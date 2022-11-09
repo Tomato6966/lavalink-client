@@ -49,7 +49,7 @@ make sure to edit:
 # Start Lavalink
 
 in the folder of `Lavalink.jar` and `application.yml` execute the following
-```
+```bash
 java -jar Lavalink.jar
 ```
 
@@ -57,12 +57,14 @@ java -jar Lavalink.jar
 
 - pm2:
 
-```
+```bash
 npm i -g pm2; # add pm2 to the system
 pm2 start --name Lavalink --max-memory-restart 4G java -- -jar Lavalink.jar
 ```
 
 - screen:
+```bash
+apt-get install screen
 screen -t Lavalink -s Lavalink
 java -jar Lavalink # in the screen window:
 
