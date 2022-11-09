@@ -71,6 +71,7 @@ java -jar Lavalink # in the screen window:
 # strg + alt + a + d -> to exit
 # screen -ls to view all screens
 # screen -r <ID> to re-enter a screen
+```
 
 # How to connect to it?
 
