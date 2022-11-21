@@ -1,0 +1,33 @@
+{
+  "name": "lavalink-client",
+  "version": "1.0.0",
+  "description": "Easy and advanced lavalink client. Use it with lavalink plugins as well as latest lavalink versions",
+  "main": "/dist/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/parasop/lavalink-client.git"
+  },
+  "keywords": [],
+  "author": {
+    "name" : "Tomato6966",
+    "url" : "https://github.com/tomato6966/"
+  },
+  "contributers": [
+    {
+      "name" : "parasop",
+      "url" : "https://github.com/parasop/"
+    }
+  ],
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/parasop/lavalink-client/issues"
+  },
+  "homepage": "https://github.com/parasop/lavalink-client#readme",
+  "devDependencies": {
+    "tslib": "^2.4.1",
+    "typescript": "^4.9.3"
+  }
+}
