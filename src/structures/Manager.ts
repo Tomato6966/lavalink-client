@@ -1,3 +1,5 @@
+import { EventEmitter } from "events";
+
 import { Player } from "./Player";
 import { Node } from "./Node";
 

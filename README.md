@@ -186,3 +186,10 @@ proxy enp1s0 {
 ## Public Lavalink Services:
   
 https://lavalink.milrato.com
+
+
+## Credits
+
+[erela.js by @menudocs](https://github.com/MenuDocs/erela.js/) - Tomato originally extended this one, but now this repository is based upon it!
+-> [tomato's erela.js fork (updated to current lavalink too)](https://github.com/Tomato6966/erela.js/) 
+-> [What is different from erela.js] //Link the wiki
