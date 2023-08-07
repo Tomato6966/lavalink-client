@@ -18,12 +18,10 @@ export interface Track {
     info: LavalinkTrackDataInfoExtended;
     pluginInfo: Partial<PluginDataInfo> | Record<string, string | number>;
 }
-
-
 export interface PluginDataInfo {
     type?: string;
     identifier?: string;
     artworkUrl?: string;
     author?: string;
-    url?: string,
+    url?: string;
 }

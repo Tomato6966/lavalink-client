@@ -1,118 +1,134 @@
-import { Track, UnresolvedTrack } from "./Player";
-import { TrackUtils } from "./Utils";
+import { QueueSaver } from "./QueueManager";
+import { Track } from "./Track";
 
-/**
- * The player's queue, the `current` property is the currently playing track, think of the rest as the up-coming tracks.
- * @noInheritDoc
- */
-export class Queue extends Array<Track | UnresolvedTrack> {
-  /** The total duration of the queue. */
-  public get duration(): number {
-    const current = this.current?.duration ?? 0;
-    return this
-      .reduce(
-        (acc: number, cur: Track) => acc + (cur.duration || 0),
-        current
-      );
+export interface StoredQueue {
+  currentTrack: Track | null;
+  previousTracks: Track[];
+  nextTracks: Track[];
+}
+
+export class Queue {
+  private readonly _nextTracks: Track[] = [];
+  private readonly _previousTracks: Track[] = [];
+  private _currentTrack: Track | null = null;
+  private readonly _guildId: string = "";
+  private readonly _QueueSaver: QueueSaver | null = null;
+  constructor(data:Partial<StoredQueue> = {}, guildId?: string, QueueSaver?: QueueSaver) {
+    this._guildId = guildId;
+    this._QueueSaver = QueueSaver;
+    this._currentTrack = this.isTrack(data.currentTrack) ? data.currentTrack : null;
+    this._previousTracks = Array.isArray(data.previousTracks) && data.previousTracks.some(track => this.isTrack(track)) ? data.previousTracks.filter(track => this.isTrack(track)) : [];
+    this._nextTracks = Array.isArray(data.nextTracks) && data.nextTracks.some(track => this.isTrack(track)) ? data.nextTracks.filter(track => this.isTrack(track)) : [];
+    // TODO bind event Function for trackEnd
   }
 
-  /** The total size of tracks in the queue including the current track. */
-  public get totalSize(): number {
-    return this.length + (this.current ? 1 : 0);
+  public isTrack(data:Track) {
+    return typeof data.encodedTrack === "string" && typeof data.info === "object";
   }
 
-  /** The size of tracks in the queue. */
-  public get size(): number {
-    return this.length
+  /** The Current Playing Track */
+  public get currentTrack() {
+    return this._currentTrack || null;
+  } 
+
+  /** All Previous Track(s) [with the limited amount] */
+  public get previousTracks() {
+    return this._previousTracks || [];
+  } 
+  
+  /** All Upcoming Track(s) */
+  public get nextTracks() {
+    return this._nextTracks || [];
+  } 
+
+  /** The Size of the upcoming Track(s) */
+  public get size() {
+    return this.nextTracks.length;
   }
 
-  /** The current track */
-  public current: Track | UnresolvedTrack | null = null;
-
-  /** The previous track */
-  public previous: Track | UnresolvedTrack | null = null;
-
-  /**
-   * Adds a track to the queue.
-   * @param track
-   * @param [offset=null]
-   */
-  public add(
-    track: (Track | UnresolvedTrack) | (Track | UnresolvedTrack)[],
-    offset?: number
-  ): void {
-    if (!TrackUtils.validate(track)) {
-      throw new RangeError('Track must be a "Track" or "Track[]".');
-    }
-
-    if (!this.current) {
-      if (!Array.isArray(track)) {
-        this.current = track;
-        return;
-      } else {
-        this.current = (track = [...track]).shift();
-      }
-    }
-
-    if (typeof offset !== "undefined" && typeof offset === "number") {
-      if (isNaN(offset)) {
-        throw new RangeError("Offset must be a number.");
-      }
-
-      if (offset < 0 || offset > this.length) {
-        throw new RangeError(`Offset must be or between 0 and ${this.length}.`);
-      }
-    }
-
-    if (typeof offset === "undefined" && typeof offset !== "number") {
-      if (track instanceof Array) this.push(...track);
-      else this.push(track);
-    } else {
-      if (track instanceof Array) this.splice(offset, 0, ...track);
-      else this.splice(offset, 0, track);
-    }
+  /** The Size of the previous Track(s) */
+  public get previousSize() {
+    return this.previousTracks.length;
   }
 
   /**
-   * Removes a track from the queue. Defaults to the first track, returning the removed track, EXCLUDING THE `current` TRACK.
-   * @param [position=0]
+   * @returns The Queue, but in a raw State, which allows easier handling for the storeManager
    */
-  public remove(position?: number): Track[];
+  public getRaw() {
+    return {
+        currentTrack: this.currentTrack,
+        previousTracks: this.previousTracks,
+        nextTracks: this.nextTracks,
+    } as StoredQueue;
+  }
 
   /**
-   * Removes an amount of tracks using a exclusive start and end exclusive index, returning the removed tracks, EXCLUDING THE `current` TRACK.
-   * @param start
-   * @param end
+   * Add a Track to the Queue, and after saved in the "db" it returns the amount of the Tracks
+   * @param Track 
+   * @param index At what position to add the Track
+   * @returns Queue-Size (for the next Tracks)
    */
-  public remove(start: number, end: number): (Track | UnresolvedTrack)[];
-  public remove(startOrPosition = 0, end?: number): (Track | UnresolvedTrack)[] {
-    if (typeof end !== "undefined") {
-      if (isNaN(Number(startOrPosition))) {
-        throw new RangeError(`Missing "start" parameter.`);
-      } else if (isNaN(Number(end))) {
-        throw new RangeError(`Missing "end" parameter.`);
-      } else if (startOrPosition >= end) {
-        throw new RangeError("Start can not be bigger than end.");
-      } else if (startOrPosition >= this.length) {
-        throw new RangeError(`Start can not be bigger than ${this.length}.`);
-      }
+  public async add(TrackOrTracks: Track | Track[], index?: number) {
+    if(typeof index === "number") return await this.splice(index, 0, TrackOrTracks);
+    // add the track(s)
+    this._nextTracks.push(...(Array.isArray(TrackOrTracks) ? TrackOrTracks : [TrackOrTracks]).filter(v => this.isTrack(v)));
+    // save the queue
+    await this._QueueSaver.set(this._guildId, this.getRaw());
 
-      return this.splice(startOrPosition, end - startOrPosition);
-    }
+    return this.size;
+  } 
 
-    return this.splice(startOrPosition, 1);
+  /**
+   * 
+   * @param index Where to remove the Track
+   * @param amount How many Tracks to remove?
+   * @param TrackOrTracks Want to Add more Tracks?
+   */
+  public async splice(index: number, amount: number, TrackOrTracks?: Track | Track[]) {
+    if(!this.size) return null;
+
+    let spliced = TrackOrTracks ? this._nextTracks.splice(index, amount, ...(Array.isArray(TrackOrTracks) ? TrackOrTracks : [TrackOrTracks]).filter(v => this.isTrack(v))) : this._nextTracks.splice(index, amount);
+    // save the queue
+    await this._QueueSaver.set(this._guildId, this.getRaw());
+    spliced = (Array.isArray(spliced) ? spliced : [spliced]);
+    return spliced.length === 1 ? spliced[0] : spliced;
   }
 
-  /** Clears the queue. */
-  public clear(): void {
-    this.splice(0);
+  /**
+   * Add a Track to the Previous Track list, and after saved in the "db" it returns the amount of the previous Tracks
+   * @param Track 
+   * @returns PreviousTracksSize
+   */
+  async addPrevious(Track: Track) {
+    if(!this.isTrack(Track)) return;
+    this._previousTracks.unshift(Track);
+    if(this.previousSize > this._QueueSaver.options.maxPreviousTracks) this._previousTracks.pop();
+    await this._QueueSaver.set(this._guildId, this.getRaw());
+    return this.previousSize;
   }
-
-  /** Shuffles the queue. */
-  public shuffle(): void {
-    for (let i = this.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [this[i], this[j]] = [this[j], this[i]];
+  /**
+   * Add a Track to the Previous Track list, and after saved in the "db" it returns the amount of the previous Tracks
+   * @param Track 
+   * @returns PreviousTracksSize
+   */
+  async setCurrent(Track: Track|null) {
+    this._currentTrack = Track;
+    await this._QueueSaver.set(this._guildId, this.getRaw());
+    return this.currentTrack;
+  }
+  /** @private @hidden */
+  async _trackEnd(addBackToQueue:boolean = false) {
+    if(this.currentTrack) { // if there was a current Track -> Add it
+      this._previousTracks.unshift(this.currentTrack);
+      if(this.previousSize > this._QueueSaver.options.maxPreviousTracks) this._previousTracks.pop();
     }
+    // change the current Track to the next upcoming one
+    this._currentTrack = this._nextTracks.shift() || null;
+    // and if repeatMode == queue, add it back to the queue!
+    if(addBackToQueue && this.currentTrack) this._nextTracks.push(this.currentTrack)
+    // save it in the DB
+    await this._QueueSaver.set(this._guildId, this.getRaw());
+    // return the new current Track
+    return this.currentTrack;
   }
 }

@@ -1,14 +1,24 @@
 {
   "compilerOptions": {
-    "target": "ES2022",
-    "module": "CommonJS",
-    "declaration": true,
-    "outDir": "./dist",
-    "rootDir": "./",
-    "skipLibCheck": true,
-    "importHelpers": true,
-    "moduleResolution": "node",
-    "esModuleInterop": true
+      /* Basic Options */
+      "target": "ES2022",
+      "module": "CommonJS",
+      "declaration": true,
+      "outDir": "./dist",
+      "rootDir": "./src",
+      "skipLibCheck": true,
+      "importHelpers": true,
+      "moduleResolution": "node",
+      "baseUrl": ".",
+      "esModuleInterop": true,
+      "allowSyntheticDefaultImports": true,
+      "types": [ "node", "ws" ]
   },
-  "exclude": ["node_modules", "dist"]
+  "include": [ 
+      "src/**/*.ts"
+  ],
+  "exclude": [
+      "node_modules",
+      "dist"
+  ]
 }
