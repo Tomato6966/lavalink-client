@@ -3,7 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.LavalinkManager = void 0;
 const node_events_1 = require("node:events");
 const NodeManager_1 = require("./NodeManager");
-const QueueManager_1 = require("./QueueManager");
+const Queue_1 = require("./Queue");
 const PlayerManager_1 = require("./PlayerManager");
 const Utils_1 = require("./Utils");
 const LavalinkManagerStatics_1 = require("./LavalinkManagerStatics");
@@ -27,10 +27,9 @@ class LavalinkManager extends node_events_1.EventEmitter {
                 throw new SyntaxError(`The provided QueueStore, does not have all required functions: ${requiredKeys.join(", ")}`);
         }
         else
-            this.options.queueStore = new QueueManager_1.DefaultQueueStore();
+            this.options.queueStore = new Queue_1.DefaultQueueStore();
         this.playerManager = new PlayerManager_1.PlayerManager(this);
         this.nodeManager = new NodeManager_1.NodeManager(this);
-        this.queueManager = new QueueManager_1.QueueManager(this);
         this.utilManager = new Utils_1.ManagerUitls(this);
     }
 }

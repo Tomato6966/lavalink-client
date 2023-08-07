@@ -1,14 +1,13 @@
 /// <reference types="node" />
 import { EventEmitter } from "node:events";
 import { NodeManager } from "./NodeManager";
-import { QueueManager, QueueSaverOptions, StoreManager } from "./QueueManager";
+import { QueueSaverOptions, StoreManager } from "./Queue";
 import { PlayerManager } from "./PlayerManager";
 import { GuildShardPayload, ManagerUitls, SearchPlatform } from "./Utils";
 import { LavalinkNodeOptions } from "./Node";
 export interface LavalinkManager {
     playerManager: PlayerManager;
     nodeManager: NodeManager;
-    queueManager: QueueManager;
     utilManager: ManagerUitls;
 }
 export interface BotClientOptions {

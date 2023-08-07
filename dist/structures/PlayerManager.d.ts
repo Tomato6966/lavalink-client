@@ -4,7 +4,6 @@ import { Player, PlayerOptions } from "./Player";
 import { LavalinkManager } from "./LavalinkManager";
 import { Track } from "./Track";
 import { TrackEndEvent, TrackExceptionEvent, TrackStartEvent, TrackStuckEvent, WebSocketClosedEvent } from "./Utils";
-import { Queue } from "./Queue";
 interface PlayerManagerEvents {
     /**
      * Emitted when a Player is created.
@@ -15,27 +14,27 @@ interface PlayerManagerEvents {
      * Emitted when a Track started playing.
      * @event Manager.playerManager#trackStart
      */
-    "trackStart": (player: Player, track: Track, queue: Queue, payload: TrackStartEvent) => void;
+    "trackStart": (player: Player, track: Track, payload: TrackStartEvent) => void;
     /**
      * Emitted when a Track finished.
      * @event Manager.playerManager#trackEnd
      */
-    "trackEnd": (player: Player, track: Track, queue: Queue, payload: TrackEndEvent) => void;
+    "trackEnd": (player: Player, track: Track, payload: TrackEndEvent) => void;
     /**
      * Emitted when a Track finished.
      * @event Manager.playerManager#trackStuck
      */
-    "trackStuck": (player: Player, track: Track, queue: Queue, payload: TrackStuckEvent) => void;
+    "trackStuck": (player: Player, track: Track, payload: TrackStuckEvent) => void;
     /**
      * Emitted when a Track finished.
      * @event Manager.playerManager#trackError
      */
-    "trackError": (player: Player, track: Track, queue: Queue, payload: TrackExceptionEvent) => void;
+    "trackError": (player: Player, track: Track, payload: TrackExceptionEvent) => void;
     /**
      * Emitted when a Track finished.
      * @event Manager.playerManager#queueEnd
      */
-    "queueEnd": (player: Player, track: Track, queue: Queue, payload: TrackEndEvent | TrackStuckEvent) => void;
+    "queueEnd": (player: Player, track: Track, payload: TrackEndEvent | TrackStuckEvent) => void;
     /**
      * Emitted when a Node-Socket got closed for a specific Player.
      * @event Manager.playerManager#socketClosed

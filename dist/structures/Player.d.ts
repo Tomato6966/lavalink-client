@@ -1,6 +1,7 @@
 import { FilterManager, LavalinkFilterData } from "./Filters";
 import { LavalinkNode } from "./Node";
 import { PlayerManager } from "./PlayerManager";
+import { Queue } from "./Queue";
 import { Track } from "./Track";
 import { LavalinkPlayerVoiceOptions, SearchPlatform, SearchResult } from "./Utils";
 export type RepeatMode = "queue" | "track" | "off";
@@ -42,6 +43,7 @@ export interface Player {
     playerManager: PlayerManager;
     options: PlayerOptions;
     node: LavalinkNode;
+    queue: Queue;
 }
 export declare class Player {
     guildId: string;
@@ -60,7 +62,6 @@ export declare class Player {
     /** If lavalink says it's connected or not */
     connected: boolean | undefined;
     voice: LavalinkPlayerVoiceOptions;
-    currentTrack: Track;
     private readonly data;
     /**
      * Set custom data.

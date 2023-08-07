@@ -1,6 +1,43 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.Queue = void 0;
+exports.Queue = exports.DefaultQueueStore = exports.QueueSaver = void 0;
+class QueueSaver {
+    constructor(storeManager, options) {
+        this._ = storeManager;
+        this.options = options;
+    }
+    async get(key) {
+        return new Queue(await this._.parse(await this._.get(key)), key, this);
+    }
+    async delete(key) {
+        return await this._.delete(key);
+    }
+    async set(key, value) {
+        return await this._.set(key, await this._.stringify(value));
+    }
+}
+exports.QueueSaver = QueueSaver;
+class DefaultQueueStore {
+    data = new Map();
+    constructor() {
+    }
+    get(key) {
+        return this.data.get(key);
+    }
+    set(key, value) {
+        return this.data.set(key, value);
+    }
+    delete(key) {
+        return this.data.delete(key);
+    }
+    stringify(value) {
+        return value;
+    }
+    parse(value) {
+        return value;
+    }
+}
+exports.DefaultQueueStore = DefaultQueueStore;
 class Queue {
     _nextTracks = [];
     _previousTracks = [];

@@ -1,6 +1,6 @@
 import { EventEmitter } from "node:events";
 import { NodeManager } from "./NodeManager";
-import { DefaultQueueStore, QueueManager, QueueSaverOptions, StoreManager } from "./QueueManager";
+import { DefaultQueueStore, QueueSaverOptions, StoreManager } from "./Queue";
 import { PlayerManager } from "./PlayerManager";
 import { GuildShardPayload, ManagerUitls, SearchPlatform } from "./Utils";
 import { LavalinkNodeOptions } from "./Node";
@@ -9,7 +9,6 @@ import { DEFAULT_SOURCES, REGEXES } from "./LavalinkManagerStatics";
 export interface LavalinkManager {
   playerManager: PlayerManager;
   nodeManager: NodeManager;
-  queueManager: QueueManager;
   utilManager: ManagerUitls;
 }
 
@@ -70,7 +69,6 @@ export class LavalinkManager extends EventEmitter {
 
     this.playerManager = new PlayerManager(this);
     this.nodeManager = new NodeManager(this);
-    this.queueManager = new QueueManager(this);
     this.utilManager = new ManagerUitls(this);
   }
 }

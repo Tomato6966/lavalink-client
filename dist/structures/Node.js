@@ -331,7 +331,6 @@ class LavalinkNode {
                 const player = this.NodeManager.LavalinkManager.playerManager.getPlayer(payload.guildId);
                 if (!player)
                     return;
-                const queue = await this.NodeManager.LavalinkManager.queueManager.getQueue(player.guildId);
                 if (player.get("internal_updateInterval"))
                     clearInterval(player.get("internal_updateInterval"));
                 player.position = payload.state.position || 0;
@@ -347,8 +346,8 @@ class LavalinkNode {
                         if (player.filterManager.filterUpdatedState >= 1) {
                             player.filterManager.filterUpdatedState++;
                             const maxMins = 8;
-                            const currentDuration = queue.currentTrack?.info?.duration || 0;
-                            if (currentDuration <= maxMins * 6e4 || (0, node_path_1.isAbsolute)(queue.currentTrack?.info?.uri)) {
+                            const currentDuration = player.queue.currentTrack?.info?.duration || 0;
+                            if (currentDuration <= maxMins * 6e4 || (0, node_path_1.isAbsolute)(player.queue.currentTrack?.info?.uri)) {
                                 if (player.filterManager.filterUpdatedState >= ((this.NodeManager.LavalinkManager.options.playerOptions.clientBasedUpdateInterval || 250) > 400 ? 2 : 3)) {
                                     player.filterManager.filterUpdatedState = 0;
                                     player.seek(player.position);
@@ -363,8 +362,8 @@ class LavalinkNode {
                 else {
                     if (player.filterManager.filterUpdatedState >= 1) { // if no interval but instafix available, findable via the "filterUpdatedState" property
                         const maxMins = 8;
-                        const currentDuration = queue.currentTrack?.info?.duration || 0;
-                        if (currentDuration <= maxMins * 6e4 || (0, node_path_1.isAbsolute)(queue.currentTrack?.info?.uri))
+                        const currentDuration = player.queue.currentTrack?.info?.duration || 0;
+                        if (currentDuration <= maxMins * 6e4 || (0, node_path_1.isAbsolute)(player.queue.currentTrack?.info?.uri))
                             player.seek(player.position);
                         player.filterManager.filterUpdatedState = 0;
                     }
@@ -387,19 +386,18 @@ class LavalinkNode {
         const player = this.NodeManager.LavalinkManager.playerManager.getPlayer(payload.guildId);
         if (!player)
             return;
-        const queue = await this.NodeManager.LavalinkManager.queueManager.getQueue(player.guildId);
         switch (payload.type) {
             case "TrackStartEvent":
-                this.trackStart(player, queue, payload);
+                this.trackStart(player, player.queue.currentTrack, payload);
                 break;
             case "TrackEndEvent":
-                this.trackEnd(player, queue, payload);
+                this.trackEnd(player, player.queue.currentTrack, payload);
                 break;
             case "TrackStuckEvent":
-                this.trackStuck(player, queue, payload);
+                this.trackStuck(player, player.queue.currentTrack, payload);
                 break;
             case "TrackExceptionEvent":
-                this.trackError(player, queue, payload);
+                this.trackError(player, player.queue.currentTrack, payload);
                 break;
             case "WebSocketClosedEvent":
                 this.socketClosed(player, payload);
@@ -410,60 +408,54 @@ class LavalinkNode {
         }
         return;
     }
-    trackStart(player, queue, payload) {
+    trackStart(player, track, payload) {
         player.playing = true;
         player.paused = false;
-        player.currentTrack = queue.currentTrack;
-        return this.NodeManager.LavalinkManager.playerManager.emit("trackStart", player, queue.currentTrack, queue, payload);
+        return this.NodeManager.LavalinkManager.playerManager.emit("trackStart", player, track, payload);
     }
-    async trackEnd(player, queue, payload) {
-        player.currentTrack = null;
+    async trackEnd(player, track, payload) {
         // If there are no songs in the queue
-        if (!queue.size && player.repeatMode === "off")
-            return this.queueEnd(player, queue, payload);
+        if (!player.queue.size && player.repeatMode === "off")
+            return this.queueEnd(player, player.queue.currentTrack, payload);
         // If a track was forcibly played
         if (payload.reason === "REPLACED")
-            return this.NodeManager.LavalinkManager.playerManager.emit("trackEnd", player, queue.currentTrack, queue, payload);
+            return this.NodeManager.LavalinkManager.playerManager.emit("trackEnd", player, track, payload);
         // If a track had an error while starting
         if (["LOAD_FAILED", "CLEAN_UP"].includes(payload.reason)) {
-            await queue._trackEnd();
-            if (!queue.currentTrack)
-                return this.queueEnd(player, queue, payload);
-            this.NodeManager.LavalinkManager.playerManager.emit("trackEnd", player, queue.currentTrack, queue, payload);
-            return this.NodeManager.LavalinkManager.options.autoSkip && player.play({ track: queue.currentTrack });
+            await player.queue._trackEnd();
+            if (!player.queue.currentTrack)
+                return this.queueEnd(player, player.queue.currentTrack, payload);
+            this.NodeManager.LavalinkManager.playerManager.emit("trackEnd", player, track, payload);
+            return this.NodeManager.LavalinkManager.options.autoSkip && player.play({ track: player.queue.currentTrack });
         }
         // remove tracks from the queue
         if (player.repeatMode !== "track")
-            await queue._trackEnd(player.repeatMode === "queue");
+            await player.queue._trackEnd(player.repeatMode === "queue");
         // if no track available, end queue
-        if (!queue.currentTrack)
-            return this.queueEnd(player, queue, payload);
+        if (!player.queue.currentTrack)
+            return this.queueEnd(player, player.queue.currentTrack, payload);
         // fire event
-        this.NodeManager.LavalinkManager.playerManager.emit("trackEnd", player, queue.currentTrack, queue, payload);
+        this.NodeManager.LavalinkManager.playerManager.emit("trackEnd", player, track, payload);
         // play track if autoSkip is true
-        return this.NodeManager.LavalinkManager.options.autoSkip && player.play({ track: queue.currentTrack });
+        return this.NodeManager.LavalinkManager.options.autoSkip && player.play({ track: player.queue.currentTrack });
     }
-    async queueEnd(player, queue, payload) {
-        player.currentTrack = null;
-        queue.setCurrent(null);
+    async queueEnd(player, track, payload) {
+        player.queue.setCurrent(null);
         player.playing = false;
-        return this.NodeManager.LavalinkManager.playerManager.emit("queueEnd", player, queue.currentTrack, queue, payload);
+        return this.NodeManager.LavalinkManager.playerManager.emit("queueEnd", player, track, payload);
     }
-    async trackStuck(player, queue, payload) {
-        player.currentTrack = null;
-        this.NodeManager.LavalinkManager.playerManager.emit("trackStuck", player, queue.currentTrack, queue, payload);
+    async trackStuck(player, track, payload) {
+        this.NodeManager.LavalinkManager.playerManager.emit("trackStuck", player, track, payload);
         // If there are no songs in the queue
-        if (!queue.size && player.repeatMode === "off")
+        if (!player.queue.size && player.repeatMode === "off")
             return; // this.queueEnd(player, queue, payload);
         // player.stop()
     }
-    trackError(player, queue, payload) {
-        player.currentTrack = null;
-        this.NodeManager.LavalinkManager.playerManager.emit("trackError", player, queue.currentTrack, queue, payload);
+    trackError(player, track, payload) {
+        this.NodeManager.LavalinkManager.playerManager.emit("trackError", player, track, payload);
         // player.stop();
     }
     socketClosed(player, payload) {
-        player.currentTrack = null;
         return this.NodeManager.LavalinkManager.playerManager.emit("socketClosed", player, payload);
     }
 }

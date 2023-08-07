@@ -1,9 +1,44 @@
-import { QueueSaver } from "./QueueManager";
 import { Track } from "./Track";
 export interface StoredQueue {
     currentTrack: Track | null;
     previousTracks: Track[];
     nextTracks: Track[];
+}
+export interface StoreManager extends Record<any, any> {
+    /** @async get a Value */
+    get: (key: unknown) => any;
+    /** @async Set a value inside a key */
+    set: (key: unknown, value: unknown) => any;
+    /** @async Delete a Database Value based of it's key */
+    delete: (key: unknown) => any;
+    /** @async Transform the value(s) inside of the StoreManager */
+    stringify: (value: unknown) => any;
+    /** @async Parse the saved value back to the Queue */
+    parse: (value: unknown) => Queue;
+}
+export interface QueueSaverOptions {
+    maxPreviousTracks: number;
+}
+export interface QueueSaver {
+    /** @private */
+    _: StoreManager;
+    /** @private */
+    options: QueueSaverOptions;
+}
+export declare class QueueSaver {
+    constructor(storeManager: StoreManager, options: QueueSaverOptions);
+    get(key: string): Promise<Queue>;
+    delete(key: string): Promise<any>;
+    set(key: string, value: any): Promise<any>;
+}
+export declare class DefaultQueueStore {
+    private data;
+    constructor();
+    get(key: any): any;
+    set(key: any, value: any): Map<any, any>;
+    delete(key: any): boolean;
+    stringify(value: any): any;
+    parse(value: any): any;
 }
 export declare class Queue {
     private readonly _nextTracks;

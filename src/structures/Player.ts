@@ -1,7 +1,8 @@
-import { FilterManager, LavalinkFilterData, PlayerFilters, validAudioOutputs } from "./Filters";
+import { FilterManager, LavalinkFilterData } from "./Filters";
 import { DEFAULT_SOURCES } from "./LavalinkManagerStatics";
 import { LavalinkNode } from "./Node";
 import { PlayerManager } from "./PlayerManager";
+import { Queue, QueueSaver } from "./Queue";
 import { PluginDataInfo, Track } from "./Track";
 import { LavalinkPlayerVoiceOptions, SearchPlatform, SearchResult, LoadTypes } from "./Utils";
 
@@ -48,6 +49,7 @@ export interface Player {
     playerManager: PlayerManager;
     options: PlayerOptions;
     node: LavalinkNode;
+    queue: Queue,
 }
 
 export class Player {
@@ -74,8 +76,6 @@ export class Player {
     public connected: boolean|undefined = false;
     
     public voice: LavalinkPlayerVoiceOptions;
-    
-    public currentTrack: Track;
 
     private readonly data: Record<string, unknown> = {};
     /**
@@ -122,10 +122,11 @@ export class Player {
         this.playerManager.emit("create", this);
         if(typeof options.volume === "number" && !isNaN(options.volume)) this.setVolume(options.volume);
 
+        this.queue = new Queue({}, this.guildId, new QueueSaver(this.playerManager.LavalinkManager.options.queueStore, this.playerManager.LavalinkManager.options.queueOptions))
     }
     // all functions
     async play(options?: Partial<PlayOptions>) {
-        const track = options.track || this.currentTrack || (await this.playerManager.LavalinkManager.queueManager.getQueue(this.guildId)).currentTrack;
+        const track = options.track || this.queue.currentTrack;
         if(!track) throw new Error(`There is no Track in the Queue, nor provided in the PlayOptions`);
         
         if (typeof options.volume === "number" && !isNaN(options.volume)) {
@@ -219,11 +220,11 @@ export class Player {
     }
 
     async seek(position:number) {
-        if(!this.currentTrack) return undefined;
+        if(!this.queue.currentTrack) return undefined;
         position = Number(position);
         if(isNaN(position)) throw new RangeError("Position must be a number.");
-        if(!this.currentTrack.info.isSeekable || this.currentTrack.info.isStream) throw new RangeError("Current Track is not seekable / a stream");
-        if(position < 0 || position > this.currentTrack.info.duration) position = Math.max(Math.min(position, this.currentTrack.info.duration), 0);
+        if(!this.queue.currentTrack.info.isSeekable || this.queue.currentTrack.info.isStream) throw new RangeError("Current Track is not seekable / a stream");
+        if(position < 0 || position > this.queue.currentTrack.info.duration) position = Math.max(Math.min(position, this.queue.currentTrack.info.duration), 0);
         this.position = position;
         this.set("internal_lastposition", this.position);
         const now = performance.now();
@@ -244,10 +245,9 @@ export class Player {
      * @param amount provide the index of the next track to skip to
      */
     async skip(skipTo:number = 0) {
-        const Queue = await this.playerManager.LavalinkManager.queueManager.getQueue(this.guildId);
         if(typeof skipTo === "number" && skipTo > 1) {
-            if(skipTo > Queue.size) throw new RangeError("Can't skip more than the queue size");
-            Queue.splice(0, skipTo - 1);
+            if(skipTo > this.queue.size) throw new RangeError("Can't skip more than the queue size");
+            this.queue.splice(0, skipTo - 1);
         }
         const now = performance.now();
         await this.node.updatePlayer({ guildId:this.guildId, playerOptions: { encodedTrack: null }});
