@@ -12,13 +12,15 @@
       "baseUrl": ".",
       "esModuleInterop": true,
       "allowSyntheticDefaultImports": true,
+      "forceConsistentCasingInFileNames": true,
       "types": [ "node", "ws" ]
   },
   "include": [ 
       "src/**/*.ts"
   ],
   "exclude": [
-      "node_modules",
-      "dist"
+    "node_modules",
+    "dist",
+    "testBot",
   ]
 }

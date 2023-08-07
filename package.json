@@ -2,11 +2,23 @@
   "name": "lavalink-client",
   "version": "1.0.0",
   "description": "Easy and advanced lavalink client. Use it with lavalink plugins as well as latest lavalink versions",
-  "main": "/dist/index.js",
+  "main": "dist/cjs/index.js",
+  "module": "dist/esm/index.js",
+  "types": "dist/types/index.d.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "tsc"
+    "build": "npm run build:cjs && npm run build:esm && npm run build:types",
+    "build:cjs": "node tools/cleanup cjs && tsc -p config/tsconfig.cjs.json",
+    "build:esm": "node tools/cleanup esm && tsc -p config/tsconfig.esm.json",
+    "build:types": "node tools/cleanup types && tsc -p config/tsconfig.types.json",
+    "clean": "node tools/cleanup",
+    "test": "node -v"
   },
+  "publishConfig": {
+    "access": "public"
+  },
+  "files": [
+    "dist"
+  ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/parasop/lavalink-client.git"
@@ -14,7 +26,12 @@
   "keywords": [
     "lavalink",
     "client",
-    "automated"
+    "lavalink-v4",
+    "music",
+    "discord",
+    "bot",
+    "advanced",
+    "typescript"
   ],
   "author": {
     "name": "Tomato6966",
@@ -23,16 +40,23 @@
   "contributers": [],
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/parasop/lavalink-client/issues"
+    "url": "https://github.com/tomato6966/lavalink-client/issues"
   },
-  "homepage": "https://github.com/parasop/lavalink-client#readme",
+  "homepage": "https://github.com/tomato6966/lavalink-client#readme",
   "devDependencies": {
-    "tslib": "^2.4.1",
-    "typescript": "^4.9.3"
-  },
-  "dependencies": {
     "@types/node": "^20.4.8",
     "@types/ws": "^8.5.5",
+    "@typescript-eslint/eslint-plugin": "^6.2.1",
+    "@typescript-eslint/parser": "^6.2.1",
+    "eslint": "^8.46.0",
+    "eslint-config-prettier": "^9.0.0",
+    "eslint-plugin-prettier": "^5.0.0",
+    "prettier": "^3.0.1",
+    "ts-loader": "^9.4.4",
+    "tslib": "^2.6.1",
+    "typescript": "^5.1.6"
+  },
+  "dependencies": {
     "undici": "^5.23.0"
   }
 }

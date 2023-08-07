@@ -1,12 +1,10 @@
 import WebSocket from "ws";
 import { Dispatcher, Pool } from "undici";
 import { NodeManager } from "./NodeManager";
-import internal from "node:stream";
-import { InvalidLavalinkRestRequest, LavalinkPlayer, PlayerEventType, PlayerEvents, PlayerUpdateInfo, RoutePlanner, TrackEndEvent, TrackExceptionEvent, TrackStartEvent, TrackStuckEvent, WebSocketClosedEvent } from "./Utils";
+import internal from "stream";
+import { InvalidLavalinkRestRequest, LavalinkPlayer, PlayerEventType, PlayerEvents, PlayerUpdateInfo, RoutePlanner, TrackEndEvent, TrackExceptionEvent, TrackStartEvent, TrackStuckEvent, WebSocketClosedEvent, Session } from "./Utils";
 import { Player } from "./Player";
-import { Queue } from "./Queue";
-import { Session } from "node:inspector";
-import { isAbsolute } from "node:path";
+import { isAbsolute } from "path";
 import { Track } from "./Track";
 
 /** Modifies any outgoing REST requests. */

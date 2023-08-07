@@ -1,4 +1,4 @@
-import { EventEmitter } from "node:events";
+import { EventEmitter } from "events";
 import { NodeManager } from "./NodeManager";
 import { DefaultQueueStore, QueueSaverOptions, StoreManager } from "./Queue";
 import { PlayerManager } from "./PlayerManager";
