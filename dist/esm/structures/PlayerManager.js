@@ -1,7 +1,8 @@
 import { EventEmitter } from "stream";
 import { Player } from "./Player";
+import { MiniMap } from "./Utils";
 export class PlayerManager extends EventEmitter {
-    players;
+    players = new MiniMap();
     constructor(LavalinkManager) {
         super();
         this.LavalinkManager = LavalinkManager;

@@ -14,9 +14,11 @@ export interface LavalinkManager {
 }
 
 export interface BotClientOptions {
-  shards?: number | "auto";
+  shards?: number | number[] | "auto";
   id: string;
   username?: string;
+  /** So users can pass entire objects / classes */
+  [x: string | number | symbol | undefined]: any;
 }
 
 export interface LavalinkPlayerOptions {
@@ -47,6 +49,7 @@ export interface LavalinkManager {
   on<U extends keyof LavalinkManagerEvents>(event: U, listener: LavalinkManagerEvents[U]): this;
 
   emit<U extends keyof LavalinkManagerEvents>(event: U, ...args: Parameters<LavalinkManagerEvents[U]>): boolean;
+  
 }
 
 export class LavalinkManager extends EventEmitter {
@@ -60,6 +63,7 @@ export class LavalinkManager extends EventEmitter {
       autoSkip: true,
       ...options
     };
+    this.initiated = false;
     if(!this.options.playerOptions.defaultSearchPlatform) this.options.playerOptions.defaultSearchPlatform = "ytsearch";
     if(!this.options.queueOptions.maxPreviousTracks || this.options.queueOptions.maxPreviousTracks <= 0) this.options.queueOptions.maxPreviousTracks = 25;
 
@@ -73,15 +77,16 @@ export class LavalinkManager extends EventEmitter {
     this.nodeManager = new NodeManager(this);
     this.utilManager = new ManagerUitls(this);
   }
+  public get useable() {
+    return this.nodeManager.nodes.filter(v => v.connected).size > 0;
+  }
   /**
    * Initiates the Manager.
    * @param clientData 
    */
-  public init(clientData: { id?: string, username?: string, shards?: "auto" | number } = {}): this {
-    const { id, username, shards } = clientData;
+  public async init(clientData: BotClientOptions) {
     if (this.initiated) return this;
-    if(!this.options.client) this.options.client = { id, username, shards };
-    
+    this.options.client = { ...(this.options.client||{}), ...clientData };
     if (!this.options.client.id) throw new Error('"client.id" is not set. Pass it in Manager#init() or as a option in the constructor.');
     
     if (typeof this.options.client.id !== "string") throw new Error('"client.id" set is not type of "string"');
@@ -89,7 +94,7 @@ export class LavalinkManager extends EventEmitter {
     let success = 0;
     for (const node of [...this.nodeManager.nodes.values()]) {
         try {
-            node.connect();
+            await node.connect();
             success++;
         }
         catch (err) {
@@ -106,6 +111,7 @@ export class LavalinkManager extends EventEmitter {
    * @param data
    */
   public async updateVoiceState(data: VoicePacket | VoiceServer | VoiceState): Promise<void> {
+    if(!this.initiated) return; 
     if ("t" in data && !["VOICE_STATE_UPDATE", "VOICE_SERVER_UPDATE"].includes(data.t)) return;
 
     const update: VoiceServer | VoiceState = "d" in data ? data.d : data;

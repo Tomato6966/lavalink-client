@@ -114,6 +114,7 @@ export class Player {
         this.filterManager = new FilterManager(this);
         this.playerManager = playerManager;
         
+        this.guildId = this.options.guildId;
         this.voiceChannelId = this.options.voiceChannelId;
         this.textChannelId = this.options.textChannelId || null;
 
@@ -130,11 +131,13 @@ export class Player {
     }
     // all functions
     async play(options?: Partial<PlayOptions>) {
-        const track = options.track || this.queue.currentTrack;
+        if(options?.track && this.queue.isTrack(options?.track)) this.queue.setCurrent(options.track);
+        if(!this.queue.currentTrack && this.queue.size) await this.queue._trackEnd(this.repeatMode === "queue")
+        const track = this.queue.currentTrack;
         if(!track) throw new Error(`There is no Track in the Queue, nor provided in the PlayOptions`);
         
-        if (typeof options.volume === "number" && !isNaN(options.volume)) {
-            this.volume = Math.max(Math.min(options.volume, 500), 0);
+        if (typeof options?.volume === "number" && !isNaN(options?.volume)) {
+            this.volume = Math.max(Math.min(options?.volume, 500), 0);
             let vol = Number(this.volume);
             if (this.playerManager.LavalinkManager.options.playerOptions.volumeDecrementer) vol *= this.playerManager.LavalinkManager.options.playerOptions.volumeDecrementer;
             this.lavalinkVolume = Math.floor(vol * 100) / 100;
@@ -142,16 +145,26 @@ export class Player {
         }
         this.set("lastposition", this.position);
 
+        const finalOptions = {
+            encodedTrack: track.encodedTrack,
+            volume: this.lavalinkVolume,
+            position: 0,
+            ...options,
+        };
+
+        if("track" in finalOptions) delete finalOptions.track;
+       
+        if((typeof finalOptions.position !== "undefined" && isNaN(finalOptions.position)) || (typeof finalOptions.position === "number" && (finalOptions.position < 0 || finalOptions.position >= track.info.duration))) throw new Error("PlayerOption#position must be a positive number, less than track's duration");
+        if((typeof finalOptions.volume !== "undefined" && isNaN(finalOptions.volume) || (typeof finalOptions.volume === "number" && finalOptions.volume < 0))) throw new Error("PlayerOption#volume must be a positive number");
+        if((typeof finalOptions.endTime !== "undefined" && isNaN(finalOptions.endTime)) || (typeof finalOptions.endTime === "number" && (finalOptions.endTime < 0 || finalOptions.endTime >= track.info.duration))) throw new Error("PlayerOption#endTime must be a positive number, less than track's duration");
+        if(typeof finalOptions.position === "number" && typeof finalOptions.endTime === "number" && finalOptions.endTime < finalOptions.position) throw new Error("PlayerOption#endTime must be bigger than PlayerOption#position")
+        if("noReplace" in finalOptions) delete finalOptions.noReplace
+        
         const now = performance.now();
         await this.node.updatePlayer({
             guildId: this.guildId,
-            noReplace: options.noReplace ?? false,
-            playerOptions: {
-                encodedTrack: track.encodedTrack,
-                volume: this.volume,
-                position: 0,
-                ...options
-            }
+            noReplace: options?.noReplace ?? false,
+            playerOptions: finalOptions,
         });
         this.ping = Math.round((performance.now() - now) / 10) / 100;
     }
@@ -176,7 +189,7 @@ export class Player {
         return;
     }
 
-    async search(query:{ query: string, source: SearchPlatform }, requestUser: unknown) {
+    async search(query:{ query: string, source?: SearchPlatform }, requestUser: unknown) {
         const _query = typeof query === "string" ? query : query.query;
         const _source = DEFAULT_SOURCES[query.source ?? this.playerManager.LavalinkManager.options.playerOptions.defaultSearchPlatform] ?? query.source ?? this.playerManager.LavalinkManager.options.playerOptions.defaultSearchPlatform;
         const srcSearch = !/^https?:\/\//.test(_query) ? `${_source}:` : "";
@@ -185,8 +198,6 @@ export class Player {
             data: any,
             pluginInfo: PluginDataInfo,
         };
-
-        console.log("DEBUG LOG - RESPONSE", res);
 
         const resTracks = res.loadType === "playlist" ? res.data?.tracks : res.loadType === "track" ? [res.data] : res.loadType === "search" ? Array.isArray(res.data) ? res.data : [res.data] : [];
 

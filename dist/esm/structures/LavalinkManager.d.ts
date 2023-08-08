@@ -11,9 +11,11 @@ export interface LavalinkManager {
     utilManager: ManagerUitls;
 }
 export interface BotClientOptions {
-    shards?: number | "auto";
+    shards?: number | number[] | "auto";
     id: string;
     username?: string;
+    /** So users can pass entire objects / classes */
+    [x: string | number | symbol | undefined]: any;
 }
 export interface LavalinkPlayerOptions {
     volumeDecrementer?: number;
@@ -44,15 +46,12 @@ export declare class LavalinkManager extends EventEmitter {
     static REGEXES: Record<import("./Utils").SourcesRegex, RegExp>;
     initiated: boolean;
     constructor(options: ManagerOptions);
+    get useable(): boolean;
     /**
      * Initiates the Manager.
      * @param clientData
      */
-    init(clientData?: {
-        id?: string;
-        username?: string;
-        shards?: "auto" | number;
-    }): this;
+    init(clientData: BotClientOptions): Promise<this>;
     /**
      * Sends voice data to the Lavalink server.
      * @param data

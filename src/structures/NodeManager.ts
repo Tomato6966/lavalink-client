@@ -60,13 +60,14 @@ export declare interface NodeManager {
 }
 
 export class NodeManager extends EventEmitter {
-    public nodes: MiniMap<string, LavalinkNode>;
+    public nodes: MiniMap<string, LavalinkNode> = new MiniMap();
     constructor(LavalinkManager:LavalinkManager) {
         super();
         this.LavalinkManager = LavalinkManager;
+        if(this.LavalinkManager.options.nodes) this.LavalinkManager.options.nodes.forEach(node => this.createNode(node));
     }
     createNode(options:LavalinkNodeOptions) {
-        if(this.nodes.has(options.id || options.host)) return this.nodes.get(options.id || options.host);
+        if(this.nodes.has(options.id || options.host)) return this.nodes.get(options.id || options.host)!;
         const newNode = new LavalinkNode(options, this);
         this.nodes.set(newNode.id, newNode);
         return newNode;

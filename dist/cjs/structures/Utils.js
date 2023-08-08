@@ -10,7 +10,7 @@ class ManagerUitls {
         this.manager = LavalinkManager;
     }
     buildTrack(data, requester) {
-        const encodedTrack = data.encoded || data.encodedTrack || typeof data.track === "string" ? data.track : undefined;
+        const encodedTrack = data.encoded || data.encodedTrack;
         if (!encodedTrack)
             throw new RangeError("Argument 'data.encoded' / 'data.encodedTrack' / 'data.track' must be present.");
         if (!data.info)
@@ -21,7 +21,7 @@ class ManagerUitls {
                     identifier: data.info?.identifier,
                     title: data.info?.title,
                     author: data.info?.author,
-                    duration: data.info?.duration,
+                    duration: data.info?.length,
                     artworkUrl: data.info?.artworkUrl || ["youtube.", "youtu.be"].some(d => data.info?.uri?.includes?.(d)) ? `https://img.youtube.com/vi/${data.info?.identifier}/mqdefault.jpg` : undefined,
                     uri: data.info?.uri,
                     sourceName: data.info?.sourceName,
@@ -126,7 +126,7 @@ class ManagerUitls {
 }
 exports.ManagerUitls = ManagerUitls;
 class MiniMap extends Map {
-    constructor(data) {
+    constructor(data = []) {
         super(data);
     }
     filter(fn, thisArg) {

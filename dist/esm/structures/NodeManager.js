@@ -1,10 +1,13 @@
 import { EventEmitter } from "stream";
 import { LavalinkNode } from "./Node";
+import { MiniMap } from "./Utils";
 export class NodeManager extends EventEmitter {
-    nodes;
+    nodes = new MiniMap();
     constructor(LavalinkManager) {
         super();
         this.LavalinkManager = LavalinkManager;
+        if (this.LavalinkManager.options.nodes)
+            this.LavalinkManager.options.nodes.forEach(node => this.createNode(node));
     }
     createNode(options) {
         if (this.nodes.has(options.id || options.host))

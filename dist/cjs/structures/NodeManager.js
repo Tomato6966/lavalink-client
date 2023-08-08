@@ -3,11 +3,14 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.NodeManager = void 0;
 const stream_1 = require("stream");
 const Node_1 = require("./Node");
+const Utils_1 = require("./Utils");
 class NodeManager extends stream_1.EventEmitter {
-    nodes;
+    nodes = new Utils_1.MiniMap();
     constructor(LavalinkManager) {
         super();
         this.LavalinkManager = LavalinkManager;
+        if (this.LavalinkManager.options.nodes)
+            this.LavalinkManager.options.nodes.forEach(node => this.createNode(node));
     }
     createNode(options) {
         if (this.nodes.has(options.id || options.host))

@@ -48,7 +48,7 @@ export class Queue {
         // TODO bind event Function for trackEnd
     }
     isTrack(data) {
-        return typeof data.encodedTrack === "string" && typeof data.info === "object";
+        return typeof data?.encodedTrack === "string" && typeof data?.info === "object";
     }
     /** The Current Playing Track */
     get currentTrack() {

@@ -112,19 +112,35 @@ export class LavalinkNode {
     public rest: Pool
     public options: LavalinkNodeOptions;
     /** The amount of rest calls the node has made. */
-    public calls = 0;
-    public stats: NodeStats;
+    public calls:number = 0;
+    public stats: NodeStats= {
+        players: 0,
+        playingPlayers: 0,
+        cpu: {
+            cores: 0,
+            lavalinkLoad: 0,
+            systemLoad: 0
+        },
+        memory: {
+            allocated: 0,
+            free: 0,
+            reservable: 0,
+            used: 0,
+        },
+        uptime: 0,
+        frameStats: {
+            deficit: 0,
+            nulled: 0,
+            sent: 0,
+        }
+    };
     private NodeManager: NodeManager | null = null;
-    private reconnectTimeout?: NodeJS.Timeout;
+    private reconnectTimeout?: NodeJS.Timeout = undefined;
     private reconnectAttempts = 1;
     public sessionId?: string | null = null;
     public info: LavalinkInfo | null = null;
-    version: "v4";
+    public version = "v4";
     constructor(options: LavalinkNodeOptions, manager: NodeManager) {
-        if (!this.options.authorization) throw new SyntaxError("LavalinkNode requires 'authorization'");
-        if (!this.options.host) throw new SyntaxError("LavalinkNode requires 'host'");
-        if (!this.options.port) throw new SyntaxError("LavalinkNode requires 'port'");
-
         this.options = {
             secure: false,
             retryAmount: 5,
@@ -135,31 +151,19 @@ export class LavalinkNode {
 
         this.NodeManager = manager;
 
+        this.validate();
+        
+
         if (this.options.secure && this.options.port !== 443) throw new SyntaxError("If secure is true, then the port must be 443");
 
         this.rest = new Pool(this.poolAddress, this.options.poolOptions);
         this.options.regions = (this.options.regions || []).map(a => a.toLowerCase());
-        this.stats = {
-            players: 0,
-            playingPlayers: 0,
-            cpu: {
-                cores: 0,
-                lavalinkLoad: 0,
-                systemLoad: 0
-            },
-            memory: {
-                allocated: 0,
-                free: 0,
-                reservable: 0,
-                used: 0,
-            },
-            uptime: 0,
-            frameStats: {
-                deficit: 0,
-                nulled: 0,
-                sent: 0,
-            }
-        }
+    }
+    private validate() {
+        if (!this.options.authorization) throw new SyntaxError("LavalinkNode requires 'authorization'");
+        if (!this.options.host) throw new SyntaxError("LavalinkNode requires 'host'");
+        if (!this.options.port) throw new SyntaxError("LavalinkNode requires 'port'");
+
     }
     /**
      * Makes an API call to the Node
@@ -193,6 +197,7 @@ export class LavalinkNode {
     }
 
     public async updatePlayer(data: PlayerUpdateInfo) {
+        console.log(data);
         if(!this.sessionId) throw new Error("The Lavalink Node is either not ready, or not up to date!");
         this.syncPlayerData(data);
 
@@ -288,8 +293,7 @@ export class LavalinkNode {
         return this.options.id || this.options.host;
     }
     public destroy() {
-        if (!this.connected) return;
-
+        if (!this.connected) return
         const players = this.NodeManager.LavalinkManager.playerManager.players.filter(p => p.node.id == this.id);
         if (players) players.forEach(p => p.destroy());
 
@@ -437,6 +441,7 @@ export class LavalinkNode {
         const payload = JSON.parse(d.toString());
 
         if (!payload.op) return;
+
         this.NodeManager.emit("raw", this, payload);
 
         switch (payload.op) {
@@ -453,7 +458,7 @@ export class LavalinkNode {
                 player.set("internal_lastposition", player.position);
                 player.connected = payload.state.connected;
                 player.wsPing = payload.state.ping >= 0 ? payload.state.ping : player.wsPing <= 0 && player.connected ? null : player.wsPing || 0;
-                if(!player.createdTimeStamp && payload.state.time) player.createdTimeStamp = payload.sate.time;
+                if(!player.createdTimeStamp && payload.state.time) player.createdTimeStamp = payload.state.time;
                 
                 if(typeof this.NodeManager.LavalinkManager.options.playerOptions.clientBasedUpdateInterval === "number" && this.NodeManager.LavalinkManager.options.playerOptions.clientBasedUpdateInterval >= 10) {
                     player.set("internal_updateInterval", setInterval(() => {
@@ -499,6 +504,7 @@ export class LavalinkNode {
         const player = this.NodeManager.LavalinkManager.playerManager.getPlayer(payload.guildId);
         if (!player) return;
 
+        console.log("botevent", payload.type);
         switch(payload.type) {
             case "TrackStartEvent": this.trackStart(player, player.queue.currentTrack, payload); break;
             case "TrackEndEvent": this.trackEnd(player, player.queue.currentTrack, payload); break;
@@ -526,7 +532,7 @@ export class LavalinkNode {
             await player.queue._trackEnd();
             if(!player.queue.currentTrack) return this.queueEnd(player, player.queue.currentTrack, payload);
             this.NodeManager.LavalinkManager.playerManager.emit("trackEnd", player, track, payload);
-            return this.NodeManager.LavalinkManager.options.autoSkip && player.play({ track: player.queue.currentTrack });
+            return this.NodeManager.LavalinkManager.options.autoSkip && player.play({ track: player.queue.currentTrack, noReplace: true });
         }
         // remove tracks from the queue
         if(player.repeatMode !== "track") await player.queue._trackEnd(player.repeatMode === "queue"); 
@@ -535,7 +541,7 @@ export class LavalinkNode {
         // fire event
         this.NodeManager.LavalinkManager.playerManager.emit("trackEnd", player, track, payload);
         // play track if autoSkip is true
-        return this.NodeManager.LavalinkManager.options.autoSkip && player.play({ track: player.queue.currentTrack });
+        return this.NodeManager.LavalinkManager.options.autoSkip && player.play({ track: player.queue.currentTrack, noReplace: true });
     }
 
     private async queueEnd(player: Player, track: Track, payload: TrackEndEvent) {

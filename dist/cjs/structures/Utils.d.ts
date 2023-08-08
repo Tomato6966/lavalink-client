@@ -41,7 +41,7 @@ export declare class ManagerUitls {
     validatedQuery(queryString: string, node: LavalinkNode): void;
 }
 export declare class MiniMap<K, V> extends Map<K, V> {
-    constructor(data: any);
+    constructor(data?: any[]);
     filter<K2 extends K>(fn: (value: V, key: K, collection: this) => key is K2): MiniMap<K2, V>;
     filter<V2 extends V>(fn: (value: V, key: K, collection: this) => value is V2): MiniMap<K, V2>;
     filter(fn: (value: V, key: K, collection: this) => boolean): MiniMap<K, V>;

@@ -3,7 +3,6 @@ import { Player, PlayerOptions } from "./Player";
 import { LavalinkManager } from "./LavalinkManager";
 import { Track } from "./Track";
 import { MiniMap, TrackEndEvent, TrackExceptionEvent, TrackStartEvent, TrackStuckEvent, WebSocketClosedEvent } from "./Utils";
-import { Queue } from "./Queue";
 
 interface PlayerManagerEvents {
     /**
@@ -64,15 +63,16 @@ export interface PlayerManager {
     emit<U extends keyof PlayerManagerEvents>(event: U, ...args: Parameters<PlayerManagerEvents[U]>): boolean;
     /** @private */
     LavalinkManager: LavalinkManager;
+    
 }
 export class PlayerManager extends EventEmitter {
-    public players: MiniMap<string, Player>;
+    public players: MiniMap<string, Player> = new MiniMap();
     constructor(LavalinkManager:LavalinkManager) {
         super();
         this.LavalinkManager = LavalinkManager;
     }
     public createPlayer(options: PlayerOptions) {
-        if(this.players.has(options.guildId)) return this.players.get(options.guildId);
+        if(this.players.has(options.guildId)) return this.players.get(options.guildId)!;
         const newPlayer = new Player(options, this);
         this.players.set(newPlayer.guildId, newPlayer);
         return newPlayer;

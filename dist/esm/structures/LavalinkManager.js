@@ -14,6 +14,7 @@ export class LavalinkManager extends EventEmitter {
             autoSkip: true,
             ...options
         };
+        this.initiated = false;
         if (!this.options.playerOptions.defaultSearchPlatform)
             this.options.playerOptions.defaultSearchPlatform = "ytsearch";
         if (!this.options.queueOptions.maxPreviousTracks || this.options.queueOptions.maxPreviousTracks <= 0)
@@ -30,16 +31,17 @@ export class LavalinkManager extends EventEmitter {
         this.nodeManager = new NodeManager(this);
         this.utilManager = new ManagerUitls(this);
     }
+    get useable() {
+        return this.nodeManager.nodes.filter(v => v.connected).size > 0;
+    }
     /**
      * Initiates the Manager.
      * @param clientData
      */
-    init(clientData = {}) {
-        const { id, username, shards } = clientData;
+    async init(clientData) {
         if (this.initiated)
             return this;
-        if (!this.options.client)
-            this.options.client = { id, username, shards };
+        this.options.client = { ...(this.options.client || {}), ...clientData };
         if (!this.options.client.id)
             throw new Error('"client.id" is not set. Pass it in Manager#init() or as a option in the constructor.');
         if (typeof this.options.client.id !== "string")
@@ -47,7 +49,7 @@ export class LavalinkManager extends EventEmitter {
         let success = 0;
         for (const node of [...this.nodeManager.nodes.values()]) {
             try {
-                node.connect();
+                await node.connect();
                 success++;
             }
             catch (err) {
@@ -66,6 +68,8 @@ export class LavalinkManager extends EventEmitter {
      * @param data
      */
     async updateVoiceState(data) {
+        if (!this.initiated)
+            return;
         if ("t" in data && !["VOICE_STATE_UPDATE", "VOICE_SERVER_UPDATE"].includes(data.t))
             return;
         const update = "d" in data ? data.d : data;

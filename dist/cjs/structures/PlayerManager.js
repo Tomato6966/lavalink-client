@@ -3,8 +3,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.PlayerManager = void 0;
 const stream_1 = require("stream");
 const Player_1 = require("./Player");
+const Utils_1 = require("./Utils");
 class PlayerManager extends stream_1.EventEmitter {
-    players;
+    players = new Utils_1.MiniMap();
     constructor(LavalinkManager) {
         super();
         this.LavalinkManager = LavalinkManager;

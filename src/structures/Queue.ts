@@ -80,7 +80,7 @@ export class Queue {
   }
 
   public isTrack(data:Track) {
-    return typeof data.encodedTrack === "string" && typeof data.info === "object";
+    return typeof data?.encodedTrack === "string" && typeof data?.info === "object";
   }
 
   /** The Current Playing Track */

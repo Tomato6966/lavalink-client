@@ -106,8 +106,9 @@ export declare class LavalinkNode {
     private reconnectAttempts;
     sessionId?: string | null;
     info: LavalinkInfo | null;
-    version: "v4";
+    version: string;
     constructor(options: LavalinkNodeOptions, manager: NodeManager);
+    private validate;
     /**
      * Makes an API call to the Node
      * @param endpoint The endpoint that we will make the call to

@@ -48,7 +48,7 @@ export class ManagerUitls {
     }
 
     buildTrack(data, requester) {
-        const encodedTrack = data.encoded || data.encodedTrack || typeof data.track === "string" ? data.track : undefined;
+        const encodedTrack = data.encoded || data.encodedTrack;
         if (!encodedTrack) throw new RangeError("Argument 'data.encoded' / 'data.encodedTrack' / 'data.track' must be present.");
         if (!data.info) data.info = {} as Partial<LavalinkTrackDataInfoExtended>;
         try {
@@ -57,7 +57,7 @@ export class ManagerUitls {
                     identifier: data.info?.identifier,
                     title: data.info?.title,
                     author: data.info?.author,
-                    duration: data.info?.duration,
+                    duration: data.info?.length,
                     artworkUrl: data.info?.artworkUrl || ["youtube.", "youtu.be"].some(d => data.info?.uri?.includes?.(d)) ? `https://img.youtube.com/vi/${data.info?.identifier}/mqdefault.jpg` : undefined,
                     uri: data.info?.uri,
                     sourceName: data.info?.sourceName,
@@ -161,7 +161,7 @@ export class ManagerUitls {
 }
 
 export class MiniMap<K, V> extends Map<K, V> {
-    constructor(data) {
+    constructor(data = []) {
         super(data);
     }
     public filter<K2 extends K>(fn: (value: V, key: K, collection: this) => key is K2): MiniMap<K2, V>;
