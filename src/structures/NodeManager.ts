@@ -1,7 +1,6 @@
 import { EventEmitter } from "stream";
 import { LavalinkNode, LavalinkNodeOptions } from "./Node";
 import { LavalinkManager } from "./LavalinkManager";
-import { LavalinkTrackDataInfo } from "./Track";
 import { MiniMap } from "./Utils";
 
 type LavalinkNodeIdentifier = string;
@@ -81,33 +80,5 @@ export class NodeManager extends EventEmitter {
         decodeNode.destroy();
         this.nodes.delete(decodeNode.id);
         return;
-    }
-    /**
-     * Decodes the base64 encoded tracks and returns a TrackData array.
-     * @param encodedTracks
-     */
-    public async decodeTracks(encodedTracks: string[], node?: LavalinkNodeIdentifier|LavalinkNode) {
-        const decodeNode = typeof node === "string" ? this.nodes.get(node) : node || this.leastUsedNodes[0];
-        if (!decodeNode) throw new Error("No available nodes.");
-
-        const res = await decodeNode.makeRequest(`/decodetracks`, r => {
-            r.method = "POST";
-            r.body = JSON.stringify(encodedTracks);
-            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-            r.headers!["Content-Type"] = "application/json";
-        }) as LavalinkTrackDataInfo[];
-
-        if (!res) throw new Error("No data returned from query.");
-
-        return res
-    }
-
-    /**
-     * Decodes the base64 encoded track and returns a TrackData.
-     * @param encodedTrack
-     */
-    public async decodeTrack(encodedTrack: string) {
-        const res = await this.decodeTracks([ encodedTrack ]);
-        return res[0];
     }
 }

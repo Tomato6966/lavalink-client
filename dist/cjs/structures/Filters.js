@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.validAudioOutputs = exports.FilterManager = void 0;
+exports.audioOutputsData = exports.FilterManager = void 0;
 class FilterManager {
     equalizerBands = [];
     filterUpdatedState = 0;
@@ -52,7 +52,7 @@ class FilterManager {
             frequency: 0,
             depth: 0 // 0 < x = 1
         },
-        channelMix: exports.validAudioOutputs.stereo,
+        channelMix: exports.audioOutputsData.stereo,
         /*distortion: {
             sinOffset: 0,
             sinScale: 1,
@@ -181,7 +181,7 @@ class FilterManager {
                 frequency: 2,
                 depth: 0.1 // 0 < x = 1
             },
-            channelMix: exports.validAudioOutputs.stereo,
+            channelMix: exports.audioOutputsData.stereo,
         })) {
             this.data[key] = value;
         }
@@ -195,9 +195,9 @@ class FilterManager {
     async setAudioOutput(type) {
         if (this.player.node.info && !this.player.node.info?.filters?.includes("channelMix"))
             throw new Error("Node#Info#filters does not include the 'channelMix' Filter (Node has it not enable)");
-        if (!type || !exports.validAudioOutputs[type])
+        if (!type || !exports.audioOutputsData[type])
             throw "Invalid audio type added, must be 'mono' / 'stereo' / 'left' / 'right'";
-        this.data.channelMix = exports.validAudioOutputs[type];
+        this.data.channelMix = exports.audioOutputsData[type];
         this.filters.audioOutput = type;
         await this.applyPlayerFilters();
         return this.filters.audioOutput;
@@ -444,7 +444,7 @@ class FilterManager {
     }
 }
 exports.FilterManager = FilterManager;
-exports.validAudioOutputs = {
+exports.audioOutputsData = {
     mono: {
         leftToLeft: 0.5,
         leftToRight: 0.5,

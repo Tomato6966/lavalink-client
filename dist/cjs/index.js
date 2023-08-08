@@ -7,7 +7,6 @@ tslib_1.__exportStar(require("./structures/LavalinkManagerStatics"), exports);
 tslib_1.__exportStar(require("./structures/Node"), exports);
 tslib_1.__exportStar(require("./structures/NodeManager"), exports);
 tslib_1.__exportStar(require("./structures/Player"), exports);
-tslib_1.__exportStar(require("./structures/PlayerManager"), exports);
 tslib_1.__exportStar(require("./structures/Queue"), exports);
 tslib_1.__exportStar(require("./structures/Track"), exports);
 tslib_1.__exportStar(require("./structures/Utils"), exports);

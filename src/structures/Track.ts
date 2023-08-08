@@ -19,7 +19,6 @@ export interface Track {
     pluginInfo: Partial<PluginDataInfo> | Record<string, string | number>;
 }
 
-
 export interface PluginDataInfo {
     type?: string;
     identifier?: string;

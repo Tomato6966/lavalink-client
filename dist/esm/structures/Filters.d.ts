@@ -118,7 +118,7 @@ export declare class FilterManager {
     /** Clears the equalizer bands. */
     clearEQ(): Promise<this>;
 }
-export declare const validAudioOutputs: {
+export declare const audioOutputsData: {
     mono: {
         leftToLeft: number;
         leftToRight: number;

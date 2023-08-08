@@ -87,7 +87,6 @@ class LavalinkNode {
         return parseAsText ? await request.body.text() : await request.body.json();
     }
     async updatePlayer(data) {
-        console.log(data);
         if (!this.sessionId)
             throw new Error("The Lavalink Node is either not ready, or not up to date!");
         this.syncPlayerData(data);
@@ -105,9 +104,32 @@ class LavalinkNode {
         });
         return this.syncPlayerData({}, res), res;
     }
+    /**
+     * Decodes the base64 encoded tracks and returns a TrackData array.
+     * @param encodedTracks
+     */
+    async decodeTracks(encodedTracks) {
+        const res = await this.makeRequest(`/decodetracks`, r => {
+            r.method = "POST";
+            r.body = JSON.stringify(encodedTracks);
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+            r.headers["Content-Type"] = "application/json";
+        });
+        if (!res)
+            throw new Error("No data returned from query.");
+        return res;
+    }
+    /**
+     * Decodes the base64 encoded track and returns a TrackData.
+     * @param encodedTrack
+     */
+    async decodeTrack(encodedTrack) {
+        const res = await this.decodeTracks([encodedTrack]);
+        return res[0];
+    }
     syncPlayerData(data, res) {
         if (typeof data === "object" && typeof data?.guildId === "string" && typeof data.playerOptions === "object" && Object.keys(data.playerOptions).length > 1) {
-            const player = this.NodeManager.LavalinkManager.playerManager.getPlayer(data.guildId);
+            const player = this.NodeManager.LavalinkManager.getPlayer(data.guildId);
             if (!player)
                 return;
             if (typeof data.playerOptions.paused !== "undefined") {
@@ -156,7 +178,7 @@ class LavalinkNode {
         }
         // just for res
         if (res?.guildId === "string" && typeof res?.voice !== "undefined") {
-            const player = this.NodeManager.LavalinkManager.playerManager.getPlayer(data.guildId);
+            const player = this.NodeManager.LavalinkManager.getPlayer(data.guildId);
             if (!player)
                 return;
             if (typeof res?.voice?.connected === "boolean" && res.voice.connected === false)
@@ -191,7 +213,7 @@ class LavalinkNode {
     destroy() {
         if (!this.connected)
             return;
-        const players = this.NodeManager.LavalinkManager.playerManager.players.filter(p => p.node.id == this.id);
+        const players = this.NodeManager.LavalinkManager.players.filter(p => p.node.id == this.id);
         if (players)
             players.forEach(p => p.destroy());
         this.socket.close(1000, "destroy");
@@ -343,7 +365,7 @@ class LavalinkNode {
                 this.stats = { ...payload };
                 break;
             case "playerUpdate":
-                const player = this.NodeManager.LavalinkManager.playerManager.getPlayer(payload.guildId);
+                const player = this.NodeManager.LavalinkManager.getPlayer(payload.guildId);
                 if (!player)
                     return;
                 if (player.get("internal_updateInterval"))
@@ -398,10 +420,9 @@ class LavalinkNode {
     async handleEvent(payload) {
         if (!payload.guildId)
             return;
-        const player = this.NodeManager.LavalinkManager.playerManager.getPlayer(payload.guildId);
+        const player = this.NodeManager.LavalinkManager.getPlayer(payload.guildId);
         if (!player)
             return;
-        console.log("botevent", payload.type);
         switch (payload.type) {
             case "TrackStartEvent":
                 this.trackStart(player, player.queue.currentTrack, payload);
@@ -427,7 +448,7 @@ class LavalinkNode {
     trackStart(player, track, payload) {
         player.playing = true;
         player.paused = false;
-        return this.NodeManager.LavalinkManager.playerManager.emit("trackStart", player, track, payload);
+        return this.NodeManager.LavalinkManager.emit("trackStart", player, track, payload);
     }
     async trackEnd(player, track, payload) {
         // If there are no songs in the queue
@@ -435,13 +456,13 @@ class LavalinkNode {
             return this.queueEnd(player, player.queue.currentTrack, payload);
         // If a track was forcibly played
         if (payload.reason === "REPLACED")
-            return this.NodeManager.LavalinkManager.playerManager.emit("trackEnd", player, track, payload);
+            return this.NodeManager.LavalinkManager.emit("trackEnd", player, track, payload);
         // If a track had an error while starting
         if (["LOAD_FAILED", "CLEAN_UP"].includes(payload.reason)) {
             await player.queue._trackEnd();
             if (!player.queue.currentTrack)
                 return this.queueEnd(player, player.queue.currentTrack, payload);
-            this.NodeManager.LavalinkManager.playerManager.emit("trackEnd", player, track, payload);
+            this.NodeManager.LavalinkManager.emit("trackEnd", player, track, payload);
             return this.NodeManager.LavalinkManager.options.autoSkip && player.play({ track: player.queue.currentTrack, noReplace: true });
         }
         // remove tracks from the queue
@@ -451,28 +472,28 @@ class LavalinkNode {
         if (!player.queue.currentTrack)
             return this.queueEnd(player, player.queue.currentTrack, payload);
         // fire event
-        this.NodeManager.LavalinkManager.playerManager.emit("trackEnd", player, track, payload);
+        this.NodeManager.LavalinkManager.emit("trackEnd", player, track, payload);
         // play track if autoSkip is true
         return this.NodeManager.LavalinkManager.options.autoSkip && player.play({ track: player.queue.currentTrack, noReplace: true });
     }
     async queueEnd(player, track, payload) {
         player.queue.setCurrent(null);
         player.playing = false;
-        return this.NodeManager.LavalinkManager.playerManager.emit("queueEnd", player, track, payload);
+        return this.NodeManager.LavalinkManager.emit("queueEnd", player, track, payload);
     }
     async trackStuck(player, track, payload) {
-        this.NodeManager.LavalinkManager.playerManager.emit("trackStuck", player, track, payload);
+        this.NodeManager.LavalinkManager.emit("trackStuck", player, track, payload);
         // If there are no songs in the queue
         if (!player.queue.size && player.repeatMode === "off")
             return; // this.queueEnd(player, queue, payload);
         // player.stop()
     }
     trackError(player, track, payload) {
-        this.NodeManager.LavalinkManager.playerManager.emit("trackError", player, track, payload);
+        this.NodeManager.LavalinkManager.emit("trackError", player, track, payload);
         // player.stop();
     }
     socketClosed(player, payload) {
-        return this.NodeManager.LavalinkManager.playerManager.emit("socketClosed", player, payload);
+        return this.NodeManager.LavalinkManager.emit("playerSocketClosed", player, payload);
     }
 }
 exports.LavalinkNode = LavalinkNode;

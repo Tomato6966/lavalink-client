@@ -4,13 +4,14 @@ exports.LavalinkManager = void 0;
 const events_1 = require("events");
 const NodeManager_1 = require("./NodeManager");
 const Queue_1 = require("./Queue");
-const PlayerManager_1 = require("./PlayerManager");
 const Utils_1 = require("./Utils");
 const LavalinkManagerStatics_1 = require("./LavalinkManagerStatics");
+const Player_1 = require("./Player");
 class LavalinkManager extends events_1.EventEmitter {
     static DEFAULT_SOURCES = LavalinkManagerStatics_1.DEFAULT_SOURCES;
     static REGEXES = LavalinkManagerStatics_1.REGEXES;
     initiated = false;
+    players = new Utils_1.MiniMap();
     constructor(options) {
         super();
         this.options = {
@@ -30,9 +31,23 @@ class LavalinkManager extends events_1.EventEmitter {
         }
         else
             this.options.queueStore = new Queue_1.DefaultQueueStore();
-        this.playerManager = new PlayerManager_1.PlayerManager(this);
         this.nodeManager = new NodeManager_1.NodeManager(this);
         this.utilManager = new Utils_1.ManagerUitls(this);
+    }
+    createPlayer(options) {
+        if (this.players.has(options.guildId))
+            return this.players.get(options.guildId);
+        const newPlayer = new Player_1.Player(options, this);
+        this.players.set(newPlayer.guildId, newPlayer);
+        return newPlayer;
+    }
+    getPlayer(guildId) {
+        return this.players.get(guildId);
+    }
+    deletePlayer(guildId) {
+        if (this.players.get(guildId).connected)
+            throw new Error("Use Player#destroy() not PlayerManager#deletePlayer() to stop the Player");
+        return this.players.delete(guildId);
     }
     get useable() {
         return this.nodeManager.nodes.filter(v => v.connected).size > 0;
@@ -78,7 +93,7 @@ class LavalinkManager extends events_1.EventEmitter {
         const update = "d" in data ? data.d : data;
         if (!update || !("token" in update) && !("session_id" in update))
             return;
-        const player = this.playerManager.getPlayer(update.guild_id);
+        const player = this.getPlayer(update.guild_id);
         if (!player)
             return;
         if ("token" in update) {
@@ -101,12 +116,12 @@ class LavalinkManager extends events_1.EventEmitter {
             return;
         if (update.channel_id) {
             if (player.voiceChannelId !== update.channel_id)
-                this.playerManager.emit("move", player, player.voiceChannelId, update.channel_id);
+                this.emit("playerMove", player, player.voiceChannelId, update.channel_id);
             player.voice.sessionId = update.session_id;
             player.voiceChannelId = update.channel_id;
         }
         else {
-            this.playerManager.emit("disconnect", player, player.voiceChannelId);
+            this.emit("playerDisconnect", player, player.voiceChannelId);
             player.voiceChannelId = null;
             player.voice = Object.assign({});
             await player.pause();

@@ -1,14 +1,13 @@
 import { EventEmitter } from "events";
 import { NodeManager } from "./NodeManager";
 import { DefaultQueueStore, QueueSaverOptions, StoreManager } from "./Queue";
-import { PlayerManager } from "./PlayerManager";
-import { GuildShardPayload, ManagerUitls, SearchPlatform, VoicePacket, VoiceServer, VoiceState } from "./Utils";
+import { GuildShardPayload, LavalinkSearchPlatform, ManagerUitls, MiniMap, SearchPlatform, TrackEndEvent, TrackExceptionEvent, TrackStartEvent, TrackStuckEvent, VoicePacket, VoiceServer, VoiceState, WebSocketClosedEvent } from "./Utils";
 import { LavalinkNodeOptions } from "./Node";
 import { DEFAULT_SOURCES, REGEXES } from "./LavalinkManagerStatics";
-import { Player } from "./Player";
+import { Player, PlayerOptions } from "./Player";
+import { Track } from "./Track";
 
 export interface LavalinkManager {
-  playerManager: PlayerManager;
   nodeManager: NodeManager;
   utilManager: ManagerUitls;
 }
@@ -40,7 +39,56 @@ export interface ManagerOptions {
 }
 
 interface LavalinkManagerEvents {
-  "create": (manager:LavalinkManager) => void; 
+    /**
+     * Emitted when a Track started playing.
+     * @event Manager.playerManager#trackStart
+     */
+    "trackStart": (player:Player, track: Track, payload:TrackStartEvent) => void;
+    /**
+     * Emitted when a Track finished.
+     * @event Manager.playerManager#trackEnd
+     */
+    "trackEnd": (player:Player, track: Track, payload:TrackEndEvent) => void;
+    /**
+     * Emitted when a Track got stuck while playing.
+     * @event Manager.playerManager#trackStuck
+     */
+    "trackStuck": (player:Player, track: Track, payload:TrackStuckEvent) => void;
+    /**
+     * Emitted when a Track errored.
+     * @event Manager.playerManager#trackError
+     */
+    "trackError": (player:Player, track: Track, payload:TrackExceptionEvent) => void;
+    /**
+     * Emitted when the Playing finished and no more tracks in the queue.
+     * @event Manager.playerManager#queueEnd
+     */
+    "queueEnd": (player:Player, track: Track, payload:TrackEndEvent|TrackStuckEvent) => void;
+    /**
+     * Emitted when a Player is created.
+     * @event Manager.playerManager#create
+     */
+    "playerCreate": (player:Player) => void;
+    /**
+     * Emitted when a Player is moved within the channel.
+     * @event Manager.playerManager#move
+     */
+    "playerMove": (player:Player, oldVoiceChannelId: string, newVoiceChannelId: string) => void;
+    /**
+     * Emitted when a Player is disconnected from a channel.
+     * @event Manager.playerManager#disconnect
+     */
+    "playerDisconnect": (player:Player, voiceChannelId: string) => void;
+    /**
+     * Emitted when a Node-Socket got closed for a specific Player.
+     * @event Manager.playerManager#socketClosed
+     */
+    "playerSocketClosed": (player:Player, payload: WebSocketClosedEvent) => void;
+    /**
+     * Emitted when a Player get's destroyed
+     * @event Manager.playerManager#destroy
+     */
+    "playerDestroy": (player:Player) => void;
 }
 
 export interface LavalinkManager {
@@ -57,6 +105,9 @@ export class LavalinkManager extends EventEmitter {
   public static REGEXES = REGEXES;
 
   public initiated:boolean = false;
+  
+  public players: MiniMap<string, Player> = new MiniMap();
+    
   constructor(options: ManagerOptions) {
     super();
     this.options = {
@@ -73,10 +124,24 @@ export class LavalinkManager extends EventEmitter {
       if(!requiredKeys.every(v => keys.includes(v)) || !requiredKeys.every(v => typeof options.queueStore[v] === "function")) throw new SyntaxError(`The provided QueueStore, does not have all required functions: ${requiredKeys.join(", ")}`);
     } else this.options.queueStore = new DefaultQueueStore();
 
-    this.playerManager = new PlayerManager(this);
     this.nodeManager = new NodeManager(this);
     this.utilManager = new ManagerUitls(this);
   }
+  
+  public createPlayer(options: PlayerOptions) {
+    if(this.players.has(options.guildId)) return this.players.get(options.guildId)!;
+    const newPlayer = new Player(options, this);
+    this.players.set(newPlayer.guildId, newPlayer);
+    return newPlayer;
+  }
+  public getPlayer(guildId:string) {
+      return this.players.get(guildId);
+  }
+  public deletePlayer(guildId:string) {
+      if(this.players.get(guildId).connected) throw new Error("Use Player#destroy() not PlayerManager#deletePlayer() to stop the Player")
+      return this.players.delete(guildId);
+  }
+
   public get useable() {
     return this.nodeManager.nodes.filter(v => v.connected).size > 0;
   }
@@ -117,7 +182,7 @@ export class LavalinkManager extends EventEmitter {
     const update: VoiceServer | VoiceState = "d" in data ? data.d : data;
     if (!update || !("token" in update) && !("session_id" in update)) return;
 
-    const player = this.playerManager.getPlayer(update.guild_id) as Player;
+    const player = this.getPlayer(update.guild_id) as Player;
     if (!player) return;
     
     if ("token" in update) {
@@ -139,11 +204,11 @@ export class LavalinkManager extends EventEmitter {
     if (update.user_id !== this.options.client.id) return;      
     
     if (update.channel_id) {
-      if (player.voiceChannelId !== update.channel_id) this.playerManager.emit("move", player, player.voiceChannelId, update.channel_id);
+      if (player.voiceChannelId !== update.channel_id) this.emit("playerMove", player, player.voiceChannelId, update.channel_id);
       player.voice.sessionId = update.session_id;
       player.voiceChannelId = update.channel_id;
     } else {
-      this.playerManager.emit("disconnect", player, player.voiceChannelId);
+      this.emit("playerDisconnect", player, player.voiceChannelId);
       player.voiceChannelId = null;
       player.voice = Object.assign({});
       await player.pause();

@@ -1,6 +1,6 @@
 import { FilterManager, LavalinkFilterData } from "./Filters";
+import { LavalinkManager } from "./LavalinkManager";
 import { LavalinkNode } from "./Node";
-import { PlayerManager } from "./PlayerManager";
 import { Queue } from "./Queue";
 import { Track } from "./Track";
 import { LavalinkPlayerVoiceOptions, SearchPlatform, SearchResult } from "./Utils";
@@ -13,7 +13,7 @@ export interface PlayerOptions {
     selfDeaf?: boolean;
     selfMute?: boolean;
     textChannelId?: string;
-    node?: Node | string;
+    node?: LavalinkNode | string;
     instaUpdateFiltersFix?: boolean;
     applyVolumeAsFilter?: boolean;
 }
@@ -40,7 +40,7 @@ export interface PlayOptions {
 }
 export interface Player {
     filterManager: FilterManager;
-    playerManager: PlayerManager;
+    LavalinkManager: LavalinkManager;
     options: PlayerOptions;
     node: LavalinkNode;
     queue: Queue;
@@ -76,12 +76,12 @@ export declare class Player {
     get<T>(key: string): T;
     clearData(): void;
     getAllData(): Record<string, unknown>;
-    constructor(options: PlayerOptions, playerManager: PlayerManager);
+    constructor(options: PlayerOptions, LavalinkManager: LavalinkManager);
     play(options?: Partial<PlayOptions>): Promise<void>;
     setVolume(volume: number, ignoreVolumeDecrementer?: boolean): Promise<void>;
     search(query: {
         query: string;
-        source: SearchPlatform;
+        source?: SearchPlatform;
     }, requestUser: unknown): Promise<SearchResult>;
     pause(): Promise<void>;
     resume(): Promise<void>;

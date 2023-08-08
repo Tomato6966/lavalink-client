@@ -1,69 +1,13 @@
-import { config } from "dotenv";
 import { Client, GatewayIntentBits } from "discord.js";
-import { LavalinkManager } from "lavalink-client";
+import { config } from "dotenv";
+import { LavalinkManager } from "./src";
+import { BotClient } from "./types/Client";
+import { envConfig } from "./config";
+import { loadCommands } from "./handler/commandLoader";
+import { loadEvents } from "./handler/eventsLoader";
+import { loadLavalinkEvents } from "./lavalinkEvents";
 
 config();
-const envConfig = {
-    token: process.env.DISCORD_TOKEN as string,
-    clientId: process.env.CLIENT_ID as string,
-    voiceChannelId: "1070626568260562958", textChannelId: "1070645885236695090"
-}
-
-async function LavalinkClientEvents() {
-    /**
-     * NODE EVENTS
-     */
-    client.musicManager.nodeManager.on("raw", (node, payload) => {
-        //console.log(node.id, " :: RAW :: ", payload);
-    }).on("disconnect", (node, reason) => {
-        console.log(node.id, " :: DISCONNECT :: ", reason);
-    }).on("connect", (node) => {
-        console.log(node.id, " :: CONNECTED :: ");
-        testPlay(); // TEST THE MUSIC ONCE CONNECTED TO THE BOT
-    }).on("reconnecting", (node) => {
-        console.log(node.id, " :: RECONNECTING :: ");
-    }).on("create", (node) => {
-        console.log(node.id, " :: CREATED :: ");
-    }).on("destroy", (node) => {
-        console.log(node.id, " :: DESTROYED :: ");
-    }).on("error", (node, error, payload) => {
-        console.log(node.id, " :: ERRORED :: ", error, " :: PAYLOAD :: ", payload);
-    });
-
-    /**
-     * PLAYER EVENTS
-     */
-    client.musicManager.playerManager.on("trackStart", (player, track) => {
-        console.log(player.guildId, " :: Started Playing :: ", track.info.title)
-    });
-}
-
-async function testPlay() {
-    await delay(150); // SHORT DELAY
-    if(!client.musicManager.useable) return console.log("NOT USEABLE ATM!");
-    const testGuild = client.guilds.cache.get("1070626568260562954")!;
-
-    const player = await client.musicManager.playerManager.createPlayer({
-        guildId: testGuild.id, voiceChannelId: envConfig.voiceChannelId, textChannelId: envConfig.textChannelId, // in what guild + channel(s)
-        selfDeaf: true, selfMute: false, volume: 100 // configuration(s)
-    });
-
-    await player.connect();
-
-    const res = await player.search({
-        query: `Elton John`,
-    }, client.user);
-
-    await player.queue.add(res.tracks);
-
-    await player.play({
-        endTime: 30000,
-        position: 25000,
-    });
-}
-
-
-const delay = async (ms) => new Promise(r => setTimeout(() => r(true), ms));
 
 const client = new Client({
     intents: [
@@ -72,7 +16,7 @@ const client = new Client({
         GatewayIntentBits.MessageContent,
         GatewayIntentBits.GuildMessages
     ]
-}) as Client & { musicManager: LavalinkManager };
+}) as BotClient;
 
 client.musicManager = new LavalinkManager({
     nodes: [
@@ -94,24 +38,16 @@ client.musicManager = new LavalinkManager({
     playerOptions: {
         applyVolumeAsFilter: false,
         clientBasedUpdateInterval: 50,
-        defaultSearchPlatform: "dzsearch",
+        defaultSearchPlatform: "ytmsearch",
         volumeDecrementer: 0.7
     },
     queueOptions: {
         maxPreviousTracks: 5
     }
 });
-// register the lavalink Client Event(s)
-LavalinkClientEvents(); 
 
-client.on("raw", d => { 
-    // VERY IMPORTANT!
-    client.musicManager.updateVoiceState(d); 
-})
-client.on("ready", async () => {
-    console.log("Discord Bot is ready to be Used!");
-    //VERY IMPORTANT!
-    await client.musicManager.init({ ...client.user!, shards: "auto" }); 
-});
+loadCommands(client);
+loadEvents(client);
+loadLavalinkEvents(client); 
 
 client.login(process.env.DISCORD_TOKEN);

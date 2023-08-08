@@ -1,13 +1,14 @@
 import { EventEmitter } from "events";
 import { NodeManager } from "./NodeManager";
 import { DefaultQueueStore } from "./Queue";
-import { PlayerManager } from "./PlayerManager";
-import { ManagerUitls } from "./Utils";
+import { ManagerUitls, MiniMap } from "./Utils";
 import { DEFAULT_SOURCES, REGEXES } from "./LavalinkManagerStatics";
+import { Player } from "./Player";
 export class LavalinkManager extends EventEmitter {
     static DEFAULT_SOURCES = DEFAULT_SOURCES;
     static REGEXES = REGEXES;
     initiated = false;
+    players = new MiniMap();
     constructor(options) {
         super();
         this.options = {
@@ -27,9 +28,23 @@ export class LavalinkManager extends EventEmitter {
         }
         else
             this.options.queueStore = new DefaultQueueStore();
-        this.playerManager = new PlayerManager(this);
         this.nodeManager = new NodeManager(this);
         this.utilManager = new ManagerUitls(this);
+    }
+    createPlayer(options) {
+        if (this.players.has(options.guildId))
+            return this.players.get(options.guildId);
+        const newPlayer = new Player(options, this);
+        this.players.set(newPlayer.guildId, newPlayer);
+        return newPlayer;
+    }
+    getPlayer(guildId) {
+        return this.players.get(guildId);
+    }
+    deletePlayer(guildId) {
+        if (this.players.get(guildId).connected)
+            throw new Error("Use Player#destroy() not PlayerManager#deletePlayer() to stop the Player");
+        return this.players.delete(guildId);
     }
     get useable() {
         return this.nodeManager.nodes.filter(v => v.connected).size > 0;
@@ -75,7 +90,7 @@ export class LavalinkManager extends EventEmitter {
         const update = "d" in data ? data.d : data;
         if (!update || !("token" in update) && !("session_id" in update))
             return;
-        const player = this.playerManager.getPlayer(update.guild_id);
+        const player = this.getPlayer(update.guild_id);
         if (!player)
             return;
         if ("token" in update) {
@@ -98,12 +113,12 @@ export class LavalinkManager extends EventEmitter {
             return;
         if (update.channel_id) {
             if (player.voiceChannelId !== update.channel_id)
-                this.playerManager.emit("move", player, player.voiceChannelId, update.channel_id);
+                this.emit("playerMove", player, player.voiceChannelId, update.channel_id);
             player.voice.sessionId = update.session_id;
             player.voiceChannelId = update.channel_id;
         }
         else {
-            this.playerManager.emit("disconnect", player, player.voiceChannelId);
+            this.emit("playerDisconnect", player, player.voiceChannelId);
             player.voiceChannelId = null;
             player.voice = Object.assign({});
             await player.pause();

@@ -57,7 +57,7 @@ export class FilterManager {
             frequency: 0, // 0 < x = 14
             depth: 0     // 0 < x = 1
         },
-        channelMix: validAudioOutputs.stereo,
+        channelMix: audioOutputsData.stereo,
         /*distortion: {
             sinOffset: 0,
             sinScale: 1,
@@ -181,7 +181,7 @@ export class FilterManager {
                 frequency: 2, // 0 < x = 14
                 depth: 0.1      // 0 < x = 1
             },
-            channelMix: validAudioOutputs.stereo,
+            channelMix: audioOutputsData.stereo,
         })) {
             this.data[key] = value;
         }
@@ -194,8 +194,8 @@ export class FilterManager {
      */
     public async setAudioOutput(type: AudioOutputs): Promise<AudioOutputs> {
         if (this.player.node.info && !this.player.node.info?.filters?.includes("channelMix")) throw new Error("Node#Info#filters does not include the 'channelMix' Filter (Node has it not enable)")
-        if (!type || !validAudioOutputs[type]) throw "Invalid audio type added, must be 'mono' / 'stereo' / 'left' / 'right'"
-        this.data.channelMix = validAudioOutputs[type];
+        if (!type || !audioOutputsData[type]) throw "Invalid audio type added, must be 'mono' / 'stereo' / 'left' / 'right'"
+        this.data.channelMix = audioOutputsData[type];
         this.filters.audioOutput = type;
         await this.applyPlayerFilters();
         return this.filters.audioOutput;
@@ -455,7 +455,7 @@ export class FilterManager {
     }
 }
 
-export const validAudioOutputs = {
+export const audioOutputsData = {
     mono: { // totalLeft: 1, totalRight: 1
         leftToLeft: 0.5, //each channel should in total 0 | 1, 0 === off, 1 === on, 0.5+0.5 === 1
         leftToRight: 0.5,

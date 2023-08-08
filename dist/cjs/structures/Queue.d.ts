@@ -47,45 +47,76 @@ export declare class Queue {
     private readonly _guildId;
     private readonly _QueueSaver;
     constructor(data?: Partial<StoredQueue>, guildId?: string, QueueSaver?: QueueSaver);
-    isTrack(data: Track): boolean;
-    /** The Current Playing Track */
+    /**
+     * Validate if a data is euqal to a track
+     * @param {Track|any} data the Track to validate
+     * @returns {boolean}
+     */
+    isTrack(data: Track | any): boolean;
+    /**
+     * Get the current Playing Track
+     * @returns {Track}
+     */
     get currentTrack(): Track;
-    /** All Previous Track(s) [with the limited amount] */
+    /**
+     * Get all previously plaid Tracks
+     * @returns {Track[]}
+     */
     get previousTracks(): Track[];
-    /** All Upcoming Track(s) */
+    /**
+     * Get all Upcoming Tracks
+     * @returns {Track[]}
+     */
     get nextTracks(): Track[];
-    /** The Size of the upcoming Track(s) */
+    /**
+     * Get the amount of the upcoming Tracks
+     * @returns {number}
+     */
     get size(): number;
-    /** The Size of the previous Track(s) */
+    /**
+     * Get the amount of the previous Tracks
+     * @returns {number}
+     */
     get previousSize(): number;
     /**
-     * @returns The Queue, but in a raw State, which allows easier handling for the storeManager
+     * @returns {{currentTrack:Track|null, previousTracks:Track[], nextTracks:Track[]}}The Queue, but in a raw State, which allows easier handling for the storeManager
      */
     getRaw(): StoredQueue;
     /**
      * Add a Track to the Queue, and after saved in the "db" it returns the amount of the Tracks
-     * @param Track
-     * @param index At what position to add the Track
-     * @returns Queue-Size (for the next Tracks)
+     * @param {Track | Track[]} TrackOrTracks
+     * @param {number} index At what position to add the Track
+     * @returns {number} Queue-Size (for the next Tracks)
      */
     add(TrackOrTracks: Track | Track[], index?: number): Promise<number | Track | Track[]>;
     /**
-     *
-     * @param index Where to remove the Track
-     * @param amount How many Tracks to remove?
-     * @param TrackOrTracks Want to Add more Tracks?
+     * Splice the nextTracks in the Queue
+     * @param {number} index Where to remove the Track
+     * @param {number} amount How many Tracks to remove?
+     * @param {Track | Track[]} TrackOrTracks Want to Add more Tracks?
+     * @returns {Track} Spliced Track
      */
     splice(index: number, amount: number, TrackOrTracks?: Track | Track[]): Promise<Track | Track[]>;
     /**
+     * Shuffles the current Queue, then saves it
+     * @returns Amount of Tracks in the Queue
+     */
+    shuffle(): Promise<number>;
+    /**
+     * Get the Total Duration of the Queue-Songs summed up
+     * @returns {number}
+     */
+    get duration(): number;
+    /**
      * Add a Track to the Previous Track list, and after saved in the "db" it returns the amount of the previous Tracks
      * @param Track
-     * @returns PreviousTracksSize
+     * @returns {number} Previous Queue Size
      */
     addPrevious(Track: Track): Promise<number>;
     /**
      * Add a Track to the Previous Track list, and after saved in the "db" it returns the amount of the previous Tracks
      * @param Track
-     * @returns PreviousTracksSize
+     * @returns {Track|null} new Current Track
      */
     setCurrent(Track: Track | null): Promise<Track>;
     /** @private @hidden */

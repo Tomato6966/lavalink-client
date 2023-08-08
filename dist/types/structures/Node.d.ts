@@ -4,6 +4,7 @@ import { Dispatcher, Pool } from "undici";
 import { NodeManager } from "./NodeManager";
 import internal from "stream";
 import { InvalidLavalinkRestRequest, LavalinkPlayer, PlayerUpdateInfo, RoutePlanner, Session } from "./Utils";
+import { LavalinkTrackDataInfo } from "./Track";
 /** Modifies any outgoing REST requests. */
 export type ModifyRequest = (options: Dispatcher.RequestOptions) => void;
 export interface LavalinkNodeOptions {
@@ -117,6 +118,16 @@ export declare class LavalinkNode {
      */
     makeRequest(endpoint: string, modify?: ModifyRequest, parseAsText?: boolean): Promise<unknown>;
     updatePlayer(data: PlayerUpdateInfo): Promise<LavalinkPlayer>;
+    /**
+     * Decodes the base64 encoded tracks and returns a TrackData array.
+     * @param encodedTracks
+     */
+    decodeTracks(encodedTracks: string[]): Promise<LavalinkTrackDataInfo[]>;
+    /**
+     * Decodes the base64 encoded track and returns a TrackData.
+     * @param encodedTrack
+     */
+    decodeTrack(encodedTrack: string): Promise<LavalinkTrackDataInfo>;
     private syncPlayerData;
     destroyPlayer(guildId: any): Promise<unknown>;
     connect(): void;

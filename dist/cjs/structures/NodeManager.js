@@ -30,31 +30,5 @@ class NodeManager extends stream_1.EventEmitter {
         this.nodes.delete(decodeNode.id);
         return;
     }
-    /**
-     * Decodes the base64 encoded tracks and returns a TrackData array.
-     * @param encodedTracks
-     */
-    async decodeTracks(encodedTracks, node) {
-        const decodeNode = typeof node === "string" ? this.nodes.get(node) : node || this.leastUsedNodes[0];
-        if (!decodeNode)
-            throw new Error("No available nodes.");
-        const res = await decodeNode.makeRequest(`/decodetracks`, r => {
-            r.method = "POST";
-            r.body = JSON.stringify(encodedTracks);
-            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-            r.headers["Content-Type"] = "application/json";
-        });
-        if (!res)
-            throw new Error("No data returned from query.");
-        return res;
-    }
-    /**
-     * Decodes the base64 encoded track and returns a TrackData.
-     * @param encodedTrack
-     */
-    async decodeTrack(encodedTrack) {
-        const res = await this.decodeTracks([encodedTrack]);
-        return res[0];
-    }
 }
 exports.NodeManager = NodeManager;
