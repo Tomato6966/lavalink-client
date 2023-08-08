@@ -1,6 +1,6 @@
 import { Client, GatewayIntentBits } from "discord.js";
 import { config } from "dotenv";
-import { LavalinkManager } from "./src";
+import { LavalinkManager } from "../src";
 import { BotClient } from "./types/Client";
 import { envConfig } from "./config";
 import { loadCommands } from "./handler/commandLoader";

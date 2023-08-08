@@ -1,5 +1,5 @@
 import { AutocompleteInteraction, Client, Collection, CommandInteraction, SlashCommandBuilder } from "discord.js";
-import { LavalinkManager } from "../src";
+import { LavalinkManager } from "../../src";
 
 export interface Command {
     data: SlashCommandBuilder;

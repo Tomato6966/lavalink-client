@@ -57,6 +57,7 @@
     "typescript": "^5.1.6"
   },
   "dependencies": {
-    "undici": "^5.23.0"
+    "undici": "^5.23.0",
+    "ws": "^8.13.0"
   }
 }
