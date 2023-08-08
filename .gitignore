@@ -1,3 +1,5 @@
 # Others
 node_modules
-testBot
+testBot/.env
+testBot/node_modules
+testBot/src
