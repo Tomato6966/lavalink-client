@@ -20,6 +20,8 @@ class PlayerManager extends stream_1.EventEmitter {
         return this.players.get(guildId);
     }
     deletePlayer(guildId) {
+        if (this.players.get(guildId).connected)
+            throw new Error("Use Player#destroy() not PlayerManager#deletePlayer() to stop the Player");
         return this.players.delete(guildId);
     }
 }

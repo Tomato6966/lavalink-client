@@ -18,7 +18,11 @@ export class Player {
     createdTimeStamp;
     /** If lavalink says it's connected or not */
     connected = false;
-    voice;
+    voice = {
+        endpoint: null,
+        sessionId: null,
+        token: null
+    };
     data = {};
     /**
      * Set custom data.

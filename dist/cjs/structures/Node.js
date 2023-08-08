@@ -186,6 +186,18 @@ class LavalinkNode {
         return this.options.id || this.options.host;
     }
     destroy() {
+        if (!this.connected)
+            return;
+        const players = this.NodeManager.LavalinkManager.playerManager.players.filter(p => p.node.id == this.id);
+        if (players)
+            players.forEach(p => p.destroy());
+        this.socket.close(1000, "destroy");
+        this.socket.removeAllListeners();
+        this.socket = null;
+        this.reconnectAttempts = 1;
+        clearTimeout(this.reconnectTimeout);
+        this.NodeManager.emit("destroy", this);
+        this.NodeManager.nodes.delete(this.id);
         return;
     }
     /** Returns if connected to the Node. */

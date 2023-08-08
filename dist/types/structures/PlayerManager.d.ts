@@ -3,13 +3,23 @@ import { EventEmitter } from "stream";
 import { Player, PlayerOptions } from "./Player";
 import { LavalinkManager } from "./LavalinkManager";
 import { Track } from "./Track";
-import { TrackEndEvent, TrackExceptionEvent, TrackStartEvent, TrackStuckEvent, WebSocketClosedEvent } from "./Utils";
+import { MiniMap, TrackEndEvent, TrackExceptionEvent, TrackStartEvent, TrackStuckEvent, WebSocketClosedEvent } from "./Utils";
 interface PlayerManagerEvents {
     /**
      * Emitted when a Player is created.
      * @event Manager.playerManager#create
      */
     "create": (player: Player) => void;
+    /**
+     * Emitted when a Player is moved within the channel.
+     * @event Manager.playerManager#move
+     */
+    "move": (player: Player, oldChannelId: string, newChannelId: string) => void;
+    /**
+     * Emitted when a Player is disconnected from a channel.
+     * @event Manager.playerManager#disconnect
+     */
+    "disconnect": (player: Player, voiceChannel: string) => void;
     /**
      * Emitted when a Track started playing.
      * @event Manager.playerManager#trackStart
@@ -53,7 +63,7 @@ export interface PlayerManager {
     LavalinkManager: LavalinkManager;
 }
 export declare class PlayerManager extends EventEmitter {
-    private players;
+    players: MiniMap<string, Player>;
     constructor(LavalinkManager: LavalinkManager);
     createPlayer(options: PlayerOptions): Player;
     getPlayer(guildId: string): Player;

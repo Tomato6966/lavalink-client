@@ -3,7 +3,7 @@ import { EventEmitter } from "events";
 import { NodeManager } from "./NodeManager";
 import { QueueSaverOptions, StoreManager } from "./Queue";
 import { PlayerManager } from "./PlayerManager";
-import { GuildShardPayload, ManagerUitls, SearchPlatform } from "./Utils";
+import { GuildShardPayload, ManagerUitls, SearchPlatform, VoicePacket, VoiceServer, VoiceState } from "./Utils";
 import { LavalinkNodeOptions } from "./Node";
 export interface LavalinkManager {
     playerManager: PlayerManager;
@@ -13,7 +13,7 @@ export interface LavalinkManager {
 export interface BotClientOptions {
     shards?: number | "auto";
     id: string;
-    username: string;
+    username?: string;
 }
 export interface LavalinkPlayerOptions {
     volumeDecrementer?: number;
@@ -42,6 +42,21 @@ export interface LavalinkManager {
 export declare class LavalinkManager extends EventEmitter {
     static DEFAULT_SOURCES: Record<SearchPlatform, import("./Utils").LavalinkSearchPlatform>;
     static REGEXES: Record<import("./Utils").SourcesRegex, RegExp>;
+    initiated: boolean;
     constructor(options: ManagerOptions);
+    /**
+     * Initiates the Manager.
+     * @param clientData
+     */
+    init(clientData?: {
+        id?: string;
+        username?: string;
+        shards?: "auto" | number;
+    }): this;
+    /**
+     * Sends voice data to the Lavalink server.
+     * @param data
+     */
+    updateVoiceState(data: VoicePacket | VoiceServer | VoiceState): Promise<void>;
 }
 export {};

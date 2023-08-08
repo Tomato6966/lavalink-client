@@ -2,6 +2,9 @@
 import { EventEmitter } from "stream";
 import { LavalinkNode, LavalinkNodeOptions } from "./Node";
 import { LavalinkManager } from "./LavalinkManager";
+import { LavalinkTrackDataInfo } from "./Track";
+import { MiniMap } from "./Utils";
+type LavalinkNodeIdentifier = string;
 interface NodeManagerEvents {
     /**
      * Emitted when a Node is created.
@@ -49,10 +52,20 @@ export declare interface NodeManager {
     LavalinkManager: LavalinkManager;
 }
 export declare class NodeManager extends EventEmitter {
-    nodes: Map<string, LavalinkNode>;
+    nodes: MiniMap<string, LavalinkNode>;
     constructor(LavalinkManager: LavalinkManager);
     createNode(options: LavalinkNodeOptions): LavalinkNode;
     get leastUsedNodes(): LavalinkNode[];
-    deleteNode(options: LavalinkNodeOptions): void;
+    deleteNode(node: LavalinkNodeIdentifier | LavalinkNode): void;
+    /**
+     * Decodes the base64 encoded tracks and returns a TrackData array.
+     * @param encodedTracks
+     */
+    decodeTracks(encodedTracks: string[], node?: LavalinkNodeIdentifier | LavalinkNode): Promise<LavalinkTrackDataInfo[]>;
+    /**
+     * Decodes the base64 encoded track and returns a TrackData.
+     * @param encodedTrack
+     */
+    decodeTrack(encodedTrack: string): Promise<LavalinkTrackDataInfo>;
 }
 export {};

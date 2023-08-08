@@ -2,9 +2,10 @@ import { EventEmitter } from "events";
 import { NodeManager } from "./NodeManager";
 import { DefaultQueueStore, QueueSaverOptions, StoreManager } from "./Queue";
 import { PlayerManager } from "./PlayerManager";
-import { GuildShardPayload, ManagerUitls, SearchPlatform } from "./Utils";
+import { GuildShardPayload, ManagerUitls, SearchPlatform, VoicePacket, VoiceServer, VoiceState } from "./Utils";
 import { LavalinkNodeOptions } from "./Node";
 import { DEFAULT_SOURCES, REGEXES } from "./LavalinkManagerStatics";
+import { Player } from "./Player";
 
 export interface LavalinkManager {
   playerManager: PlayerManager;
@@ -15,7 +16,7 @@ export interface LavalinkManager {
 export interface BotClientOptions {
   shards?: number | "auto";
   id: string;
-  username: string;
+  username?: string;
 }
 
 export interface LavalinkPlayerOptions {
@@ -52,6 +53,7 @@ export class LavalinkManager extends EventEmitter {
   public static DEFAULT_SOURCES = DEFAULT_SOURCES;
   public static REGEXES = REGEXES;
 
+  public initiated:boolean = false;
   constructor(options: ManagerOptions) {
     super();
     this.options = {
@@ -70,5 +72,76 @@ export class LavalinkManager extends EventEmitter {
     this.playerManager = new PlayerManager(this);
     this.nodeManager = new NodeManager(this);
     this.utilManager = new ManagerUitls(this);
+  }
+  /**
+   * Initiates the Manager.
+   * @param clientData 
+   */
+  public init(clientData: { id?: string, username?: string, shards?: "auto" | number } = {}): this {
+    const { id, username, shards } = clientData;
+    if (this.initiated) return this;
+    if(!this.options.client) this.options.client = { id, username, shards };
+    
+    if (!this.options.client.id) throw new Error('"client.id" is not set. Pass it in Manager#init() or as a option in the constructor.');
+    
+    if (typeof this.options.client.id !== "string") throw new Error('"client.id" set is not type of "string"');
+
+    let success = 0;
+    for (const node of [...this.nodeManager.nodes.values()]) {
+        try {
+            node.connect();
+            success++;
+        }
+        catch (err) {
+            console.error(err);
+            this.nodeManager.emit("error", node, err);
+        }
+    }
+    if(success > 0) this.initiated = true;
+    else console.error("Could not connect to at least 1 Node");
+    return this;
+  }
+  /**
+   * Sends voice data to the Lavalink server.
+   * @param data
+   */
+  public async updateVoiceState(data: VoicePacket | VoiceServer | VoiceState): Promise<void> {
+    if ("t" in data && !["VOICE_STATE_UPDATE", "VOICE_SERVER_UPDATE"].includes(data.t)) return;
+
+    const update: VoiceServer | VoiceState = "d" in data ? data.d : data;
+    if (!update || !("token" in update) && !("session_id" in update)) return;
+
+    const player = this.playerManager.getPlayer(update.guild_id) as Player;
+    if (!player) return;
+    
+    if ("token" in update) {
+      if (!player.node?.sessionId) throw new Error("Lavalink Node is either not ready or not up to date");
+      await player.node.updatePlayer({
+        guildId: player.guildId,
+        playerOptions: {
+          voice: {
+            token: update.token,
+            endpoint: update.endpoint,
+            sessionId: player.voice?.sessionId,
+          }
+        }
+      });
+      return 
+    }
+
+    /* voice state update */
+    if (update.user_id !== this.options.client.id) return;      
+    
+    if (update.channel_id) {
+      if (player.voiceChannelId !== update.channel_id) this.playerManager.emit("move", player, player.voiceChannelId, update.channel_id);
+      player.voice.sessionId = update.session_id;
+      player.voiceChannelId = update.channel_id;
+    } else {
+      this.playerManager.emit("disconnect", player, player.voiceChannelId);
+      player.voiceChannelId = null;
+      player.voice = Object.assign({});
+      await player.pause();
+    }
+    return 
   }
 }

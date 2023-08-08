@@ -75,7 +75,11 @@ export class Player {
     /** If lavalink says it's connected or not */
     public connected: boolean|undefined = false;
     
-    public voice: LavalinkPlayerVoiceOptions;
+    public voice: LavalinkPlayerVoiceOptions = {
+        endpoint: null,
+        sessionId: null,
+        token: null
+    };
 
     private readonly data: Record<string, unknown> = {};
     /**

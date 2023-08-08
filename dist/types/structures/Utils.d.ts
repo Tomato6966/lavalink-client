@@ -1,6 +1,6 @@
 import { LavalinkFilterData } from "./Filters";
 import { LavalinkManager } from "./LavalinkManager";
-import { NodeStats } from "./Node";
+import { LavalinkNode, NodeStats } from "./Node";
 import { PlayOptions } from "./Player";
 import { PluginDataInfo, Track } from "./Track";
 export declare const TrackSymbol: unique symbol;
@@ -38,6 +38,16 @@ export interface ManagerUitls {
 export declare class ManagerUitls {
     constructor(LavalinkManager: LavalinkManager);
     buildTrack(data: any, requester: any): Track;
+    validatedQuery(queryString: string, node: LavalinkNode): void;
+}
+export declare class MiniMap<K, V> extends Map<K, V> {
+    constructor(data: any);
+    filter<K2 extends K>(fn: (value: V, key: K, collection: this) => key is K2): MiniMap<K2, V>;
+    filter<V2 extends V>(fn: (value: V, key: K, collection: this) => value is V2): MiniMap<K, V2>;
+    filter(fn: (value: V, key: K, collection: this) => boolean): MiniMap<K, V>;
+    filter<This, K2 extends K>(fn: (this: This, value: V, key: K, collection: this) => key is K2, thisArg: This): MiniMap<K2, V>;
+    filter<This, V2 extends V>(fn: (this: This, value: V, key: K, collection: this) => value is V2, thisArg: This): MiniMap<K, V2>;
+    filter<This>(fn: (this: This, value: V, key: K, collection: this) => boolean, thisArg: This): MiniMap<K, V>;
 }
 export type PlayerEvents = TrackStartEvent | TrackEndEvent | TrackStuckEvent | TrackExceptionEvent | WebSocketClosedEvent;
 export type Severity = "COMMON" | "SUSPICIOUS" | "FAULT";

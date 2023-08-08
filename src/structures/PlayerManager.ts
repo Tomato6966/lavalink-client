@@ -2,7 +2,7 @@ import { EventEmitter } from "stream";
 import { Player, PlayerOptions } from "./Player";
 import { LavalinkManager } from "./LavalinkManager";
 import { Track } from "./Track";
-import { TrackEndEvent, TrackExceptionEvent, TrackStartEvent, TrackStuckEvent, WebSocketClosedEvent } from "./Utils";
+import { MiniMap, TrackEndEvent, TrackExceptionEvent, TrackStartEvent, TrackStuckEvent, WebSocketClosedEvent } from "./Utils";
 import { Queue } from "./Queue";
 
 interface PlayerManagerEvents {
@@ -11,6 +11,16 @@ interface PlayerManagerEvents {
      * @event Manager.playerManager#create
      */
     "create": (player:Player) => void;
+    /**
+     * Emitted when a Player is moved within the channel.
+     * @event Manager.playerManager#move
+     */
+    "move": (player:Player, oldChannelId: string, newChannelId: string) => void;
+    /**
+     * Emitted when a Player is disconnected from a channel.
+     * @event Manager.playerManager#disconnect
+     */
+    "disconnect": (player:Player, voiceChannel: string) => void;
     /**
      * Emitted when a Track started playing.
      * @event Manager.playerManager#trackStart
@@ -56,7 +66,7 @@ export interface PlayerManager {
     LavalinkManager: LavalinkManager;
 }
 export class PlayerManager extends EventEmitter {
-    private players: Map<string, Player>;
+    public players: MiniMap<string, Player>;
     constructor(LavalinkManager:LavalinkManager) {
         super();
         this.LavalinkManager = LavalinkManager;
@@ -71,6 +81,7 @@ export class PlayerManager extends EventEmitter {
         return this.players.get(guildId);
     }
     public deletePlayer(guildId:string) {
+        if(this.players.get(guildId).connected) throw new Error("Use Player#destroy() not PlayerManager#deletePlayer() to stop the Player")
         return this.players.delete(guildId);
     }
 }
