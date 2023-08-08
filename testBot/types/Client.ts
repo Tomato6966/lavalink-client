@@ -13,6 +13,6 @@ export interface Event {
 }
 
 export interface BotClient extends Client {
-    musicManager: LavalinkManager;
+    lavalink: LavalinkManager;
     commands: Collection<string, Command>;
 }

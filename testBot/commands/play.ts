@@ -37,7 +37,7 @@ export default {
             autocompleteMap.delete(`${interaction.user.id}_timeout`);
         }
 
-        const player = client.musicManager.getPlayer(interaction.guildId) || await client.musicManager.createPlayer({
+        const player = client.lavalink.getPlayer(interaction.guildId) || await client.lavalink.createPlayer({
             guildId: interaction.guildId, voiceChannelId: vcId, textChannelId: interaction.channelId, // in what guild + channel(s)
             selfDeaf: true, selfMute: false, volume: 100, instaUpdateFiltersFix: true // configuration(s)
         });
@@ -65,7 +65,7 @@ export default {
         if(!vcId) return interaction.respond([{ name: `Join a voice Channel`, value: "join_vc" }]);
 
         const focussedQuery = interaction.options.getFocused();
-        const player = client.musicManager.getPlayer(interaction.guildId) || await client.musicManager.createPlayer({
+        const player = client.lavalink.getPlayer(interaction.guildId) || await client.lavalink.createPlayer({
             guildId: interaction.guildId, voiceChannelId: vcId, textChannelId: interaction.channelId, // in what guild + channel(s)
             selfDeaf: true, selfMute: false, volume: 100, instaUpdateFiltersFix: true // configuration(s)
         });

@@ -32,7 +32,7 @@ const { LavalinkManager } = require("lavalink-client"); // Common Js
 
 ```ts
 // Suggest it to extend it to the bot Client
-client.musicManager = new LavalinkManager({
+client.lavalink = new LavalinkManager({
     nodes: [
         {
             authorization: "youshallnotpass",
@@ -64,11 +64,11 @@ client.musicManager = new LavalinkManager({
 3. **VERY IMPORTANT!** - Register Voice State updates + initialize the Manager
 
 ```ts
-client.on("raw", d => client.musicManager.updateVoiceState(d)); // for voice state updates!
+client.on("raw", d => client.lavalink.updateVoiceState(d)); // for voice state updates!
 client.on("ready", async () => {
     console.log("Discord Bot is ready to be Used!");
     // user.id is required, user.shards (not), user.username (not, but recommended for lavalink stats!) 
-    await client.musicManager.init({ ...client.user!, shards: "auto" }); 
+    await client.lavalink.init({ ...client.user!, shards: "auto" }); 
 });
 ```
 
@@ -76,7 +76,7 @@ client.on("ready", async () => {
 
 ```ts
 // create player
-const player = await client.musicManager.createPlayer({
+const player = await client.lavalink.createPlayer({
     guildId: guild.id, voiceChannelId: voice.id, textChannelId: text.id, // in what guild + channel(s)
     selfDeaf: true, selfMute: false, volume: 100 // configuration(s)
 }); 

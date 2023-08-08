@@ -4,7 +4,7 @@ export function PlayerEvents(client:BotClient) {
     /**
      * PLAYER EVENTS
      */
-    client.musicManager.on("playerCreate", (player) => {
+    client.lavalink.on("playerCreate", (player) => {
         console.log(player.guildId, " :: Created a Player :: ");
     }).on("playerDestroy", (player) => {
         console.log(player.guildId, " :: Player got Destroyed :: ");
@@ -18,7 +18,7 @@ export function PlayerEvents(client:BotClient) {
     /**
      * Queue/Track Events
      */
-    client.musicManager.on("trackStart", (player, track) => {
+    client.lavalink.on("trackStart", (player, track) => {
         console.log(player.guildId, " :: Started Playing :: ", track.info.title)
     }).on("trackEnd", (player, track, payload) => {
         console.log(player.guildId, " :: Finished Playing :: ", track.info.title)

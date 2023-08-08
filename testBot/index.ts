@@ -18,7 +18,7 @@ const client = new Client({
     ]
 }) as BotClient;
 
-client.musicManager = new LavalinkManager({
+client.lavalink = new LavalinkManager({
     nodes: [
         {
             authorization: "milrato_pass_2333",
