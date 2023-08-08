@@ -1,7 +1,7 @@
 import { CommandInteractionOptionResolver, GuildMember, SlashCommandBuilder } from "discord.js";
 import {  Command } from "../types/Client";
 import { formatMS_HHMMSS } from "../Utils/Time";
-import { SearchPlatform, Track } from "../src";
+import { SearchPlatform, Track } from "../../src";
 
 const autocompleteMap = new Map();
 
