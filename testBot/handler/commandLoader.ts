@@ -3,10 +3,11 @@ import { join } from "node:path";
 import { BotClient, Command } from "../types/Client";
 import { Collection } from "discord.js";
 import { pathToFileURL } from "node:url";
+import { MiniMap } from "../../src";
 
 
 export async function loadCommands(client:BotClient) {
-    client.commands = new Collection();
+    client.commands = new MiniMap();
     const path = join(process.cwd(), "commands");
     const files = readdirSync(path).filter(file => file.endsWith(".ts") || file.endsWith(".js"));
     for(const file of files) {

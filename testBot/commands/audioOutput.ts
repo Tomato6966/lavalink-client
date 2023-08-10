@@ -1,10 +1,17 @@
 import { CommandInteractionOptionResolver, GuildMember, SlashCommandBuilder } from "discord.js";
 import { Command } from "../types/Client";
+import { AudioOutputs } from "../../src";
 
-export default {
+export default { 
     data: new SlashCommandBuilder()
-        .setName("skip").setDescription("Skip the current track")
-        .addIntegerOption(o => o.setName("skipto").setDescription("to which song to skip to?").setRequired(false)),
+        .setName("audio_output")
+        .setDescription("Set the audio output channel")
+        .addStringOption(o => o.setName("channel").setDescription("To what output-channel do you want to set the bot?").addChoices(
+            { name: "Left", value: "left" },
+            { name: "Right", value: "right" },
+            { name: "Mono", value: "mono" },
+            { name: "Stereo", value: "stereo" },
+        )),
     execute: async (client, interaction) => {
         if(!interaction.guildId) return;
         const vcId = (interaction.member as GuildMember)?.voice?.channelId;
@@ -13,15 +20,11 @@ export default {
         if(!vcId) return interaction.reply({ ephemeral: true, content: "Join a Voice Channel "});
         if(player.voiceChannelId !== vcId) return interaction.reply({ ephemeral: true, content: "You need to be in my Voice Channel" })
         
-        const current = player.queue.current;
-        const nextTrack = player.queue.tracks[0];
-        
-        if(!nextTrack) return interaction.reply({ ephemeral: true, content: `No Tracks to skip to`});
-
-        await player.skip((interaction.options as CommandInteractionOptionResolver).getInteger("skipto") || 0);
+        await player.filterManager.setAudioOutput((interaction.options as CommandInteractionOptionResolver).getString("channel") as AudioOutputs);
 
         await interaction.reply({
-            ephemeral: true, content: `Skipped [\`${current?.info.title}\`](${current?.info.uri}) -> [\`${nextTrack?.info.title}\`](${nextTrack?.info.uri})`
-        });
+            content: `Now playing from the \`${player.filterManager.filters.audioOutput} Audio-Channel\``
+        })
     }
+
 } as Command;

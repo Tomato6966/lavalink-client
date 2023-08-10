@@ -8,7 +8,7 @@ import { Player, PlayerOptions } from "./Player";
 import { Track } from "./Track";
 export interface LavalinkManager {
     nodeManager: NodeManager;
-    utilManager: ManagerUitls;
+    utils: ManagerUitls;
 }
 export interface BotClientOptions {
     shards?: number | number[] | "auto";
@@ -22,6 +22,7 @@ export interface LavalinkPlayerOptions {
     clientBasedUpdateInterval?: number;
     defaultSearchPlatform?: SearchPlatform;
     applyVolumeAsFilter?: boolean;
+    autoReconnectOnDisconnect?: boolean;
 }
 export interface ManagerOptions {
     nodes: LavalinkNodeOptions[];
@@ -58,7 +59,7 @@ interface LavalinkManagerEvents {
      * Emitted when the Playing finished and no more tracks in the queue.
      * @event Manager.playerManager#queueEnd
      */
-    "queueEnd": (player: Player, track: Track, payload: TrackEndEvent | TrackStuckEvent) => void;
+    "queueEnd": (player: Player, track: Track, payload: TrackEndEvent | TrackStuckEvent | TrackExceptionEvent) => void;
     /**
      * Emitted when a Player is created.
      * @event Manager.playerManager#create
@@ -94,7 +95,9 @@ export declare class LavalinkManager extends EventEmitter {
     static DEFAULT_SOURCES: Record<SearchPlatform, LavalinkSearchPlatform>;
     static REGEXES: Record<import("./Utils").SourcesRegex, RegExp>;
     initiated: boolean;
-    players: MiniMap<string, Player>;
+    readonly players: MiniMap<string, Player>;
+    private applyDefaultOptions;
+    private validateAndApply;
     constructor(options: ManagerOptions);
     createPlayer(options: PlayerOptions): Player;
     getPlayer(guildId: string): Player;

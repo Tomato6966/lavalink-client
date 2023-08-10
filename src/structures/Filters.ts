@@ -446,6 +446,8 @@ export class FilterManager {
 
         this.player.ping = Math.round((performance.now() - now) / 10) / 100;
         
+        if (this.player.options.instaUpdateFiltersFix === true) this.filterUpdatedState = 1;
+        
         return this;
     }
 
@@ -469,16 +471,16 @@ export const audioOutputsData = {
         rightToRight: 1,
     },
     left: { // totalLeft: 1, totalRight: 0
-        leftToLeft: 0.5,
+        leftToLeft: 1,
         leftToRight: 0,
-        rightToLeft: 0.5,
+        rightToLeft: 1,
         rightToRight: 0,
     },
     right: { // totalLeft: 0, totalRight: 1
         leftToLeft: 0,
-        leftToRight: 0.5,
+        leftToRight: 1,
         rightToLeft: 0,
-        rightToRight: 0.5,
+        rightToRight: 1,
     },
 }
 export interface PlayerFilters {

@@ -2,8 +2,10 @@ import { LavalinkFilterData } from "./Filters";
 import { LavalinkManager } from "./LavalinkManager";
 import { LavalinkNode, NodeStats } from "./Node";
 import { PlayOptions } from "./Player";
+import { Queue } from "./Queue";
 import { PluginDataInfo, Track } from "./Track";
 export declare const TrackSymbol: unique symbol;
+export declare const UnresolvedTrackSymbol: unique symbol;
 export declare const QueueSymbol: unique symbol;
 export declare const NodeSymbol: unique symbol;
 export type LavalinkSearchPlatform = "ytsearch" | "ytmsearch" | "scsearch" | "spsearch" | "sprec" | "amsearch" | "dzsearch" | "dzisrc" | "sprec" | "ymsearch" | "speak" | "tts";
@@ -11,8 +13,8 @@ export type ClientSearchPlatform = "youtube" | "youtube music" | "soundcloud" | 
 export type SearchPlatform = LavalinkSearchPlatform | ClientSearchPlatform;
 export type SourcesRegex = "YoutubeRegex" | "YoutubeMusicRegex" | "SoundCloudRegex" | "SoundCloudMobileRegex" | "DeezerTrackRegex" | "DeezerArtistRegex" | "DeezerEpisodeRegex" | "DeezerMixesRegex" | "DeezerPageLinkRegex" | "DeezerPlaylistRegex" | "DeezerAlbumRegex" | "AllDeezerRegex" | "AllDeezerRegexWithoutPageLink" | "SpotifySongRegex" | "SpotifyPlaylistRegex" | "SpotifyArtistRegex" | "SpotifyEpisodeRegex" | "SpotifyShowRegex" | "SpotifyAlbumRegex" | "AllSpotifyRegex" | "mp3Url" | "m3uUrl" | "m3u8Url" | "mp4Url" | "m4aUrl" | "wavUrl" | "aacpUrl" | "tiktok" | "mixcloud" | "musicYandex" | "radiohost" | "bandcamp" | "appleMusic" | "TwitchTv" | "vimeo";
 export interface PlaylistInfo {
-    /** The playlist name. */
-    name: string;
+    /** The playlist title. */
+    title: string;
     /** The Playlist Author */
     author?: string;
     /** The Playlist Thumbnail */
@@ -36,18 +38,65 @@ export interface ManagerUitls {
     manager: LavalinkManager;
 }
 export declare class ManagerUitls {
-    constructor(LavalinkManager: LavalinkManager);
+    constructor(LavalinkManager?: LavalinkManager);
     buildTrack(data: any, requester: any): Track;
+    /**
+     * Validate if a data is euqal to a track
+     * @param {Track|any} data the Track to validate
+     * @returns {boolean}
+     */
+    isTrack(data: Track | any): boolean;
     validatedQuery(queryString: string, node: LavalinkNode): void;
+}
+/**
+ * @internal
+ */
+export interface MiniMapConstructor {
+    new (): MiniMap<unknown, unknown>;
+    new <K, V>(entries?: ReadonlyArray<readonly [K, V]> | null): MiniMap<K, V>;
+    new <K, V>(iterable: Iterable<readonly [K, V]>): MiniMap<K, V>;
+    readonly prototype: MiniMap<unknown, unknown>;
+    readonly [Symbol.species]: MiniMapConstructor;
+}
+/**
+ * Separate interface for the constructor so that emitted js does not have a constructor that overwrites itself
+ *
+ * @internal
+ */
+export interface MiniMap<K, V> extends Map<K, V> {
+    constructor: MiniMapConstructor;
 }
 export declare class MiniMap<K, V> extends Map<K, V> {
     constructor(data?: any[]);
-    filter<K2 extends K>(fn: (value: V, key: K, collection: this) => key is K2): MiniMap<K2, V>;
-    filter<V2 extends V>(fn: (value: V, key: K, collection: this) => value is V2): MiniMap<K, V2>;
-    filter(fn: (value: V, key: K, collection: this) => boolean): MiniMap<K, V>;
-    filter<This, K2 extends K>(fn: (this: This, value: V, key: K, collection: this) => key is K2, thisArg: This): MiniMap<K2, V>;
-    filter<This, V2 extends V>(fn: (this: This, value: V, key: K, collection: this) => value is V2, thisArg: This): MiniMap<K, V2>;
-    filter<This>(fn: (this: This, value: V, key: K, collection: this) => boolean, thisArg: This): MiniMap<K, V>;
+    /**
+     * Identical to
+     * [Array.filter()](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/filter),
+     * but returns a MiniMap instead of an Array.
+     *
+     * @param fn The function to test with (should return boolean)
+     * @param thisArg Value to use as `this` when executing function
+     *
+     * @example
+     * miniMap.filter(user => user.username === 'Bob');
+     */
+    filter<K2 extends K>(fn: (value: V, key: K, miniMap: this) => key is K2): MiniMap<K2, V>;
+    filter<V2 extends V>(fn: (value: V, key: K, miniMap: this) => value is V2): MiniMap<K, V2>;
+    filter(fn: (value: V, key: K, miniMap: this) => boolean): MiniMap<K, V>;
+    filter<This, K2 extends K>(fn: (this: This, value: V, key: K, miniMap: this) => key is K2, thisArg: This): MiniMap<K2, V>;
+    filter<This, V2 extends V>(fn: (this: This, value: V, key: K, miniMap: this) => value is V2, thisArg: This): MiniMap<K, V2>;
+    filter<This>(fn: (this: This, value: V, key: K, miniMap: this) => boolean, thisArg: This): MiniMap<K, V>;
+    /**
+     * Maps each item to another value into an array. Identical in behavior to
+     * [Array.map()](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/map).
+     *
+     * @param fn Function that produces an element of the new array, taking three arguments
+     * @param thisArg Value to use as `this` when executing function
+     *
+     * @example
+     * miniMap.map(user => user.tag);
+     */
+    map<T>(fn: (value: V, key: K, miniMap: this) => T): T[];
+    map<This, T>(fn: (this: This, value: V, key: K, miniMap: this) => T, thisArg: This): T[];
 }
 export type PlayerEvents = TrackStartEvent | TrackEndEvent | TrackStuckEvent | TrackExceptionEvent | WebSocketClosedEvent;
 export type Severity = "COMMON" | "SUSPICIOUS" | "FAULT";
@@ -88,7 +137,7 @@ export interface WebSocketClosedEvent extends PlayerEvent {
 export type LoadTypes = "track" | "playlist" | "search" | "error" | "empty";
 export type State = "CONNECTED" | "CONNECTING" | "DISCONNECTED" | "DISCONNECTING" | "DESTROYING";
 export type PlayerEventType = "TrackStartEvent" | "TrackEndEvent" | "TrackExceptionEvent" | "TrackStuckEvent" | "WebSocketClosedEvent";
-export type TrackEndReason = "FINISHED" | "LOAD_FAILED" | "STOPPED" | "REPLACED" | "CLEANUP";
+export type TrackEndReason = "finished" | "loadFailed" | "stopped" | "replaced" | "cleanup";
 export interface InvalidLavalinkRestRequest {
     timestamp: number;
     status: number;
@@ -191,3 +240,4 @@ export interface NodeMessage extends NodeStats {
     op: "stats" | "playerUpdate" | "event";
     guildId: string;
 }
+export declare function queueTrackEnd(queue: Queue, addBackToQueue?: boolean): Promise<Track>;

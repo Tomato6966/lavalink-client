@@ -9,7 +9,7 @@ import { Track } from "./Track";
 
 export interface LavalinkManager {
   nodeManager: NodeManager;
-  utilManager: ManagerUitls;
+  utils: ManagerUitls;
 }
 
 export interface BotClientOptions {
@@ -25,6 +25,7 @@ export interface LavalinkPlayerOptions {
   clientBasedUpdateInterval?: number;
   defaultSearchPlatform?: SearchPlatform;
   applyVolumeAsFilter?:boolean;
+  autoReconnectOnDisconnect?:boolean;
 }
 
 export interface ManagerOptions {
@@ -63,7 +64,7 @@ interface LavalinkManagerEvents {
      * Emitted when the Playing finished and no more tracks in the queue.
      * @event Manager.playerManager#queueEnd
      */
-    "queueEnd": (player:Player, track: Track, payload:TrackEndEvent|TrackStuckEvent) => void;
+    "queueEnd": (player:Player, track: Track, payload:TrackEndEvent|TrackStuckEvent|TrackExceptionEvent) => void;
     /**
      * Emitted when a Player is created.
      * @event Manager.playerManager#create
@@ -106,26 +107,44 @@ export class LavalinkManager extends EventEmitter {
 
   public initiated:boolean = false;
   
-  public players: MiniMap<string, Player> = new MiniMap();
+  public readonly players: MiniMap<string, Player> = new MiniMap();
     
-  constructor(options: ManagerOptions) {
-    super();
-    this.options = {
-      autoSkip: true,
-      ...options
-    };
-    this.initiated = false;
-    if(!this.options.playerOptions.defaultSearchPlatform) this.options.playerOptions.defaultSearchPlatform = "ytsearch";
-    if(!this.options.queueOptions.maxPreviousTracks || this.options.queueOptions.maxPreviousTracks <= 0) this.options.queueOptions.maxPreviousTracks = 25;
+  private applyDefaultOptions() {
 
+    if(!this.options.playerOptions.defaultSearchPlatform) this.options.playerOptions.defaultSearchPlatform = "ytsearch";
+    
+    if(typeof this.options?.queueOptions?.maxPreviousTracks !== "number" || this.options.queueOptions.maxPreviousTracks < 0) this.options.queueOptions.maxPreviousTracks = 25;
+
+    return;
+  }
+  private validateAndApply(options: ManagerOptions) {
+    /* QUEUE STORE */
     if(options.queueStore) {
-      const keys = Object.keys(options.queueStore);
+      const keys = Object.getOwnPropertyNames(Object.getPrototypeOf(options.queueStore));
       const requiredKeys = ["get", "set", "stringify", "parse", "delete"];
       if(!requiredKeys.every(v => keys.includes(v)) || !requiredKeys.every(v => typeof options.queueStore[v] === "function")) throw new SyntaxError(`The provided QueueStore, does not have all required functions: ${requiredKeys.join(", ")}`);
     } else this.options.queueStore = new DefaultQueueStore();
 
+
+  }
+
+  constructor(options: ManagerOptions) {
+    super();
+    
+    // create options
+    this.options = {
+      autoSkip: true,
+      ...options
+    };
+
+    // use the validators
+    this.applyDefaultOptions();
+    this.validateAndApply(options);
+
+    // create classes
     this.nodeManager = new NodeManager(this);
-    this.utilManager = new ManagerUitls(this);
+    this.utils = new ManagerUitls(this);
+
   }
   
   public createPlayer(options: PlayerOptions) {
@@ -134,11 +153,13 @@ export class LavalinkManager extends EventEmitter {
     this.players.set(newPlayer.guildId, newPlayer);
     return newPlayer;
   }
+
   public getPlayer(guildId:string) {
       return this.players.get(guildId);
   }
+
   public deletePlayer(guildId:string) {
-      if(this.players.get(guildId).connected) throw new Error("Use Player#destroy() not PlayerManager#deletePlayer() to stop the Player")
+      if(typeof this.players.get(guildId)?.voiceChannelId === "string") throw new Error("Use Player#destroy(true) not PlayerManager#deletePlayer() to stop the Player")
       return this.players.delete(guildId);
   }
 
@@ -209,9 +230,17 @@ export class LavalinkManager extends EventEmitter {
       player.voiceChannelId = update.channel_id;
     } else {
       this.emit("playerDisconnect", player, player.voiceChannelId);
+      
+      await player.pause();
+
+      if(this.options.playerOptions.autoReconnectOnDisconnect === true) {
+        await player.connect();
+        return await player.resume();
+      }
+
       player.voiceChannelId = null;
       player.voice = Object.assign({});
-      await player.pause();
+      return 
     }
     return 
   }

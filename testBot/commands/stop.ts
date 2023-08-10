@@ -3,7 +3,7 @@ import { Command } from "../types/Client";
 
 export default {
     data: new SlashCommandBuilder()
-        .setName("test").setDescription("Test something inline.."),
+        .setName("stop").setDescription("Stops the player"),
     execute: async (client, interaction) => {
         if(!interaction.guildId) return;
         const vcId = (interaction.member as GuildMember)?.voice?.channelId;
@@ -11,8 +11,9 @@ export default {
         if(!player) return interaction.reply({ ephemeral: true, content: "I'm not connected" });
         
         // example to apply a filter!
-        player.filterManager.toggleNightcore();
-        
-        interaction.reply({ content: "OK" });
+        await player.destroy();
+
+        // and it is good again!
+        interaction.reply({ content: "Stopped the player" });
     }
 } as Command;

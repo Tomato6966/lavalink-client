@@ -12,27 +12,37 @@ class LavalinkManager extends events_1.EventEmitter {
     static REGEXES = LavalinkManagerStatics_1.REGEXES;
     initiated = false;
     players = new Utils_1.MiniMap();
-    constructor(options) {
-        super();
-        this.options = {
-            autoSkip: true,
-            ...options
-        };
-        this.initiated = false;
+    applyDefaultOptions() {
         if (!this.options.playerOptions.defaultSearchPlatform)
             this.options.playerOptions.defaultSearchPlatform = "ytsearch";
-        if (!this.options.queueOptions.maxPreviousTracks || this.options.queueOptions.maxPreviousTracks <= 0)
+        if (typeof this.options?.queueOptions?.maxPreviousTracks !== "number" || this.options.queueOptions.maxPreviousTracks < 0)
             this.options.queueOptions.maxPreviousTracks = 25;
+        return;
+    }
+    validateAndApply(options) {
+        /* QUEUE STORE */
         if (options.queueStore) {
-            const keys = Object.keys(options.queueStore);
+            const keys = Object.getOwnPropertyNames(Object.getPrototypeOf(options.queueStore));
             const requiredKeys = ["get", "set", "stringify", "parse", "delete"];
             if (!requiredKeys.every(v => keys.includes(v)) || !requiredKeys.every(v => typeof options.queueStore[v] === "function"))
                 throw new SyntaxError(`The provided QueueStore, does not have all required functions: ${requiredKeys.join(", ")}`);
         }
         else
             this.options.queueStore = new Queue_1.DefaultQueueStore();
+    }
+    constructor(options) {
+        super();
+        // create options
+        this.options = {
+            autoSkip: true,
+            ...options
+        };
+        // use the validators
+        this.applyDefaultOptions();
+        this.validateAndApply(options);
+        // create classes
         this.nodeManager = new NodeManager_1.NodeManager(this);
-        this.utilManager = new Utils_1.ManagerUitls(this);
+        this.utils = new Utils_1.ManagerUitls(this);
     }
     createPlayer(options) {
         if (this.players.has(options.guildId))
@@ -45,8 +55,8 @@ class LavalinkManager extends events_1.EventEmitter {
         return this.players.get(guildId);
     }
     deletePlayer(guildId) {
-        if (this.players.get(guildId).connected)
-            throw new Error("Use Player#destroy() not PlayerManager#deletePlayer() to stop the Player");
+        if (typeof this.players.get(guildId)?.voiceChannelId === "string")
+            throw new Error("Use Player#destroy(true) not PlayerManager#deletePlayer() to stop the Player");
         return this.players.delete(guildId);
     }
     get useable() {
@@ -122,9 +132,14 @@ class LavalinkManager extends events_1.EventEmitter {
         }
         else {
             this.emit("playerDisconnect", player, player.voiceChannelId);
+            await player.pause();
+            if (this.options.playerOptions.autoReconnectOnDisconnect === true) {
+                await player.connect();
+                return await player.resume();
+            }
             player.voiceChannelId = null;
             player.voice = Object.assign({});
-            await player.pause();
+            return;
         }
         return;
     }

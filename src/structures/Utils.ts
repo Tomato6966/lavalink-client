@@ -3,9 +3,11 @@ import { LavalinkManager } from "./LavalinkManager";
 import { DEFAULT_SOURCES, REGEXES } from "./LavalinkManagerStatics";
 import { LavalinkNode, NodeStats } from "./Node";
 import { PlayOptions } from "./Player";
+import { Queue } from "./Queue";
 import { LavalinkTrackDataInfoExtended, PluginDataInfo, Track } from "./Track";
 
 export const TrackSymbol = Symbol("LC-Track");
+export const UnresolvedTrackSymbol = Symbol("LC-Track-Unresolved");
 export const QueueSymbol = Symbol("LC-Queue");
 export const NodeSymbol = Symbol("LC-Node");
 
@@ -16,8 +18,8 @@ export type SearchPlatform = LavalinkSearchPlatform | ClientSearchPlatform;
 export type SourcesRegex = "YoutubeRegex" | "YoutubeMusicRegex" | "SoundCloudRegex" | "SoundCloudMobileRegex" | "DeezerTrackRegex" | "DeezerArtistRegex" | "DeezerEpisodeRegex" | "DeezerMixesRegex" | "DeezerPageLinkRegex" | "DeezerPlaylistRegex" | "DeezerAlbumRegex" | "AllDeezerRegex" | "AllDeezerRegexWithoutPageLink" | "SpotifySongRegex" | "SpotifyPlaylistRegex" | "SpotifyArtistRegex" | "SpotifyEpisodeRegex" | "SpotifyShowRegex" | "SpotifyAlbumRegex" | "AllSpotifyRegex" | "mp3Url" | "m3uUrl" | "m3u8Url" | "mp4Url" | "m4aUrl" | "wavUrl" | "aacpUrl" | "tiktok" | "mixcloud" | "musicYandex" | "radiohost" | "bandcamp" | "appleMusic" | "TwitchTv" | "vimeo"
 
 export interface PlaylistInfo {
-    /** The playlist name. */
-    name: string;
+    /** The playlist title. */
+    title: string;
     /** The Playlist Author */
     author?: string;
     /** The Playlist Thumbnail */
@@ -43,7 +45,7 @@ export interface ManagerUitls {
 }
 
 export class ManagerUitls {
-    constructor(LavalinkManager: LavalinkManager) {
+    constructor(LavalinkManager?: LavalinkManager) {
         this.manager = LavalinkManager;
     }
 
@@ -75,6 +77,16 @@ export class ManagerUitls {
             throw new RangeError(`Argument "data" is not a valid track: ${error.message}`);
         }
     }
+    
+    /**
+     * Validate if a data is euqal to a track
+     * @param {Track|any} data the Track to validate 
+     * @returns {boolean}
+     */
+    isTrack (data: Track | any) {
+      return typeof data?.encodedTrack === "string" && typeof data?.info === "object";
+    }
+
     validatedQuery(queryString:string, node:LavalinkNode):void {
         if(!node.info) throw new Error("No Lavalink Node was provided");
         if(!node.info.sourceManagers?.length) throw new Error("Lavalink Node, has no sourceManagers enabled");
@@ -157,33 +169,84 @@ export class ManagerUitls {
           throw new Error("Lavalink Node has not 'youtube' enabled, which is required to have 'ytsearch' work");
         }
         return;
-      }
+    }
+}
+/**
+ * @internal
+ */
+export interface MiniMapConstructor {
+	new (): MiniMap<unknown, unknown>;
+	new <K, V>(entries?: ReadonlyArray<readonly [K, V]> | null): MiniMap<K, V>;
+	new <K, V>(iterable: Iterable<readonly [K, V]>): MiniMap<K, V>;
+	readonly prototype: MiniMap<unknown, unknown>;
+	readonly [Symbol.species]: MiniMapConstructor;
+}
+
+/**
+ * Separate interface for the constructor so that emitted js does not have a constructor that overwrites itself
+ *
+ * @internal
+ */
+export interface MiniMap<K, V> extends Map<K, V> {
+	constructor: MiniMapConstructor;
 }
 
 export class MiniMap<K, V> extends Map<K, V> {
     constructor(data = []) {
         super(data);
     }
-    public filter<K2 extends K>(fn: (value: V, key: K, collection: this) => key is K2): MiniMap<K2, V>;
-	public filter<V2 extends V>(fn: (value: V, key: K, collection: this) => value is V2): MiniMap<K, V2>;
-	public filter(fn: (value: V, key: K, collection: this) => boolean): MiniMap<K, V>;
-	public filter<This, K2 extends K>(
-		fn: (this: This, value: V, key: K, collection: this) => key is K2,
-		thisArg: This,
-	): MiniMap<K2, V>;
-	public filter<This, V2 extends V>(
-		fn: (this: This, value: V, key: K, collection: this) => value is V2,
-		thisArg: This,
-	): MiniMap<K, V2>;
-	public filter<This>(fn: (this: This, value: V, key: K, collection: this) => boolean, thisArg: This): MiniMap<K, V>;
-	public filter(fn: (value: V, key: K, collection: this) => boolean, thisArg?: unknown): MiniMap<K, V> {
-		if (typeof thisArg !== 'undefined') fn = fn.bind(thisArg);
-		const results = new this.constructor[Symbol.species]<K, V>();
-		for (const [key, val] of this) {
-			if (fn(val, key, this)) results.set(key, val);
-		}
-		return results;
-	}
+    /**
+     * Identical to
+     * [Array.filter()](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/filter),
+     * but returns a MiniMap instead of an Array.
+     *
+     * @param fn The function to test with (should return boolean)
+     * @param thisArg Value to use as `this` when executing function
+     *
+     * @example
+     * miniMap.filter(user => user.username === 'Bob');
+     */
+    public filter<K2 extends K>(fn: (value: V, key: K, miniMap: this) => key is K2): MiniMap<K2, V>;
+    public filter<V2 extends V>(fn: (value: V, key: K, miniMap: this) => value is V2): MiniMap<K, V2>;
+    public filter(fn: (value: V, key: K, miniMap: this) => boolean): MiniMap<K, V>;
+    public filter<This, K2 extends K>(
+      fn: (this: This, value: V, key: K, miniMap: this) => key is K2,
+      thisArg: This,
+    ): MiniMap<K2, V>;
+    public filter<This, V2 extends V>(
+      fn: (this: This, value: V, key: K, miniMap: this) => value is V2,
+      thisArg: This,
+    ): MiniMap<K, V2>;
+    public filter<This>(fn: (this: This, value: V, key: K, miniMap: this) => boolean, thisArg: This): MiniMap<K, V>;
+    public filter(fn: (value: V, key: K, miniMap: this) => boolean, thisArg?: unknown): MiniMap<K, V> {
+      if (typeof thisArg !== 'undefined') fn = fn.bind(thisArg);
+      const results = new this.constructor[Symbol.species]<K, V>();
+      for (const [key, val] of this) {
+        if (fn(val, key, this)) results.set(key, val);
+      }
+      return results;
+    }
+    /**
+     * Maps each item to another value into an array. Identical in behavior to
+     * [Array.map()](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/map).
+     *
+     * @param fn Function that produces an element of the new array, taking three arguments
+     * @param thisArg Value to use as `this` when executing function
+     *
+     * @example
+     * miniMap.map(user => user.tag);
+     */
+    public map<T>(fn: (value: V, key: K, miniMap: this) => T): T[];
+    public map<This, T>(fn: (this: This, value: V, key: K, miniMap: this) => T, thisArg: This): T[];
+    public map<T>(fn: (value: V, key: K, miniMap: this) => T, thisArg?: unknown): T[] {
+      if (typeof thisArg !== 'undefined') fn = fn.bind(thisArg);
+      const iter = this.entries();
+      return Array.from({ length: this.size }, (): T => {
+        const [key, value] = iter.next().value;
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+        return fn(value, key, this);
+      });
+    }
 }
 
 export type PlayerEvents =
@@ -257,11 +320,11 @@ export type PlayerEventType =
     | "WebSocketClosedEvent";
 
 export type TrackEndReason =
-    | "FINISHED"
-    | "LOAD_FAILED"
-    | "STOPPED"
-    | "REPLACED"
-    | "CLEANUP";
+    | "finished"
+    | "loadFailed"
+    | "stopped"
+    | "replaced"
+    | "cleanup";
 
 export interface InvalidLavalinkRestRequest {
     timestamp: number;
@@ -377,4 +440,21 @@ export interface NodeMessage extends NodeStats {
     type: PlayerEventType;
     op: "stats" | "playerUpdate" | "event";
     guildId: string;
+}
+
+
+export async function queueTrackEnd(queue:Queue, addBackToQueue:boolean = false) {
+  if(queue.current) { // if there was a current Track -> Add it
+    queue.previous.unshift(queue.current);
+    if(queue.previous.length > queue.options.maxPreviousTracks) queue.previous.splice(queue.options.maxPreviousTracks, queue.previous.length);
+  }
+  // change the current Track to the next upcoming one
+  queue.current = queue.tracks.shift() || null;
+  // and if repeatMode == queue, add it back to the queue!
+  if(addBackToQueue && queue.current) queue.tracks.push(queue.current)
+  // save it in the DB
+  await queue.utils.save()
+
+  // return the new current Track
+  return queue.current;
 }

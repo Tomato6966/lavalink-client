@@ -4,7 +4,7 @@ import { DEFAULT_SOURCES } from "./LavalinkManagerStatics";
 import { LavalinkNode } from "./Node";
 import { Queue, QueueSaver } from "./Queue";
 import { PluginDataInfo, Track } from "./Track";
-import { LavalinkPlayerVoiceOptions, SearchPlatform, SearchResult, LoadTypes } from "./Utils";
+import { LavalinkPlayerVoiceOptions, SearchPlatform, SearchResult, LoadTypes, queueTrackEnd } from "./Utils";
 
 export type RepeatMode = "queue" | "track" | "off";
 export interface PlayerOptions {
@@ -53,7 +53,6 @@ export interface Player {
 }
 
 export class Player {
-
     // All properties
     public guildId: string;
     public voiceChannelId: string | null = null;
@@ -82,6 +81,7 @@ export class Player {
     };
 
     private readonly data: Record<string, unknown> = {};
+    
     /**
      * Set custom data.
      * @param key
@@ -127,13 +127,19 @@ export class Player {
         this.LavalinkManager.emit("playerCreate", this);
         if(typeof options.volume === "number" && !isNaN(options.volume)) this.setVolume(options.volume);
 
-        this.queue = new Queue({}, this.guildId, new QueueSaver(this.LavalinkManager.options.queueStore, this.LavalinkManager.options.queueOptions))
+        this.queue = new Queue(this.guildId, {}, new QueueSaver(this.LavalinkManager.options.queueStore, this.LavalinkManager.options.queueOptions))
     }
+
     // all functions
     async play(options?: Partial<PlayOptions>) {
-        if(options?.track && this.queue.isTrack(options?.track)) this.queue.setCurrent(options.track);
-        if(!this.queue.currentTrack && this.queue.size) await this.queue._trackEnd(this.repeatMode === "queue")
-        const track = this.queue.currentTrack;
+        if(options?.track && this.LavalinkManager.utils.isTrack(options?.track)) {
+            await this.queue.add(options?.track, 0);
+            await queueTrackEnd(this.queue, this.repeatMode === "queue");
+        }
+
+        if(!this.queue.current && this.queue.tracks.length) await queueTrackEnd(this.queue, this.repeatMode === "queue");
+
+        const track = this.queue.current;
         if(!track) throw new Error(`There is no Track in the Queue, nor provided in the PlayOptions`);
         
         if (typeof options?.volume === "number" && !isNaN(options?.volume)) {
@@ -206,14 +212,14 @@ export class Player {
             exception: res.loadType === "error" ? res.data : null,
             pluginInfo: res.pluginInfo || {},
             playlist: res.loadType === "playlist" ? {
-                name: res.data.info?.name || res.data.pluginInfo?.name || null,
+                title: res.data.info?.name || res.data.pluginInfo?.name || null,
                 author: res.data.info?.author || res.data.pluginInfo?.author || null,
                 thumbnail: (res.data.info?.artworkUrl) || (res.data.pluginInfo?.artworkUrl) || ((typeof res.data?.info?.selectedTrack !== "number" || res.data?.info?.selectedTrack === -1) ? null : resTracks[res.data?.info?.selectedTrack] ? (resTracks[res.data?.info?.selectedTrack]?.info?.artworkUrl || resTracks[res.data?.info?.selectedTrack]?.info?.pluginInfo?.artworkUrl) : null) || null,
                 uri: res.data.info?.url || res.data.info?.uri || res.data.info?.link || res.data.pluginInfo?.url || res.data.pluginInfo?.uri || res.data.pluginInfo?.link || null,
-                selectedTrack: typeof res.data?.info?.selectedTrack !== "number" || res.data?.info?.selectedTrack === -1 ? null : resTracks[res.data?.info?.selectedTrack] ? this.LavalinkManager.utilManager.buildTrack(resTracks[res.data?.info?.selectedTrack], requestUser) : null,
+                selectedTrack: typeof res.data?.info?.selectedTrack !== "number" || res.data?.info?.selectedTrack === -1 ? null : resTracks[res.data?.info?.selectedTrack] ? this.LavalinkManager.utils.buildTrack(resTracks[res.data?.info?.selectedTrack], requestUser) : null,
                 duration: resTracks.length ? resTracks.reduce((acc, cur) => acc + (cur?.info?.duration || 0), 0) : 0,
             } : null,
-            tracks: resTracks.length ? resTracks.map(t => this.LavalinkManager.utilManager.buildTrack(t, requestUser)) : []
+            tracks: resTracks.length ? resTracks.map(t => this.LavalinkManager.utils.buildTrack(t, requestUser)) : []
         } as SearchResult;
         return response;
     }
@@ -235,11 +241,11 @@ export class Player {
     }
 
     async seek(position:number) {
-        if(!this.queue.currentTrack) return undefined;
+        if(!this.queue.current) return undefined;
         position = Number(position);
         if(isNaN(position)) throw new RangeError("Position must be a number.");
-        if(!this.queue.currentTrack.info.isSeekable || this.queue.currentTrack.info.isStream) throw new RangeError("Current Track is not seekable / a stream");
-        if(position < 0 || position > this.queue.currentTrack.info.duration) position = Math.max(Math.min(position, this.queue.currentTrack.info.duration), 0);
+        if(!this.queue.current.info.isSeekable || this.queue.current.info.isStream) throw new RangeError("Current Track is not seekable / a stream");
+        if(position < 0 || position > this.queue.current.info.duration) position = Math.max(Math.min(position, this.queue.current.info.duration), 0);
         this.position = position;
         this.set("internal_lastposition", this.position);
         const now = performance.now();
@@ -260,11 +266,10 @@ export class Player {
      * @param amount provide the index of the next track to skip to
      */
     async skip(skipTo:number = 0) {
-        if(!this.queue.size) throw new RangeError("Can't skip more than the queue size")
-
+        if(!this.queue.tracks.length) throw new RangeError("Can't skip more than the queue size")
         if(typeof skipTo === "number" && skipTo > 1) {
-            if(skipTo > this.queue.size) throw new RangeError("Can't skip more than the queue size");
-            this.queue.splice(0, skipTo - 1);
+            if(skipTo > this.queue.tracks.length) throw new RangeError("Can't skip more than the queue size");
+            await this.queue.splice(0, skipTo - 1);
         }
         const now = performance.now();
         await this.node.updatePlayer({ guildId:this.guildId, playerOptions: { encodedTrack: null }});
@@ -312,6 +317,8 @@ export class Player {
     public async destroy(disconnect = true) {
         if(disconnect) await this.disconnect();
         
+        await this.queue.utils.destroy();
+
         await this.node.destroyPlayer(this.guildId);
 
         this.LavalinkManager.emit("playerDestroy", this);

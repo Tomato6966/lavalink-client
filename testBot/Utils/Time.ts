@@ -1,8 +1,13 @@
 export function formatMS_HHMMSS(num:number) {
-    const h = Math.floor(num / 3.6e6);
-    const m = Math.floor((num - (h * 3.6e6)) / 60);
-    const s = num - (h * 3.6e6) - (m * 60);
-    return `${h < 10 ? `0${h <= 0 ? 0 : h}:`: h}:${m < 10 ? `0${m <= 0 ? 0 : m}:`: m}:${s < 10 ? `0${s <= 0 ? 0 : s}:`: s}:`;
+    return [86400000, 3600000, 60000, 1000, 1].reduce((p:number[], c:number) => {
+        let res = ~~(num / c);
+        num -= res * c;
+        return [...p, res];
+    }, [])
+    .map((v, i) => i <= 1 && v === 0 ? undefined : [ i === 4 ? "." : "", v < 10 ? `0${v}` : v, [" Days, ", ":", ":", "", ""][i]].join(""))
+    .filter(Boolean)
+    .slice(0, -1)
+    .join("");
 }
 
 export const delay = async (ms) => new Promise(r => setTimeout(() => r(true), ms));

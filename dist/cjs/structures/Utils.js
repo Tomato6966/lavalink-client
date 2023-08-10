@@ -1,8 +1,9 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.MiniMap = exports.ManagerUitls = exports.NodeSymbol = exports.QueueSymbol = exports.TrackSymbol = void 0;
+exports.queueTrackEnd = exports.MiniMap = exports.ManagerUitls = exports.NodeSymbol = exports.QueueSymbol = exports.UnresolvedTrackSymbol = exports.TrackSymbol = void 0;
 const LavalinkManagerStatics_1 = require("./LavalinkManagerStatics");
 exports.TrackSymbol = Symbol("LC-Track");
+exports.UnresolvedTrackSymbol = Symbol("LC-Track-Unresolved");
 exports.QueueSymbol = Symbol("LC-Queue");
 exports.NodeSymbol = Symbol("LC-Node");
 class ManagerUitls {
@@ -39,6 +40,14 @@ class ManagerUitls {
         catch (error) {
             throw new RangeError(`Argument "data" is not a valid track: ${error.message}`);
         }
+    }
+    /**
+     * Validate if a data is euqal to a track
+     * @param {Track|any} data the Track to validate
+     * @returns {boolean}
+     */
+    isTrack(data) {
+        return typeof data?.encodedTrack === "string" && typeof data?.info === "object";
     }
     validatedQuery(queryString, node) {
         if (!node.info)
@@ -139,5 +148,32 @@ class MiniMap extends Map {
         }
         return results;
     }
+    map(fn, thisArg) {
+        if (typeof thisArg !== 'undefined')
+            fn = fn.bind(thisArg);
+        const iter = this.entries();
+        return Array.from({ length: this.size }, () => {
+            const [key, value] = iter.next().value;
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+            return fn(value, key, this);
+        });
+    }
 }
 exports.MiniMap = MiniMap;
+async function queueTrackEnd(queue, addBackToQueue = false) {
+    if (queue.current) { // if there was a current Track -> Add it
+        queue.previous.unshift(queue.current);
+        if (queue.previous.length > queue.options.maxPreviousTracks)
+            queue.previous.splice(queue.options.maxPreviousTracks, queue.previous.length);
+    }
+    // change the current Track to the next upcoming one
+    queue.current = queue.tracks.shift() || null;
+    // and if repeatMode == queue, add it back to the queue!
+    if (addBackToQueue && queue.current)
+        queue.tracks.push(queue.current);
+    // save it in the DB
+    await queue.utils.save();
+    // return the new current Track
+    return queue.current;
+}
+exports.queueTrackEnd = queueTrackEnd;
