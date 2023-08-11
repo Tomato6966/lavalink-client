@@ -1,9 +1,9 @@
 import { FilterManager, LavalinkFilterData } from "./Filters";
 import { LavalinkManager } from "./LavalinkManager";
-import { DEFAULT_SOURCES } from "./LavalinkManagerStatics";
+import { DefaultSources } from "./LavalinkManagerStatics";
 import { LavalinkNode } from "./Node";
 import { Queue, QueueSaver } from "./Queue";
-import { PluginDataInfo, Track } from "./Track";
+import { PluginInfo, Track } from "./Track";
 import { LavalinkPlayerVoiceOptions, SearchPlatform, SearchResult, LoadTypes, queueTrackEnd } from "./Utils";
 
 export type RepeatMode = "queue" | "track" | "off";
@@ -29,7 +29,7 @@ export interface PlayOptions {
     /** Encoded Track to use&search, instead of the queue system (yt only)... */
     identifier?: string;
     /** The position to start the track. */
-    position?: number;
+    startTime?: number;
     /** The position to end the track. */
     endTime?: number;
     /** Whether to not replace the track if a play payload is sent. */
@@ -53,27 +53,41 @@ export interface Player {
 }
 
 export class Player {
-    // All properties
+    /** The Guild Id of the Player */
     public guildId: string;
+    /** The Voice Channel Id of the Player */
     public voiceChannelId: string | null = null;
+    /** The Text Channel Id of the Player */
     public textChannelId: string | null = null;
-
+    /** States if the Bot is supposed to be outputting audio */
     public playing: boolean = false;
+    /** States if the Bot is paused or not */
     public paused: boolean = false;
+    /** Repeat Mode of the Player */
     public repeatMode: RepeatMode = "off";
-    public ping: number = 0;
-    public wsPing: number = 0;
+    /** Player's ping */
+    public ping: { 
+        /* Response time for rest actions with Lavalink Server */
+        lavalink: 0, 
+        /* Latency of the Discord's Websocket Voice Server */
+        ws: 0
+    };
 
+    /** The Display Volume */
     public volume: number = 100;
+    /** The Volume Lavalink actually is outputting */
     public lavalinkVolume: number = 100;
 
+    /** The current Positin of the player (Calculated) */
     public position: number = 0;
+    /** The current Positin of the player (from Lavalink) */
+    public lastPosition: number = 0;
 
-    /** When the player was created [Timestamp] (from lavalink) */
+    /** When the player was created [Timestamp in Ms] (from lavalink) */
     public createdTimeStamp: number;
-    /** If lavalink says it's connected or not */
+    /** The Player Connection's State (from Lavalink) */
     public connected: boolean|undefined = false;
-    
+    /** Voice Server Data (from Lavalink) */
     public voice: LavalinkPlayerVoiceOptions = {
         endpoint: null,
         sessionId: null,
@@ -83,32 +97,10 @@ export class Player {
     private readonly data: Record<string, unknown> = {};
     
     /**
-     * Set custom data.
-     * @param key
-     * @param value
+     * Create a new Player
+     * @param options 
+     * @param LavalinkManager 
      */
-    public set(key: string, value: unknown): void { 
-        this.data[key] = value; 
-        return;
-    }
-    /**
-     * Get custom data.
-     * @param key
-     */
-    public get<T>(key: string): T { return this.data[key] as T; }
-
-    public clearData(): void {
-        const toKeep = Object.keys(this.data).filter(v => v.startsWith("internal_"));
-        for(const key in this.data) {
-            if(toKeep.includes(key)) continue;
-            delete this.data[key];
-        }
-        return;
-    }
-
-    public getAllData(): Record<string, unknown> { return Object.fromEntries(Object.entries(this.data).filter(v => !v[0].startsWith("internal_"))); }
-
-    // constructor
     constructor(options: PlayerOptions, LavalinkManager:LavalinkManager) {
         this.options = options;
         this.filterManager = new FilterManager(this);
@@ -130,7 +122,47 @@ export class Player {
         this.queue = new Queue(this.guildId, {}, new QueueSaver(this.LavalinkManager.options.queueStore, this.LavalinkManager.options.queueOptions))
     }
 
-    // all functions
+    /**
+     * Set custom data.
+     * @param key
+     * @param value
+     */
+    public set(key: string, value: unknown): void { 
+        this.data[key] = value; 
+        return;
+    }
+
+    /**
+     * Get custom data.
+     * @param key
+     */
+    public get<T>(key: string): T { 
+        return this.data[key] as T;
+    }
+
+    /**
+     * CLears all the custom data.
+     */
+    public clearData(): void {
+        const toKeep = Object.keys(this.data).filter(v => v.startsWith("internal_"));
+        for(const key in this.data) {
+            if(toKeep.includes(key)) continue;
+            delete this.data[key];
+        }
+        return;
+    }
+
+    /**
+     * Get all custom Data
+     */
+    public getAllData(): Record<string, unknown> { 
+        return Object.fromEntries(Object.entries(this.data).filter(v => !v[0].startsWith("internal_")));
+    }
+
+    /**
+     * Play the next track from the queue / a specific track, with playoptions for Lavalink
+     * @param options 
+     */
     async play(options?: Partial<PlayOptions>) {
         if(options?.track && this.LavalinkManager.utils.isTrack(options?.track)) {
             await this.queue.add(options?.track, 0);
@@ -149,21 +181,20 @@ export class Player {
             this.lavalinkVolume = Math.floor(vol * 100) / 100;
             options.volume = vol;
         }
-        this.set("lastposition", this.position);
 
         const finalOptions = {
-            encodedTrack: track.encodedTrack,
+            encoded: track.encoded,
             volume: this.lavalinkVolume,
-            position: 0,
+            startTime: 0,
             ...options,
         };
 
         if("track" in finalOptions) delete finalOptions.track;
        
-        if((typeof finalOptions.position !== "undefined" && isNaN(finalOptions.position)) || (typeof finalOptions.position === "number" && (finalOptions.position < 0 || finalOptions.position >= track.info.duration))) throw new Error("PlayerOption#position must be a positive number, less than track's duration");
+        if((typeof finalOptions.startTime !== "undefined" && isNaN(finalOptions.startTime)) || (typeof finalOptions.startTime === "number" && (finalOptions.startTime < 0 || finalOptions.startTime >= track.info.duration))) throw new Error("PlayerOption#startTime must be a positive number, less than track's duration");
         if((typeof finalOptions.volume !== "undefined" && isNaN(finalOptions.volume) || (typeof finalOptions.volume === "number" && finalOptions.volume < 0))) throw new Error("PlayerOption#volume must be a positive number");
         if((typeof finalOptions.endTime !== "undefined" && isNaN(finalOptions.endTime)) || (typeof finalOptions.endTime === "number" && (finalOptions.endTime < 0 || finalOptions.endTime >= track.info.duration))) throw new Error("PlayerOption#endTime must be a positive number, less than track's duration");
-        if(typeof finalOptions.position === "number" && typeof finalOptions.endTime === "number" && finalOptions.endTime < finalOptions.position) throw new Error("PlayerOption#endTime must be bigger than PlayerOption#position")
+        if(typeof finalOptions.startTime === "number" && typeof finalOptions.endTime === "number" && finalOptions.endTime < finalOptions.startTime) throw new Error("PlayerOption#endTime must be bigger than PlayerOption#startTime")
         if("noReplace" in finalOptions) delete finalOptions.noReplace
         
         const now = performance.now();
@@ -172,9 +203,14 @@ export class Player {
             noReplace: options?.noReplace ?? false,
             playerOptions: finalOptions,
         });
-        this.ping = Math.round((performance.now() - now) / 10) / 100;
+        this.ping.lavalink = Math.round((performance.now() - now) / 10) / 100;
     }
 
+    /**
+     * Set the Volume for the Player
+     * @param volume The Volume in percent
+     * @param ignoreVolumeDecrementer If it should ignore the volumedecrementer option
+     */
     async setVolume(volume:number, ignoreVolumeDecrementer:boolean = false) {
         volume = Number(volume);
 
@@ -191,23 +227,33 @@ export class Player {
         } else {
             await this.node.updatePlayer({ guildId: this.guildId, playerOptions: { volume } });
         }
-        this.ping = Math.round((performance.now() - now) / 10) / 100;
+        this.ping.lavalink = Math.round((performance.now() - now) / 10) / 100;
         return;
     }
 
-    async search(query:{ query: string, source?: SearchPlatform }, requestUser: unknown) {
-        const _query = typeof query === "string" ? query : query.query;
-        const _source = DEFAULT_SOURCES[query.source ?? this.LavalinkManager.options.playerOptions.defaultSearchPlatform] ?? query.source ?? this.LavalinkManager.options.playerOptions.defaultSearchPlatform;
-        const srcSearch = !/^https?:\/\//.test(_query) ? `${_source}:` : "";
-        const res = await this.node.makeRequest(`/loadtracks?identifier=${srcSearch}${encodeURIComponent(_query)}`) as {
+    /**
+     * 
+     * @param query Query for your data
+     * @param requestUser 
+     */
+    async search(query: { query: string, source?: SearchPlatform } | string, requestUser: unknown) {
+        // transform the query object
+        query = { 
+            query: typeof query === "string" ? query : query.query, 
+            source: DefaultSources[query.source ?? this.LavalinkManager.options.playerOptions.defaultSearchPlatform] ?? query.source ?? this.LavalinkManager.options.playerOptions.defaultSearchPlatform 
+        }
+
+        // request the data
+        const res = await this.node.request(`/loadtracks?identifier=${!/^https?:\/\//.test(query.query) ? `${query.source}:` : ""}${encodeURIComponent(query.query)}`) as {
             loadType: LoadTypes,
             data: any,
-            pluginInfo: PluginDataInfo,
+            pluginInfo: PluginInfo,
         };
 
+        // transform the data which can be Error, Track or Track[] to enfore [Track] 
         const resTracks = res.loadType === "playlist" ? res.data?.tracks : res.loadType === "track" ? [res.data] : res.loadType === "search" ? Array.isArray(res.data) ? res.data : [res.data] : [];
 
-        const response = {
+        return {
             loadType: res.loadType,
             exception: res.loadType === "error" ? res.data : null,
             pluginInfo: res.pluginInfo || {},
@@ -221,48 +267,70 @@ export class Player {
             } : null,
             tracks: resTracks.length ? resTracks.map(t => this.LavalinkManager.utils.buildTrack(t, requestUser)) : []
         } as SearchResult;
-        return response;
     }
+
+    /**
+     * Pause the player
+     */
     async pause() {
         if(this.paused && !this.playing) throw new Error("Player is already paused - not able to pause.");
         this.paused = true;
         const now = performance.now();
         await this.node.updatePlayer({ guildId: this.guildId, playerOptions: { paused: true } });
-        this.ping = Math.round((performance.now() - now) / 10) / 100;
+        this.ping.lavalink = Math.round((performance.now() - now) / 10) / 100;
         return;
     }
+    
+    /**
+     * Resume the Player
+     */
     async resume() {
         if(!this.paused) throw new Error("Player isn't paused - not able to resume.");
         this.paused = false;
         const now = performance.now();
         await this.node.updatePlayer({ guildId: this.guildId, playerOptions: { paused: false } });
-        this.ping = Math.round((performance.now() - now) / 10) / 100;
+        this.ping.lavalink = Math.round((performance.now() - now) / 10) / 100;
         return;
     }
 
+    /**
+     * Seek to a specific Position
+     * @param position 
+     */
     async seek(position:number) {
         if(!this.queue.current) return undefined;
+        
         position = Number(position);
+        
         if(isNaN(position)) throw new RangeError("Position must be a number.");
+        
         if(!this.queue.current.info.isSeekable || this.queue.current.info.isStream) throw new RangeError("Current Track is not seekable / a stream");
+        
         if(position < 0 || position > this.queue.current.info.duration) position = Math.max(Math.min(position, this.queue.current.info.duration), 0);
+        
         this.position = position;
-        this.set("internal_lastposition", this.position);
+        
+        this.lastPosition = position;
+
         const now = performance.now();
         await this.node.updatePlayer({ guildId:this.guildId, playerOptions: { position }});
-        this.ping = Math.round((performance.now() - now) / 10) / 100;
+        this.ping.lavalink = Math.round((performance.now() - now) / 10) / 100;
+
         return;
     }
 
+    /**
+     * Set the Repeatmode of the Player
+     * @param repeatMode 
+     */
     async setRepeatMode(repeatMode:RepeatMode) {
         if(!["off", "track", "queue"].includes(repeatMode)) throw new RangeError("Repeatmode must be either 'off', 'track', or 'queue'");
         this.repeatMode = repeatMode;
         return;
     }
 
-
     /**
-     * Skip a Song (on Lavalink it's called "STOP")
+     * Skip the current song, or a specific amount of songs
      * @param amount provide the index of the next track to skip to
      */
     async skip(skipTo:number = 0) {
@@ -272,11 +340,15 @@ export class Player {
             await this.queue.splice(0, skipTo - 1);
         }
         const now = performance.now();
-        await this.node.updatePlayer({ guildId:this.guildId, playerOptions: { encodedTrack: null }});
-        this.ping = Math.round((performance.now() - now) / 10) / 100;
+        await this.node.updatePlayer({ guildId:this.guildId, playerOptions: { encoded: null }});
+        this.ping.lavalink = Math.round((performance.now() - now) / 10) / 100;
         return true;
     }
 
+    /**
+     * Connects the Player to the Voice Channel
+     * @returns 
+     */
     public async connect() {
         if(!this.options.voiceChannelId) throw new RangeError("No Voice Channel id has been set.");
 
@@ -293,8 +365,13 @@ export class Player {
         return;
     }
 
-    public async disconnect() {
-        if(!this.options.voiceChannelId) throw new RangeError("No Voice Channel id has been set.");
+    /**
+     * Disconnects the Player from the Voice Channel, but keeps the player in the cache
+     * @param force If false it throws an error, if player thinks it's already disconnected
+     * @returns
+     */
+    public async disconnect(force:boolean = false) {
+        if(!force && !this.options.voiceChannelId) throw new RangeError("No Voice Channel id has been set.");
 
         await this.LavalinkManager.options.sendToShard(this.guildId, {
             op: 4,
@@ -312,16 +389,68 @@ export class Player {
     }
     
     /**
-     * Destroy the player
+     * Destroy the player and disconnect from the voice channel
      */
-    public async destroy(disconnect = true) {
-        if(disconnect) await this.disconnect();
-        
+    public async destroy() {
+        await this.disconnect(true);
+
         await this.queue.utils.destroy();
 
         await this.node.destroyPlayer(this.guildId);
 
         this.LavalinkManager.emit("playerDestroy", this);
         this.LavalinkManager.deletePlayer(this.guildId);
+    }
+
+    /**
+     * Move the player on a different Audio-Node
+     * @param newNode New Node / New Node Id 
+     */
+    public async changeNode(newNode: LavalinkNode | string) {
+        
+        const updateNode = typeof newNode === "string" ? this.LavalinkManager.NodeManager.nodes.get(newNode) : newNode;
+        if(!updateNode) throw new Error("Could not find the new Node");
+
+        const data = this.toJSON();
+
+        await this.node.destroyPlayer(this.guildId);
+        
+        this.node = updateNode;
+        await this.connect();
+
+        const now = performance.now();
+        await this.node.updatePlayer({
+            guildId: this.guildId,
+            noReplace: options?.noReplace ?? false,
+            playerOptions: {
+                startTime: data.position,
+                volume: data.volume,
+                paused: data.paused,
+                filters: { ...data.filters, equalizer: data.equalizer },
+            },
+        });
+        this.ping.lavalink = Math.round((performance.now() - now) / 10) / 100;
+        return this.node.id;
+    }
+
+    /** Converts the Player including Queue to a Json state */
+    public toJSON() {
+        return {
+            guildId: this.guildId,
+            voiceChannelId: this.voiceChannelId,
+            textChannelId: this.textChannelId,
+            position: this.position,
+            lastPosition: this.lastPosition,
+            volume: this.volume,
+            lavalinkVolume: this.lavalinkVolume,
+            repeatMode: this.repeatMode,
+            paused: this.paused,
+            playing: this.playing,
+            createdTimeStamp: this.createdTimeStamp,
+            filters: this.filterManager?.data || {},
+            equalizer: this.filterManager?.equalizerBands || [],
+            queue: this.queue?.utils?.getRaw?.() || { current: null, tracks: [], previous: [] },
+            nodeId: this.node?.id,
+        }
     }
 }

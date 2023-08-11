@@ -1,10 +1,10 @@
 import { LavalinkFilterData } from "./Filters";
 import { LavalinkManager } from "./LavalinkManager";
-import { DEFAULT_SOURCES, REGEXES } from "./LavalinkManagerStatics";
+import { DefaultSources, SourceLinksRegexes } from "./LavalinkManagerStatics";
 import { LavalinkNode, NodeStats } from "./Node";
 import { PlayOptions } from "./Player";
 import { Queue } from "./Queue";
-import { LavalinkTrackDataInfoExtended, PluginDataInfo, Track } from "./Track";
+import { TrackInfo, PluginInfo, Track } from "./Track";
 
 export const TrackSymbol = Symbol("LC-Track");
 export const UnresolvedTrackSymbol = Symbol("LC-Track-Unresolved");
@@ -30,11 +30,12 @@ export interface PlaylistInfo {
     selectedTrack: Track | null;
     /** The duration of the entire playlist. (calcualted) */
     duration: number;
-  }
+}
+
 export interface SearchResult {
     loadType: LoadTypes,
     exception: Exception | null,
-    pluginInfo: PluginDataInfo,
+    pluginInfo: PluginInfo,
     playlist: PlaylistInfo | null,
     tracks: Track[]
 }
@@ -50,11 +51,12 @@ export class ManagerUitls {
     }
 
     buildTrack(data, requester) {
-        const encodedTrack = data.encoded || data.encodedTrack;
-        if (!encodedTrack) throw new RangeError("Argument 'data.encoded' / 'data.encodedTrack' / 'data.track' must be present.");
-        if (!data.info) data.info = {} as Partial<LavalinkTrackDataInfoExtended>;
+        const encoded = data.encoded || data.encoded;
+        if (!encoded) throw new RangeError("Argument 'data.encoded' / 'data.encoded' / 'data.track' must be present.");
+        if (!data.info) data.info = {} as Partial<TrackInfo>;
         try {
             const r = {
+                encoded,
                 info: {
                     identifier: data.info?.identifier,
                     title: data.info?.title,
@@ -66,10 +68,9 @@ export class ManagerUitls {
                     isSeekable: data.info?.isSeekable,
                     isStream: data.info?.isStream,
                     isrc: data.info?.isrc,
-                    requester: data.info?.requester || requester,
                 },
                 pluginInfo: data.pluginInfo || data.plugin || {},
-                encodedTrack
+                requester: data.info?.requester || requester,
             } as Track;
             Object.defineProperty(r, TrackSymbol, { configurable: true, value: true });
             return r;
@@ -84,7 +85,7 @@ export class ManagerUitls {
      * @returns {boolean}
      */
     isTrack (data: Track | any) {
-      return typeof data?.encodedTrack === "string" && typeof data?.info === "object";
+      return typeof data?.encoded === "string" && typeof data?.info === "object";
     }
 
     validatedQuery(queryString:string, node:LavalinkNode):void {
@@ -92,46 +93,46 @@ export class ManagerUitls {
         if(!node.info.sourceManagers?.length) throw new Error("Lavalink Node, has no sourceManagers enabled");
         
         // missing links: beam.pro local getyarn.io clypit pornhub reddit ocreamix soundgasm
-        if((REGEXES.YoutubeMusicRegex.test(queryString) || REGEXES.YoutubeRegex.test(queryString)) && !node.info.sourceManagers.includes("youtube")) {
+        if((SourceLinksRegexes.YoutubeMusicRegex.test(queryString) || SourceLinksRegexes.YoutubeRegex.test(queryString)) && !node.info.sourceManagers.includes("youtube")) {
           throw new Error("Lavalink Node has not 'youtube' enabled");
         }
-        if((REGEXES.SoundCloudMobileRegex.test(queryString) || REGEXES.SoundCloudRegex.test(queryString)) && !node.info.sourceManagers.includes("soundcloud")) {
+        if((SourceLinksRegexes.SoundCloudMobileRegex.test(queryString) || SourceLinksRegexes.SoundCloudRegex.test(queryString)) && !node.info.sourceManagers.includes("soundcloud")) {
           throw new Error("Lavalink Node has not 'soundcloud' enabled");
         }
-        if(REGEXES.bandcamp.test(queryString) && !node.info.sourceManagers.includes("bandcamp")) {
+        if(SourceLinksRegexes.bandcamp.test(queryString) && !node.info.sourceManagers.includes("bandcamp")) {
           throw new Error("Lavalink Node has not 'bandcamp' enabled");
         }
-        if(REGEXES.TwitchTv.test(queryString) && !node.info.sourceManagers.includes("twitch")) {
+        if(SourceLinksRegexes.TwitchTv.test(queryString) && !node.info.sourceManagers.includes("twitch")) {
           throw new Error("Lavalink Node has not 'twitch' enabled");
         }
-        if(REGEXES.vimeo.test(queryString) && !node.info.sourceManagers.includes("vimeo")) {
+        if(SourceLinksRegexes.vimeo.test(queryString) && !node.info.sourceManagers.includes("vimeo")) {
           throw new Error("Lavalink Node has not 'vimeo' enabled");
         }
-        if(REGEXES.tiktok.test(queryString) && !node.info.sourceManagers.includes("tiktok")) {
+        if(SourceLinksRegexes.tiktok.test(queryString) && !node.info.sourceManagers.includes("tiktok")) {
           throw new Error("Lavalink Node has not 'tiktok' enabled");
         }
-        if(REGEXES.mixcloud.test(queryString) && !node.info.sourceManagers.includes("mixcloud")) {
+        if(SourceLinksRegexes.mixcloud.test(queryString) && !node.info.sourceManagers.includes("mixcloud")) {
           throw new Error("Lavalink Node has not 'mixcloud' enabled");
         }
-        if(REGEXES.AllSpotifyRegex.test(queryString) && !node.info.sourceManagers.includes("spotify")) {
+        if(SourceLinksRegexes.AllSpotifyRegex.test(queryString) && !node.info.sourceManagers.includes("spotify")) {
           throw new Error("Lavalink Node has not 'spotify' enabled");
         }
-        if(REGEXES.appleMusic.test(queryString) && !node.info.sourceManagers.includes("applemusic")) {
+        if(SourceLinksRegexes.appleMusic.test(queryString) && !node.info.sourceManagers.includes("applemusic")) {
           throw new Error("Lavalink Node has not 'applemusic' enabled");
         }
-        if(REGEXES.AllDeezerRegex.test(queryString) && !node.info.sourceManagers.includes("deezer")) {
+        if(SourceLinksRegexes.AllDeezerRegex.test(queryString) && !node.info.sourceManagers.includes("deezer")) {
           throw new Error("Lavalink Node has not 'deezer' enabled");
         }
-        if(REGEXES.AllDeezerRegex.test(queryString) && node.info.sourceManagers.includes("deezer") && !node.info.sourceManagers.includes("http")) {
+        if(SourceLinksRegexes.AllDeezerRegex.test(queryString) && node.info.sourceManagers.includes("deezer") && !node.info.sourceManagers.includes("http")) {
           throw new Error("Lavalink Node has not 'http' enabled, which is required to have 'deezer' to work");
         }
-        if(REGEXES.musicYandex.test(queryString) && !node.info.sourceManagers.includes("yandexmusic")) {
+        if(SourceLinksRegexes.musicYandex.test(queryString) && !node.info.sourceManagers.includes("yandexmusic")) {
           throw new Error("Lavalink Node has not 'yandexmusic' enabled");
         }
 
         const hasSource = queryString.split(":")[0];
         if(queryString.split(" ").length <= 1 || !queryString.split(" ")[0].includes(":")) return;
-        const source = DEFAULT_SOURCES[hasSource] as LavalinkSearchPlatform;
+        const source = DefaultSources[hasSource] as LavalinkSearchPlatform;
         
         if(!source) throw new Error(`Lavalink Node SearchQuerySource: '${hasSource}' is not available`);
     
@@ -342,30 +343,44 @@ export interface LavalinkPlayerVoice {
 }
 export interface LavalinkPlayerVoiceOptions extends Omit<LavalinkPlayerVoice, 'connected' | 'ping'> { }
 
-export interface Address {
-    address: string;
+export interface FailingAddress {
+  /** The failing address */
+    failingAddress: string;
+    /** The timestamp when the address failed */
     failingTimestamp: number;
+    /** The timestamp when the address failed as a pretty string */
     failingTime: string;
 }
 
+type RoutePlannerTypes = "RotatingIpRoutePlanner" | "NanoIpRoutePlanner" | "RotatingNanoIpRoutePlanner" | "BalancingIpRoutePlanner";
+
 export interface RoutePlanner {
-    class?: string;
+    class?: RoutePlannerTypes;
     details?: {
+        /** The ip block being used */
         ipBlock: {
-            type: string;
+          /** The type of the ip block */
+            type: "Inet4Address" | "Inet6Address";
+            /** 	The size of the ip block */
             size: string;
         },
-        failingAddresses: Address[]
+        /** The failing addresses */
+        failingAddresses: FailingAddress[];
+        /** The number of rotations */
+        rotateIndex?: string;
+        /** The current offset in the block	 */
+        ipIndex?: string;
+        /** The current address being used	 */
+        currentAddress?: string;
+        /** The current offset in the ip block */
+        currentAddressIndex?: string;
+        /** The information in which /64 block ips are chosen. This number increases on each ban. */
+        blockIndex?: string;
     }
-    rotateIndex?: string;
-    ipIndex?: string;
-    currentAddress?: string;
-    blockIndex?: string;
-    currentAddressIndex?: string;
 }
 
 export interface Session {
-    resumingKey?: string;
+    resuming: boolean;
     timeout: number;
 }
 
@@ -424,6 +439,8 @@ export interface VoiceState {
     session_id: string;
     channel_id: string;
 }
+
+export type Base64 = string;
 
 export interface VoiceServer {
     token: string;

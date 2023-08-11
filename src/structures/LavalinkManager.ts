@@ -3,7 +3,7 @@ import { NodeManager } from "./NodeManager";
 import { DefaultQueueStore, QueueSaverOptions, StoreManager } from "./Queue";
 import { GuildShardPayload, LavalinkSearchPlatform, ManagerUitls, MiniMap, SearchPlatform, TrackEndEvent, TrackExceptionEvent, TrackStartEvent, TrackStuckEvent, VoicePacket, VoiceServer, VoiceState, WebSocketClosedEvent } from "./Utils";
 import { LavalinkNodeOptions } from "./Node";
-import { DEFAULT_SOURCES, REGEXES } from "./LavalinkManagerStatics";
+import { DefaultSources, SourceLinksRegexes } from "./LavalinkManagerStatics";
 import { Player, PlayerOptions } from "./Player";
 import { Track } from "./Track";
 
@@ -102,8 +102,8 @@ export interface LavalinkManager {
 }
 
 export class LavalinkManager extends EventEmitter {
-  public static DEFAULT_SOURCES = DEFAULT_SOURCES;
-  public static REGEXES = REGEXES;
+  public static DefaultSources = DefaultSources;
+  public static SourceLinksRegexes = SourceLinksRegexes;
 
   public initiated:boolean = false;
   

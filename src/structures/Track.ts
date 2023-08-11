@@ -1,4 +1,6 @@
-export interface LavalinkTrackDataInfo {
+import { Base64 } from "./Utils";
+
+export interface TrackInfo {
     identifier: string;
     title: string;
     author: string;
@@ -11,43 +13,42 @@ export interface LavalinkTrackDataInfo {
     isrc: string | null;
 }
 
-export interface UnresolvedTrackInfo {
-    /** [QUERY] The title to search against. */
-    title: string;
-    /** [QUERY] The author to search against. */
-    author?: string;
-    /** [QUERY] The duration to search within 1500 milliseconds of the results from YouTube. */
-    duration?: number;
-    /** [QUERY] If provided, it will search via identifier, (only works for youtube & soundcloud) */
+
+export interface PluginInfo {
+    /** The Type provided by a plugin */
+    type?: string;
+    /** The Identifier provided by a plugin */
     identifier?: string;
-    /** [QUERY] If provided, it will search via uri */
-    uri?: string;
-    /** [QUERY] If it's a local track */
-    local?: boolean;
-    /** [Override] Default artwork url */
-    artworkUrl: string | null;
+    /** The ArtworkUrl provided by a plugin */
+    artworkUrl?: string;
+    /** The Author Information provided by a plugin */
+    author?: string;
+    /** The Url provided by a Plugin */
+    url?: string,
+    /** The Url provided by a Plugin */
+    uri?: string,
 }
+
+export interface LavalinkTrack {
+    /** The Base 64 encoded String */
+    encoded?: Base64;
+    /** Track Information */
+    info: TrackInfo;
+    /** Plugin Information from Lavalink */
+    pluginInfo: Partial<PluginInfo> | Record<string, string | number>;
+}
+
+export interface Track extends LavalinkTrack {
+    /** The Track's Requester */
+    requester?: unknown;
+}
+
 
 export interface UnresolvedQuery {
     /** The base64 of the unresolved track to "encode" */
-    encodedTrack?: string;
+    encoded?: Base64;
     /** Search for the closest track possible, by providing as much information as you can! */
-    info?: Partial<UnresolvedTrackInfo>;
-}
-
-export interface LavalinkTrackDataInfoExtended extends LavalinkTrackDataInfo {
+    info?: Partial<TrackInfo>;
+    /** The Track's Requester */
     requester?: unknown;
-}
-export interface Track {
-    encodedTrack?: string;
-    info: LavalinkTrackDataInfoExtended;
-    pluginInfo: Partial<PluginDataInfo> | Record<string, string | number>;
-}
-
-export interface PluginDataInfo {
-    type?: string;
-    identifier?: string;
-    artworkUrl?: string;
-    author?: string;
-    url?: string,
 }

@@ -102,7 +102,7 @@ export class FilterManager {
                 filters: sendData,
             }
         })
-        this.player.ping = Math.round((performance.now() - now) / 10) / 100;
+        this.player.ping.lavalink = Math.round((performance.now() - now) / 10) / 100;
         if (this.player.options.instaUpdateFiltersFix === true) this.filterUpdatedState = 1;
         return;
     }
@@ -188,6 +188,17 @@ export class FilterManager {
         await this.applyPlayerFilters();
         return this.filters;
     }
+
+    public async setVolume(volume:number) {
+        if(volume < 0 || volume > 5) throw new SyntaxError("Volume-Filter must be between 0 and 5");
+        
+        this.data.volume = volume;
+        
+        await this.applyPlayerFilters();
+        
+        return this.filters.volume;
+    }
+
     /**
      * Set the AudioOutput Filter 
      * @param type 
@@ -444,7 +455,7 @@ export class FilterManager {
             filters: { equalizer: this.equalizerBands } }
         });
 
-        this.player.ping = Math.round((performance.now() - now) / 10) / 100;
+        this.player.ping.lavalink = Math.round((performance.now() - now) / 10) / 100;
         
         if (this.player.options.instaUpdateFiltersFix === true) this.filterUpdatedState = 1;
         
