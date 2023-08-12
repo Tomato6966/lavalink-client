@@ -6,6 +6,17 @@ import { Queue, QueueSaver } from "./Queue";
 import { PluginInfo, Track } from "./Track";
 import { LavalinkPlayerVoiceOptions, SearchPlatform, SearchResult, LoadTypes, queueTrackEnd } from "./Utils";
 
+type PlayerDestroyReasons = "NodeDestroy" | "NodeDeleted" | "LavalinkNoVoice" | "NodeReconnectFail" | "Disconnected" | "ChannelDeleted";
+export type DestroyReasonsType = PlayerDestroyReasons | string;
+export const DestroyReasons = {
+    NodeDestroy: "NodeDestroy",
+    NodeDeleted: "NodeDeleted",
+    LavalinkNoVoice: "LavalinkNoVoice",
+    NodeReconnectFail: "NodeReconnectFail",
+    Disconnected: "Disconnected",
+    ChannelDeleted: "ChannelDeleted"
+} as Record<PlayerDestroyReasons, PlayerDestroyReasons>
+
 export type RepeatMode = "queue" | "track" | "off";
 export interface PlayerOptions {
     guildId: string;
@@ -398,14 +409,14 @@ export class Player {
     /**
      * Destroy the player and disconnect from the voice channel
      */
-    public async destroy() {
+    public async destroy(reason?:string) {
         await this.disconnect(true);
 
         await this.queue.utils.destroy();
 
         await this.node.destroyPlayer(this.guildId);
 
-        this.LavalinkManager.emit("playerDestroy", this);
+        this.LavalinkManager.emit("playerDestroy", this, reason);
         this.LavalinkManager.deletePlayer(this.guildId);
     }
 

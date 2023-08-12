@@ -3,7 +3,7 @@ import { Dispatcher, Pool } from "undici";
 import { NodeManager } from "./NodeManager";
 import internal from "stream";
 import { InvalidLavalinkRestRequest, LavalinkPlayer, PlayerEventType, PlayerEvents, PlayerUpdateInfo, RoutePlanner, TrackEndEvent, TrackExceptionEvent, TrackStartEvent, TrackStuckEvent, WebSocketClosedEvent, Session, queueTrackEnd, Base64 } from "./Utils";
-import { Player, PlayerOptions } from "./Player";
+import { DestroyReasons, DestroyReasonsType, Player, PlayerOptions } from "./Player";
 import { isAbsolute } from "path";
 import { TrackInfo, Track } from "./Track";
 
@@ -285,10 +285,10 @@ export class LavalinkNode {
      * Destroys the Node-Connection (Websocket) and all player's of the node
      * @returns 
      */
-    public destroy() {
+    public destroy(destroyReason?:DestroyReasonsType) {
         if (!this.connected) return
         const players = this.NodeManager.LavalinkManager.players.filter(p => p.node.id == this.id);
-        if (players) players.forEach(p => p.destroy());
+        if (players) players.forEach(p => p.destroy(destroyReason || DestroyReasons.NodeDestroy));
 
         this.socket.close(1000, "destroy");
         this.socket.removeAllListeners();
@@ -297,7 +297,7 @@ export class LavalinkNode {
         this.reconnectAttempts = 1;
         clearTimeout(this.reconnectTimeout);
 
-        this.NodeManager.emit("destroy", this);
+        this.NodeManager.emit("destroy", this, destroyReason);
         this.NodeManager.nodes.delete(this.id);
         return;
     }
@@ -463,7 +463,7 @@ export class LavalinkNode {
                 player.position = data.playerOptions.position;
                 player.lastPosition = data.playerOptions.position;
             }
-            
+
             if (typeof data.playerOptions.voice !== "undefined") player.voice = data.playerOptions.voice;
             if (typeof data.playerOptions.volume !== "undefined") {
                 if (this.NodeManager.LavalinkManager.options.playerOptions.volumeDecrementer) {
@@ -497,7 +497,7 @@ export class LavalinkNode {
             const player = this.NodeManager.LavalinkManager.getPlayer(data.guildId);
             if (!player) return;
 
-            if (typeof res?.voice?.connected === "boolean" && res.voice.connected === false) return player.destroy();
+            if (typeof res?.voice?.connected === "boolean" && res.voice.connected === false) return player.destroy(DestroyReasons.LavalinkNoVoice);
             player.ping.ws = res?.voice?.ping || player?.ping.ws;
         }
 
@@ -515,7 +515,7 @@ export class LavalinkNode {
                 const error = new Error(`Unable to connect after ${this.options.retryAmount} attempts.`)
 
                 this.NodeManager.emit("error", this, error);
-                return this.destroy();
+                return this.destroy(DestroyReasons.NodeReconnectFail);
             }
             this.socket.removeAllListeners();
             this.socket = null;

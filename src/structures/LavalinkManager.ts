@@ -4,7 +4,7 @@ import { DefaultQueueStore, QueueSaverOptions, StoreManager } from "./Queue";
 import { GuildShardPayload, LavalinkSearchPlatform, ManagerUitls, MiniMap, SearchPlatform, TrackEndEvent, TrackExceptionEvent, TrackStartEvent, TrackStuckEvent, VoicePacket, VoiceServer, VoiceState, WebSocketClosedEvent } from "./Utils";
 import { LavalinkNodeOptions } from "./Node";
 import { DefaultSources, SourceLinksRegexes } from "./LavalinkManagerStatics";
-import { Player, PlayerOptions } from "./Player";
+import { DestroyReasons, DestroyReasonsType, Player, PlayerOptions } from "./Player";
 import { Track } from "./Track";
 
 export interface LavalinkManager {
@@ -25,7 +25,13 @@ export interface LavalinkPlayerOptions {
   clientBasedUpdateInterval?: number;
   defaultSearchPlatform?: SearchPlatform;
   applyVolumeAsFilter?:boolean;
-  autoReconnectOnDisconnect?:boolean;
+  onDisconnect?: {
+    autoReconnect?: boolean,
+    destroyPlayer?: boolean,
+  },
+  onEmptyQueue?: {
+    destroyAfter?: number,
+  }
 }
 
 export interface ManagerOptions {
@@ -89,7 +95,7 @@ interface LavalinkManagerEvents {
      * Emitted when a Player get's destroyed
      * @event Manager.playerManager#destroy
      */
-    "playerDestroy": (player:Player) => void;
+    "playerDestroy": (player:Player, destroyReason?:DestroyReasonsType) => void;
 }
 
 export interface LavalinkManager {
@@ -229,11 +235,14 @@ export class LavalinkManager extends EventEmitter {
       player.voice.sessionId = update.session_id;
       player.voiceChannelId = update.channel_id;
     } else {
+      if(this.options.playerOptions.onDisconnect?.destroyPlayer === true) {
+        return await player.destroy(DestroyReasons.Disconnected);
+      }
       this.emit("playerDisconnect", player, player.voiceChannelId);
-      
+
       await player.pause();
 
-      if(this.options.playerOptions.autoReconnectOnDisconnect === true) {
+      if(this.options.playerOptions.onDisconnect?.autoReconnect === true) {
         await player.connect();
         return await player.resume();
       }

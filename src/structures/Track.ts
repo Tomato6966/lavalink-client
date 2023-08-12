@@ -35,7 +35,7 @@ export interface LavalinkTrack {
     /** Track Information */
     info: TrackInfo;
     /** Plugin Information from Lavalink */
-    pluginInfo: Partial<PluginInfo> | Record<string, string | number>;
+    pluginInfo: Partial<PluginInfo>;
 }
 
 export interface Track extends LavalinkTrack {

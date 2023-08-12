@@ -2,6 +2,7 @@ import { EventEmitter } from "stream";
 import { LavalinkNode, LavalinkNodeOptions } from "./Node";
 import { LavalinkManager } from "./LavalinkManager";
 import { MiniMap } from "./Utils";
+import { DestroyReasons, DestroyReasonsType } from "./Player";
 
 type LavalinkNodeIdentifier = string;
 
@@ -16,7 +17,7 @@ interface NodeManagerEvents {
      * Emitted when a Node is destroyed.
      * @event Manager.nodeManager#destroy
      */
-    "destroy": (node:LavalinkNode) => void;
+    "destroy": (node:LavalinkNode, destroyReason?:DestroyReasonsType) => void;
 
     /**
      * Emitted when a Node is connected.
@@ -77,7 +78,7 @@ export class NodeManager extends EventEmitter {
     deleteNode(node:LavalinkNodeIdentifier|LavalinkNode) {
         const decodeNode = typeof node === "string" ? this.nodes.get(node) : node || this.leastUsedNodes[0];
         if(!decodeNode) throw new Error("Node was not found");
-        decodeNode.destroy();
+        decodeNode.destroy(DestroyReasons.NodeDeleted);
         this.nodes.delete(decodeNode.id);
         return;
     }
