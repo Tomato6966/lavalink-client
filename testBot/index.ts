@@ -49,7 +49,7 @@ client.lavalink = new LavalinkManager({
             destroyPlayer: false // overrides autoReconnect and directly destroys the player if the bot disconnects from the vc
         },
         onEmptyQueue: {
-            destroyAfterMs: 10000, // 0 === instantly destroy | don't provide the option, to don't destroy the player
+            destroyAfterMs: 30_000, // 0 === instantly destroy | don't provide the option, to don't destroy the player
         }
     },
     queueOptions: {

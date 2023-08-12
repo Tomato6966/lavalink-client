@@ -14,21 +14,34 @@ npm install tomato6966/lavalink-client
 
 # Features
 
-- Player-Destroy Reasons like:
+- 💯 Lavalink v4 Supported only (with Lavalink Plugins)
+
+- ✅ Player-Destroy Reasons like:
   - Channel got deleted, Player got disconnected...
-- Choose able queue stores (maps, collections, redis, databases, ...)
+
+- ✨ Choose able queue stores (maps, collections, redis, databases, ...)
   - You can create your own queueStore, thus make it easy to sync queues accross multiple connections (e.g. dashboard-bot)
-- Included Filter & Equalizer Management
-- Multiple Player Options
+
+- 😍 Included Filter & Equalizer Management
+
+- 👍 Multiple Player Options *for easier use*
   - onDisconnect -> Player Destroy / auto Reconnect
   - onEmptyQueue -> Player Destroy / leave After x Time
   - instaFixFilter -> seek the player after applying a filter, to instantly apply it's effect (only works for little-durational-songs)
   - applyVolumeAsFilter -> instead of using lavalink.volume, it uses lavalink.filters.volume which is much different!
-- Lavalink Validations
+
+- 🛡️ Lavalink Validations
   - It only let's you use the filters / plugins / sources, if Lavalink actually has it enabled
-- Memory friendly and easy style
+
+- 🧑‍💻 Memory friendly and easy style
   - Only the required data is displayed, and the store-way & types match Lavalink#IMPLEMENTATION.md
-- Much much more!
+
+- 😘 Automated Handlings
+  - Skips the songs, on TrackEnd, TrackStuck, TrackError, 
+  - Destroys the player on channeldelete
+  - Pauses / resumes the player if it get's muted / unmuted (server-wide) [soon]
+  - ...
+- 😁 Much much more!
 
 # Documentation
 
@@ -113,4 +126,13 @@ await player.play(); // you can provide specific track, or let the manager choos
 
 ## Example (typescript)
 
-Can be found in the [/testBot](https://github.com/Tomato6966/lavalink-client/blob/main/testBot/README.md) Directory
+Can be found in the [`/testBot`](https://github.com/Tomato6966/lavalink-client/blob/main/testBot/README.md) Directory
+
+It contains the following features:
+
+- Example Use for `Redis based Queue`
+- Example Use for `Queue Changes Watcher Logger`
+- Example Use for `Filters`, `Audio Output`, `equalizers`
+- How to make an easy, yet advanced `Slash Commands Only Bot`
+- `Slim Memory Usage`
+- `All lavalink-client events` displayments

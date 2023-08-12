@@ -621,8 +621,6 @@ export class LavalinkNode {
         const player = this.NodeManager.LavalinkManager.getPlayer(payload.guildId);
         if (!player) return;
 
-        console.log(payload.type);
-
         switch (payload.type) {
             case "TrackStartEvent": this.trackStart(player, player.queue.current, payload); break;
             case "TrackEndEvent": this.trackEnd(player, player.queue.current, payload); break;

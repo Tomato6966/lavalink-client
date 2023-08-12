@@ -33,7 +33,7 @@ export function PlayerEvents(client:BotClient) {
      * Queue/Track Events
      */
     client.lavalink.on("trackStart", (player, track) => {
-        console.log(player.guildId, " :: Started Playing :: ", track.info.title)
+        console.log(player.guildId, " :: Started Playing :: ", track.info)
         const channel = client.channels.cache.get(player.textChannelId!) as TextChannel;
         if(!channel) return;
         channel.send({

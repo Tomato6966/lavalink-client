@@ -13,7 +13,7 @@ export default {
             // if not in a guild -> return
             if (!interaction.guildId) return;
             // get the guild's player
-            const player = await client.lavalink.getPlayer(interaction.guildId);
+            const player = client.lavalink.getPlayer(interaction.guildId);
             // return if no player
             if (!player) return interaction.reply({ ephemeral: true, content: "I'm not connected" });
             // get old queue for difference
@@ -36,7 +36,7 @@ export default {
             // if not in a guild -> return
             if (!interaction.guildId) return;
             // get the guild's player
-            const player = await client.lavalink.getPlayer(interaction.guildId);
+            const player = client.lavalink.getPlayer(interaction.guildId);
             // return if no player
             if (!player) return interaction.reply({ ephemeral: true, content: "I'm not connected" });
             // remove tracks

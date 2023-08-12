@@ -1,4 +1,4 @@
-import { CommandInteractionOptionResolver, GuildMember, SlashCommandBuilder } from "discord.js";
+import { CommandInteractionOptionResolver, GuildMember, SlashCommandBuilder, VoiceChannel } from "discord.js";
 import {  Command } from "../types/Client";
 import { formatMS_HHMMSS } from "../Utils/Time";
 import { SearchPlatform, SearchResult, Track } from "../../src";
@@ -24,6 +24,9 @@ export default {
         const vcId = (interaction.member as GuildMember)?.voice?.channelId;
         if(!vcId) return interaction.reply({ ephemeral: true, content: `Join a voice Channel` });
 
+        const vc = (interaction.member as GuildMember)?.voice?.channel as VoiceChannel;
+        if(!vc.joinable || !vc.speakable) return interaction.reply({ ephemeral: true, content: "I am not able to join your channel / speak in there." });
+        
         const src = (interaction.options as CommandInteractionOptionResolver).getString("source") as SearchPlatform|undefined;
         const query = (interaction.options as CommandInteractionOptionResolver).getString("query") as string;
         

@@ -21,7 +21,7 @@ export class ManagerUitls {
                     title: data.info?.title,
                     author: data.info?.author,
                     duration: data.info?.length,
-                    artworkUrl: data.info?.artworkUrl || data.pluginInfo?.artworkUrl || data.plugin?.artworkUrl || ["youtube.", "youtu.be"].some(d => data.info?.uri?.includes?.(d)) ? `https://img.youtube.com/vi/${data.info?.identifier}/mqdefault.jpg` : undefined,
+                    artworkUrl: data.info?.artworkUrl || data.pluginInfo?.artworkUrl || data.plugin?.artworkUrl,
                     uri: data.info?.uri,
                     sourceName: data.info?.sourceName,
                     isSeekable: data.info?.isSeekable,
