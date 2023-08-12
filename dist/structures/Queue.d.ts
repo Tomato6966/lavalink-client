@@ -61,7 +61,7 @@ export declare class Queue {
     /**
      * @returns The Queue, but in a raw State, which allows easier handling for the storeManager
      */
-    getRaw(): StoredQueue;
+    getStored(): StoredQueue;
     /**
      * Add a Track to the Queue, and after saved in the "db" it returns the amount of the Tracks
      * @param Track

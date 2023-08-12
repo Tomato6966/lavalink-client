@@ -6,14 +6,16 @@ import { Queue, QueueSaver } from "./Queue";
 import { PluginInfo, Track } from "./Track";
 import { LavalinkPlayerVoiceOptions, SearchPlatform, SearchResult, LoadTypes, queueTrackEnd } from "./Utils";
 
-type PlayerDestroyReasons = "NodeDestroy" | "NodeDeleted" | "LavalinkNoVoice" | "NodeReconnectFail" | "Disconnected" | "ChannelDeleted";
+type PlayerDestroyReasons = "QueueEmpty" | "NodeDestroy" | "NodeDeleted" | "LavalinkNoVoice" | "NodeReconnectFail" | "PlayerReconnectFail" | "Disconnected" | "ChannelDeleted";
 export type DestroyReasonsType = PlayerDestroyReasons | string;
 export const DestroyReasons = {
+    QueueEmpty: "QueueEmpty",
     NodeDestroy: "NodeDestroy",
     NodeDeleted: "NodeDeleted",
     LavalinkNoVoice: "LavalinkNoVoice",
     NodeReconnectFail: "NodeReconnectFail",
     Disconnected: "Disconnected",
+    PlayerReconnectFail: "PlayerReconnectFail",
     ChannelDeleted: "ChannelDeleted"
 } as Record<PlayerDestroyReasons, PlayerDestroyReasons>
 
@@ -130,7 +132,7 @@ export class Player {
         this.LavalinkManager.emit("playerCreate", this);
         if(typeof options.volume === "number" && !isNaN(options.volume)) this.setVolume(options.volume);
 
-        this.queue = new Queue(this.guildId, {}, new QueueSaver(this.LavalinkManager.options.queueStore, this.LavalinkManager.options.queueOptions))
+        this.queue = new Queue(this.guildId, {}, new QueueSaver(this.LavalinkManager.options.queueStore, this.LavalinkManager.options.queueOptions), this.LavalinkManager.options.queueChangesWatcher)
     }
 
     /**
@@ -175,6 +177,11 @@ export class Player {
      * @param options 
      */
     async play(options?: Partial<PlayOptions>) {
+        if(this.get("internal_queueempty")) {
+            clearTimeout(this.get("internal_queueempty"));
+            this.set("internal_queueempty", undefined);
+        }
+
         if(options?.track && this.LavalinkManager.utils.isTrack(options?.track)) {
             await this.queue.add(options?.track, 0);
             await queueTrackEnd(this.queue, this.repeatMode === "queue");
@@ -357,6 +364,8 @@ export class Player {
             if(skipTo > this.queue.tracks.length) throw new RangeError("Can't skip more than the queue size");
             await this.queue.splice(0, skipTo - 1);
         }
+        if(!this.playing) return await this.play();
+
         const now = performance.now();
         await this.node.updatePlayer({ guildId:this.guildId, playerOptions: { encodedTrack: null }});
         this.ping.lavalink = Math.round((performance.now() - now) / 10) / 100;
@@ -469,7 +478,7 @@ export class Player {
             createdTimeStamp: this.createdTimeStamp,
             filters: this.filterManager?.data || {},
             equalizer: this.filterManager?.equalizerBands || [],
-            queue: this.queue?.utils?.getRaw?.() || { current: null, tracks: [], previous: [] },
+            queue: this.queue?.utils?.getStored?.() || { current: null, tracks: [], previous: [] },
             nodeId: this.node?.id,
         }
     }

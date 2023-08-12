@@ -1,5 +1,3 @@
-import { LavalinkNode } from "./Node";
-import { Player } from "./Player";
 import { Track } from "./Track";
 import { ManagerUitls, QueueSymbol } from "./Utils";
 
@@ -72,6 +70,19 @@ export class DefaultQueueStore {
     return value as Partial<StoredQueue>; // JSON.parse(value)
   }
 }
+export class QueueChangesWatcher {
+  constructor() {
+  }
+  tracksAdd(guildId:string, tracks: Track[], position: number, oldStoredQueue:StoredQueue, newStoredQueue: StoredQueue) {
+    return;
+  }
+  tracksRemoved(guildId:string, tracks: Track[], position: number, oldStoredQueue:StoredQueue, newStoredQueue: StoredQueue) {
+    return;
+  }
+  shuffled(guildId:string, oldStoredQueue:StoredQueue, newStoredQueue: StoredQueue) {
+    return;
+  }
+}
 
 export class Queue {
   public readonly tracks: Track[] = [];
@@ -82,9 +93,9 @@ export class Queue {
   protected readonly QueueSaver: QueueSaver | null = null;
   static readonly StaticSymbol: Symbol = QueueSymbol;
   private managerUtils = new ManagerUitls();
-
-  constructor(guildId: string, data: Partial<StoredQueue> = {}, QueueSaver?: QueueSaver) {
-
+  private queueChanges: QueueChangesWatcher | null;
+  constructor(guildId: string, data: Partial<StoredQueue> = {}, QueueSaver?: QueueSaver, queueChangesWatcher?: QueueChangesWatcher) {
+    this.queueChanges = queueChangesWatcher || null;
     this.guildId = guildId;
     this.QueueSaver = QueueSaver;
     this.options.maxPreviousTracks = this.QueueSaver?.options?.maxPreviousTracks ?? this.options.maxPreviousTracks;
@@ -105,7 +116,7 @@ export class Queue {
      */
     save: async () => {
       if (this.previous.length > this.options.maxPreviousTracks) this.previous.splice(this.options.maxPreviousTracks, this.previous.length);
-      return await this.QueueSaver.set(this.guildId, this.utils.getRaw());
+      return await this.QueueSaver.set(this.guildId, this.utils.getStored());
     },
 
     /**
@@ -123,6 +134,7 @@ export class Queue {
       
       return;
     },
+
     destroy: async () => {
       return await this.QueueSaver.delete(this.guildId);
     },
@@ -131,7 +143,7 @@ export class Queue {
     /**
      * @returns {{current:Track|null, previous:Track[], tracks:Track[]}}The Queue, but in a raw State, which allows easier handling for the storeManager
      */
-    getRaw: () => {
+    getStored: () => {
       if (this.previous.length > this.options.maxPreviousTracks) this.previous.splice(this.options.maxPreviousTracks, this.previous.length);
       return {
         current: this.current,
@@ -146,27 +158,34 @@ export class Queue {
      */
     totalDuration: () => {
       return this.tracks.reduce((acc: number, cur) => acc + (cur.info.duration || 0), this.current?.info.duration || 0);
-    },
-    
+    }
+  }
+
     /**
      * Shuffles the current Queue, then saves it
      * @returns Amount of Tracks in the Queue
      */
-    shuffle: async () => {
+    public async shuffle() {
+      const oldStored = typeof this.queueChanges?.shuffled === "function" ? this.utils.getStored() : null;
+
       if (this.tracks.length <= 1) return this.tracks.length;
       // swap #1 and #2 if only 2 tracks.
-      if (this.tracks.length == 2) [this[0], this[1]] = [this[1], this[0]]
+      if (this.tracks.length == 2) {
+        [this.tracks[0], this.tracks[1]] = [this.tracks[1], this.tracks[0]];
+      }
       else { // randomly swap places.
         for (let i = this.tracks.length - 1; i > 0; i--) {
           const j = Math.floor(Math.random() * (i + 1));
-          [this[i], this[j]] = [this[j], this[i]];
+          [this.tracks[i], this.tracks[j]] = [this.tracks[j], this.tracks[i]];
         }
       }
+
+      // LOG
+      if(typeof this.queueChanges?.shuffled === "function") this.queueChanges.shuffled(this.guildId, oldStored, this.utils.getStored());
+
       await this.utils.save();
       return this.tracks.length;
     }
-  }
-
   /**
    * Add a Track to the Queue, and after saved in the "db" it returns the amount of the Tracks
    * @param {Track | Track[]} TrackOrTracks 
@@ -175,8 +194,13 @@ export class Queue {
    */
   public async add(TrackOrTracks: Track | Track[], index?: number) {
     if (typeof index === "number" && index >= 0 && index < this.tracks.length) return await this.splice(index, 0, ...(Array.isArray(TrackOrTracks) ? TrackOrTracks : [TrackOrTracks]).filter(v => this.managerUtils.isTrack(v)));
+   
+    const oldStored = typeof this.queueChanges?.tracksAdd === "function" ? this.utils.getStored() : null;
     // add the track(s)
     this.tracks.push(...(Array.isArray(TrackOrTracks) ? TrackOrTracks : [TrackOrTracks]).filter(v => this.managerUtils.isTrack(v)));
+    // log if available
+    if(typeof this.queueChanges?.tracksAdd === "function") try { this.queueChanges.tracksAdd(this.guildId, (Array.isArray(TrackOrTracks) ? TrackOrTracks : [TrackOrTracks]).filter(v => this.managerUtils.isTrack(v)), this.tracks.length, oldStored, this.utils.getStored()); } catch (e) { /*  */ }
+    
     // save the queue
     await this.utils.save();
     // return the amount of the tracks
@@ -191,16 +215,23 @@ export class Queue {
    * @returns {Track} Spliced Track
    */
   public async splice(index: number, amount: number, TrackOrTracks?: Track | Track[]) {
+    const oldStored = typeof this.queueChanges?.tracksAdd === "function" || typeof this.queueChanges?.tracksRemoved === "function" ? this.utils.getStored() : null;
+    // if no tracks to splice, add the tracks
     if (!this.tracks.length) {
       if(TrackOrTracks) return await this.add(TrackOrTracks);
       return null
     }
-
+    // Log if available
+    if((TrackOrTracks) && typeof this.queueChanges?.tracksAdd === "function") try { this.queueChanges.tracksAdd(this.guildId, (Array.isArray(TrackOrTracks) ? TrackOrTracks : [TrackOrTracks]).filter(v => this.managerUtils.isTrack(v)), index, oldStored, this.utils.getStored()); } catch (e) { /*  */ }
+    // remove the tracks (and add the new ones)
     let spliced = TrackOrTracks ? this.tracks.splice(index, amount, ...(Array.isArray(TrackOrTracks) ? TrackOrTracks : [TrackOrTracks]).filter(v => this.managerUtils.isTrack(v))) : this.tracks.splice(index, amount);
+    // get the spliced array
+    spliced = (Array.isArray(spliced) ? spliced : [spliced]);
+    // Log if available
+    if(typeof this.queueChanges?.tracksRemoved === "function") try { this.queueChanges.tracksRemoved(this.guildId, spliced, index, oldStored, this.utils.getStored()) } catch (e) { /* */ }
     // save the queue
     await this.utils.save();
-    spliced = (Array.isArray(spliced) ? spliced : [spliced]);
+    // return the things
     return spliced.length === 1 ? spliced[0] : spliced;
   }
-
 }

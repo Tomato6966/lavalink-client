@@ -1,6 +1,6 @@
 import { EventEmitter } from "events";
 import { NodeManager } from "./NodeManager";
-import { DefaultQueueStore, QueueSaverOptions, StoreManager } from "./Queue";
+import { DefaultQueueStore, QueueChangesWatcher, QueueSaverOptions, StoreManager } from "./Queue";
 import { GuildShardPayload, LavalinkSearchPlatform, ManagerUitls, MiniMap, SearchPlatform, TrackEndEvent, TrackExceptionEvent, TrackStartEvent, TrackStuckEvent, VoicePacket, VoiceServer, VoiceState, WebSocketClosedEvent } from "./Utils";
 import { LavalinkNodeOptions } from "./Node";
 import { DefaultSources, SourceLinksRegexes } from "./LavalinkManagerStatics";
@@ -29,15 +29,18 @@ export interface LavalinkPlayerOptions {
     autoReconnect?: boolean,
     destroyPlayer?: boolean,
   },
+  /* What the Player should do, when the queue gets empty */
   onEmptyQueue?: {
-    destroyAfter?: number,
+    /* aut. destroy the player after x ms, if 0 it instantly destroys, don't provide to not destroy the player */
+    destroyAfterMs?: number,
   }
 }
 
 export interface ManagerOptions {
   nodes: LavalinkNodeOptions[];
-  queueStore?: StoreManager;
   queueOptions?: QueueSaverOptions;
+  queueStore?: StoreManager;
+  queueChangesWatcher?: QueueChangesWatcher;
   client?: BotClientOptions;
   playerOptions?: LavalinkPlayerOptions;
   autoSkip?: boolean;
@@ -198,59 +201,77 @@ export class LavalinkManager extends EventEmitter {
     else console.error("Could not connect to at least 1 Node");
     return this;
   }
+
   /**
    * Sends voice data to the Lavalink server.
    * @param data
    */
-  public async updateVoiceState(data: VoicePacket | VoiceServer | VoiceState): Promise<void> {
+  public async sendRawData(data: VoicePacket | VoiceServer | VoiceState | any): Promise<void> {
     if(!this.initiated) return; 
-    if ("t" in data && !["VOICE_STATE_UPDATE", "VOICE_SERVER_UPDATE"].includes(data.t)) return;
-
-    const update: VoiceServer | VoiceState = "d" in data ? data.d : data;
-    if (!update || !("token" in update) && !("session_id" in update)) return;
-
-    const player = this.getPlayer(update.guild_id) as Player;
-    if (!player) return;
+    if(!("t" in data)) return; 
     
-    if ("token" in update) {
-      if (!player.node?.sessionId) throw new Error("Lavalink Node is either not ready or not up to date");
-      await player.node.updatePlayer({
-        guildId: player.guildId,
-        playerOptions: {
-          voice: {
-            token: update.token,
-            endpoint: update.endpoint,
-            sessionId: player.voice?.sessionId,
+    // for channel Delete
+    if("CHANNEL_DELETE" === data.t) {
+      const update = "d" in data ? data.d : data;
+      if(!update.guild_id) return;
+      const player = this.getPlayer(update.guild_id);
+      if(player.voiceChannelId === update.id) {
+        return player.destroy(DestroyReasons.ChannelDeleted);
+      }
+    }
+
+    // for voice updates
+    if (["VOICE_STATE_UPDATE", "VOICE_SERVER_UPDATE"].includes(data.t)) {
+      const update: VoiceServer | VoiceState = "d" in data ? data.d : data;
+      if (!update || !("token" in update) && !("session_id" in update)) return;
+
+      const player = this.getPlayer(update.guild_id) as Player;
+      if (!player) return;
+      
+      if ("token" in update) {
+        if (!player.node?.sessionId) throw new Error("Lavalink Node is either not ready or not up to date");
+        await player.node.updatePlayer({
+          guildId: player.guildId,
+          playerOptions: {
+            voice: {
+              token: update.token,
+              endpoint: update.endpoint,
+              sessionId: player.voice?.sessionId,
+            }
           }
+        });
+        return 
+      }
+
+      /* voice state update */
+      if (update.user_id !== this.options.client.id) return;      
+      
+      if (update.channel_id) {
+        if (player.voiceChannelId !== update.channel_id) this.emit("playerMove", player, player.voiceChannelId, update.channel_id);
+        player.voice.sessionId = update.session_id;
+        player.voiceChannelId = update.channel_id;
+      } else {
+        if(this.options.playerOptions.onDisconnect?.destroyPlayer === true) {
+          return await player.destroy(DestroyReasons.Disconnected);
         }
-      });
+        this.emit("playerDisconnect", player, player.voiceChannelId);
+
+        await player.pause();
+
+        if(this.options.playerOptions.onDisconnect?.autoReconnect === true) {
+          try {
+            await player.connect();
+          } catch {
+            return await player.destroy(DestroyReasons.PlayerReconnectFail);
+          }
+          return await player.resume();
+        }
+
+        player.voiceChannelId = null;
+        player.voice = Object.assign({});
+        return 
+      }
       return 
     }
-
-    /* voice state update */
-    if (update.user_id !== this.options.client.id) return;      
-    
-    if (update.channel_id) {
-      if (player.voiceChannelId !== update.channel_id) this.emit("playerMove", player, player.voiceChannelId, update.channel_id);
-      player.voice.sessionId = update.session_id;
-      player.voiceChannelId = update.channel_id;
-    } else {
-      if(this.options.playerOptions.onDisconnect?.destroyPlayer === true) {
-        return await player.destroy(DestroyReasons.Disconnected);
-      }
-      this.emit("playerDisconnect", player, player.voiceChannelId);
-
-      await player.pause();
-
-      if(this.options.playerOptions.onDisconnect?.autoReconnect === true) {
-        await player.connect();
-        return await player.resume();
-      }
-
-      player.voiceChannelId = null;
-      player.voice = Object.assign({});
-      return 
-    }
-    return 
   }
 }

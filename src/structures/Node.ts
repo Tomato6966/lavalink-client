@@ -622,7 +622,7 @@ export class LavalinkNode {
         if (!player) return;
 
         console.log(payload.type);
-        
+
         switch (payload.type) {
             case "TrackStartEvent": this.trackStart(player, player.queue.current, payload); break;
             case "TrackEndEvent": this.trackEnd(player, player.queue.current, payload); break;
@@ -671,8 +671,20 @@ export class LavalinkNode {
 
         if ((payload as TrackEndEvent)?.reason !== "stopped") {
             await player.queue.utils.save();
-            console.log("QUEUE END STOP")
-        } else console.log(payload);
+        }
+
+        if(typeof this.NodeManager.LavalinkManager.options.playerOptions?.onEmptyQueue?.destroyAfterMs === "number" && !isNaN(this.NodeManager.LavalinkManager.options.playerOptions.onEmptyQueue?.destroyAfterMs) && this.NodeManager.LavalinkManager.options.playerOptions.onEmptyQueue?.destroyAfterMs >= 0) {
+            if(this.NodeManager.LavalinkManager.options.playerOptions.onEmptyQueue?.destroyAfterMs === 0) return player.destroy(DestroyReasons.QueueEmpty);
+            else {
+                if(player.get("internal_queueempty")) {
+                    clearTimeout(player.get("internal_queueempty"));
+                    player.set("internal_queueempty", undefined);
+                }
+                player.set("internal_queueempty", setTimeout(() => {
+                    player.destroy(DestroyReasons.QueueEmpty);
+                }, this.NodeManager.LavalinkManager.options.playerOptions.onEmptyQueue?.destroyAfterMs))
+            }
+        }
 
         return this.NodeManager.LavalinkManager.emit("queueEnd", player, track, payload);
     }

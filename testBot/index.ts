@@ -1,11 +1,12 @@
 import { Client, GatewayIntentBits } from "discord.js";
 import { createClient, RedisClientType } from 'redis';
-import { DefaultQueueStore, LavalinkManager, StoredQueue } from "../src";
+import { DefaultQueueStore, LavalinkManager, QueueChangesWatcher, StoredQueue, Track } from "../src";
 import { BotClient } from "./types/Client";
 import { envConfig } from "./config";
 import { loadCommands } from "./handler/commandLoader";
 import { loadEvents } from "./handler/eventsLoader";
 import { loadLavalinkEvents } from "./lavalinkEvents";
+import { myCustomStore, myCustomWatcher } from "./Utils/CustomClasses";
 
 const client = new Client({
     intents: [
@@ -16,29 +17,6 @@ const client = new Client({
     ]
 }) as BotClient;
 
-class myCustomStore extends DefaultQueueStore {
-    private redis:RedisClientType;
-    constructor(redisClient:RedisClientType) {
-        super();
-        this.redis = redisClient;
-    }
-    async get(guildId: any): Promise<any> {
-        return await this.redis.get(guildId);
-    }
-    async set(guildId: any, stringifiedQueueData: any): Promise<any> {
-        // await this.delete(guildId); // redis requires you to delete it first;
-        return await this.redis.set(guildId, stringifiedQueueData);
-    }
-    async delete(guildId: any): Promise<any> {
-        return await this.redis.del(guildId);
-    }
-    async parse(stringifiedQueueData: any): Promise<Partial<StoredQueue>> {
-        return JSON.parse(stringifiedQueueData);
-    }
-    async stringify(parsedQueueData: any): Promise<any> {
-        return JSON.stringify(parsedQueueData);
-    }
-}
 
 client.redis = createClient({ url: envConfig.redis.url, password: envConfig.redis.password });
 client.redis.connect();
@@ -65,12 +43,20 @@ client.lavalink = new LavalinkManager({
         applyVolumeAsFilter: false,
         clientBasedUpdateInterval: 50,
         defaultSearchPlatform: "ytmsearch",
-        volumeDecrementer: 0.7
+        volumeDecrementer: 0.75,
+        onDisconnect: {
+            autoReconnect: true, // automatically attempts a reconnect, if the bot disconnects from the voice channel, if it fails, it get's destroyed
+            destroyPlayer: false // overrides autoReconnect and directly destroys the player if the bot disconnects from the vc
+        },
+        onEmptyQueue: {
+            destroyAfterMs: 10000, // 0 === instantly destroy | don't provide the option, to don't destroy the player
+        }
     },
     queueOptions: {
         maxPreviousTracks: 0
     },
-    queueStore: new myCustomStore(client.redis)
+    queueStore: new myCustomStore(client.redis),
+    queueChangesWatcher: new myCustomWatcher(client)
 });
 
 loadCommands(client);

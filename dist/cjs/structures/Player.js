@@ -6,11 +6,13 @@ const LavalinkManagerStatics_1 = require("./LavalinkManagerStatics");
 const Queue_1 = require("./Queue");
 const Utils_1 = require("./Utils");
 exports.DestroyReasons = {
+    QueueEmpty: "QueueEmpty",
     NodeDestroy: "NodeDestroy",
     NodeDeleted: "NodeDeleted",
     LavalinkNoVoice: "LavalinkNoVoice",
     NodeReconnectFail: "NodeReconnectFail",
     Disconnected: "Disconnected",
+    PlayerReconnectFail: "PlayerReconnectFail",
     ChannelDeleted: "ChannelDeleted"
 };
 class Player {
@@ -72,7 +74,7 @@ class Player {
         this.LavalinkManager.emit("playerCreate", this);
         if (typeof options.volume === "number" && !isNaN(options.volume))
             this.setVolume(options.volume);
-        this.queue = new Queue_1.Queue(this.guildId, {}, new Queue_1.QueueSaver(this.LavalinkManager.options.queueStore, this.LavalinkManager.options.queueOptions));
+        this.queue = new Queue_1.Queue(this.guildId, {}, new Queue_1.QueueSaver(this.LavalinkManager.options.queueStore, this.LavalinkManager.options.queueOptions), this.LavalinkManager.options.queueChangesWatcher);
     }
     /**
      * Set custom data.
@@ -113,6 +115,10 @@ class Player {
      * @param options
      */
     async play(options) {
+        if (this.get("internal_queueempty")) {
+            clearTimeout(this.get("internal_queueempty"));
+            this.set("internal_queueempty", undefined);
+        }
         if (options?.track && this.LavalinkManager.utils.isTrack(options?.track)) {
             await this.queue.add(options?.track, 0);
             await (0, Utils_1.queueTrackEnd)(this.queue, this.repeatMode === "queue");
@@ -131,7 +137,7 @@ class Player {
             options.volume = vol;
         }
         const finalOptions = {
-            encoded: track.encoded,
+            encodedTrack: track.encoded,
             volume: this.lavalinkVolume,
             position: 0,
             ...options,
@@ -283,6 +289,8 @@ class Player {
                 throw new RangeError("Can't skip more than the queue size");
             await this.queue.splice(0, skipTo - 1);
         }
+        if (!this.playing)
+            return await this.play();
         const now = performance.now();
         await this.node.updatePlayer({ guildId: this.guildId, playerOptions: { encodedTrack: null } });
         this.ping.lavalink = Math.round((performance.now() - now) / 10) / 100;
@@ -332,9 +340,10 @@ class Player {
     async destroy(reason) {
         await this.disconnect(true);
         await this.queue.utils.destroy();
+        this.LavalinkManager.deletePlayer(this.guildId);
         await this.node.destroyPlayer(this.guildId);
         this.LavalinkManager.emit("playerDestroy", this, reason);
-        this.LavalinkManager.deletePlayer(this.guildId);
+        return;
     }
     /**
      * Move the player on a different Audio-Node
@@ -378,7 +387,7 @@ class Player {
             createdTimeStamp: this.createdTimeStamp,
             filters: this.filterManager?.data || {},
             equalizer: this.filterManager?.equalizerBands || [],
-            queue: this.queue?.utils?.getRaw?.() || { current: null, tracks: [], previous: [] },
+            queue: this.queue?.utils?.getStored?.() || { current: null, tracks: [], previous: [] },
             nodeId: this.node?.id,
         };
     }

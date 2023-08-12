@@ -41,6 +41,12 @@ export declare class DefaultQueueStore {
     stringify(value: any): Promise<any>;
     parse(value: any): Promise<Partial<StoredQueue>>;
 }
+export declare class QueueChangesWatcher {
+    constructor();
+    tracksAdd(guildId: string, tracks: Track[], position: number, oldStoredQueue: StoredQueue, newStoredQueue: StoredQueue): void;
+    tracksRemoved(guildId: string, tracks: Track[], position: number, oldStoredQueue: StoredQueue, newStoredQueue: StoredQueue): void;
+    shuffled(guildId: string, oldStoredQueue: StoredQueue, newStoredQueue: StoredQueue): void;
+}
 export declare class Queue {
     readonly tracks: Track[];
     readonly previous: Track[];
@@ -52,7 +58,8 @@ export declare class Queue {
     protected readonly QueueSaver: QueueSaver | null;
     static readonly StaticSymbol: Symbol;
     private managerUtils;
-    constructor(guildId: string, data?: Partial<StoredQueue>, QueueSaver?: QueueSaver);
+    private queueChanges;
+    constructor(guildId: string, data?: Partial<StoredQueue>, QueueSaver?: QueueSaver, queueChangesWatcher?: QueueChangesWatcher);
     /**
      * Utils for a Queue
      */
@@ -70,18 +77,18 @@ export declare class Queue {
         /**
          * @returns {{current:Track|null, previous:Track[], tracks:Track[]}}The Queue, but in a raw State, which allows easier handling for the storeManager
          */
-        getRaw: () => StoredQueue;
+        getStored: () => StoredQueue;
         /**
          * Get the Total Duration of the Queue-Songs summed up
          * @returns {number}
          */
         totalDuration: () => number;
-        /**
-         * Shuffles the current Queue, then saves it
-         * @returns Amount of Tracks in the Queue
-         */
-        shuffle: () => Promise<number>;
     };
+    /**
+     * Shuffles the current Queue, then saves it
+     * @returns Amount of Tracks in the Queue
+     */
+    shuffle(): Promise<number>;
     /**
      * Add a Track to the Queue, and after saved in the "db" it returns the amount of the Tracks
      * @param {Track | Track[]} TrackOrTracks

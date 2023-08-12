@@ -4,7 +4,7 @@ import { LavalinkNode } from "./Node";
 import { Queue } from "./Queue";
 import { Track } from "./Track";
 import { LavalinkPlayerVoiceOptions, SearchPlatform, SearchResult } from "./Utils";
-type PlayerDestroyReasons = "NodeDestroy" | "NodeDeleted" | "LavalinkNoVoice" | "NodeReconnectFail" | "Disconnected" | "ChannelDeleted";
+type PlayerDestroyReasons = "QueueEmpty" | "NodeDestroy" | "NodeDeleted" | "LavalinkNoVoice" | "NodeReconnectFail" | "PlayerReconnectFail" | "Disconnected" | "ChannelDeleted";
 export type DestroyReasonsType = PlayerDestroyReasons | string;
 export declare const DestroyReasons: Record<PlayerDestroyReasons, PlayerDestroyReasons>;
 export type RepeatMode = "queue" | "track" | "off";
@@ -148,7 +148,7 @@ export declare class Player {
      * Skip the current song, or a specific amount of songs
      * @param amount provide the index of the next track to skip to
      */
-    skip(skipTo?: number): Promise<boolean>;
+    skip(skipTo?: number): Promise<true | void>;
     /**
      * Connects the Player to the Voice Channel
      * @returns

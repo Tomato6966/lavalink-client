@@ -12,6 +12,24 @@ Dev Version: (Current)
 npm install tomato6966/lavalink-client
 ```
 
+# Features
+
+- Player-Destroy Reasons like:
+  - Channel got deleted, Player got disconnected...
+- Choose able queue stores (maps, collections, redis, databases, ...)
+  - You can create your own queueStore, thus make it easy to sync queues accross multiple connections (e.g. dashboard-bot)
+- Included Filter & Equalizer Management
+- Multiple Player Options
+  - onDisconnect -> Player Destroy / auto Reconnect
+  - onEmptyQueue -> Player Destroy / leave After x Time
+  - instaFixFilter -> seek the player after applying a filter, to instantly apply it's effect (only works for little-durational-songs)
+  - applyVolumeAsFilter -> instead of using lavalink.volume, it uses lavalink.filters.volume which is much different!
+- Lavalink Validations
+  - It only let's you use the filters / plugins / sources, if Lavalink actually has it enabled
+- Memory friendly and easy style
+  - Only the required data is displayed, and the store-way & types match Lavalink#IMPLEMENTATION.md
+- Much much more!
+
 # Documentation
 
 *soon*
@@ -57,14 +75,16 @@ client.lavalink = new LavalinkManager({
     },
     queueOptions: {
         maxPreviousTracks: 5
-    }
+    },
+    // queueStore: new myCustomStore(client.redis), // OPTIONAL! 'class myCustomStore extends DefaultQueueStore' --> for custom queue stores, e.g. redis, etc. | default is lavalink-client#MiniMap
+    // queueChangesWatcher: new myCustomWatcher(), // OPTIONAL! 'class myCustomWatcher extends QueueChangesWatcher' --> for queue action logs!
 });
 ```
 
 3. **VERY IMPORTANT!** - Register Voice State updates + initialize the Manager
 
 ```ts
-client.on("raw", d => client.lavalink.updateVoiceState(d)); // for voice state updates!
+client.on("raw", d => client.lavalink.sendRawData(d)); // for voice state updates!
 client.on("ready", async () => {
     console.log("Discord Bot is ready to be Used!");
     // user.id is required, user.shards (not), user.username (not, but recommended for lavalink stats!) 

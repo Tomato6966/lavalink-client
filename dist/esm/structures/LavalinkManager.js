@@ -92,55 +92,73 @@ export class LavalinkManager extends EventEmitter {
      * Sends voice data to the Lavalink server.
      * @param data
      */
-    async updateVoiceState(data) {
+    async sendRawData(data) {
         if (!this.initiated)
             return;
-        if ("t" in data && !["VOICE_STATE_UPDATE", "VOICE_SERVER_UPDATE"].includes(data.t))
+        if (!("t" in data))
             return;
-        const update = "d" in data ? data.d : data;
-        if (!update || !("token" in update) && !("session_id" in update))
-            return;
-        const player = this.getPlayer(update.guild_id);
-        if (!player)
-            return;
-        if ("token" in update) {
-            if (!player.node?.sessionId)
-                throw new Error("Lavalink Node is either not ready or not up to date");
-            await player.node.updatePlayer({
-                guildId: player.guildId,
-                playerOptions: {
-                    voice: {
-                        token: update.token,
-                        endpoint: update.endpoint,
-                        sessionId: player.voice?.sessionId,
+        // for channel Delete
+        if ("CHANNEL_DELETE" === data.t) {
+            const update = "d" in data ? data.d : data;
+            if (!update.guild_id)
+                return;
+            const player = this.getPlayer(update.guild_id);
+            if (player.voiceChannelId === update.id) {
+                return player.destroy(DestroyReasons.ChannelDeleted);
+            }
+        }
+        // for voice updates
+        if (["VOICE_STATE_UPDATE", "VOICE_SERVER_UPDATE"].includes(data.t)) {
+            const update = "d" in data ? data.d : data;
+            if (!update || !("token" in update) && !("session_id" in update))
+                return;
+            const player = this.getPlayer(update.guild_id);
+            if (!player)
+                return;
+            if ("token" in update) {
+                if (!player.node?.sessionId)
+                    throw new Error("Lavalink Node is either not ready or not up to date");
+                await player.node.updatePlayer({
+                    guildId: player.guildId,
+                    playerOptions: {
+                        voice: {
+                            token: update.token,
+                            endpoint: update.endpoint,
+                            sessionId: player.voice?.sessionId,
+                        }
                     }
+                });
+                return;
+            }
+            /* voice state update */
+            if (update.user_id !== this.options.client.id)
+                return;
+            if (update.channel_id) {
+                if (player.voiceChannelId !== update.channel_id)
+                    this.emit("playerMove", player, player.voiceChannelId, update.channel_id);
+                player.voice.sessionId = update.session_id;
+                player.voiceChannelId = update.channel_id;
+            }
+            else {
+                if (this.options.playerOptions.onDisconnect?.destroyPlayer === true) {
+                    return await player.destroy(DestroyReasons.Disconnected);
                 }
-            });
-            return;
-        }
-        /* voice state update */
-        if (update.user_id !== this.options.client.id)
-            return;
-        if (update.channel_id) {
-            if (player.voiceChannelId !== update.channel_id)
-                this.emit("playerMove", player, player.voiceChannelId, update.channel_id);
-            player.voice.sessionId = update.session_id;
-            player.voiceChannelId = update.channel_id;
-        }
-        else {
-            if (this.options.playerOptions.onDisconnect?.destroyPlayer === true) {
-                return await player.destroy(DestroyReasons.Disconnected);
+                this.emit("playerDisconnect", player, player.voiceChannelId);
+                await player.pause();
+                if (this.options.playerOptions.onDisconnect?.autoReconnect === true) {
+                    try {
+                        await player.connect();
+                    }
+                    catch {
+                        return await player.destroy(DestroyReasons.PlayerReconnectFail);
+                    }
+                    return await player.resume();
+                }
+                player.voiceChannelId = null;
+                player.voice = Object.assign({});
+                return;
             }
-            this.emit("playerDisconnect", player, player.voiceChannelId);
-            await player.pause();
-            if (this.options.playerOptions.onDisconnect?.autoReconnect === true) {
-                await player.connect();
-                return await player.resume();
-            }
-            player.voiceChannelId = null;
-            player.voice = Object.assign({});
             return;
         }
-        return;
     }
 }

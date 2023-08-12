@@ -1,7 +1,7 @@
 /// <reference types="node" />
 import { EventEmitter } from "events";
 import { NodeManager } from "./NodeManager";
-import { QueueSaverOptions, StoreManager } from "./Queue";
+import { QueueChangesWatcher, QueueSaverOptions, StoreManager } from "./Queue";
 import { GuildShardPayload, LavalinkSearchPlatform, ManagerUitls, MiniMap, SearchPlatform, TrackEndEvent, TrackExceptionEvent, TrackStartEvent, TrackStuckEvent, VoicePacket, VoiceServer, VoiceState, WebSocketClosedEvent } from "./Utils";
 import { LavalinkNodeOptions } from "./Node";
 import { DestroyReasonsType, Player, PlayerOptions } from "./Player";
@@ -27,13 +27,14 @@ export interface LavalinkPlayerOptions {
         destroyPlayer?: boolean;
     };
     onEmptyQueue?: {
-        destroyAfter?: number;
+        destroyAfterMs?: number;
     };
 }
 export interface ManagerOptions {
     nodes: LavalinkNodeOptions[];
-    queueStore?: StoreManager;
     queueOptions?: QueueSaverOptions;
+    queueStore?: StoreManager;
+    queueChangesWatcher?: QueueChangesWatcher;
     client?: BotClientOptions;
     playerOptions?: LavalinkPlayerOptions;
     autoSkip?: boolean;
@@ -118,6 +119,6 @@ export declare class LavalinkManager extends EventEmitter {
      * Sends voice data to the Lavalink server.
      * @param data
      */
-    updateVoiceState(data: VoicePacket | VoiceServer | VoiceState): Promise<void>;
+    sendRawData(data: VoicePacket | VoiceServer | VoiceState | any): Promise<void>;
 }
 export {};
