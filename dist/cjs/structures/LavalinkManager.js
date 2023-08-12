@@ -8,8 +8,8 @@ const Utils_1 = require("./Utils");
 const LavalinkManagerStatics_1 = require("./LavalinkManagerStatics");
 const Player_1 = require("./Player");
 class LavalinkManager extends events_1.EventEmitter {
-    static DEFAULT_SOURCES = LavalinkManagerStatics_1.DEFAULT_SOURCES;
-    static REGEXES = LavalinkManagerStatics_1.REGEXES;
+    static DefaultSources = LavalinkManagerStatics_1.DefaultSources;
+    static SourceLinksRegexes = LavalinkManagerStatics_1.SourceLinksRegexes;
     initiated = false;
     players = new Utils_1.MiniMap();
     applyDefaultOptions() {

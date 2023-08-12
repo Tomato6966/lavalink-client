@@ -11,13 +11,14 @@ class ManagerUitls {
         this.manager = LavalinkManager;
     }
     buildTrack(data, requester) {
-        const encodedTrack = data.encoded || data.encodedTrack;
-        if (!encodedTrack)
-            throw new RangeError("Argument 'data.encoded' / 'data.encodedTrack' / 'data.track' must be present.");
+        const encoded = data.encoded || data.encoded;
+        if (!encoded)
+            throw new RangeError("Argument 'data.encoded' / 'data.encoded' / 'data.track' must be present.");
         if (!data.info)
             data.info = {};
         try {
             const r = {
+                encoded,
                 info: {
                     identifier: data.info?.identifier,
                     title: data.info?.title,
@@ -29,10 +30,9 @@ class ManagerUitls {
                     isSeekable: data.info?.isSeekable,
                     isStream: data.info?.isStream,
                     isrc: data.info?.isrc,
-                    requester: data.info?.requester || requester,
                 },
                 pluginInfo: data.pluginInfo || data.plugin || {},
-                encodedTrack
+                requester: data.info?.requester || requester,
             };
             Object.defineProperty(r, exports.TrackSymbol, { configurable: true, value: true });
             return r;
@@ -47,7 +47,7 @@ class ManagerUitls {
      * @returns {boolean}
      */
     isTrack(data) {
-        return typeof data?.encodedTrack === "string" && typeof data?.info === "object";
+        return typeof data?.encoded === "string" && typeof data?.info === "object";
     }
     validatedQuery(queryString, node) {
         if (!node.info)
@@ -55,46 +55,46 @@ class ManagerUitls {
         if (!node.info.sourceManagers?.length)
             throw new Error("Lavalink Node, has no sourceManagers enabled");
         // missing links: beam.pro local getyarn.io clypit pornhub reddit ocreamix soundgasm
-        if ((LavalinkManagerStatics_1.REGEXES.YoutubeMusicRegex.test(queryString) || LavalinkManagerStatics_1.REGEXES.YoutubeRegex.test(queryString)) && !node.info.sourceManagers.includes("youtube")) {
+        if ((LavalinkManagerStatics_1.SourceLinksRegexes.YoutubeMusicRegex.test(queryString) || LavalinkManagerStatics_1.SourceLinksRegexes.YoutubeRegex.test(queryString)) && !node.info.sourceManagers.includes("youtube")) {
             throw new Error("Lavalink Node has not 'youtube' enabled");
         }
-        if ((LavalinkManagerStatics_1.REGEXES.SoundCloudMobileRegex.test(queryString) || LavalinkManagerStatics_1.REGEXES.SoundCloudRegex.test(queryString)) && !node.info.sourceManagers.includes("soundcloud")) {
+        if ((LavalinkManagerStatics_1.SourceLinksRegexes.SoundCloudMobileRegex.test(queryString) || LavalinkManagerStatics_1.SourceLinksRegexes.SoundCloudRegex.test(queryString)) && !node.info.sourceManagers.includes("soundcloud")) {
             throw new Error("Lavalink Node has not 'soundcloud' enabled");
         }
-        if (LavalinkManagerStatics_1.REGEXES.bandcamp.test(queryString) && !node.info.sourceManagers.includes("bandcamp")) {
+        if (LavalinkManagerStatics_1.SourceLinksRegexes.bandcamp.test(queryString) && !node.info.sourceManagers.includes("bandcamp")) {
             throw new Error("Lavalink Node has not 'bandcamp' enabled");
         }
-        if (LavalinkManagerStatics_1.REGEXES.TwitchTv.test(queryString) && !node.info.sourceManagers.includes("twitch")) {
+        if (LavalinkManagerStatics_1.SourceLinksRegexes.TwitchTv.test(queryString) && !node.info.sourceManagers.includes("twitch")) {
             throw new Error("Lavalink Node has not 'twitch' enabled");
         }
-        if (LavalinkManagerStatics_1.REGEXES.vimeo.test(queryString) && !node.info.sourceManagers.includes("vimeo")) {
+        if (LavalinkManagerStatics_1.SourceLinksRegexes.vimeo.test(queryString) && !node.info.sourceManagers.includes("vimeo")) {
             throw new Error("Lavalink Node has not 'vimeo' enabled");
         }
-        if (LavalinkManagerStatics_1.REGEXES.tiktok.test(queryString) && !node.info.sourceManagers.includes("tiktok")) {
+        if (LavalinkManagerStatics_1.SourceLinksRegexes.tiktok.test(queryString) && !node.info.sourceManagers.includes("tiktok")) {
             throw new Error("Lavalink Node has not 'tiktok' enabled");
         }
-        if (LavalinkManagerStatics_1.REGEXES.mixcloud.test(queryString) && !node.info.sourceManagers.includes("mixcloud")) {
+        if (LavalinkManagerStatics_1.SourceLinksRegexes.mixcloud.test(queryString) && !node.info.sourceManagers.includes("mixcloud")) {
             throw new Error("Lavalink Node has not 'mixcloud' enabled");
         }
-        if (LavalinkManagerStatics_1.REGEXES.AllSpotifyRegex.test(queryString) && !node.info.sourceManagers.includes("spotify")) {
+        if (LavalinkManagerStatics_1.SourceLinksRegexes.AllSpotifyRegex.test(queryString) && !node.info.sourceManagers.includes("spotify")) {
             throw new Error("Lavalink Node has not 'spotify' enabled");
         }
-        if (LavalinkManagerStatics_1.REGEXES.appleMusic.test(queryString) && !node.info.sourceManagers.includes("applemusic")) {
+        if (LavalinkManagerStatics_1.SourceLinksRegexes.appleMusic.test(queryString) && !node.info.sourceManagers.includes("applemusic")) {
             throw new Error("Lavalink Node has not 'applemusic' enabled");
         }
-        if (LavalinkManagerStatics_1.REGEXES.AllDeezerRegex.test(queryString) && !node.info.sourceManagers.includes("deezer")) {
+        if (LavalinkManagerStatics_1.SourceLinksRegexes.AllDeezerRegex.test(queryString) && !node.info.sourceManagers.includes("deezer")) {
             throw new Error("Lavalink Node has not 'deezer' enabled");
         }
-        if (LavalinkManagerStatics_1.REGEXES.AllDeezerRegex.test(queryString) && node.info.sourceManagers.includes("deezer") && !node.info.sourceManagers.includes("http")) {
+        if (LavalinkManagerStatics_1.SourceLinksRegexes.AllDeezerRegex.test(queryString) && node.info.sourceManagers.includes("deezer") && !node.info.sourceManagers.includes("http")) {
             throw new Error("Lavalink Node has not 'http' enabled, which is required to have 'deezer' to work");
         }
-        if (LavalinkManagerStatics_1.REGEXES.musicYandex.test(queryString) && !node.info.sourceManagers.includes("yandexmusic")) {
+        if (LavalinkManagerStatics_1.SourceLinksRegexes.musicYandex.test(queryString) && !node.info.sourceManagers.includes("yandexmusic")) {
             throw new Error("Lavalink Node has not 'yandexmusic' enabled");
         }
         const hasSource = queryString.split(":")[0];
         if (queryString.split(" ").length <= 1 || !queryString.split(" ")[0].includes(":"))
             return;
-        const source = LavalinkManagerStatics_1.DEFAULT_SOURCES[hasSource];
+        const source = LavalinkManagerStatics_1.DefaultSources[hasSource];
         if (!source)
             throw new Error(`Lavalink Node SearchQuerySource: '${hasSource}' is not available`);
         if (source === "amsearch" && !node.info.sourceManagers.includes("applemusic")) {

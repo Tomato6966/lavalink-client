@@ -1,11 +1,5 @@
 import { LavalinkSearchPlatform, SearchPlatform, SourcesRegex } from "./Utils"
 
-interface EndpointData {
-    path: string,
-    method: string,
-    body: Record<string, string>
-}
-
 export const DefaultSources: Record<SearchPlatform, LavalinkSearchPlatform> = {
     // youtubemusic
     "youtube music": "ytmsearch",
@@ -35,7 +29,6 @@ export const DefaultSources: Record<SearchPlatform, LavalinkSearchPlatform> = {
     // deezer
     "deezer": "dzsearch",
     "dz": "dzsearch",
-    "deezer": "dzsearch",
     "dzsearch": "dzsearch",
     "dzisrc": "dzisrc",
     // yandexmusic

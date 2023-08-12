@@ -1,10 +1,9 @@
 /// <reference types="node" />
-import WebSocket from "ws";
 import { Dispatcher, Pool } from "undici";
 import { NodeManager } from "./NodeManager";
 import internal from "stream";
-import { InvalidLavalinkRestRequest, LavalinkPlayer, PlayerUpdateInfo, RoutePlanner, Session } from "./Utils";
-import { LavalinkTrackDataInfo } from "./Track";
+import { InvalidLavalinkRestRequest, LavalinkPlayer, PlayerUpdateInfo, RoutePlanner, Session, Base64 } from "./Utils";
+import { TrackInfo } from "./Track";
 /** Modifies any outgoing REST requests. */
 export type ModifyRequest = (options: Dispatcher.RequestOptions) => void;
 export interface LavalinkNodeOptions {
@@ -16,6 +15,8 @@ export interface LavalinkNodeOptions {
     authorization: string;
     /** Does the Server use ssl (https) */
     secure?: boolean;
+    /** RESUME THE PLAYER? by providing a sessionid on the node-creation */
+    sessionId?: string;
     /** Add a Custom ID to the node, for later use */
     id?: string;
     /** Voice Regions of this Node */
@@ -55,7 +56,7 @@ export interface FrameStats {
     /** The amount of deficit frames. */
     deficit?: number;
 }
-export interface NodeStats {
+export interface BaseNodeStats {
     /** The amount of players on the node. */
     players: number;
     /** The amount of playing players on the node. */
@@ -66,6 +67,10 @@ export interface NodeStats {
     memory: MemoryStats;
     /** The cpu stats for the node. */
     cpu: CPUStats;
+    /** The frame stats for the node. */
+    frameStats: FrameStats;
+}
+export interface NodeStats extends BaseNodeStats {
     /** The frame stats for the node. */
     frameStats: FrameStats;
 }
@@ -96,76 +101,134 @@ export interface PluginObject {
     version: string;
 }
 export declare class LavalinkNode {
-    socket: WebSocket | null;
-    rest: Pool;
+    /** The provided Options of the Node */
     options: LavalinkNodeOptions;
     /** The amount of rest calls the node has made. */
     calls: number;
     stats: NodeStats;
-    private NodeManager;
-    private reconnectTimeout?;
-    private reconnectAttempts;
     sessionId?: string | null;
+    /** Actual Lavalink Information of the Node */
     info: LavalinkInfo | null;
-    version: string;
+    /** The Node Manager of this Node */
+    private NodeManager;
+    /** The Reconnection Timeout */
+    private reconnectTimeout?;
+    /** The Reconnection Attempt counter */
+    private reconnectAttempts;
+    /** The Socket of the Lavalink */
+    private socket;
+    /** The Rest Server for this Lavalink */
+    private rest;
+    /** Version of what the Lavalink Server should be */
+    private version;
+    /**
+     * Create a new Node
+     * @param options
+     * @param manager
+     */
     constructor(options: LavalinkNodeOptions, manager: NodeManager);
-    private validate;
     /**
      * Makes an API call to the Node
      * @param endpoint The endpoint that we will make the call to
      * @param modify Used to modify the request before being sent
      * @returns The returned data
      */
-    makeRequest(endpoint: string, modify?: ModifyRequest, parseAsText?: boolean): Promise<unknown>;
+    request(endpoint: string, modify?: ModifyRequest, parseAsText?: boolean): Promise<unknown>;
+    /**
+     * Update the Player State on the Lavalink Server
+     * @param data
+     * @returns
+     */
     updatePlayer(data: PlayerUpdateInfo): Promise<LavalinkPlayer>;
     /**
-     * Decodes the base64 encoded tracks and returns a TrackData array.
-     * @param encodedTracks
+     * Destroys the Player on the Lavalink Server
+     * @param guildId
+     * @returns
      */
-    decodeTracks(encodedTracks: string[]): Promise<LavalinkTrackDataInfo[]>;
-    /**
-     * Decodes the base64 encoded track and returns a TrackData.
-     * @param encodedTrack
-     */
-    decodeTrack(encodedTrack: string): Promise<LavalinkTrackDataInfo>;
-    private syncPlayerData;
     destroyPlayer(guildId: any): Promise<unknown>;
-    connect(): void;
+    /**
+     * Connect to the Lavalink Node
+     * @param sessionId Provide the Session Id of the previous connection, to resume the node and it's player(s)
+     * @returns
+     */
+    connect(sessionId?: string): void;
+    /** Get the id of the node */
     get id(): string;
+    /**
+     * Destroys the Node-Connection (Websocket) and all player's of the node
+     * @returns
+     */
     destroy(): void;
     /** Returns if connected to the Node. */
     get connected(): boolean;
-    get poolAddress(): string;
-    private fetchInfo;
-    private fetchVersion;
     /**
      * Gets all Players of a Node
      */
-    getPlayers(): Promise<LavalinkPlayer[]>;
+    fetchAllPlayers(): Promise<LavalinkPlayer[]>;
     /**
      * Gets specific Player Information
      */
-    getPlayer(guildId: string): Promise<LavalinkPlayer | InvalidLavalinkRestRequest>;
+    fetchPlayer(guildId: string): Promise<LavalinkPlayer | InvalidLavalinkRestRequest>;
     /**
-     * Updates the session with a resuming key and timeout
-     * @param resumingKey
-     * @param timeout
+     * Updates the session with and enables/disables resuming and timeout
+     * @param resuming Whether resuming is enabled for this session or not
+     * @param timeout The timeout in seconds (default is 60s)
      */
-    updateSession(resumingKey?: string, timeout?: number): Promise<Session | Record<string, string>>;
+    updateSession(resuming?: boolean, timeout?: number): Promise<Session>;
     /**
-     * Get routplanner Info from Lavalink
+     * Decode Track or Tracks
      */
-    getRoutePlannerStatus(): Promise<RoutePlanner>;
+    decode: {
+        /**
+         * Decode a single track into its info, where BASE64 is the encoded base64 data.
+         * @param encoded
+         * @returns
+         */
+        singleTrack: (encoded: Base64) => Promise<TrackInfo>;
+        /**
+         *
+         * @param encodeds Decodes multiple tracks into their info
+         * @returns
+         */
+        multipleTracks: (encodeds: Base64[]) => Promise<TrackInfo[]>;
+    };
     /**
-     * Release blacklisted IP address into pool of IPs
-     * @param address IP address
+     * Request Lavalink statistics.
+     * @returns
      */
-    unmarkFailedAddress(address: string): Promise<void>;
+    fetchStats(): Promise<BaseNodeStats>;
     /**
-     * Release blacklisted IP address into pool of IPs
-     * @param address IP address
+     * Request Lavalink version.
+     * @returns
      */
-    unmarkAllFailedAddresses(): Promise<void>;
+    fetchVersion(): Promise<string>;
+    /**
+     * Request Lavalink information.
+     * @returns
+     */
+    fetchInfo(): Promise<LavalinkInfo>;
+    /**
+     * Lavalink's Route Planner Api
+     */
+    routePlannerApi: {
+        /**
+         * Get routplanner Info from Lavalink
+         */
+        getStatus: () => Promise<RoutePlanner>;
+        /**
+         * Release blacklisted IP address into pool of IPs
+         * @param address IP address
+         */
+        unmarkFailedAddress: (address: string) => Promise<void>;
+        /**
+         * Release all blacklisted IP addresses into pool of IPs
+         */
+        unmarkAllFailedAddresses: () => Promise<unknown>;
+    };
+    /** Private Utils */
+    private validate;
+    private syncPlayerData;
+    private get poolAddress();
     private reconnect;
     private open;
     private close;

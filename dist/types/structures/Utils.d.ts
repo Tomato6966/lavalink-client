@@ -3,13 +3,13 @@ import { LavalinkManager } from "./LavalinkManager";
 import { LavalinkNode, NodeStats } from "./Node";
 import { PlayOptions } from "./Player";
 import { Queue } from "./Queue";
-import { PluginDataInfo, Track } from "./Track";
+import { PluginInfo, Track } from "./Track";
 export declare const TrackSymbol: unique symbol;
 export declare const UnresolvedTrackSymbol: unique symbol;
 export declare const QueueSymbol: unique symbol;
 export declare const NodeSymbol: unique symbol;
 export type LavalinkSearchPlatform = "ytsearch" | "ytmsearch" | "scsearch" | "spsearch" | "sprec" | "amsearch" | "dzsearch" | "dzisrc" | "sprec" | "ymsearch" | "speak" | "tts";
-export type ClientSearchPlatform = "youtube" | "youtube music" | "soundcloud" | "ytm" | "yt" | "sc" | "am" | "sp" | "sprec" | "spsuggestion" | "ds" | "dz" | "deezer" | "yandex" | "yandexmusic";
+export type ClientSearchPlatform = "youtube" | "yt" | "yt" | "youtube music" | "youtubemusic" | "ytm" | "soundcloud" | "sc" | "am" | "apple music" | "applemusic" | "apple" | "yandex music" | "sp" | "sprec" | "spsuggestion" | "spotify" | "dz" | "deezer" | "yandex" | "yandexmusic";
 export type SearchPlatform = LavalinkSearchPlatform | ClientSearchPlatform;
 export type SourcesRegex = "YoutubeRegex" | "YoutubeMusicRegex" | "SoundCloudRegex" | "SoundCloudMobileRegex" | "DeezerTrackRegex" | "DeezerArtistRegex" | "DeezerEpisodeRegex" | "DeezerMixesRegex" | "DeezerPageLinkRegex" | "DeezerPlaylistRegex" | "DeezerAlbumRegex" | "AllDeezerRegex" | "AllDeezerRegexWithoutPageLink" | "SpotifySongRegex" | "SpotifyPlaylistRegex" | "SpotifyArtistRegex" | "SpotifyEpisodeRegex" | "SpotifyShowRegex" | "SpotifyAlbumRegex" | "AllSpotifyRegex" | "mp3Url" | "m3uUrl" | "m3u8Url" | "mp4Url" | "m4aUrl" | "wavUrl" | "aacpUrl" | "tiktok" | "mixcloud" | "musicYandex" | "radiohost" | "bandcamp" | "appleMusic" | "TwitchTv" | "vimeo";
 export interface PlaylistInfo {
@@ -29,7 +29,7 @@ export interface PlaylistInfo {
 export interface SearchResult {
     loadType: LoadTypes;
     exception: Exception | null;
-    pluginInfo: PluginDataInfo;
+    pluginInfo: PluginInfo;
     playlist: PlaylistInfo | null;
     tracks: Track[];
 }
@@ -154,28 +154,41 @@ export interface LavalinkPlayerVoice {
 }
 export interface LavalinkPlayerVoiceOptions extends Omit<LavalinkPlayerVoice, 'connected' | 'ping'> {
 }
-export interface Address {
-    address: string;
+export interface FailingAddress {
+    /** The failing address */
+    failingAddress: string;
+    /** The timestamp when the address failed */
     failingTimestamp: number;
+    /** The timestamp when the address failed as a pretty string */
     failingTime: string;
 }
+type RoutePlannerTypes = "RotatingIpRoutePlanner" | "NanoIpRoutePlanner" | "RotatingNanoIpRoutePlanner" | "BalancingIpRoutePlanner";
 export interface RoutePlanner {
-    class?: string;
+    class?: RoutePlannerTypes;
     details?: {
+        /** The ip block being used */
         ipBlock: {
-            type: string;
+            /** The type of the ip block */
+            type: "Inet4Address" | "Inet6Address";
+            /** 	The size of the ip block */
             size: string;
         };
-        failingAddresses: Address[];
+        /** The failing addresses */
+        failingAddresses: FailingAddress[];
+        /** The number of rotations */
+        rotateIndex?: string;
+        /** The current offset in the block	 */
+        ipIndex?: string;
+        /** The current address being used	 */
+        currentAddress?: string;
+        /** The current offset in the ip block */
+        currentAddressIndex?: string;
+        /** The information in which /64 block ips are chosen. This number increases on each ban. */
+        blockIndex?: string;
     };
-    rotateIndex?: string;
-    ipIndex?: string;
-    currentAddress?: string;
-    blockIndex?: string;
-    currentAddressIndex?: string;
 }
 export interface Session {
-    resumingKey?: string;
+    resuming: boolean;
     timeout: number;
 }
 export interface GuildShardPayload {
@@ -226,6 +239,7 @@ export interface VoiceState {
     session_id: string;
     channel_id: string;
 }
+export type Base64 = string;
 export interface VoiceServer {
     token: string;
     guild_id: string;
@@ -241,3 +255,4 @@ export interface NodeMessage extends NodeStats {
     guildId: string;
 }
 export declare function queueTrackEnd(queue: Queue, addBackToQueue?: boolean): Promise<Track>;
+export {};

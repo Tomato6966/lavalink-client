@@ -2,11 +2,11 @@ import { EventEmitter } from "events";
 import { NodeManager } from "./NodeManager";
 import { DefaultQueueStore } from "./Queue";
 import { ManagerUitls, MiniMap } from "./Utils";
-import { DEFAULT_SOURCES, REGEXES } from "./LavalinkManagerStatics";
+import { DefaultSources, SourceLinksRegexes } from "./LavalinkManagerStatics";
 import { Player } from "./Player";
 export class LavalinkManager extends EventEmitter {
-    static DEFAULT_SOURCES = DEFAULT_SOURCES;
-    static REGEXES = REGEXES;
+    static DefaultSources = DefaultSources;
+    static SourceLinksRegexes = SourceLinksRegexes;
     initiated = false;
     players = new MiniMap();
     applyDefaultOptions() {

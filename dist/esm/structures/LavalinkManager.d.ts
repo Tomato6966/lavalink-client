@@ -92,8 +92,8 @@ export interface LavalinkManager {
     emit<U extends keyof LavalinkManagerEvents>(event: U, ...args: Parameters<LavalinkManagerEvents[U]>): boolean;
 }
 export declare class LavalinkManager extends EventEmitter {
-    static DEFAULT_SOURCES: Record<SearchPlatform, LavalinkSearchPlatform>;
-    static REGEXES: Record<import("./Utils").SourcesRegex, RegExp>;
+    static DefaultSources: Record<SearchPlatform, LavalinkSearchPlatform>;
+    static SourceLinksRegexes: Record<import("./Utils").SourcesRegex, RegExp>;
     initiated: boolean;
     readonly players: MiniMap<string, Player>;
     private applyDefaultOptions;

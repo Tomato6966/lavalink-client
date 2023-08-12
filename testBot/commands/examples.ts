@@ -52,7 +52,8 @@ export default {
 
 function getExampleQueue() {
     return {
-        "currentTrack": {
+        "current": {
+            "encoded": "QAABHQMAM0hleSBNYW1hIChmZWF0LiBCZWJlIFJleGhhLCBOaWNraSBNaW5haiAmIEFmcm9qYWNrKQAMRGF2aWQgR3VldHRhAAAAAAAC8egAC0hzejZoTF9hNjlRAAEAK2h0dHBzOi8vd3d3LnlvdXR1YmUuY29tL3dhdGNoP3Y9SHN6NmhMX2E2OVEBAIBodHRwczovL2xoMy5nb29nbGV1c2VyY29udGVudC5jb20vT0dOSm43RXpTM0xRVnRhc1pvZWtlVnI3OS13MzVHNDdfT1VWTWh4ckV0Wmx2aU9YMjEyR3hKM2JSLXFjd2YyM1lXeUNlanFnanQza2xlWGNmZz13MTAwMC1oMTAwMAAAB3lvdXR1YmUAAAAAAAAAAA==",
             "info": {
                 "identifier": "Hsz6hL_a69Q",
                 "title": "Hey Mama (feat. Bebe Rexha, Nicki Minaj & Afrojack)",
@@ -63,21 +64,21 @@ function getExampleQueue() {
                 "sourceName": "youtube",
                 "isSeekable": true,
                 "isStream": false,
-                "isrc": null,
-                "requester": {
-                    "id": "498094279793704991",
-                    "username": "chrissy8283",
-                    "globalName": "Chrissy",
-                    "avatar": "164c06b4e7ac2cdfffb941481e6511ca",
-                    "displayAvatarURL": "https://cdn.discordapp.com/avatars/498094279793704991/164c06b4e7ac2cdfffb941481e6511ca.webp"
-                }
+                "isrc": null
             },
             "pluginInfo": {},
-            "encodedTrack": "QAABHQMAM0hleSBNYW1hIChmZWF0LiBCZWJlIFJleGhhLCBOaWNraSBNaW5haiAmIEFmcm9qYWNrKQAMRGF2aWQgR3VldHRhAAAAAAAC8egAC0hzejZoTF9hNjlRAAEAK2h0dHBzOi8vd3d3LnlvdXR1YmUuY29tL3dhdGNoP3Y9SHN6NmhMX2E2OVEBAIBodHRwczovL2xoMy5nb29nbGV1c2VyY29udGVudC5jb20vT0dOSm43RXpTM0xRVnRhc1pvZWtlVnI3OS13MzVHNDdfT1VWTWh4ckV0Wmx2aU9YMjEyR3hKM2JSLXFjd2YyM1lXeUNlanFnanQza2xlWGNmZz13MTAwMC1oMTAwMAAAB3lvdXR1YmUAAAAAAAAAAA=="
+            "requester": {
+                "id": "498094279793704991",
+                "username": "chrissy8283",
+                "globalName": "Chrissy",
+                "avatar": "164c06b4e7ac2cdfffb941481e6511ca",
+                "displayAvatarURL": "https://cdn.discordapp.com/avatars/498094279793704991/164c06b4e7ac2cdfffb941481e6511ca.webp"
+            }
         },
-        "previousTracks": [],
-        "nextTracks": [
+        "previous": [],
+        "tracks": [
             {
+                "encoded": "QAAA4wMARkJsYWNrc3RyZWV0IC0gTm8gRGlnZ2l0eSAoT2ZmaWNpYWwgTXVzaWMgVmlkZW8pIGZ0LiBEci4gRHJlLCBRdWVlbiBQZW4AC0JsYWNrc3RyZWV0AAAAAAAEIpgACzNLTDltUnVzMTlvAAEAK2h0dHBzOi8vd3d3LnlvdXR1YmUuY29tL3dhdGNoP3Y9M0tMOW1SdXMxOW8BADRodHRwczovL2kueXRpbWcuY29tL3ZpLzNLTDltUnVzMTlvL21heHJlc2RlZmF1bHQuanBnAAAHeW91dHViZQAAAAAAAAAA",
                 "info": {
                     "identifier": "3KL9mRus19o",
                     "title": "Blackstreet - No Diggity (Official Music Video) ft. Dr. Dre, Queen Pen",
@@ -88,19 +89,19 @@ function getExampleQueue() {
                     "sourceName": "youtube",
                     "isSeekable": true,
                     "isStream": false,
-                    "isrc": null,
-                    "requester": {
-                        "id": "498094279793704991",
-                        "username": "chrissy8283",
-                        "globalName": "Chrissy",
-                        "avatar": "164c06b4e7ac2cdfffb941481e6511ca",
-                        "displayAvatarURL": "https://cdn.discordapp.com/avatars/498094279793704991/164c06b4e7ac2cdfffb941481e6511ca.webp"
-                    }
+                    "isrc": null
                 },
                 "pluginInfo": {},
-                "encodedTrack": "QAAA4wMARkJsYWNrc3RyZWV0IC0gTm8gRGlnZ2l0eSAoT2ZmaWNpYWwgTXVzaWMgVmlkZW8pIGZ0LiBEci4gRHJlLCBRdWVlbiBQZW4AC0JsYWNrc3RyZWV0AAAAAAAEIpgACzNLTDltUnVzMTlvAAEAK2h0dHBzOi8vd3d3LnlvdXR1YmUuY29tL3dhdGNoP3Y9M0tMOW1SdXMxOW8BADRodHRwczovL2kueXRpbWcuY29tL3ZpLzNLTDltUnVzMTlvL21heHJlc2RlZmF1bHQuanBnAAAHeW91dHViZQAAAAAAAAAA"
+                "requester": {
+                    "id": "498094279793704991",
+                    "username": "chrissy8283",
+                    "globalName": "Chrissy",
+                    "avatar": "164c06b4e7ac2cdfffb941481e6511ca",
+                    "displayAvatarURL": "https://cdn.discordapp.com/avatars/498094279793704991/164c06b4e7ac2cdfffb941481e6511ca.webp"
+                }
             },
             {
+                "encoded": "QAABHQMAM0hleSBNYW1hIChmZWF0LiBCZWJlIFJleGhhLCBOaWNraSBNaW5haiAmIEFmcm9qYWNrKQAMRGF2aWQgR3VldHRhAAAAAAAC8egAC0hzejZoTF9hNjlRAAEAK2h0dHBzOi8vd3d3LnlvdXR1YmUuY29tL3dhdGNoP3Y9SHN6NmhMX2E2OVEBAIBodHRwczovL2xoMy5nb29nbGV1c2VyY29udGVudC5jb20vT0dOSm43RXpTM0xRVnRhc1pvZWtlVnI3OS13MzVHNDdfT1VWTWh4ckV0Wmx2aU9YMjEyR3hKM2JSLXFjd2YyM1lXeUNlanFnanQza2xlWGNmZz13MTAwMC1oMTAwMAAAB3lvdXR1YmUAAAAAAAAAAA==",
                 "info": {
                     "identifier": "Hsz6hL_a69Q",
                     "title": "Hey Mama (feat. Bebe Rexha, Nicki Minaj & Afrojack)",
@@ -111,19 +112,19 @@ function getExampleQueue() {
                     "sourceName": "youtube",
                     "isSeekable": true,
                     "isStream": false,
-                    "isrc": null,
-                    "requester": {
-                        "id": "498094279793704991",
-                        "username": "chrissy8283",
-                        "globalName": "Chrissy",
-                        "avatar": "164c06b4e7ac2cdfffb941481e6511ca",
-                        "displayAvatarURL": "https://cdn.discordapp.com/avatars/498094279793704991/164c06b4e7ac2cdfffb941481e6511ca.webp"
-                    }
+                    "isrc": null
                 },
                 "pluginInfo": {},
-                "encodedTrack": "QAABHQMAM0hleSBNYW1hIChmZWF0LiBCZWJlIFJleGhhLCBOaWNraSBNaW5haiAmIEFmcm9qYWNrKQAMRGF2aWQgR3VldHRhAAAAAAAC8egAC0hzejZoTF9hNjlRAAEAK2h0dHBzOi8vd3d3LnlvdXR1YmUuY29tL3dhdGNoP3Y9SHN6NmhMX2E2OVEBAIBodHRwczovL2xoMy5nb29nbGV1c2VyY29udGVudC5jb20vT0dOSm43RXpTM0xRVnRhc1pvZWtlVnI3OS13MzVHNDdfT1VWTWh4ckV0Wmx2aU9YMjEyR3hKM2JSLXFjd2YyM1lXeUNlanFnanQza2xlWGNmZz13MTAwMC1oMTAwMAAAB3lvdXR1YmUAAAAAAAAAAA=="
+                "requester": {
+                    "id": "498094279793704991",
+                    "username": "chrissy8283",
+                    "globalName": "Chrissy",
+                    "avatar": "164c06b4e7ac2cdfffb941481e6511ca",
+                    "displayAvatarURL": "https://cdn.discordapp.com/avatars/498094279793704991/164c06b4e7ac2cdfffb941481e6511ca.webp"
+                }
             },
             {
+                "encoded": "QAAA+gMAEVNodXQgVXAgYW5kIERhbmNlAA1XQUxLIFRIRSBNT09OAAAAAAADDUAAC0dHc3VMVmxMT2JjAAEAK2h0dHBzOi8vd3d3LnlvdXR1YmUuY29tL3dhdGNoP3Y9R0dzdUxWbExPYmMBAH5odHRwczovL2xoMy5nb29nbGV1c2VyY29udGVudC5jb20vVEJad0dWZXhWd0txQjcyZGNHR1cxWTdnQ1dFX0o1Z0Q5V2FfM0xIbzBnb0xvNXZXbU5xLUJ2UHBfNEphdjhGTjhaM3NYYW5wTy1BVTgtWnQ9dzEwMDAtaDEwMDAAAAd5b3V0dWJlAAAAAAAAAAA=",
                 "info": {
                     "identifier": "GGsuLVlLObc",
                     "title": "Shut Up and Dance",
@@ -134,17 +135,16 @@ function getExampleQueue() {
                     "sourceName": "youtube",
                     "isSeekable": true,
                     "isStream": false,
-                    "isrc": null,
-                    "requester": {
-                        "id": "498094279793704991",
-                        "username": "chrissy8283",
-                        "globalName": "Chrissy",
-                        "avatar": "164c06b4e7ac2cdfffb941481e6511ca",
-                        "displayAvatarURL": "https://cdn.discordapp.com/avatars/498094279793704991/164c06b4e7ac2cdfffb941481e6511ca.webp"
-                    }
+                    "isrc": null
                 },
                 "pluginInfo": {},
-                "encodedTrack": "QAAA+gMAEVNodXQgVXAgYW5kIERhbmNlAA1XQUxLIFRIRSBNT09OAAAAAAADDUAAC0dHc3VMVmxMT2JjAAEAK2h0dHBzOi8vd3d3LnlvdXR1YmUuY29tL3dhdGNoP3Y9R0dzdUxWbExPYmMBAH5odHRwczovL2xoMy5nb29nbGV1c2VyY29udGVudC5jb20vVEJad0dWZXhWd0txQjcyZGNHR1cxWTdnQ1dFX0o1Z0Q5V2FfM0xIbzBnb0xvNXZXbU5xLUJ2UHBfNEphdjhGTjhaM3NYYW5wTy1BVTgtWnQ9dzEwMDAtaDEwMDAAAAd5b3V0dWJlAAAAAAAAAAA="
+                "requester": {
+                    "id": "498094279793704991",
+                    "username": "chrissy8283",
+                    "globalName": "Chrissy",
+                    "avatar": "164c06b4e7ac2cdfffb941481e6511ca",
+                    "displayAvatarURL": "https://cdn.discordapp.com/avatars/498094279793704991/164c06b4e7ac2cdfffb941481e6511ca.webp"
+                }
             }
         ]
     } as StoredQueue

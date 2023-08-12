@@ -12,7 +12,16 @@ export const QueueSymbol = Symbol("LC-Queue");
 export const NodeSymbol = Symbol("LC-Node");
 
 export type LavalinkSearchPlatform = "ytsearch" | "ytmsearch" | "scsearch" | "spsearch" | "sprec" | "amsearch" | "dzsearch" | "dzisrc" | "sprec" | "ymsearch" | "speak" | "tts";
-export type ClientSearchPlatform = "youtube" | "youtube music" | "soundcloud" | "ytm" | "yt" | "sc" | "am" | "sp" | "sprec" | "spsuggestion" | "ds" | "dz" | "deezer" | "yandex" | "yandexmusic";
+
+export type ClientSearchPlatform = 
+"youtube" | "yt" | "yt" | 
+"youtube music" | "youtubemusic" | "ytm" |
+"soundcloud" | "sc" | 
+"am" | "apple music" | "applemusic" | "apple" | "yandex music" |
+"sp" | "sprec" | "spsuggestion"  | "spotify" |
+"dz" | "deezer" |
+"yandex" | "yandexmusic";
+
 export type SearchPlatform = LavalinkSearchPlatform | ClientSearchPlatform;
 
 export type SourcesRegex = "YoutubeRegex" | "YoutubeMusicRegex" | "SoundCloudRegex" | "SoundCloudMobileRegex" | "DeezerTrackRegex" | "DeezerArtistRegex" | "DeezerEpisodeRegex" | "DeezerMixesRegex" | "DeezerPageLinkRegex" | "DeezerPlaylistRegex" | "DeezerAlbumRegex" | "AllDeezerRegex" | "AllDeezerRegexWithoutPageLink" | "SpotifySongRegex" | "SpotifyPlaylistRegex" | "SpotifyArtistRegex" | "SpotifyEpisodeRegex" | "SpotifyShowRegex" | "SpotifyAlbumRegex" | "AllSpotifyRegex" | "mp3Url" | "m3uUrl" | "m3u8Url" | "mp4Url" | "m4aUrl" | "wavUrl" | "aacpUrl" | "tiktok" | "mixcloud" | "musicYandex" | "radiohost" | "bandcamp" | "appleMusic" | "TwitchTv" | "vimeo"
@@ -397,9 +406,9 @@ export interface GuildShardPayload {
 
 
 export interface PlayerUpdateInfo {
-    guildId: string;
-    playerOptions: PlayOptions;
-    noReplace?: boolean;
+  guildId: string;
+  playerOptions: PlayOptions;
+  noReplace?: boolean;
 }
 export interface LavalinkPlayer {
     guildId: string;

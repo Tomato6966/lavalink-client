@@ -50,9 +50,9 @@ export class Queue {
         this.guildId = guildId;
         this.QueueSaver = QueueSaver;
         this.options.maxPreviousTracks = this.QueueSaver?.options?.maxPreviousTracks ?? this.options.maxPreviousTracks;
-        this.current = this.managerUtils.isTrack(data.currentTrack) ? data.currentTrack : null;
-        this.previous = Array.isArray(data.previousTracks) && data.previousTracks.some(track => this.managerUtils.isTrack(track)) ? data.previousTracks.filter(track => this.managerUtils.isTrack(track)) : [];
-        this.tracks = Array.isArray(data.nextTracks) && data.nextTracks.some(track => this.managerUtils.isTrack(track)) ? data.nextTracks.filter(track => this.managerUtils.isTrack(track)) : [];
+        this.current = this.managerUtils.isTrack(data.current) ? data.current : null;
+        this.previous = Array.isArray(data.previous) && data.previous.some(track => this.managerUtils.isTrack(track)) ? data.previous.filter(track => this.managerUtils.isTrack(track)) : [];
+        this.tracks = Array.isArray(data.tracks) && data.tracks.some(track => this.managerUtils.isTrack(track)) ? data.tracks.filter(track => this.managerUtils.isTrack(track)) : [];
         this.utils.sync(false, true);
     }
     /**
@@ -75,12 +75,12 @@ export class Queue {
             const data = await this.QueueSaver.get(this.guildId);
             if (!data)
                 return console.log("No data found to sync for guildId: ", this.guildId);
-            if (!dontSyncCurrent && !this.current && this.managerUtils.isTrack(data.currentTrack))
-                this.current = data.currentTrack;
-            if (Array.isArray(data.nextTracks) && data?.nextTracks.length && data.nextTracks.some(track => this.managerUtils.isTrack(track)))
-                this.tracks.splice(override ? 0 : this.tracks.length, override ? this.tracks.length : 0, ...data.nextTracks.filter(track => this.managerUtils.isTrack(track)));
-            if (Array.isArray(data.previousTracks) && data?.previousTracks.length && data.previousTracks.some(track => this.managerUtils.isTrack(track)))
-                this.previous.splice(0, override ? this.tracks.length : 0, ...data.previousTracks.filter(track => this.managerUtils.isTrack(track)));
+            if (!dontSyncCurrent && !this.current && this.managerUtils.isTrack(data.current))
+                this.current = data.current;
+            if (Array.isArray(data.tracks) && data?.tracks.length && data.tracks.some(track => this.managerUtils.isTrack(track)))
+                this.tracks.splice(override ? 0 : this.tracks.length, override ? this.tracks.length : 0, ...data.tracks.filter(track => this.managerUtils.isTrack(track)));
+            if (Array.isArray(data.previous) && data?.previous.length && data.previous.some(track => this.managerUtils.isTrack(track)))
+                this.previous.splice(0, override ? this.tracks.length : 0, ...data.previous.filter(track => this.managerUtils.isTrack(track)));
             await this.utils.save();
             return;
         },
@@ -88,15 +88,15 @@ export class Queue {
             return await this.QueueSaver.delete(this.guildId);
         },
         /**
-         * @returns {{currentTrack:Track|null, previousTracks:Track[], nextTracks:Track[]}}The Queue, but in a raw State, which allows easier handling for the storeManager
+         * @returns {{current:Track|null, previous:Track[], tracks:Track[]}}The Queue, but in a raw State, which allows easier handling for the storeManager
          */
         getRaw: () => {
             if (this.previous.length > this.options.maxPreviousTracks)
                 this.previous.splice(this.options.maxPreviousTracks, this.previous.length);
             return {
-                currentTrack: this.current,
-                previousTracks: this.previous,
-                nextTracks: this.tracks,
+                current: this.current,
+                previous: this.previous,
+                tracks: this.tracks,
             };
         },
         /**
@@ -143,7 +143,7 @@ export class Queue {
         return this.tracks.length;
     }
     /**
-     * Splice the nextTracks in the Queue
+     * Splice the tracks in the Queue
      * @param {number} index Where to remove the Track
      * @param {number} amount How many Tracks to remove?
      * @param {Track | Track[]} TrackOrTracks Want to Add more Tracks?

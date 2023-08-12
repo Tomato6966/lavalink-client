@@ -1,8 +1,8 @@
 import { Track } from "./Track";
 export interface StoredQueue {
-    currentTrack: Track | null;
-    previousTracks: Track[];
-    nextTracks: Track[];
+    current: Track | null;
+    previous: Track[];
+    tracks: Track[];
 }
 export interface StoreManager extends Record<any, any> {
     /** @async get a Value (MUST RETURN UNPARSED!) */
@@ -68,7 +68,7 @@ export declare class Queue {
         sync: (override?: boolean, dontSyncCurrent?: boolean) => Promise<void>;
         destroy: () => Promise<any>;
         /**
-         * @returns {{currentTrack:Track|null, previousTracks:Track[], nextTracks:Track[]}}The Queue, but in a raw State, which allows easier handling for the storeManager
+         * @returns {{current:Track|null, previous:Track[], tracks:Track[]}}The Queue, but in a raw State, which allows easier handling for the storeManager
          */
         getRaw: () => StoredQueue;
         /**
@@ -90,7 +90,7 @@ export declare class Queue {
      */
     add(TrackOrTracks: Track | Track[], index?: number): any;
     /**
-     * Splice the nextTracks in the Queue
+     * Splice the tracks in the Queue
      * @param {number} index Where to remove the Track
      * @param {number} amount How many Tracks to remove?
      * @param {Track | Track[]} TrackOrTracks Want to Add more Tracks?

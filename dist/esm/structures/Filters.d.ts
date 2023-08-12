@@ -20,6 +20,7 @@ export declare class FilterManager {
      * Reset all Filters
      */
     resetFilters(): Promise<PlayerFilters>;
+    setVolume(volume: number): Promise<boolean>;
     /**
      * Set the AudioOutput Filter
      * @param type

@@ -29,7 +29,7 @@ export interface PlayOptions {
     /** Encoded Track to use&search, instead of the queue system (yt only)... */
     identifier?: string;
     /** The position to start the track. */
-    startTime?: number;
+    position?: number;
     /** The position to end the track. */
     endTime?: number;
     /** Whether to not replace the track if a play payload is sent. */
@@ -66,7 +66,7 @@ export class Player {
     /** Repeat Mode of the Player */
     public repeatMode: RepeatMode = "off";
     /** Player's ping */
-    public ping: { 
+    public ping = { 
         /* Response time for rest actions with Lavalink Server */
         lavalink: 0, 
         /* Latency of the Discord's Websocket Voice Server */
@@ -185,16 +185,16 @@ export class Player {
         const finalOptions = {
             encoded: track.encoded,
             volume: this.lavalinkVolume,
-            startTime: 0,
+            position: 0,
             ...options,
         };
 
         if("track" in finalOptions) delete finalOptions.track;
        
-        if((typeof finalOptions.startTime !== "undefined" && isNaN(finalOptions.startTime)) || (typeof finalOptions.startTime === "number" && (finalOptions.startTime < 0 || finalOptions.startTime >= track.info.duration))) throw new Error("PlayerOption#startTime must be a positive number, less than track's duration");
+        if((typeof finalOptions.position !== "undefined" && isNaN(finalOptions.position)) || (typeof finalOptions.position === "number" && (finalOptions.position < 0 || finalOptions.position >= track.info.duration))) throw new Error("PlayerOption#position must be a positive number, less than track's duration");
         if((typeof finalOptions.volume !== "undefined" && isNaN(finalOptions.volume) || (typeof finalOptions.volume === "number" && finalOptions.volume < 0))) throw new Error("PlayerOption#volume must be a positive number");
         if((typeof finalOptions.endTime !== "undefined" && isNaN(finalOptions.endTime)) || (typeof finalOptions.endTime === "number" && (finalOptions.endTime < 0 || finalOptions.endTime >= track.info.duration))) throw new Error("PlayerOption#endTime must be a positive number, less than track's duration");
-        if(typeof finalOptions.startTime === "number" && typeof finalOptions.endTime === "number" && finalOptions.endTime < finalOptions.startTime) throw new Error("PlayerOption#endTime must be bigger than PlayerOption#startTime")
+        if(typeof finalOptions.position === "number" && typeof finalOptions.endTime === "number" && finalOptions.endTime < finalOptions.position) throw new Error("PlayerOption#endTime must be bigger than PlayerOption#position")
         if("noReplace" in finalOptions) delete finalOptions.noReplace
         
         const now = performance.now();
@@ -238,13 +238,20 @@ export class Player {
      */
     async search(query: { query: string, source?: SearchPlatform } | string, requestUser: unknown) {
         // transform the query object
-        query = { 
+        const Query = { 
             query: typeof query === "string" ? query : query.query, 
-            source: DefaultSources[query.source ?? this.LavalinkManager.options.playerOptions.defaultSearchPlatform] ?? query.source ?? this.LavalinkManager.options.playerOptions.defaultSearchPlatform 
+            source: DefaultSources[(typeof query === "string" ? undefined : query.source) ?? this.LavalinkManager.options.playerOptions.defaultSearchPlatform] ?? (typeof query === "string" ? undefined : query.source) ?? this.LavalinkManager.options.playerOptions.defaultSearchPlatform 
+        }
+
+        // if user does player.search("ytsearch:Hello")
+        const foundSource = [...Object.keys(DefaultSources)].find(source => Query.query.startsWith(`${source}:`)) as SearchPlatform | undefined;
+        if(foundSource && DefaultSources[foundSource]){
+            Query.source = DefaultSources[foundSource]; // set the source to ytsearch:
+            Query.query = Query.query.replace(`${foundSource}:`, ""); // remove ytsearch: from the query
         }
 
         // request the data
-        const res = await this.node.request(`/loadtracks?identifier=${!/^https?:\/\//.test(query.query) ? `${query.source}:` : ""}${encodeURIComponent(query.query)}`) as {
+        const res = await this.node.request(`/loadtracks?identifier=${!/^https?:\/\//.test(Query.query) ? `${Query.source}:` : ""}${encodeURIComponent(Query.query)}`) as {
             loadType: LoadTypes,
             data: any,
             pluginInfo: PluginInfo,
@@ -340,7 +347,7 @@ export class Player {
             await this.queue.splice(0, skipTo - 1);
         }
         const now = performance.now();
-        await this.node.updatePlayer({ guildId:this.guildId, playerOptions: { encoded: null }});
+        await this.node.updatePlayer({ guildId:this.guildId, playerOptions: { encodedTrack: null }});
         this.ping.lavalink = Math.round((performance.now() - now) / 10) / 100;
         return true;
     }
@@ -408,7 +415,7 @@ export class Player {
      */
     public async changeNode(newNode: LavalinkNode | string) {
         
-        const updateNode = typeof newNode === "string" ? this.LavalinkManager.NodeManager.nodes.get(newNode) : newNode;
+        const updateNode = typeof newNode === "string" ? this.LavalinkManager.nodeManager.nodes.get(newNode) : newNode;
         if(!updateNode) throw new Error("Could not find the new Node");
 
         const data = this.toJSON();
@@ -421,9 +428,9 @@ export class Player {
         const now = performance.now();
         await this.node.updatePlayer({
             guildId: this.guildId,
-            noReplace: options?.noReplace ?? false,
+            noReplace: false,
             playerOptions: {
-                startTime: data.position,
+                position: data.position,
                 volume: data.volume,
                 paused: data.paused,
                 filters: { ...data.filters, equalizer: data.equalizer },

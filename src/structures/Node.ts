@@ -3,7 +3,7 @@ import { Dispatcher, Pool } from "undici";
 import { NodeManager } from "./NodeManager";
 import internal from "stream";
 import { InvalidLavalinkRestRequest, LavalinkPlayer, PlayerEventType, PlayerEvents, PlayerUpdateInfo, RoutePlanner, TrackEndEvent, TrackExceptionEvent, TrackStartEvent, TrackStuckEvent, WebSocketClosedEvent, Session, queueTrackEnd, Base64 } from "./Utils";
-import { Player } from "./Player";
+import { Player, PlayerOptions } from "./Player";
 import { isAbsolute } from "path";
 import { TrackInfo, Track } from "./Track";
 
@@ -333,7 +333,7 @@ export class LavalinkNode {
      */
     public async updateSession(resuming?: boolean, timeout?: number) {
         if (!this.sessionId) throw new Error("the Lavalink-Node is either not ready, or not up to date!");
-        const data = {}
+        const data = {} as Session;
         if(typeof resuming === "boolean") data.resuming = resuming;
         if(typeof timeout === "number" && timeout > 0) data.timeout = timeout;
         return await this.request(`/sessions/${this.sessionId}`, r => {
@@ -459,14 +459,11 @@ export class LavalinkNode {
                 player.playing = !data.playerOptions.paused;
             }
 
-            if (typeof data.playerOptions.position !== "undefined") {
+            if (typeof data.playerOptions.position === "number") {
                 player.position = data.playerOptions.position;
                 player.lastPosition = data.playerOptions.position;
             }
-            if (typeof data.playerOptions.startTime !== "undefined") {
-                player.position = data.playerOptions.startTime;
-                player.lastPosition = data.playerOptions.startTime;
-            }
+            
             if (typeof data.playerOptions.voice !== "undefined") player.voice = data.playerOptions.voice;
             if (typeof data.playerOptions.volume !== "undefined") {
                 if (this.NodeManager.LavalinkManager.options.playerOptions.volumeDecrementer) {

@@ -46,23 +46,44 @@ export interface Player {
     queue: Queue;
 }
 export declare class Player {
+    /** The Guild Id of the Player */
     guildId: string;
+    /** The Voice Channel Id of the Player */
     voiceChannelId: string | null;
+    /** The Text Channel Id of the Player */
     textChannelId: string | null;
+    /** States if the Bot is supposed to be outputting audio */
     playing: boolean;
+    /** States if the Bot is paused or not */
     paused: boolean;
+    /** Repeat Mode of the Player */
     repeatMode: RepeatMode;
-    ping: number;
-    wsPing: number;
+    /** Player's ping */
+    ping: {
+        lavalink: number;
+        ws: number;
+    };
+    /** The Display Volume */
     volume: number;
+    /** The Volume Lavalink actually is outputting */
     lavalinkVolume: number;
+    /** The current Positin of the player (Calculated) */
     position: number;
-    /** When the player was created [Timestamp] (from lavalink) */
+    /** The current Positin of the player (from Lavalink) */
+    lastPosition: number;
+    /** When the player was created [Timestamp in Ms] (from lavalink) */
     createdTimeStamp: number;
-    /** If lavalink says it's connected or not */
+    /** The Player Connection's State (from Lavalink) */
     connected: boolean | undefined;
+    /** Voice Server Data (from Lavalink) */
     voice: LavalinkPlayerVoiceOptions;
     private readonly data;
+    /**
+     * Create a new Player
+     * @param options
+     * @param LavalinkManager
+     */
+    constructor(options: PlayerOptions, LavalinkManager: LavalinkManager);
     /**
      * Set custom data.
      * @param key
@@ -74,28 +95,93 @@ export declare class Player {
      * @param key
      */
     get<T>(key: string): T;
+    /**
+     * CLears all the custom data.
+     */
     clearData(): void;
+    /**
+     * Get all custom Data
+     */
     getAllData(): Record<string, unknown>;
-    constructor(options: PlayerOptions, LavalinkManager: LavalinkManager);
+    /**
+     * Play the next track from the queue / a specific track, with playoptions for Lavalink
+     * @param options
+     */
     play(options?: Partial<PlayOptions>): Promise<void>;
+    /**
+     * Set the Volume for the Player
+     * @param volume The Volume in percent
+     * @param ignoreVolumeDecrementer If it should ignore the volumedecrementer option
+     */
     setVolume(volume: number, ignoreVolumeDecrementer?: boolean): Promise<void>;
+    /**
+     *
+     * @param query Query for your data
+     * @param requestUser
+     */
     search(query: {
         query: string;
         source?: SearchPlatform;
-    }, requestUser: unknown): Promise<SearchResult>;
+    } | string, requestUser: unknown): Promise<SearchResult>;
+    /**
+     * Pause the player
+     */
     pause(): Promise<void>;
+    /**
+     * Resume the Player
+     */
     resume(): Promise<void>;
+    /**
+     * Seek to a specific Position
+     * @param position
+     */
     seek(position: number): Promise<any>;
+    /**
+     * Set the Repeatmode of the Player
+     * @param repeatMode
+     */
     setRepeatMode(repeatMode: RepeatMode): Promise<void>;
     /**
-     * Skip a Song (on Lavalink it's called "STOP")
+     * Skip the current song, or a specific amount of songs
      * @param amount provide the index of the next track to skip to
      */
     skip(skipTo?: number): Promise<boolean>;
-    connect(): Promise<void>;
-    disconnect(): Promise<void>;
     /**
-     * Destroy the player
+     * Connects the Player to the Voice Channel
+     * @returns
      */
-    destroy(disconnect?: boolean): Promise<void>;
+    connect(): Promise<void>;
+    /**
+     * Disconnects the Player from the Voice Channel, but keeps the player in the cache
+     * @param force If false it throws an error, if player thinks it's already disconnected
+     * @returns
+     */
+    disconnect(force?: boolean): Promise<void>;
+    /**
+     * Destroy the player and disconnect from the voice channel
+     */
+    destroy(): Promise<void>;
+    /**
+     * Move the player on a different Audio-Node
+     * @param newNode New Node / New Node Id
+     */
+    changeNode(newNode: LavalinkNode | string): Promise<string>;
+    /** Converts the Player including Queue to a Json state */
+    toJSON(): {
+        guildId: string;
+        voiceChannelId: string;
+        textChannelId: string;
+        position: number;
+        lastPosition: number;
+        volume: number;
+        lavalinkVolume: number;
+        repeatMode: RepeatMode;
+        paused: boolean;
+        playing: boolean;
+        createdTimeStamp: number;
+        filters: {};
+        equalizer: import("./Filters").EQBand[];
+        queue: import("./Queue").StoredQueue;
+        nodeId: string;
+    };
 }
