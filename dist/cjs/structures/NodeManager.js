@@ -4,6 +4,7 @@ exports.NodeManager = void 0;
 const stream_1 = require("stream");
 const Node_1 = require("./Node");
 const Utils_1 = require("./Utils");
+const Player_1 = require("./Player");
 class NodeManager extends stream_1.EventEmitter {
     nodes = new Utils_1.MiniMap();
     constructor(LavalinkManager) {
@@ -26,7 +27,7 @@ class NodeManager extends stream_1.EventEmitter {
         const decodeNode = typeof node === "string" ? this.nodes.get(node) : node || this.leastUsedNodes[0];
         if (!decodeNode)
             throw new Error("Node was not found");
-        decodeNode.destroy();
+        decodeNode.destroy(Player_1.DestroyReasons.NodeDeleted);
         this.nodes.delete(decodeNode.id);
         return;
     }

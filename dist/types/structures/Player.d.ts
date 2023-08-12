@@ -4,6 +4,9 @@ import { LavalinkNode } from "./Node";
 import { Queue } from "./Queue";
 import { Track } from "./Track";
 import { LavalinkPlayerVoiceOptions, SearchPlatform, SearchResult } from "./Utils";
+type PlayerDestroyReasons = "NodeDestroy" | "NodeDeleted" | "LavalinkNoVoice" | "NodeReconnectFail" | "Disconnected" | "ChannelDeleted";
+export type DestroyReasonsType = PlayerDestroyReasons | string;
+export declare const DestroyReasons: Record<PlayerDestroyReasons, PlayerDestroyReasons>;
 export type RepeatMode = "queue" | "track" | "off";
 export interface PlayerOptions {
     guildId: string;
@@ -160,7 +163,7 @@ export declare class Player {
     /**
      * Destroy the player and disconnect from the voice channel
      */
-    destroy(): Promise<void>;
+    destroy(reason?: string): Promise<void>;
     /**
      * Move the player on a different Audio-Node
      * @param newNode New Node / New Node Id
@@ -185,3 +188,4 @@ export declare class Player {
         nodeId: string;
     };
 }
+export {};

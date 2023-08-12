@@ -1,10 +1,18 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.Player = void 0;
+exports.Player = exports.DestroyReasons = void 0;
 const Filters_1 = require("./Filters");
 const LavalinkManagerStatics_1 = require("./LavalinkManagerStatics");
 const Queue_1 = require("./Queue");
 const Utils_1 = require("./Utils");
+exports.DestroyReasons = {
+    NodeDestroy: "NodeDestroy",
+    NodeDeleted: "NodeDeleted",
+    LavalinkNoVoice: "LavalinkNoVoice",
+    NodeReconnectFail: "NodeReconnectFail",
+    Disconnected: "Disconnected",
+    ChannelDeleted: "ChannelDeleted"
+};
 class Player {
     /** The Guild Id of the Player */
     guildId;
@@ -321,11 +329,11 @@ class Player {
     /**
      * Destroy the player and disconnect from the voice channel
      */
-    async destroy() {
+    async destroy(reason) {
         await this.disconnect(true);
         await this.queue.utils.destroy();
         await this.node.destroyPlayer(this.guildId);
-        this.LavalinkManager.emit("playerDestroy", this);
+        this.LavalinkManager.emit("playerDestroy", this, reason);
         this.LavalinkManager.deletePlayer(this.guildId);
     }
     /**

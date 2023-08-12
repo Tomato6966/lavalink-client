@@ -1,6 +1,7 @@
 import WebSocket from "ws";
 import { Pool } from "undici";
 import { queueTrackEnd } from "./Utils";
+import { DestroyReasons } from "./Player";
 import { isAbsolute } from "path";
 export class LavalinkNode {
     /** The provided Options of the Node */
@@ -154,18 +155,18 @@ export class LavalinkNode {
      * Destroys the Node-Connection (Websocket) and all player's of the node
      * @returns
      */
-    destroy() {
+    destroy(destroyReason) {
         if (!this.connected)
             return;
         const players = this.NodeManager.LavalinkManager.players.filter(p => p.node.id == this.id);
         if (players)
-            players.forEach(p => p.destroy());
+            players.forEach(p => p.destroy(destroyReason || DestroyReasons.NodeDestroy));
         this.socket.close(1000, "destroy");
         this.socket.removeAllListeners();
         this.socket = null;
         this.reconnectAttempts = 1;
         clearTimeout(this.reconnectTimeout);
-        this.NodeManager.emit("destroy", this);
+        this.NodeManager.emit("destroy", this, destroyReason);
         this.NodeManager.nodes.delete(this.id);
         return;
     }
@@ -370,7 +371,7 @@ export class LavalinkNode {
             if (!player)
                 return;
             if (typeof res?.voice?.connected === "boolean" && res.voice.connected === false)
-                return player.destroy();
+                return player.destroy(DestroyReasons.LavalinkNoVoice);
             player.ping.ws = res?.voice?.ping || player?.ping.ws;
         }
         return true;
@@ -383,7 +384,7 @@ export class LavalinkNode {
             if (this.reconnectAttempts >= this.options.retryAmount) {
                 const error = new Error(`Unable to connect after ${this.options.retryAmount} attempts.`);
                 this.NodeManager.emit("error", this, error);
-                return this.destroy();
+                return this.destroy(DestroyReasons.NodeReconnectFail);
             }
             this.socket.removeAllListeners();
             this.socket = null;

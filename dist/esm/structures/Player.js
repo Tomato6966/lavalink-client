@@ -2,6 +2,14 @@ import { FilterManager } from "./Filters";
 import { DefaultSources } from "./LavalinkManagerStatics";
 import { Queue, QueueSaver } from "./Queue";
 import { queueTrackEnd } from "./Utils";
+export const DestroyReasons = {
+    NodeDestroy: "NodeDestroy",
+    NodeDeleted: "NodeDeleted",
+    LavalinkNoVoice: "LavalinkNoVoice",
+    NodeReconnectFail: "NodeReconnectFail",
+    Disconnected: "Disconnected",
+    ChannelDeleted: "ChannelDeleted"
+};
 export class Player {
     /** The Guild Id of the Player */
     guildId;
@@ -318,11 +326,11 @@ export class Player {
     /**
      * Destroy the player and disconnect from the voice channel
      */
-    async destroy() {
+    async destroy(reason) {
         await this.disconnect(true);
         await this.queue.utils.destroy();
         await this.node.destroyPlayer(this.guildId);
-        this.LavalinkManager.emit("playerDestroy", this);
+        this.LavalinkManager.emit("playerDestroy", this, reason);
         this.LavalinkManager.deletePlayer(this.guildId);
     }
     /**

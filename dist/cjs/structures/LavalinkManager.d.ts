@@ -4,7 +4,7 @@ import { NodeManager } from "./NodeManager";
 import { QueueSaverOptions, StoreManager } from "./Queue";
 import { GuildShardPayload, LavalinkSearchPlatform, ManagerUitls, MiniMap, SearchPlatform, TrackEndEvent, TrackExceptionEvent, TrackStartEvent, TrackStuckEvent, VoicePacket, VoiceServer, VoiceState, WebSocketClosedEvent } from "./Utils";
 import { LavalinkNodeOptions } from "./Node";
-import { Player, PlayerOptions } from "./Player";
+import { DestroyReasonsType, Player, PlayerOptions } from "./Player";
 import { Track } from "./Track";
 export interface LavalinkManager {
     nodeManager: NodeManager;
@@ -22,7 +22,13 @@ export interface LavalinkPlayerOptions {
     clientBasedUpdateInterval?: number;
     defaultSearchPlatform?: SearchPlatform;
     applyVolumeAsFilter?: boolean;
-    autoReconnectOnDisconnect?: boolean;
+    onDisconnect?: {
+        autoReconnect?: boolean;
+        destroyPlayer?: boolean;
+    };
+    onEmptyQueue?: {
+        destroyAfter?: number;
+    };
 }
 export interface ManagerOptions {
     nodes: LavalinkNodeOptions[];
@@ -84,7 +90,7 @@ interface LavalinkManagerEvents {
      * Emitted when a Player get's destroyed
      * @event Manager.playerManager#destroy
      */
-    "playerDestroy": (player: Player) => void;
+    "playerDestroy": (player: Player, destroyReason?: DestroyReasonsType) => void;
 }
 export interface LavalinkManager {
     options: ManagerOptions;

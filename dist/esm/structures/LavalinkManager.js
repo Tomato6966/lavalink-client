@@ -3,7 +3,7 @@ import { NodeManager } from "./NodeManager";
 import { DefaultQueueStore } from "./Queue";
 import { ManagerUitls, MiniMap } from "./Utils";
 import { DefaultSources, SourceLinksRegexes } from "./LavalinkManagerStatics";
-import { Player } from "./Player";
+import { DestroyReasons, Player } from "./Player";
 export class LavalinkManager extends EventEmitter {
     static DefaultSources = DefaultSources;
     static SourceLinksRegexes = SourceLinksRegexes;
@@ -128,9 +128,12 @@ export class LavalinkManager extends EventEmitter {
             player.voiceChannelId = update.channel_id;
         }
         else {
+            if (this.options.playerOptions.onDisconnect?.destroyPlayer === true) {
+                return await player.destroy(DestroyReasons.Disconnected);
+            }
             this.emit("playerDisconnect", player, player.voiceChannelId);
             await player.pause();
-            if (this.options.playerOptions.autoReconnectOnDisconnect === true) {
+            if (this.options.playerOptions.onDisconnect?.autoReconnect === true) {
                 await player.connect();
                 return await player.resume();
             }

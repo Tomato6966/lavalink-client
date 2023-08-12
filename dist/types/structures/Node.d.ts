@@ -3,6 +3,7 @@ import { Dispatcher, Pool } from "undici";
 import { NodeManager } from "./NodeManager";
 import internal from "stream";
 import { InvalidLavalinkRestRequest, LavalinkPlayer, PlayerUpdateInfo, RoutePlanner, Session, Base64 } from "./Utils";
+import { DestroyReasonsType } from "./Player";
 import { TrackInfo } from "./Track";
 /** Modifies any outgoing REST requests. */
 export type ModifyRequest = (options: Dispatcher.RequestOptions) => void;
@@ -158,7 +159,7 @@ export declare class LavalinkNode {
      * Destroys the Node-Connection (Websocket) and all player's of the node
      * @returns
      */
-    destroy(): void;
+    destroy(destroyReason?: DestroyReasonsType): void;
     /** Returns if connected to the Node. */
     get connected(): boolean;
     /**

@@ -131,9 +131,12 @@ class LavalinkManager extends events_1.EventEmitter {
             player.voiceChannelId = update.channel_id;
         }
         else {
+            if (this.options.playerOptions.onDisconnect?.destroyPlayer === true) {
+                return await player.destroy(Player_1.DestroyReasons.Disconnected);
+            }
             this.emit("playerDisconnect", player, player.voiceChannelId);
             await player.pause();
-            if (this.options.playerOptions.autoReconnectOnDisconnect === true) {
+            if (this.options.playerOptions.onDisconnect?.autoReconnect === true) {
                 await player.connect();
                 return await player.resume();
             }

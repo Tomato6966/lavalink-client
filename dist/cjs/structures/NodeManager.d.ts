@@ -3,6 +3,7 @@ import { EventEmitter } from "stream";
 import { LavalinkNode, LavalinkNodeOptions } from "./Node";
 import { LavalinkManager } from "./LavalinkManager";
 import { MiniMap } from "./Utils";
+import { DestroyReasonsType } from "./Player";
 type LavalinkNodeIdentifier = string;
 interface NodeManagerEvents {
     /**
@@ -14,7 +15,7 @@ interface NodeManagerEvents {
      * Emitted when a Node is destroyed.
      * @event Manager.nodeManager#destroy
      */
-    "destroy": (node: LavalinkNode) => void;
+    "destroy": (node: LavalinkNode, destroyReason?: DestroyReasonsType) => void;
     /**
      * Emitted when a Node is connected.
      * @event Manager.nodeManager#connect

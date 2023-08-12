@@ -1,6 +1,7 @@
 import { EventEmitter } from "stream";
 import { LavalinkNode } from "./Node";
 import { MiniMap } from "./Utils";
+import { DestroyReasons } from "./Player";
 export class NodeManager extends EventEmitter {
     nodes = new MiniMap();
     constructor(LavalinkManager) {
@@ -23,7 +24,7 @@ export class NodeManager extends EventEmitter {
         const decodeNode = typeof node === "string" ? this.nodes.get(node) : node || this.leastUsedNodes[0];
         if (!decodeNode)
             throw new Error("Node was not found");
-        decodeNode.destroy();
+        decodeNode.destroy(DestroyReasons.NodeDeleted);
         this.nodes.delete(decodeNode.id);
         return;
     }
