@@ -218,7 +218,6 @@ export class LavalinkNode {
     public async updatePlayer(data: PlayerUpdateInfo) {
         if (!this.sessionId) throw new Error("The Lavalink Node is either not ready, or not up to date!");
         this.syncPlayerData(data);
-
         const res = await this.request(`/sessions/${this.sessionId}/players/${data.guildId}`, r => {
             r.method = "PATCH";
             // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -622,6 +621,8 @@ export class LavalinkNode {
         const player = this.NodeManager.LavalinkManager.getPlayer(payload.guildId);
         if (!player) return;
 
+        console.log(payload.type);
+        
         switch (payload.type) {
             case "TrackStartEvent": this.trackStart(player, player.queue.current, payload); break;
             case "TrackEndEvent": this.trackEnd(player, player.queue.current, payload); break;

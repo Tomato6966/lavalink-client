@@ -38,11 +38,21 @@ export default {
         }
 
         const player = client.lavalink.getPlayer(interaction.guildId) || await client.lavalink.createPlayer({
-            guildId: interaction.guildId, voiceChannelId: vcId, textChannelId: interaction.channelId, // in what guild + channel(s)
-            selfDeaf: true, selfMute: false, volume: 100, instaUpdateFiltersFix: true // configuration(s)
+            guildId: interaction.guildId, 
+            voiceChannelId: vcId, 
+            textChannelId: interaction.channelId, 
+            selfDeaf: true, 
+            selfMute: false,
+            volume: 100,  // default volume
+            instaUpdateFiltersFix: true, // optional
+            applyVolumeAsFilter: false, // if true player.setVolume(54) -> player.filters.setVolume(0.54)
+            // node: "YOUR_NODE_ID",
+            // vcRegion: (interaction.member as GuildMember)?.voice.channel?.rtcRegion!
         });
         
-        if(!player.connected) await player.connect();
+        const connected = player.connected;
+
+        if(!connected) await player.connect();
 
         if(player.voiceChannelId !== vcId) return interaction.reply({ ephemeral: true, content: "You need to be in my Voice Channel" });
         
@@ -53,11 +63,11 @@ export default {
 
         await interaction.reply({
             content: response.loadType === "playlist" 
-                ? `✅ Added [${response.tracks.length}] Tracks${response.playlist?.title ? ` - from the Playlist \`${response.playlist.uri ? `[${response.playlist.title}](${response.playlist.uri})` : response.playlist.title}\`` : ""}` 
-                : `✅ Added [\`${response.tracks[0].info.title}\`](${response.tracks[0].info.uri}) by \`${response.tracks[0].info.author}\`` 
+                ? `✅ Added [${response.tracks.length}] Tracks${response.playlist?.title ? ` - from the Playlist ${response.playlist.uri ? `[\`${response.playlist.title}\`](<${response.playlist.uri}>)` : `\`${response.playlist.title}\``}` : ""} at \`#${player.queue.tracks.length}\`` 
+                : `✅ Added [\`${response.tracks[0].info.title}\`](<${response.tracks[0].info.uri}>) by \`${response.tracks[0].info.author}\` at \`#${player.queue.tracks.length}\`` 
         });
 
-        if(!player.playing) await player.play();
+        if(!player.playing) await player.play(connected ? { volume: 100, paused: false } : undefined);
     },
     autocomplete: async (client, interaction) => {
         if(!interaction.guildId) return;

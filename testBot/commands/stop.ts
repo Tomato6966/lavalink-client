@@ -11,7 +11,7 @@ export default {
         if(!player) return interaction.reply({ ephemeral: true, content: "I'm not connected" });
         
         // example to apply a filter!
-        await player.destroy();
+        await player.destroy(`${interaction.user.username} stopped the Player`);
 
         // and it is good again!
         interaction.reply({ content: "Stopped the player" });

@@ -194,11 +194,11 @@ export class Player {
         }
 
         const finalOptions = {
-            encoded: track.encoded,
+            encodedTrack: track.encoded,
             volume: this.lavalinkVolume,
             position: 0,
             ...options,
-        };
+        } as Partial<PlayOptions>;
 
         if("track" in finalOptions) delete finalOptions.track;
        
@@ -414,10 +414,12 @@ export class Player {
 
         await this.queue.utils.destroy();
 
+        this.LavalinkManager.deletePlayer(this.guildId);
+
         await this.node.destroyPlayer(this.guildId);
 
         this.LavalinkManager.emit("playerDestroy", this, reason);
-        this.LavalinkManager.deletePlayer(this.guildId);
+        return;
     }
 
     /**
