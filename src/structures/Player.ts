@@ -267,12 +267,11 @@ export class Player {
             Query.source = DefaultSources[foundSource]; // set the source to ytsearch:
             Query.query = Query.query.replace(`${foundSource}:`, ""); // remove ytsearch: from the query
         }
-        
-        // ftts query parameters: ?voice=Olivia&audio_format=ogg_opus&translate=False&silence=1000&speed=1.0
-        if(Query.source === "ftts") Query.query = "//" + Query.query
 
-        // request the data
-        const res = await this.node.request(`/loadtracks?identifier=${!/^https?:\/\//.test(Query.query) ? `${Query.source}:` : ""}${encodeURIComponent(Query.query)}`) as {
+
+        // ftts query parameters: ?voice=Olivia&audio_format=ogg_opus&translate=False&silence=1000&speed=1.0 | example raw get query: https://api.flowery.pw/v1/tts?voice=Olivia&audio_format=ogg_opus&translate=False&silence=0&speed=1.0&text=Hello%20World
+        // request the data 
+        const res = await this.node.request(`/loadtracks?identifier=${!/^https?:\/\//.test(Query.query) ? `${Query.source}:${Query.source === "ftts" ? "//" : ""}` : ""}${encodeURIComponent(Query.query)}`) as {
             loadType: LoadTypes,
             data: any,
             pluginInfo: PluginInfo,
