@@ -74,7 +74,6 @@ class Queue {
         this.current = this.managerUtils.isTrack(data.current) ? data.current : null;
         this.previous = Array.isArray(data.previous) && data.previous.some(track => this.managerUtils.isTrack(track)) ? data.previous.filter(track => this.managerUtils.isTrack(track)) : [];
         this.tracks = Array.isArray(data.tracks) && data.tracks.some(track => this.managerUtils.isTrack(track)) ? data.tracks.filter(track => this.managerUtils.isTrack(track)) : [];
-        this.utils.sync(false, true);
     }
     /**
      * Utils for a Queue

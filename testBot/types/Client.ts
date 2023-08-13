@@ -5,6 +5,12 @@ import { RedisClientType } from "redis";
 declare type InteractionExecuteFN = (client:BotClient, interaction:CommandInteraction) => any; 
 declare type AutoCompleteExecuteFN = (client:BotClient, interaction:AutocompleteInteraction) => any;
 
+export interface CustomRequester {
+    id: string,
+    username: string,
+    avatar?: string,
+}
+
 export interface Command {
     data: SlashCommandBuilder;
     execute: InteractionExecuteFN;

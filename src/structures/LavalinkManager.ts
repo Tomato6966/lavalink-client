@@ -1,6 +1,6 @@
 import { EventEmitter } from "events";
 import { NodeManager } from "./NodeManager";
-import { DefaultQueueStore, QueueChangesWatcher, QueueSaverOptions, StoreManager } from "./Queue";
+import { DefaultQueueStore, Queue, QueueChangesWatcher, QueueSaverOptions, StoreManager } from "./Queue";
 import { GuildShardPayload, LavalinkSearchPlatform, ManagerUitls, MiniMap, SearchPlatform, TrackEndEvent, TrackExceptionEvent, TrackStartEvent, TrackStuckEvent, VoicePacket, VoiceServer, VoiceState, WebSocketClosedEvent } from "./Utils";
 import { LavalinkNodeOptions } from "./Node";
 import { DefaultSources, SourceLinksRegexes } from "./LavalinkManagerStatics";
@@ -21,16 +21,27 @@ export interface BotClientOptions {
 }
 
 export interface LavalinkPlayerOptions {
+  /** If the Lavalink Volume should be decremented by x number */
   volumeDecrementer?: number;
-  clientBasedUpdateInterval?: number;
+  /** How often it should update the the player Position */
+  clientBasedPositionUpdateInterval?: number;
+  /** What should be used as a searchPlatform, if no source was provided during the query */
   defaultSearchPlatform?: SearchPlatform;
+  /** Applies the volume via a filter, not via the lavalink volume transformer */
   applyVolumeAsFilter?:boolean;
+  /** Transforms the saved data of a requested user */
+  requesterTransformer?: (requester:unknown) => unknown,
+  /** What lavalink-client should do when the player reconnects */
   onDisconnect?: {
+    /** Try to reconnect? -> If fails -> Destroy */
     autoReconnect?: boolean,
+    /** Instantly destroy player (overrides autoReconnect) */
     destroyPlayer?: boolean,
   },
   /* What the Player should do, when the queue gets empty */
   onEmptyQueue?: {
+    /** Get's executed onEmptyQueue -> You can do any track queue previous transformations, if you add a track to the queue -> it will play it, if not queueEnd will execute! */
+    autoPlayFunction?: (player:Player, lastPlayedTrack:Track) => Promise<void>,
     /* aut. destroy the player after x ms, if 0 it instantly destroys, don't provide to not destroy the player */
     destroyAfterMs?: number,
   }

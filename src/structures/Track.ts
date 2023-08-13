@@ -1,5 +1,10 @@
 import { Base64 } from "./Utils";
 
+type LavalinkSourceNames = "youtube" | "youtubemusic" | "soundcloud" | "bandcamp" | "twitch";
+
+type LavalinkPlugin_LavaSrc_SourceNames = "deezer" |  "spotify" | "applemusic" | "yandexmusic" | "flowery-tts";
+type SourceNames = LavalinkSourceNames | LavalinkPlugin_LavaSrc_SourceNames;
+
 export interface TrackInfo {
     identifier: string;
     title: string;
@@ -7,7 +12,7 @@ export interface TrackInfo {
     duration: number;
     artworkUrl: string | null;
     uri: string;
-    sourceName: string;
+    sourceName: SourceNames;
     isSeekable: boolean;
     isStream: boolean;
     isrc: string | null;
@@ -27,6 +32,8 @@ export interface PluginInfo {
     url?: string,
     /** The Url provided by a Plugin */
     uri?: string,
+    /** You can put specific track information here, to transform the tracks... */
+    clientData?: { [key:string] : any },
 }
 
 export interface LavalinkTrack {

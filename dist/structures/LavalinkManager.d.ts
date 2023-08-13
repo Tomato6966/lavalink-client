@@ -17,7 +17,7 @@ export interface BotClientOptions {
 }
 export interface LavalinkPlayerOptions {
     volumeDecrementer?: number;
-    clientBasedUpdateInterval?: number;
+    clientBasedPositionUpdateInterval?: number;
     defaultSearchPlatform?: SearchPlatform;
     applyVolumeAsFilter?: boolean;
 }

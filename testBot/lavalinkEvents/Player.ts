@@ -1,5 +1,5 @@
 import { EmbedBuilder, TextChannel } from "discord.js";
-import { BotClient } from "../types/Client";
+import { BotClient, CustomRequester } from "../types/Client";
 import { formatMS_HHMMSS } from "../Utils/Time";
 
 export function PlayerEvents(client:BotClient) {
@@ -33,7 +33,7 @@ export function PlayerEvents(client:BotClient) {
      * Queue/Track Events
      */
     client.lavalink.on("trackStart", (player, track) => {
-        console.log(player.guildId, " :: Started Playing :: ", track.info)
+        console.log(player.guildId, " :: Started Playing :: ", track)
         const channel = client.channels.cache.get(player.textChannelId!) as TextChannel;
         if(!channel) return;
         channel.send({
@@ -48,8 +48,14 @@ export function PlayerEvents(client:BotClient) {
                             `> - **Author:** ${track.info.author}`,
                             `> - **Duration:** ${formatMS_HHMMSS(track.info.duration)} | Ends <t:${Math.floor((Date.now() + track.info.duration) / 1000)}:R>`,
                             `> - **Source:** ${track.info.sourceName}`,
-                        ].join("\n")
+                            `> - **Requester:** <@${(track.requester as CustomRequester).id}>`,
+                            track.pluginInfo?.clientData?.fromAutoplay ? `> *From Autoplay* ✅` : undefined
+                        ].filter(v => typeof v === "string" && v.length).join("\n")
                     )
+                    .setFooter({
+                        text: `Requested by ${(track.requester as CustomRequester).username}`,
+                        iconURL: (track.requester as CustomRequester).avatar || undefined
+                    })
                     .setTimestamp()
             ]
         })

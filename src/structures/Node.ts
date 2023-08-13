@@ -578,15 +578,15 @@ export class LavalinkNode {
                 player.ping.ws = payload.state.ping >= 0 ? payload.state.ping : player.ping.ws <= 0 && player.connected ? null : player.ping.ws || 0;
                 if (!player.createdTimeStamp && payload.state.time) player.createdTimeStamp = payload.state.time;
 
-                if (typeof this.NodeManager.LavalinkManager.options.playerOptions.clientBasedUpdateInterval === "number" && this.NodeManager.LavalinkManager.options.playerOptions.clientBasedUpdateInterval >= 10) {
+                if (typeof this.NodeManager.LavalinkManager.options.playerOptions.clientBasedPositionUpdateInterval === "number" && this.NodeManager.LavalinkManager.options.playerOptions.clientBasedPositionUpdateInterval >= 10) {
                     player.set("internal_updateInterval", setInterval(() => {
-                        player.position += this.NodeManager.LavalinkManager.options.playerOptions.clientBasedUpdateInterval || 250;
+                        player.position += this.NodeManager.LavalinkManager.options.playerOptions.clientBasedPositionUpdateInterval || 250;
                         if (player.filterManager.filterUpdatedState >= 1) {
                             player.filterManager.filterUpdatedState++
                             const maxMins = 8;
                             const currentDuration = player.queue.current?.info?.duration || 0;
                             if (currentDuration <= maxMins * 6e4 || isAbsolute(player.queue.current?.info?.uri)) {
-                                if (player.filterManager.filterUpdatedState >= ((this.NodeManager.LavalinkManager.options.playerOptions.clientBasedUpdateInterval || 250) > 400 ? 2 : 3)) {
+                                if (player.filterManager.filterUpdatedState >= ((this.NodeManager.LavalinkManager.options.playerOptions.clientBasedPositionUpdateInterval || 250) > 400 ? 2 : 3)) {
                                     player.filterManager.filterUpdatedState = 0;
                                     player.seek(player.position);
                                 }
@@ -594,7 +594,7 @@ export class LavalinkNode {
                                 player.filterManager.filterUpdatedState = 0;
                             }
                         }
-                    }, this.NodeManager.LavalinkManager.options.playerOptions.clientBasedUpdateInterval || 250))
+                    }, this.NodeManager.LavalinkManager.options.playerOptions.clientBasedPositionUpdateInterval || 250))
                 } else {
                     if (player.filterManager.filterUpdatedState >= 1) { // if no interval but instafix available, findable via the "filterUpdatedState" property
                         const maxMins = 8;
@@ -666,6 +666,13 @@ export class LavalinkNode {
     private async queueEnd(player: Player, track: Track, payload: TrackEndEvent | TrackStuckEvent | TrackExceptionEvent) {
         player.queue.current = null;
         player.playing = false;
+        
+        if(typeof this.NodeManager.LavalinkManager.options?.playerOptions?.onEmptyQueue?.autoPlayFunction === "function") {
+            await this.NodeManager.LavalinkManager.options?.playerOptions?.onEmptyQueue?.autoPlayFunction(player, track);
+            if(player.queue.tracks.length > 0) await queueTrackEnd(player.queue, player.repeatMode === "queue");
+            if(player.queue.current) return player.play({ track: player.queue.current, noReplace: true, paused: false });
+        }
+
 
         if ((payload as TrackEndEvent)?.reason !== "stopped") {
             await player.queue.utils.save();

@@ -79,8 +79,9 @@ export class ManagerUitls {
                     isrc: data.info?.isrc,
                 },
                 pluginInfo: data.pluginInfo || data.plugin || {},
-                requester: data?.requester || requester,
+                requester: typeof this.manager.options?.playerOptions?.requesterTransformer === "function" ? this.manager.options?.playerOptions?.requesterTransformer(data?.requester || requester) : requester,
             } as Track;
+            
             Object.defineProperty(r, TrackSymbol, { configurable: true, value: true });
             return r;
         } catch (error) {
