@@ -16,7 +16,7 @@ export default {
             { name: "Soundcloud", value: "scsearch" },
             { name: "Deezer", value: "dzsearch" },
             { name: "Spotify", value: "spsearch" },
-            { name: "Apple Music", value: "amsearch" }
+            { name: "Apple Music", value: "amsearch" },
         )),
     execute: async (client, interaction) => {
         if(!interaction.guildId) return;

@@ -8,7 +8,7 @@ export declare const TrackSymbol: unique symbol;
 export declare const UnresolvedTrackSymbol: unique symbol;
 export declare const QueueSymbol: unique symbol;
 export declare const NodeSymbol: unique symbol;
-export type LavalinkSearchPlatform = "ytsearch" | "ytmsearch" | "scsearch" | "spsearch" | "sprec" | "amsearch" | "dzsearch" | "dzisrc" | "sprec" | "ymsearch" | "speak" | "tts";
+export type LavalinkSearchPlatform = "ytsearch" | "ytmsearch" | "scsearch" | "spsearch" | "sprec" | "amsearch" | "dzsearch" | "dzisrc" | "sprec" | "ymsearch" | "speak" | "tts" | "ftts";
 export type ClientSearchPlatform = "youtube" | "yt" | "yt" | "youtube music" | "youtubemusic" | "ytm" | "soundcloud" | "sc" | "am" | "apple music" | "applemusic" | "apple" | "yandex music" | "sp" | "sprec" | "spsuggestion" | "spotify" | "dz" | "deezer" | "yandex" | "yandexmusic";
 export type SearchPlatform = LavalinkSearchPlatform | ClientSearchPlatform;
 export type SourcesRegex = "YoutubeRegex" | "YoutubeMusicRegex" | "SoundCloudRegex" | "SoundCloudMobileRegex" | "DeezerTrackRegex" | "DeezerArtistRegex" | "DeezerEpisodeRegex" | "DeezerMixesRegex" | "DeezerPageLinkRegex" | "DeezerPlaylistRegex" | "DeezerAlbumRegex" | "AllDeezerRegex" | "AllDeezerRegexWithoutPageLink" | "SpotifySongRegex" | "SpotifyPlaylistRegex" | "SpotifyArtistRegex" | "SpotifyEpisodeRegex" | "SpotifyShowRegex" | "SpotifyAlbumRegex" | "AllSpotifyRegex" | "mp3Url" | "m3uUrl" | "m3u8Url" | "mp4Url" | "m4aUrl" | "wavUrl" | "aacpUrl" | "tiktok" | "mixcloud" | "musicYandex" | "radiohost" | "bandcamp" | "appleMusic" | "TwitchTv" | "vimeo";

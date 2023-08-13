@@ -39,6 +39,7 @@ export const DefaultSources: Record<SearchPlatform, LavalinkSearchPlatform> = {
     // speak PLUGIN
     "speak": "speak",
     "tts": "tts",
+    "ftts": "ftts"
 }
 
 export const SourceLinksRegexes: Record<SourcesRegex, RegExp> = {

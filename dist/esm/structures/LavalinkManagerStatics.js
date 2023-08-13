@@ -37,6 +37,7 @@ export const DefaultSources = {
     // speak PLUGIN
     "speak": "speak",
     "tts": "tts",
+    "ftts": "ftts"
 };
 export const SourceLinksRegexes = {
     /** DEFAULT SUPPORTED BY LAVALINK */

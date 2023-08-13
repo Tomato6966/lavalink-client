@@ -121,6 +121,10 @@ class ManagerUitls {
         if (source === "tts" && !node.info.sourceManagers.includes("tts")) {
             throw new Error("Lavalink Node has not 'tts' enabled, which is required to have 'tts' work");
         }
+        if (source === "ftts" && !node.info.sourceManagers.includes("ftts")) {
+            console.log(node.info.sourceManagers);
+            throw new Error("Lavalink Node has not 'ftts' enabled, which is required to have 'ftts' work");
+        }
         if (source === "ymsearch" && !node.info.sourceManagers.includes("yandexmusic")) {
             throw new Error("Lavalink Node has not 'yandexmusic' enabled, which is required to have 'ymsearch' work");
         }

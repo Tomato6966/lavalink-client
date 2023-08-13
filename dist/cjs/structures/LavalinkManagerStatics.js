@@ -40,6 +40,7 @@ exports.DefaultSources = {
     // speak PLUGIN
     "speak": "speak",
     "tts": "tts",
+    "ftts": "ftts"
 };
 exports.SourceLinksRegexes = {
     /** DEFAULT SUPPORTED BY LAVALINK */
