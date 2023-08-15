@@ -95,18 +95,6 @@ export declare class MiniMap<K, V> extends Map<K, V> {
     filter<This, K2 extends K>(fn: (this: This, value: V, key: K, miniMap: this) => key is K2, thisArg: This): MiniMap<K2, V>;
     filter<This, V2 extends V>(fn: (this: This, value: V, key: K, miniMap: this) => value is V2, thisArg: This): MiniMap<K, V2>;
     filter<This>(fn: (this: This, value: V, key: K, miniMap: this) => boolean, thisArg: This): MiniMap<K, V>;
-    /**
-     * The sort method sorts the items of a collection in place and returns it.
-     * The sort is not necessarily stable in Node 10 or older.
-     * The default sort order is according to string Unicode code points.
-     *
-     * @param compareFunction Specifies a function that defines the sort order.
-     * If omitted, the collection is sorted according to each character's Unicode code point value, according to the string conversion of each element.
-     *
-     * @example
-     * collection.sort((userA, userB) => userA.createdTimestamp - userB.createdTimestamp);
-     */
-    sort(compareFunction?: (firstValue: V, secondValue: V, firstKey: K, secondKey: K) => number): this;
     toJSON(): V[];
     private static defaultSort;
     /**

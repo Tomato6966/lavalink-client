@@ -95,12 +95,12 @@ export class LavalinkManager extends EventEmitter {
             throw new SyntaxError("No Manager Options Provided");
         // create options
         this.options = options;
+        this.utils = new ManagerUitls(this);
         // use the validators
         this.validateAndApply(options);
         this.applyDefaultOptions();
         // create classes
         this.nodeManager = new NodeManager(this);
-        this.utils = new ManagerUitls(this);
     }
     createPlayer(options) {
         if (this.players.has(options.guildId))

@@ -14,7 +14,6 @@ export class NodeManager extends EventEmitter {
         if (this.nodes.has(options.id || `${options.host}:${options.port}`))
             return this.nodes.get(options.id || `${options.host}:${options.port}`);
         const newNode = new LavalinkNode(options, this);
-        console.log(newNode.id, this.LavalinkManager.utils.isNode(newNode));
         this.nodes.set(newNode.id, newNode);
         return newNode;
     }
@@ -28,19 +27,19 @@ export class NodeManager extends EventEmitter {
     }
     /** Returns the least used Nodes sorted by amount of calls. */
     get leastUsedNodesCalls() {
-        return this.nodes
+        return [...this.nodes.values()]
             .filter((node) => node.connected)
             .sort((a, b) => b.calls - a.calls); // client sided sorting
     }
     /** Returns the least used Nodes sorted by amount of players. */
     get leastUsedNodesPlayers() {
-        return this.nodes
+        return [...this.nodes.values()]
             .filter((node) => node.connected)
             .sort((a, b) => (a.stats?.players || 0) - (b.stats?.players || 0));
     }
     /** Returns the least used Nodes sorted by amount of memory usage. */
     get leastUsedNodesMemory() {
-        return this.nodes
+        return [...this.nodes.values()]
             .filter((node) => node.connected)
             .sort((a, b) => (b.stats?.memory?.used || 0) - (a.stats?.memory?.used || 0)); // sort after memory
     }
@@ -52,7 +51,7 @@ export class NodeManager extends EventEmitter {
             return this.leastLoadNodesMemory; // this.options.defaultLeastLoadNodeSortType === "memory"
     }
     get leastLoadNodesMemory() {
-        return this.nodes
+        return [...this.nodes.values()]
             .filter((node) => node.connected)
             .sort((a, b) => {
             const aload = a.stats.memory?.used
@@ -66,7 +65,7 @@ export class NodeManager extends EventEmitter {
     }
     /** Returns the least system load Nodes. */
     get leastLoadNodesCpu() {
-        return this.nodes
+        return [...this.nodes.values()]
             .filter((node) => node.connected)
             .sort((a, b) => {
             const aload = a.stats.cpu

@@ -46,13 +46,13 @@ export class ManagerUitls {
         if (!data)
             return false;
         const keys = Object.getOwnPropertyNames(Object.getPrototypeOf(data));
-        console.log("isNode, keys", keys);
+        if (!keys.includes("constructor"))
+            return false;
         if (!keys.length)
             return false;
         // all required functions
         if (!["connect", "destroy", "destroyPlayer", "fetchAllPlayers", "fetchInfo", "fetchPlayer", "fetchStats", "fetchVersion", "request", "updatePlayer", "updateSession"].every(v => keys.includes(v)))
             return false;
-        // all properties
         return true;
     }
     /**
@@ -196,28 +196,6 @@ export class MiniMap extends Map {
         }
         return results;
     }
-    /**
-     * The sort method sorts the items of a collection in place and returns it.
-     * The sort is not necessarily stable in Node 10 or older.
-     * The default sort order is according to string Unicode code points.
-     *
-     * @param compareFunction Specifies a function that defines the sort order.
-     * If omitted, the collection is sorted according to each character's Unicode code point value, according to the string conversion of each element.
-     *
-     * @example
-     * collection.sort((userA, userB) => userA.createdTimestamp - userB.createdTimestamp);
-     */
-    sort(compareFunction = MiniMap.defaultSort) {
-        const entries = [...this.entries()];
-        entries.sort((a, b) => compareFunction(a[1], b[1], a[0], b[0]));
-        // Perform clean-up
-        super.clear();
-        // Set the new entries
-        for (const [k, v] of entries) {
-            super.set(k, v);
-        }
-        return this;
-    }
     toJSON() {
         // toJSON is called recursively by JSON.stringify.
         return [...this.values()];
@@ -242,11 +220,11 @@ export async function queueTrackEnd(queue, addBackToQueue = false) {
         if (queue.previous.length > queue.options.maxPreviousTracks)
             queue.previous.splice(queue.options.maxPreviousTracks, queue.previous.length);
     }
-    // change the current Track to the next upcoming one
-    queue.current = queue.tracks.shift() || null;
     // and if repeatMode == queue, add it back to the queue!
     if (addBackToQueue && queue.current)
         queue.tracks.push(queue.current);
+    // change the current Track to the next upcoming one
+    queue.current = queue.tracks.shift() || null;
     // save it in the DB
     await queue.utils.save();
     // return the new current Track

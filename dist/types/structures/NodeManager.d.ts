@@ -55,7 +55,7 @@ export declare class NodeManager extends EventEmitter {
     nodes: MiniMap<string, LavalinkNode>;
     constructor(LavalinkManager: LavalinkManager);
     createNode(options: LavalinkNodeOptions): LavalinkNode;
-    get leastUsedNodes(): MiniMap<string, LavalinkNode>;
+    get leastUsedNodes(): LavalinkNode[];
     /** Returns the least used Nodes sorted by amount of calls. */
     private get leastUsedNodesCalls();
     /** Returns the least used Nodes sorted by amount of players. */
@@ -63,10 +63,10 @@ export declare class NodeManager extends EventEmitter {
     /** Returns the least used Nodes sorted by amount of memory usage. */
     private get leastUsedNodesMemory();
     /** Returns the least system load Nodes. */
-    get leastLoadNodes(): MiniMap<string, LavalinkNode>;
-    get leastLoadNodesMemory(): MiniMap<string, LavalinkNode>;
+    get leastLoadNodes(): LavalinkNode[];
+    get leastLoadNodesMemory(): LavalinkNode[];
     /** Returns the least system load Nodes. */
-    get leastLoadNodesCpu(): MiniMap<string, LavalinkNode>;
+    get leastLoadNodesCpu(): LavalinkNode[];
     deleteNode(node: LavalinkNodeIdentifier | LavalinkNode): void;
 }
 export {};
