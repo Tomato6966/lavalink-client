@@ -21,6 +21,8 @@ export interface StoreManager extends Record<any, any> {
 }
 export interface QueueSaverOptions {
   maxPreviousTracks: number;
+  queueStore?: StoreManager;
+  queueChangesWatcher?: QueueChangesWatcher;
 }
 export interface QueueSaver {
   /** @private */
@@ -31,9 +33,11 @@ export interface QueueSaver {
 
 
 export class QueueSaver {
-  constructor(storeManager: StoreManager, options: QueueSaverOptions) {
-    this._ = storeManager;
-    this.options = options;
+  constructor(options: QueueSaverOptions) {
+    this._ = options.queueStore || new DefaultQueueStore();
+    this.options = {
+      maxPreviousTracks: options.maxPreviousTracks
+    };
   }
   async get(guildId: string) {
     return await this._.parse(await this._.get(guildId));
@@ -94,8 +98,8 @@ export class Queue {
   static readonly StaticSymbol: Symbol = QueueSymbol;
   private managerUtils = new ManagerUitls();
   private queueChanges: QueueChangesWatcher | null;
-  constructor(guildId: string, data: Partial<StoredQueue> = {}, QueueSaver?: QueueSaver, queueChangesWatcher?: QueueChangesWatcher) {
-    this.queueChanges = queueChangesWatcher || null;
+  constructor(guildId: string, data: Partial<StoredQueue> = {}, QueueSaver?: QueueSaver, queueOptions?: QueueSaverOptions) {
+    this.queueChanges = queueOptions.queueChangesWatcher || null;
     this.guildId = guildId;
     this.QueueSaver = QueueSaver;
     this.options.maxPreviousTracks = this.QueueSaver?.options?.maxPreviousTracks ?? this.options.maxPreviousTracks;
