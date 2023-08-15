@@ -21,7 +21,9 @@ export default {
         await player.skip((interaction.options as CommandInteractionOptionResolver).getInteger("skipto") || 0);
 
         await interaction.reply({
-            ephemeral: true, content: `Skipped [\`${current?.info.title}\`](<${current?.info.uri}>) -> [\`${nextTrack?.info.title}\`](<${nextTrack?.info.uri}>)`
+            ephemeral: true, content: current ? 
+            `Skipped [\`${current?.info.title}\`](<${current?.info.uri}>) -> [\`${nextTrack?.info.title}\`](<${nextTrack?.info.uri}>)` :
+            `Skipped to [\`${nextTrack?.info.title}\`](<${nextTrack?.info.uri}>)`
         });
     }
 } as Command;

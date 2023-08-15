@@ -33,14 +33,14 @@ export function PlayerEvents(client:BotClient) {
      * Queue/Track Events
      */
     client.lavalink.on("trackStart", (player, track) => {
-        console.log(player.guildId, " :: Started Playing :: ", track)
+        console.log(player.guildId, " :: Started Playing :: ", track.info.title, "QUEUE:", player.queue.tracks.map(v => v.info.title));
         const channel = client.channels.cache.get(player.textChannelId!) as TextChannel;
         if(!channel) return;
         channel.send({
             embeds: [ 
                 new EmbedBuilder()
                     .setColor("Blurple")
-                    .setTitle(`🎶 ${track.info.title}`)
+                    .setTitle(`🎶 ${track.info.title}`.substring(0, 256))
                     .setURL(track.info.uri)
                     .setThumbnail(track.info.artworkUrl || track.pluginInfo?.artworkUrl || null)
                     .setDescription(
@@ -50,7 +50,7 @@ export function PlayerEvents(client:BotClient) {
                             `> - **Source:** ${track.info.sourceName}`,
                             `> - **Requester:** <@${(track.requester as CustomRequester).id}>`,
                             track.pluginInfo?.clientData?.fromAutoplay ? `> *From Autoplay* ✅` : undefined
-                        ].filter(v => typeof v === "string" && v.length).join("\n")
+                        ].filter(v => typeof v === "string" && v.length).join("\n").substring(0, 4096)
                     )
                     .setFooter({
                         text: `Requested by ${(track.requester as CustomRequester).username}`,
