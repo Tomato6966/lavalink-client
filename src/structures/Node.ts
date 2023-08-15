@@ -277,7 +277,7 @@ export class LavalinkNode {
     
     /** Get the id of the node */
     public get id() {
-        return this.options.id || this.options.host;
+        return this.options.id || `${this.options.host}:${this.options.port}`;
     }
 
     /**
