@@ -527,14 +527,14 @@ export class LavalinkNode {
             return this.NodeManager.LavalinkManager.emit("trackEnd", player, track, payload);
         // If a track had an error while starting
         if (["loadFailed", "cleanup"].includes(payload.reason)) {
-            await queueTrackEnd(player.queue);
+            await queueTrackEnd(player.queue, false);
             // if no track available, end queue
             if (!player.queue.current)
                 return this.queueEnd(player, track, payload);
             // fire event
             this.NodeManager.LavalinkManager.emit("trackEnd", player, track, payload);
             // play track if autoSkip is true
-            return this.NodeManager.LavalinkManager.options.autoSkip && player.play({ track: player.queue.current, noReplace: true });
+            return this.NodeManager.LavalinkManager.options.autoSkip && player.play({ noReplace: true });
         }
         // remove tracks from the queue
         if (player.repeatMode !== "track")
@@ -545,7 +545,7 @@ export class LavalinkNode {
         // fire event
         this.NodeManager.LavalinkManager.emit("trackEnd", player, track, payload);
         // play track if autoSkip is true
-        return this.NodeManager.LavalinkManager.options.autoSkip && player.play({ track: player.queue.current, noReplace: true });
+        return this.NodeManager.LavalinkManager.options.autoSkip && player.play({ noReplace: true });
     }
     async queueEnd(player, track, payload) {
         player.queue.current = null;
@@ -555,7 +555,7 @@ export class LavalinkNode {
             if (player.queue.tracks.length > 0)
                 await queueTrackEnd(player.queue, player.repeatMode === "queue");
             if (player.queue.current)
-                return player.play({ track: player.queue.current, noReplace: true, paused: false });
+                return player.play({ noReplace: true, paused: false });
         }
         if (payload?.reason !== "stopped") {
             await player.queue.utils.save();
@@ -586,7 +586,7 @@ export class LavalinkNode {
         if (!player.queue.current)
             return this.queueEnd(player, track, payload);
         // play track if autoSkip is true
-        return (this.NodeManager.LavalinkManager.options.autoSkip && player.queue.current) && player.play({ track: player.queue.current, noReplace: true });
+        return (this.NodeManager.LavalinkManager.options.autoSkip && player.queue.current) && player.play({ noReplace: true });
     }
     async trackError(player, track, payload) {
         this.NodeManager.LavalinkManager.emit("trackError", player, track, payload);
@@ -596,7 +596,7 @@ export class LavalinkNode {
         if (!player.queue.current)
             return this.queueEnd(player, track, payload);
         // play track if autoSkip is true
-        return (this.NodeManager.LavalinkManager.options.autoSkip && player.queue.current) && player.play({ track: player.queue.current, noReplace: true });
+        return (this.NodeManager.LavalinkManager.options.autoSkip && player.queue.current) && player.play({ noReplace: true });
     }
     socketClosed(player, payload) {
         return this.NodeManager.LavalinkManager.emit("playerSocketClosed", player, payload);
