@@ -124,7 +124,8 @@ export class Player {
         this.textChannelId = this.options.textChannelId || null;
 
         this.node = typeof this.options.node === "string" ? this.LavalinkManager.nodeManager.nodes.get(this.options.node) : this.options.node;
-        if(!this.node || typeof this.node.request !== "function") this.node = this.LavalinkManager.nodeManager.leastUsedNodes.filter(v => options.vcRegion ? v.options?.regions?.includes(options.vcRegion) : true)[0] || this.LavalinkManager.nodeManager.leastUsedNodes[0] || null;
+        if(!this.node || typeof this.node?.request !== "function") this.node = this.LavalinkManager.nodeManager.leastUsedNodes.filter(v => options.vcRegion ? v.options?.regions?.includes(options.vcRegion) : true)[0] || this.LavalinkManager.nodeManager.leastUsedNodes[0] || null;
+       
         if(!this.node) throw new Error("No available Node was found, please add a LavalinkNode to the Manager via Manager.NodeManager#createNode")
        
         if(this.LavalinkManager.options.playerOptions.volumeDecrementer) this.volume *= this.LavalinkManager.options.playerOptions.volumeDecrementer;
