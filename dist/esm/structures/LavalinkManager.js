@@ -10,33 +10,94 @@ export class LavalinkManager extends EventEmitter {
     initiated = false;
     players = new MiniMap();
     applyDefaultOptions() {
+        if (!this.options.playerOptions)
+            this.options.playerOptions = {
+                applyVolumeAsFilter: false,
+                clientBasedPositionUpdateInterval: 100,
+                defaultSearchPlatform: "ytsearch",
+                onDisconnect: {
+                    destroyPlayer: true,
+                    autoReconnect: false
+                },
+                onEmptyQueue: {
+                    autoPlayFunction: null,
+                    destroyAfterMs: undefined
+                },
+                requesterTransformer: (requester) => {
+                    // if it's already the transformed requester
+                    if (typeof requester === "object" && "avatar" in requester && Object.keys(requester).length === 3)
+                        return requester;
+                    // if it's still a discord.js User
+                    if (typeof requester === "object" && "displayAvatarURL" in requester) { // it's a user
+                        return {
+                            id: requester.id,
+                            username: requester.username,
+                            avatar: requester.displayAvatarURL(),
+                        };
+                    }
+                    // if it's non of the above
+                    return { id: requester.toString(), username: "unknown" }; // reteurn something that makes sense for you!
+                },
+                volumeDecrementer: 1
+            };
+        if (!this.options.autoSkip)
+            this.options.autoSkip = true;
+        if (!this.options.defaultLeastLoadNodeSortType)
+            this.options.defaultLeastLoadNodeSortType = "memory";
+        if (!this.options.defaultLeastUsedNodeSortType)
+            this.options.defaultLeastUsedNodeSortType = "players";
         if (!this.options.playerOptions.defaultSearchPlatform)
             this.options.playerOptions.defaultSearchPlatform = "ytsearch";
+        // default queue options
+        if (!this.options.queueOptions)
+            this.options.queueOptions = {
+                maxPreviousTracks: 25,
+                queueChangesWatcher: null,
+                queueStore: new DefaultQueueStore()
+            };
         if (typeof this.options?.queueOptions?.maxPreviousTracks !== "number" || this.options.queueOptions.maxPreviousTracks < 0)
             this.options.queueOptions.maxPreviousTracks = 25;
         return;
     }
     validateAndApply(options) {
+        if (typeof options.sendToShard !== "function")
+            throw new SyntaxError("ManagerOption.sendToShard was not provided, which is required!");
+        if (typeof options.client !== "object" || typeof options.client.id !== "string")
+            throw new SyntaxError("ManagerOption.client = { id: string, username?:string, shards?: 'auto'|number } was not provided, which is required");
+        if (options.autoSkip && typeof options.autoSkip !== "boolean")
+            throw new SyntaxError("ManagerOption.autoSkip must be either false | true aka boolean");
+        if (options.defaultLeastLoadNodeSortType && !["memory", "cpu"].includes(options.defaultLeastLoadNodeSortType))
+            throw new SyntaxError("ManagerOption.defaultLeastLoadNodeSortType must be 'memory' | 'cpu'");
+        if (options.defaultLeastUsedNodeSortType && !["memory", "players", "calls"].includes(options.defaultLeastUsedNodeSortType))
+            throw new SyntaxError("ManagerOption.defaultLeastLoadNodeSortType must be 'memory' | 'calls' | 'players'");
+        if (!options.nodes || !Array.isArray(options.nodes) || !options.nodes.every(node => this.utils.isNodeOptions(node)))
+            throw new SyntaxError("ManagerOption.nodes must be an Array of NodeOptions and is required of at least 1 Node");
         /* QUEUE STORE */
-        if (options.queueStore) {
-            const keys = Object.getOwnPropertyNames(Object.getPrototypeOf(options.queueStore));
+        if (options.queueOptions?.queueStore) {
+            const keys = Object.getOwnPropertyNames(Object.getPrototypeOf(options.queueOptions?.queueStore));
             const requiredKeys = ["get", "set", "stringify", "parse", "delete"];
-            if (!requiredKeys.every(v => keys.includes(v)) || !requiredKeys.every(v => typeof options.queueStore[v] === "function"))
-                throw new SyntaxError(`The provided QueueStore, does not have all required functions: ${requiredKeys.join(", ")}`);
+            if (!requiredKeys.every(v => keys.includes(v)) || !requiredKeys.every(v => typeof options.queueOptions?.queueStore[v] === "function"))
+                throw new SyntaxError(`The provided ManagerOption.QueueStore, does not have all required functions: ${requiredKeys.join(", ")}`);
         }
         else
-            this.options.queueStore = new DefaultQueueStore();
+            this.options.queueOptions.queueStore = new DefaultQueueStore();
+        /* QUEUE WATCHER */
+        if (options.queueOptions?.queueChangesWatcher) {
+            const keys = Object.getOwnPropertyNames(Object.getPrototypeOf(options.queueOptions?.queueChangesWatcher));
+            const requiredKeys = ["tracksAdd", "tracksRemoved", "shuffled"];
+            if (!requiredKeys.every(v => keys.includes(v)) || !requiredKeys.every(v => typeof options.queueOptions?.queueChangesWatcher[v] === "function"))
+                throw new SyntaxError(`The provided ManagerOption.QueueChangesWatcher, does not have all required functions: ${requiredKeys.join(", ")}`);
+        }
     }
     constructor(options) {
         super();
+        if (!options)
+            throw new SyntaxError("No Manager Options Provided");
         // create options
-        this.options = {
-            autoSkip: true,
-            ...options
-        };
+        this.options = options;
         // use the validators
-        this.applyDefaultOptions();
         this.validateAndApply(options);
+        this.applyDefaultOptions();
         // create classes
         this.nodeManager = new NodeManager(this);
         this.utils = new ManagerUitls(this);

@@ -1,6 +1,6 @@
 import { LavalinkFilterData } from "./Filters";
 import { LavalinkManager } from "./LavalinkManager";
-import { LavalinkNode, NodeStats } from "./Node";
+import { LavalinkNode, LavalinkNodeOptions, NodeStats } from "./Node";
 import { PlayOptions } from "./Player";
 import { Queue } from "./Queue";
 import { PluginInfo, Track } from "./Track";
@@ -41,9 +41,19 @@ export declare class ManagerUitls {
     constructor(LavalinkManager?: LavalinkManager);
     buildTrack(data: any, requester: any): Track;
     /**
+     * Validate if a data is equal to a node
+     * @param data
+     */
+    isNode(data: LavalinkNode): boolean;
+    /**
+     * Validate if a data is equal to node options
+     * @param data
+     */
+    isNodeOptions(data: LavalinkNodeOptions | any): boolean;
+    /**
      * Validate if a data is euqal to a track
-     * @param {Track|any} data the Track to validate
-     * @returns {boolean}
+     * @param data the Track to validate
+     * @returns
      */
     isTrack(data: Track | any): boolean;
     validatedQuery(queryString: string, node: LavalinkNode): void;
@@ -85,6 +95,20 @@ export declare class MiniMap<K, V> extends Map<K, V> {
     filter<This, K2 extends K>(fn: (this: This, value: V, key: K, miniMap: this) => key is K2, thisArg: This): MiniMap<K2, V>;
     filter<This, V2 extends V>(fn: (this: This, value: V, key: K, miniMap: this) => value is V2, thisArg: This): MiniMap<K, V2>;
     filter<This>(fn: (this: This, value: V, key: K, miniMap: this) => boolean, thisArg: This): MiniMap<K, V>;
+    /**
+     * The sort method sorts the items of a collection in place and returns it.
+     * The sort is not necessarily stable in Node 10 or older.
+     * The default sort order is according to string Unicode code points.
+     *
+     * @param compareFunction Specifies a function that defines the sort order.
+     * If omitted, the collection is sorted according to each character's Unicode code point value, according to the string conversion of each element.
+     *
+     * @example
+     * collection.sort((userA, userB) => userA.createdTimestamp - userB.createdTimestamp);
+     */
+    sort(compareFunction?: (firstValue: V, secondValue: V, firstKey: K, secondKey: K) => number): this;
+    toJSON(): V[];
+    private static defaultSort;
     /**
      * Maps each item to another value into an array. Identical in behavior to
      * [Array.map()](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/map).

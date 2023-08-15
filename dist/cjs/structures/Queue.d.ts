@@ -18,6 +18,8 @@ export interface StoreManager extends Record<any, any> {
 }
 export interface QueueSaverOptions {
     maxPreviousTracks: number;
+    queueStore?: StoreManager;
+    queueChangesWatcher?: QueueChangesWatcher;
 }
 export interface QueueSaver {
     /** @private */
@@ -26,7 +28,7 @@ export interface QueueSaver {
     options: QueueSaverOptions;
 }
 export declare class QueueSaver {
-    constructor(storeManager: StoreManager, options: QueueSaverOptions);
+    constructor(options: QueueSaverOptions);
     get(guildId: string): Promise<Partial<StoredQueue>>;
     delete(guildId: string): Promise<any>;
     set(guildId: string, value: any): Promise<any>;
@@ -59,7 +61,7 @@ export declare class Queue {
     static readonly StaticSymbol: Symbol;
     private managerUtils;
     private queueChanges;
-    constructor(guildId: string, data?: Partial<StoredQueue>, QueueSaver?: QueueSaver, queueChangesWatcher?: QueueChangesWatcher);
+    constructor(guildId: string, data?: Partial<StoredQueue>, QueueSaver?: QueueSaver, queueOptions?: QueueSaverOptions);
     /**
      * Utils for a Queue
      */

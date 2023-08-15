@@ -39,9 +39,57 @@ export class ManagerUitls {
         }
     }
     /**
+     * Validate if a data is equal to a node
+     * @param data
+     */
+    isNode(data) {
+        if (!data)
+            return false;
+        const keys = Object.getOwnPropertyNames(Object.getPrototypeOf(data));
+        console.log("isNode, keys", keys);
+        if (!keys.length)
+            return false;
+        // all required functions
+        if (!["connect", "destroy", "destroyPlayer", "fetchAllPlayers", "fetchInfo", "fetchPlayer", "fetchStats", "fetchVersion", "request", "updatePlayer", "updateSession"].every(v => keys.includes(v)))
+            return false;
+        // all properties
+        return true;
+    }
+    /**
+     * Validate if a data is equal to node options
+     * @param data
+     */
+    isNodeOptions(data) {
+        if (!data || typeof data !== "object" || Array.isArray(data))
+            return false;
+        if (typeof data.host !== "string" || !data.host.length)
+            return false;
+        if (typeof data.port !== "number" || isNaN(data.port) || data.port < 0 || data.port > 65535)
+            return false;
+        if (typeof data.authorization !== "string" || !data.authorization.length)
+            return false;
+        if ("secure" in data && typeof data.secure !== "boolean")
+            return false;
+        if ("sessionId" in data && typeof data.sessionId !== "string")
+            return false;
+        if ("id" in data && typeof data.id !== "string")
+            return false;
+        if ("regions" in data && (!Array.isArray(data.regions) || !data.regions.every(v => typeof v === "string")))
+            return false;
+        if ("poolOptions" in data && typeof data.poolOptions !== "object")
+            return false;
+        if ("retryAmount" in data && (typeof data.retryAmount !== "number" || isNaN(data.retryAmount) || data.retryAmount <= 0))
+            return false;
+        if ("retryDelay" in data && (typeof data.retryDelay !== "number" || isNaN(data.retryDelay) || data.retryDelay <= 0))
+            return false;
+        if ("requestTimeout" in data && (typeof data.requestTimeout !== "number" || isNaN(data.requestTimeout) || data.requestTimeout <= 0))
+            return false;
+        return true;
+    }
+    /**
      * Validate if a data is euqal to a track
-     * @param {Track|any} data the Track to validate
-     * @returns {boolean}
+     * @param data the Track to validate
+     * @returns
      */
     isTrack(data) {
         return typeof data?.encoded === "string" && typeof data?.info === "object";
@@ -147,6 +195,35 @@ export class MiniMap extends Map {
                 results.set(key, val);
         }
         return results;
+    }
+    /**
+     * The sort method sorts the items of a collection in place and returns it.
+     * The sort is not necessarily stable in Node 10 or older.
+     * The default sort order is according to string Unicode code points.
+     *
+     * @param compareFunction Specifies a function that defines the sort order.
+     * If omitted, the collection is sorted according to each character's Unicode code point value, according to the string conversion of each element.
+     *
+     * @example
+     * collection.sort((userA, userB) => userA.createdTimestamp - userB.createdTimestamp);
+     */
+    sort(compareFunction = MiniMap.defaultSort) {
+        const entries = [...this.entries()];
+        entries.sort((a, b) => compareFunction(a[1], b[1], a[0], b[0]));
+        // Perform clean-up
+        super.clear();
+        // Set the new entries
+        for (const [k, v] of entries) {
+            super.set(k, v);
+        }
+        return this;
+    }
+    toJSON() {
+        // toJSON is called recursively by JSON.stringify.
+        return [...this.values()];
+    }
+    static defaultSort(firstValue, secondValue) {
+        return Number(firstValue > secondValue) || Number(firstValue === secondValue) - 1;
     }
     map(fn, thisArg) {
         if (typeof thisArg !== 'undefined')

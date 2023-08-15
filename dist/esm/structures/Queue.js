@@ -1,8 +1,10 @@
 import { ManagerUitls, QueueSymbol } from "./Utils";
 export class QueueSaver {
-    constructor(storeManager, options) {
-        this._ = storeManager;
-        this.options = options;
+    constructor(options) {
+        this._ = options.queueStore || new DefaultQueueStore();
+        this.options = {
+            maxPreviousTracks: options.maxPreviousTracks
+        };
     }
     async get(guildId) {
         return await this._.parse(await this._.get(guildId));
@@ -60,8 +62,8 @@ export class Queue {
     static StaticSymbol = QueueSymbol;
     managerUtils = new ManagerUitls();
     queueChanges;
-    constructor(guildId, data = {}, QueueSaver, queueChangesWatcher) {
-        this.queueChanges = queueChangesWatcher || null;
+    constructor(guildId, data = {}, QueueSaver, queueOptions) {
+        this.queueChanges = queueOptions.queueChangesWatcher || null;
         this.guildId = guildId;
         this.QueueSaver = QueueSaver;
         this.options.maxPreviousTracks = this.QueueSaver?.options?.maxPreviousTracks ?? this.options.maxPreviousTracks;

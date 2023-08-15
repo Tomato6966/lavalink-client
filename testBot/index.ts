@@ -1,6 +1,6 @@
-import { Client, GatewayIntentBits, User } from "discord.js";
-import { createClient, RedisClientType } from 'redis';
-import { DefaultQueueStore, LavalinkManager, QueueChangesWatcher, StoredQueue, Track } from "../src";
+import { Client, GatewayIntentBits } from "discord.js";
+import { createClient } from 'redis';
+import { LavalinkManager } from "../src";
 import { BotClient, CustomRequester } from "./types/Client";
 import { envConfig } from "./config";
 import { loadCommands } from "./handler/commandLoader";

@@ -3,9 +3,11 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.Queue = exports.QueueChangesWatcher = exports.DefaultQueueStore = exports.QueueSaver = void 0;
 const Utils_1 = require("./Utils");
 class QueueSaver {
-    constructor(storeManager, options) {
-        this._ = storeManager;
-        this.options = options;
+    constructor(options) {
+        this._ = options.queueStore || new DefaultQueueStore();
+        this.options = {
+            maxPreviousTracks: options.maxPreviousTracks
+        };
     }
     async get(guildId) {
         return await this._.parse(await this._.get(guildId));
@@ -66,8 +68,8 @@ class Queue {
     static StaticSymbol = Utils_1.QueueSymbol;
     managerUtils = new Utils_1.ManagerUitls();
     queueChanges;
-    constructor(guildId, data = {}, QueueSaver, queueChangesWatcher) {
-        this.queueChanges = queueChangesWatcher || null;
+    constructor(guildId, data = {}, QueueSaver, queueOptions) {
+        this.queueChanges = queueOptions.queueChangesWatcher || null;
         this.guildId = guildId;
         this.QueueSaver = QueueSaver;
         this.options.maxPreviousTracks = this.QueueSaver?.options?.maxPreviousTracks ?? this.options.maxPreviousTracks;

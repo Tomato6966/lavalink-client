@@ -1,7 +1,7 @@
 /// <reference types="node" />
 import { EventEmitter } from "events";
 import { NodeManager } from "./NodeManager";
-import { QueueChangesWatcher, QueueSaverOptions, StoreManager } from "./Queue";
+import { QueueSaverOptions } from "./Queue";
 import { GuildShardPayload, LavalinkSearchPlatform, ManagerUitls, MiniMap, SearchPlatform, TrackEndEvent, TrackExceptionEvent, TrackStartEvent, TrackStuckEvent, VoicePacket, VoiceServer, VoiceState, WebSocketClosedEvent } from "./Utils";
 import { LavalinkNodeOptions } from "./Node";
 import { DestroyReasonsType, Player, PlayerOptions } from "./Player";
@@ -44,11 +44,11 @@ export interface LavalinkPlayerOptions {
 export interface ManagerOptions {
     nodes: LavalinkNodeOptions[];
     queueOptions?: QueueSaverOptions;
-    queueStore?: StoreManager;
-    queueChangesWatcher?: QueueChangesWatcher;
     client?: BotClientOptions;
     playerOptions?: LavalinkPlayerOptions;
     autoSkip?: boolean;
+    defaultLeastUsedNodeSortType?: "memory" | "calls" | "players";
+    defaultLeastLoadNodeSortType?: "cpu" | "memory";
     /** @async */
     sendToShard: (guildId: string, payload: GuildShardPayload) => void;
 }

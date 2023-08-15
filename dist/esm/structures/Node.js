@@ -149,7 +149,7 @@ export class LavalinkNode {
     }
     /** Get the id of the node */
     get id() {
-        return this.options.id || this.options.host;
+        return this.options.id || `${this.options.host}:${this.options.port}`;
     }
     /**
      * Destroys the Node-Connection (Websocket) and all player's of the node
