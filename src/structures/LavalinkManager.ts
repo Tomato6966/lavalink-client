@@ -179,7 +179,8 @@ export class LavalinkManager extends EventEmitter {
   }
   private validateAndApply(options: ManagerOptions) {
     if(typeof options.sendToShard !== "function") throw new SyntaxError("ManagerOption.sendToShard was not provided, which is required!");
-    if(typeof options.client !== "object" || typeof options.client.id !== "string") throw new SyntaxError("ManagerOption.client = { id: string, username?:string, shards?: 'auto'|number } was not provided, which is required");
+    // only check in .init()
+    // if(typeof options.client !== "object" || typeof options.client.id !== "string") throw new SyntaxError("ManagerOption.client = { id: string, username?:string, shards?: 'auto'|number } was not provided, which is required");
     if(options.autoSkip && typeof options.autoSkip !== "boolean") throw new SyntaxError("ManagerOption.autoSkip must be either false | true aka boolean");
     if(options.defaultLeastLoadNodeSortType && !["memory", "cpu"].includes(options.defaultLeastLoadNodeSortType)) throw new SyntaxError("ManagerOption.defaultLeastLoadNodeSortType must be 'memory' | 'cpu'");
     if(options.defaultLeastUsedNodeSortType && !["memory", "players", "calls"].includes(options.defaultLeastUsedNodeSortType)) throw new SyntaxError("ManagerOption.defaultLeastLoadNodeSortType must be 'memory' | 'calls' | 'players'");
