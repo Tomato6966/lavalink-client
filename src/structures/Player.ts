@@ -123,8 +123,8 @@ export class Player {
         this.voiceChannelId = this.options.voiceChannelId;
         this.textChannelId = this.options.textChannelId || null;
 
-        this.node = this.LavalinkManager.nodeManager.leastUsedNodes.filter(v => options.vcRegion ? v.options?.regions?.includes(options.vcRegion) : true)[0] || this.LavalinkManager.nodeManager.leastUsedNodes[0] || null;
-       
+        this.node = typeof this.options.node === "string" ? this.LavalinkManager.nodeManager.nodes.get(this.options.node) : this.options.node;
+        if(!this.node || typeof this.node.request !== "function") this.node = this.LavalinkManager.nodeManager.leastUsedNodes.filter(v => options.vcRegion ? v.options?.regions?.includes(options.vcRegion) : true)[0] || this.LavalinkManager.nodeManager.leastUsedNodes[0] || null;
         if(!this.node) throw new Error("No available Node was found, please add a LavalinkNode to the Manager via Manager.NodeManager#createNode")
        
         if(this.LavalinkManager.options.playerOptions.volumeDecrementer) this.volume *= this.LavalinkManager.options.playerOptions.volumeDecrementer;
@@ -132,7 +132,7 @@ export class Player {
         this.LavalinkManager.emit("playerCreate", this);
         if(typeof options.volume === "number" && !isNaN(options.volume)) this.setVolume(options.volume);
 
-        this.queue = new Queue(this.guildId, {}, new QueueSaver(this.LavalinkManager.options.queueStore, this.LavalinkManager.options.queueOptions), this.LavalinkManager.options.queueChangesWatcher)
+        this.queue = new Queue(this.guildId, {}, new QueueSaver(this.LavalinkManager.options.queueOptions), this.LavalinkManager.options.queueOptions)
     }
 
     /**
