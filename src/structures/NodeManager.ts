@@ -69,42 +69,41 @@ export class NodeManager extends EventEmitter {
     createNode(options: LavalinkNodeOptions) {
         if (this.nodes.has(options.id || `${options.host}:${options.port}`)) return this.nodes.get(options.id || `${options.host}:${options.port}`)!;
         const newNode = new LavalinkNode(options, this);
-        console.log(newNode.id, this.LavalinkManager.utils.isNode(newNode));
         this.nodes.set(newNode.id, newNode);
         return newNode;
     }
-    public get leastUsedNodes(): MiniMap<string, LavalinkNode> {
+    public get leastUsedNodes(): LavalinkNode[] {
         if(this.LavalinkManager.options.defaultLeastUsedNodeSortType === "memory") return this.leastUsedNodesMemory;
         else if(this.LavalinkManager.options.defaultLeastUsedNodeSortType === "calls")  return this.leastUsedNodesCalls;
         else return this.leastUsedNodesPlayers; // this.options.defaultLeastUsedNodeSortType === "players"
     }
     /** Returns the least used Nodes sorted by amount of calls. */
-    private get leastUsedNodesCalls(): MiniMap<string, LavalinkNode> {
-        return this.nodes
+    private get leastUsedNodesCalls(): LavalinkNode[] {
+        return [...this.nodes.values()]
             .filter((node) => node.connected)
             .sort((a, b) => b.calls - a.calls); // client sided sorting
     }
     /** Returns the least used Nodes sorted by amount of players. */
-    private get leastUsedNodesPlayers(): MiniMap<string, LavalinkNode> {
-        return this.nodes
+    private get leastUsedNodesPlayers(): LavalinkNode[] {
+        return [...this.nodes.values()]
             .filter((node) => node.connected)
             .sort((a, b) => (a.stats?.players || 0) - (b.stats?.players || 0))
     }
     /** Returns the least used Nodes sorted by amount of memory usage. */
-    private get leastUsedNodesMemory(): MiniMap<string, LavalinkNode> {
-        return this.nodes
+    private get leastUsedNodesMemory(): LavalinkNode[] {
+        return [...this.nodes.values()]
             .filter((node) => node.connected)
             .sort((a, b) => (b.stats?.memory?.used || 0) - (a.stats?.memory?.used || 0)) // sort after memory
     }
 
     /** Returns the least system load Nodes. */
-    public get leastLoadNodes(): MiniMap<string, LavalinkNode> {
+    public get leastLoadNodes(): LavalinkNode[] {
         if (this.LavalinkManager.options.defaultLeastLoadNodeSortType === "cpu") return this.leastLoadNodesCpu;
         else return this.leastLoadNodesMemory; // this.options.defaultLeastLoadNodeSortType === "memory"
     }
 
-    public get leastLoadNodesMemory(): MiniMap<string, LavalinkNode> {
-        return this.nodes
+    public get leastLoadNodesMemory(): LavalinkNode[] {
+        return [...this.nodes.values()]
             .filter((node) => node.connected)
             .sort((a, b) => {
                 const aload = a.stats.memory?.used
@@ -118,8 +117,8 @@ export class NodeManager extends EventEmitter {
     }
 
     /** Returns the least system load Nodes. */
-    public get leastLoadNodesCpu(): MiniMap<string, LavalinkNode> {
-        return this.nodes
+    public get leastLoadNodesCpu(): LavalinkNode[] {
+        return [...this.nodes.values()]
             .filter((node) => node.connected)
             .sort((a, b) => {
                 const aload = a.stats.cpu
