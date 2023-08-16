@@ -11,6 +11,7 @@ Latest stable Version: (currently, unreleased)
 npm install --save lavalink-client
 ```
 
+
 Dev Version: (Current)
 
 ```bash
