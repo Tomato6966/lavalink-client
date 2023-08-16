@@ -5,7 +5,7 @@ import { GuildShardPayload, LavalinkSearchPlatform, ManagerUitls, MiniMap, Searc
 import { LavalinkNodeOptions } from "./Node";
 import { DefaultSources, SourceLinksRegexes } from "./LavalinkManagerStatics";
 import { DestroyReasons, DestroyReasonsType, Player, PlayerOptions } from "./Player";
-import { Track } from "./Track";
+import { Track, UnresolvedTrack } from "./Track";
 
 export interface LavalinkManager {
   nodeManager: NodeManager;
@@ -76,7 +76,7 @@ interface LavalinkManagerEvents {
      * Emitted when a Track errored.
      * @event Manager#trackError
      */
-    "trackError": (player:Player, track: Track, payload:TrackExceptionEvent) => void;
+    "trackError": (player:Player, track: Track | UnresolvedTrack, payload:TrackExceptionEvent) => void;
     /**
      * Emitted when the Playing finished and no more tracks in the queue.
      * @event Manager#queueEnd

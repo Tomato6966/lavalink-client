@@ -557,7 +557,7 @@ export interface NodeMessage extends NodeStats {
 
 export async function queueTrackEnd(queue: Queue, addBackToQueue: boolean = false) {
   if (queue.current) { // if there was a current Track -> Add it
-    queue.previous.unshift(queue.current);
+    queue.previous.unshift(queue.current as Track);
     if (queue.previous.length > queue.options.maxPreviousTracks) queue.previous.splice(queue.options.maxPreviousTracks, queue.previous.length);
   }
   // and if repeatMode == queue, add it back to the queue!

@@ -282,5 +282,5 @@ export interface NodeMessage extends NodeStats {
     op: "stats" | "playerUpdate" | "event";
     guildId: string;
 }
-export declare function queueTrackEnd(queue: Queue, addBackToQueue?: boolean): Promise<Track>;
+export declare function queueTrackEnd(queue: Queue, addBackToQueue?: boolean): Promise<Track | UnresolvedTrack>;
 export {};

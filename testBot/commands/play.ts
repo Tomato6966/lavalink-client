@@ -66,7 +66,7 @@ export default {
 
         await interaction.reply({
             content: response.loadType === "playlist" 
-                ? `✅ Added [${response.tracks.length}] Tracks${response.playlist?.title ? ` - from the Playlist ${response.playlist.uri ? `[\`${response.playlist.title}\`](<${response.playlist.uri}>)` : `\`${response.playlist.title}\``}` : ""} at \`#${player.queue.tracks.length}\`` 
+                ? `✅ Added [${response.tracks.length}] Tracks${response.playlist?.title ? ` - from the Playlist ${response.playlist.uri ? `[\`${response.playlist.title}\`](<${response.playlist.uri}>)` : `\`${response.playlist.title}\``}` : ""} at \`#${player.queue.tracks.length-response.tracks.length}\`` 
                 : `✅ Added [\`${response.tracks[0].info.title}\`](<${response.tracks[0].info.uri}>) by \`${response.tracks[0].info.author}\` at \`#${player.queue.tracks.length}\`` 
         });
 

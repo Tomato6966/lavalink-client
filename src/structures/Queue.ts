@@ -1,4 +1,4 @@
-import { Track } from "./Track";
+import { Track, UnresolvedTrack } from "./Track";
 import { ManagerUitls, QueueSymbol } from "./Utils";
 
 export interface StoredQueue {
@@ -78,10 +78,10 @@ export class DefaultQueueStore {
 export class QueueChangesWatcher {
   constructor() {
   }
-  tracksAdd(guildId:string, tracks: Track[], position: number, oldStoredQueue:StoredQueue, newStoredQueue: StoredQueue) {
+  tracksAdd(guildId:string, tracks: (Track | UnresolvedTrack)[], position: number, oldStoredQueue:StoredQueue, newStoredQueue: StoredQueue) {
     return;
   }
-  tracksRemoved(guildId:string, tracks: Track[], position: number, oldStoredQueue:StoredQueue, newStoredQueue: StoredQueue) {
+  tracksRemoved(guildId:string, tracks: (Track | UnresolvedTrack)[], position: number, oldStoredQueue:StoredQueue, newStoredQueue: StoredQueue) {
     return;
   }
   shuffled(guildId:string, oldStoredQueue:StoredQueue, newStoredQueue: StoredQueue) {
@@ -90,9 +90,9 @@ export class QueueChangesWatcher {
 }
 
 export class Queue {
-  public readonly tracks: Track[] = [];
+  public readonly tracks: (Track | UnresolvedTrack)[] = [];
   public readonly previous: Track[] = [];
-  public current: Track | null = null;
+  public current: Track | UnresolvedTrack | null = null;
   public options = { maxPreviousTracks: 25 };
   private readonly guildId: string = "";
   private readonly QueueSaver: QueueSaver | null = null;
@@ -194,7 +194,7 @@ export class Queue {
    * @param {number} index At what position to add the Track
    * @returns {number} Queue-Size (for the next Tracks)
    */
-  public async add(TrackOrTracks: Track | Track[], index?: number) {
+  public async add(TrackOrTracks: Track | UnresolvedTrack | (Track | UnresolvedTrack)[], index?: number) {
     if (typeof index === "number" && index >= 0 && index < this.tracks.length) return await this.splice(index, 0, ...(Array.isArray(TrackOrTracks) ? TrackOrTracks : [TrackOrTracks]).filter(v => this.managerUtils.isTrack(v) || this.managerUtils.isUnresolvedTrack(v)));
    
     const oldStored = typeof this.queueChanges?.tracksAdd === "function" ? this.utils.toJSON() : null;
@@ -216,7 +216,7 @@ export class Queue {
    * @param {Track | Track[]} TrackOrTracks Want to Add more Tracks?
    * @returns {Track} Spliced Track
    */
-  public async splice(index: number, amount: number, TrackOrTracks?: Track | Track[]) {
+  public async splice(index: number, amount: number, TrackOrTracks?: Track | UnresolvedTrack | (Track | UnresolvedTrack)[]) {
     const oldStored = typeof this.queueChanges?.tracksAdd === "function" || typeof this.queueChanges?.tracksRemoved === "function" ? this.utils.toJSON() : null;
     // if no tracks to splice, add the tracks
     if (!this.tracks.length) {

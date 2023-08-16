@@ -1,4 +1,4 @@
-import { Track } from "./Track";
+import { Track, UnresolvedTrack } from "./Track";
 export interface StoredQueue {
     current: Track | null;
     previous: Track[];
@@ -45,14 +45,14 @@ export declare class DefaultQueueStore {
 }
 export declare class QueueChangesWatcher {
     constructor();
-    tracksAdd(guildId: string, tracks: Track[], position: number, oldStoredQueue: StoredQueue, newStoredQueue: StoredQueue): void;
-    tracksRemoved(guildId: string, tracks: Track[], position: number, oldStoredQueue: StoredQueue, newStoredQueue: StoredQueue): void;
+    tracksAdd(guildId: string, tracks: (Track | UnresolvedTrack)[], position: number, oldStoredQueue: StoredQueue, newStoredQueue: StoredQueue): void;
+    tracksRemoved(guildId: string, tracks: (Track | UnresolvedTrack)[], position: number, oldStoredQueue: StoredQueue, newStoredQueue: StoredQueue): void;
     shuffled(guildId: string, oldStoredQueue: StoredQueue, newStoredQueue: StoredQueue): void;
 }
 export declare class Queue {
-    readonly tracks: Track[];
+    readonly tracks: (Track | UnresolvedTrack)[];
     readonly previous: Track[];
-    current: Track | null;
+    current: Track | UnresolvedTrack | null;
     options: {
         maxPreviousTracks: number;
     };
@@ -96,7 +96,7 @@ export declare class Queue {
      * @param {number} index At what position to add the Track
      * @returns {number} Queue-Size (for the next Tracks)
      */
-    add(TrackOrTracks: Track | Track[], index?: number): any;
+    add(TrackOrTracks: Track | UnresolvedTrack | (Track | UnresolvedTrack)[], index?: number): any;
     /**
      * Splice the tracks in the Queue
      * @param {number} index Where to remove the Track
@@ -104,5 +104,5 @@ export declare class Queue {
      * @param {Track | Track[]} TrackOrTracks Want to Add more Tracks?
      * @returns {Track} Spliced Track
      */
-    splice(index: number, amount: number, TrackOrTracks?: Track | Track[]): any;
+    splice(index: number, amount: number, TrackOrTracks?: Track | UnresolvedTrack | (Track | UnresolvedTrack)[]): any;
 }

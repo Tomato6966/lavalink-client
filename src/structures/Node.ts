@@ -623,10 +623,10 @@ export class LavalinkNode {
         if (!player) return;
 
         switch (payload.type) {
-            case "TrackStartEvent": this.trackStart(player, player.queue.current, payload); break;
-            case "TrackEndEvent": this.trackEnd(player, player.queue.current, payload); break;
-            case "TrackStuckEvent": this.trackStuck(player, player.queue.current, payload); break;
-            case "TrackExceptionEvent": this.trackError(player, player.queue.current, payload); break;
+            case "TrackStartEvent": this.trackStart(player, player.queue.current as Track, payload); break;
+            case "TrackEndEvent": this.trackEnd(player, player.queue.current as Track, payload); break;
+            case "TrackStuckEvent": this.trackStuck(player, player.queue.current as Track, payload); break;
+            case "TrackExceptionEvent": this.trackError(player, player.queue.current as Track, payload); break;
             case "WebSocketClosedEvent": this.socketClosed(player, payload); break;
             default: this.NodeManager.emit("error", this, new Error(`Node#event unknown event '${(payload as PlayerEventType & PlayerEvents).type}'.`), (payload as PlayerEventType & PlayerEvents)); break;
         }

@@ -5,7 +5,7 @@ import { QueueSaverOptions } from "./Queue";
 import { GuildShardPayload, LavalinkSearchPlatform, ManagerUitls, MiniMap, SearchPlatform, TrackEndEvent, TrackExceptionEvent, TrackStartEvent, TrackStuckEvent, VoicePacket, VoiceServer, VoiceState, WebSocketClosedEvent } from "./Utils";
 import { LavalinkNodeOptions } from "./Node";
 import { DestroyReasonsType, Player, PlayerOptions } from "./Player";
-import { Track } from "./Track";
+import { Track, UnresolvedTrack } from "./Track";
 export interface LavalinkManager {
     nodeManager: NodeManager;
     utils: ManagerUitls;
@@ -69,7 +69,7 @@ interface LavalinkManagerEvents {
      * Emitted when a Track errored.
      * @event Manager#trackError
      */
-    "trackError": (player: Player, track: Track, payload: TrackExceptionEvent) => void;
+    "trackError": (player: Player, track: Track | UnresolvedTrack, payload: TrackExceptionEvent) => void;
     /**
      * Emitted when the Playing finished and no more tracks in the queue.
      * @event Manager#queueEnd
