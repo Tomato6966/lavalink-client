@@ -26,7 +26,7 @@ export default {
             textChannelId: interaction.channelId, 
             selfDeaf: true, 
             selfMute: false,
-            volume: 100,  // default volume
+            volume: client.defaultVolume,  // default volume
             instaUpdateFiltersFix: true, // optional
             applyVolumeAsFilter: false, // if true player.setVolume(54) -> player.filters.setVolume(0.54)
             // node: "YOUR_NODE_ID",

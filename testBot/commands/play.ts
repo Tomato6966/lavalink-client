@@ -46,7 +46,7 @@ export default {
             textChannelId: interaction.channelId, 
             selfDeaf: true, 
             selfMute: false,
-            volume: 100,  // default volume
+            volume: client.defaultVolume,  // default volume
             instaUpdateFiltersFix: true, // optional
             applyVolumeAsFilter: false, // if true player.setVolume(54) -> player.filters.setVolume(0.54)
             // node: "YOUR_NODE_ID",
@@ -70,7 +70,7 @@ export default {
                 : `✅ Added [\`${response.tracks[0].info.title}\`](<${response.tracks[0].info.uri}>) by \`${response.tracks[0].info.author}\` at \`#${player.queue.tracks.length}\`` 
         });
 
-        if(!player.playing) await player.play(connected ? { volume: 100, paused: false } : undefined);
+        if(!player.playing) await player.play(connected ? { volume: client.defaultVolume, paused: false } : undefined);
     },
     autocomplete: async (client, interaction) => {
         if(!interaction.guildId) return;
@@ -80,7 +80,7 @@ export default {
         const focussedQuery = interaction.options.getFocused();
         const player = client.lavalink.getPlayer(interaction.guildId) || await client.lavalink.createPlayer({
             guildId: interaction.guildId, voiceChannelId: vcId, textChannelId: interaction.channelId, // in what guild + channel(s)
-            selfDeaf: true, selfMute: false, volume: 100, instaUpdateFiltersFix: true // configuration(s)
+            selfDeaf: true, selfMute: false, volume: client.defaultVolume, instaUpdateFiltersFix: true // configuration(s)
         });
 
         if(!player.connected) await player.connect();

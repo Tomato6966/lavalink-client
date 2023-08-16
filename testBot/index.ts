@@ -23,6 +23,8 @@ client.redis = createClient({ url: envConfig.redis.url, password: envConfig.redi
 client.redis.connect();
 client.redis.on("error", (err) => console.log('Redis Client Error', err));
 
+client.defaultVolume = 100;
+
 client.lavalink = new LavalinkManager({
     nodes: [
         {
@@ -60,8 +62,6 @@ client.lavalink = new LavalinkManager({
         queueStore: new myCustomStore(client.redis),
         queueChangesWatcher: new myCustomWatcher(client)
     },
-    defaultLeastLoadNodeSortType: "cpu",
-    defaultLeastUsedNodeSortType: "players"
 });
 
 loadCommands(client);

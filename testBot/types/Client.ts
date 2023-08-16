@@ -34,4 +34,5 @@ export interface BotClient extends Client {
     lavalink: LavalinkManager;
     commands: MiniMap<string, Command|SubCommand>;
     redis: RedisClientType;
+    defaultVolume: number;
 }
