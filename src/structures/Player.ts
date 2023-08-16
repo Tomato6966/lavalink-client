@@ -124,8 +124,11 @@ export class Player {
         this.textChannelId = this.options.textChannelId || null;
 
         this.node = typeof this.options.node === "string" ? this.LavalinkManager.nodeManager.nodes.get(this.options.node) : this.options.node;
-        if(!this.node || typeof this.node?.request !== "function") this.node = this.LavalinkManager.nodeManager.leastUsedNodes.filter(v => options.vcRegion ? v.options?.regions?.includes(options.vcRegion) : true)[0] || this.LavalinkManager.nodeManager.leastUsedNodes[0] || null;
-       
+
+        if(!this.node || typeof this.node.request !== "function") {
+            const least = this.LavalinkManager.nodeManager.leastUsedNodes();
+            this.node = least.filter(v => options.vcRegion ? v.options?.regions?.includes(options.vcRegion) : true)[0] || least[0] || null;
+        }
         if(!this.node) throw new Error("No available Node was found, please add a LavalinkNode to the Manager via Manager.NodeManager#createNode")
        
         if(this.LavalinkManager.options.playerOptions.volumeDecrementer) this.volume *= this.LavalinkManager.options.playerOptions.volumeDecrementer;
@@ -269,7 +272,6 @@ export class Player {
             Query.query = Query.query.replace(`${foundSource}:`, ""); // remove ytsearch: from the query
         }
 
-
         // ftts query parameters: ?voice=Olivia&audio_format=ogg_opus&translate=False&silence=1000&speed=1.0 | example raw get query: https://api.flowery.pw/v1/tts?voice=Olivia&audio_format=ogg_opus&translate=False&silence=0&speed=1.0&text=Hello%20World
         // request the data 
         const res = await this.node.request(`/loadtracks?identifier=${!/^https?:\/\//.test(Query.query) ? `${Query.source}:${Query.source === "ftts" ? "//" : ""}` : ""}${encodeURIComponent(Query.query)}`) as {
@@ -353,8 +355,7 @@ export class Player {
      */
     async setRepeatMode(repeatMode:RepeatMode) {
         if(!["off", "track", "queue"].includes(repeatMode)) throw new RangeError("Repeatmode must be either 'off', 'track', or 'queue'");
-        this.repeatMode = repeatMode;
-        return;
+        return this.repeatMode = repeatMode;
     }
 
     /**
@@ -362,7 +363,8 @@ export class Player {
      * @param amount provide the index of the next track to skip to
      */
     async skip(skipTo:number = 0) {
-        if(!this.queue.tracks.length) throw new RangeError("Can't skip more than the queue size")
+        if(!this.queue.tracks.length) throw new RangeError("Can't skip more than the queue size");
+
         if(typeof skipTo === "number" && skipTo > 1) {
             if(skipTo > this.queue.tracks.length) throw new RangeError("Can't skip more than the queue size");
             await this.queue.splice(0, skipTo - 1);
@@ -481,7 +483,7 @@ export class Player {
             createdTimeStamp: this.createdTimeStamp,
             filters: this.filterManager?.data || {},
             equalizer: this.filterManager?.equalizerBands || [],
-            queue: this.queue?.utils?.getStored?.() || { current: null, tracks: [], previous: [] },
+            queue: this.queue?.utils?.toJSON?.() || { current: null, tracks: [], previous: [] },
             nodeId: this.node?.id,
         }
     }

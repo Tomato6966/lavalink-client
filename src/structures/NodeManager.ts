@@ -72,66 +72,48 @@ export class NodeManager extends EventEmitter {
         this.nodes.set(newNode.id, newNode);
         return newNode;
     }
-    public get leastUsedNodes(): LavalinkNode[] {
-        if(this.LavalinkManager.options.defaultLeastUsedNodeSortType === "memory") return this.leastUsedNodesMemory;
-        else if(this.LavalinkManager.options.defaultLeastUsedNodeSortType === "calls")  return this.leastUsedNodesCalls;
-        else return this.leastUsedNodesPlayers; // this.options.defaultLeastUsedNodeSortType === "players"
-    }
-    /** Returns the least used Nodes sorted by amount of calls. */
-    private get leastUsedNodesCalls(): LavalinkNode[] {
-        return [...this.nodes.values()]
-            .filter((node) => node.connected)
-            .sort((a, b) => b.calls - a.calls); // client sided sorting
-    }
-    /** Returns the least used Nodes sorted by amount of players. */
-    private get leastUsedNodesPlayers(): LavalinkNode[] {
-        return [...this.nodes.values()]
-            .filter((node) => node.connected)
-            .sort((a, b) => (a.stats?.players || 0) - (b.stats?.players || 0))
-    }
-    /** Returns the least used Nodes sorted by amount of memory usage. */
-    private get leastUsedNodesMemory(): LavalinkNode[] {
-        return [...this.nodes.values()]
-            .filter((node) => node.connected)
-            .sort((a, b) => (b.stats?.memory?.used || 0) - (a.stats?.memory?.used || 0)) // sort after memory
-    }
-
-    /** Returns the least system load Nodes. */
-    public get leastLoadNodes(): LavalinkNode[] {
-        if (this.LavalinkManager.options.defaultLeastLoadNodeSortType === "cpu") return this.leastLoadNodesCpu;
-        else return this.leastLoadNodesMemory; // this.options.defaultLeastLoadNodeSortType === "memory"
-    }
-
-    public get leastLoadNodesMemory(): LavalinkNode[] {
-        return [...this.nodes.values()]
-            .filter((node) => node.connected)
-            .sort((a, b) => {
-                const aload = a.stats.memory?.used
-                    ? a.stats.memory.used
-                    : 0;
-                const bload = b.stats.memory?.used
-                    ? b.stats.memory.used
-                    : 0;
-                return aload - bload;
-            });
+    public leastUsedNodes(sortType: "memory" | "cpuLavalink" | "cpuSystem" | "calls" | "playingPlayers" | "players" = "players"): LavalinkNode[] {
+        switch(sortType) {
+            case "memory": {
+                return [...this.nodes.values()]
+                .filter((node) => node.connected)
+                .sort((a, b) => (a.stats?.memory?.used || 0) - (b.stats?.memory?.used || 0)) // sort after memor
+            } break;
+            case "cpuLavalink": {
+                return [...this.nodes.values()]
+                .filter((node) => node.connected)
+                .sort((a, b) => (a.stats?.cpu?.lavalinkLoad || 0) - (b.stats?.cpu?.lavalinkLoad || 0)) // sort after memor
+            } break;
+            case "cpuSystem": {
+                return [...this.nodes.values()]
+                .filter((node) => node.connected)
+                .sort((a, b) => (a.stats?.cpu?.systemLoad || 0) - (b.stats?.cpu?.systemLoad || 0)) // sort after memor
+            } break;
+            case "calls": {
+                return [...this.nodes.values()]
+                .filter((node) => node.connected)
+                .sort((a, b) => a.calls - b.calls); // client sided sorting
+            } break;
+            case "playingPlayers": {
+                return [...this.nodes.values()]
+                .filter((node) => node.connected)
+                .sort((a, b) => (a.stats?.playingPlayers || 0) - (b.stats?.playingPlayers || 0))
+            } break;
+            case "players": {
+                return [...this.nodes.values()]
+                .filter((node) => node.connected)
+                .sort((a, b) => (a.stats?.players || 0) - (b.stats?.players || 0))
+            } break;
+            default: {
+                return [...this.nodes.values()]
+                .filter((node) => node.connected)
+                .sort((a, b) => (a.stats?.players || 0) - (b.stats?.players || 0))
+            } break;
+        }
     }
 
-    /** Returns the least system load Nodes. */
-    public get leastLoadNodesCpu(): LavalinkNode[] {
-        return [...this.nodes.values()]
-            .filter((node) => node.connected)
-            .sort((a, b) => {
-                const aload = a.stats.cpu
-                    ? (a.stats.cpu.systemLoad / a.stats.cpu.cores) * 100
-                    : 0;
-                const bload = b.stats.cpu
-                    ? (b.stats.cpu.systemLoad / b.stats.cpu.cores) * 100
-                    : 0;
-                return aload - bload;
-            });
-    }
     deleteNode(node: LavalinkNodeIdentifier | LavalinkNode) {
-        const decodeNode = typeof node === "string" ? this.nodes.get(node) : node || this.leastUsedNodes[0];
+        const decodeNode = typeof node === "string" ? this.nodes.get(node) : node || this.leastUsedNodes()[0];
         if (!decodeNode) throw new Error("Node was not found");
         decodeNode.destroy(DestroyReasons.NodeDeleted);
         this.nodes.delete(decodeNode.id);
