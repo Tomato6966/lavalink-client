@@ -188,10 +188,10 @@ export class Player {
 
         if(options?.track && this.LavalinkManager.utils.isTrack(options?.track)) {
             await this.queue.add(options?.track, 0);
-            await queueTrackEnd(this.queue, this.repeatMode === "queue");
+            await queueTrackEnd(this);
         }
 
-        if(!this.queue.current && this.queue.tracks.length) await queueTrackEnd(this.queue, this.repeatMode === "queue");
+        if(!this.queue.current && this.queue.tracks.length) await queueTrackEnd(this);
 
         // @ts-ignore
         if(this.queue.current && this.LavalinkManager.utils.isUnresolvedTrack(this.queue.current)) {

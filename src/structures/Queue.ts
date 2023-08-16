@@ -92,7 +92,7 @@ export class QueueChangesWatcher {
 export class Queue {
   public readonly tracks: (Track | UnresolvedTrack)[] = [];
   public readonly previous: Track[] = [];
-  public current: Track | UnresolvedTrack | null = null;
+  public current: Track | null = null;
   public options = { maxPreviousTracks: 25 };
   private readonly guildId: string = "";
   private readonly QueueSaver: QueueSaver | null = null;
@@ -104,9 +104,12 @@ export class Queue {
     this.QueueSaver = QueueSaver;
     this.options.maxPreviousTracks = this.QueueSaver?.options?.maxPreviousTracks ?? this.options.maxPreviousTracks;
 
-    this.current = this.managerUtils.isTrack(data.current) || this.managerUtils.isUnresolvedTrack(data.current) ? data.current : null;
+    this.current = this.managerUtils.isTrack(data.current)  ? data.current : null;
     this.previous = Array.isArray(data.previous) && data.previous.some(track => this.managerUtils.isTrack(track) || this.managerUtils.isUnresolvedTrack(track)) ? data.previous.filter(track => this.managerUtils.isTrack(track) || this.managerUtils.isUnresolvedTrack(track)) : [];
     this.tracks = Array.isArray(data.tracks) && data.tracks.some(track => this.managerUtils.isTrack(track) || this.managerUtils.isUnresolvedTrack(track)) ? data.tracks.filter(track => this.managerUtils.isTrack(track) || this.managerUtils.isUnresolvedTrack(track)) : [];
+  }
+  private applyData(data: Partial<StoredQueue>) {
+
   }
 
   /**
@@ -128,7 +131,7 @@ export class Queue {
     sync: async (override=true, dontSyncCurrent = true) => {
       const data = await this.QueueSaver.get(this.guildId);
       if (!data) return console.log("No data found to sync for guildId: ", this.guildId);
-      if (!dontSyncCurrent && !this.current && (this.managerUtils.isTrack(data.current) || this.managerUtils.isUnresolvedTrack(data.current))) this.current = data.current;
+      if (!dontSyncCurrent && !this.current && (this.managerUtils.isTrack(data.current))) this.current = data.current;
       if (Array.isArray(data.tracks) && data?.tracks.length && data.tracks.some(track => this.managerUtils.isTrack(track) || this.managerUtils.isUnresolvedTrack(track))) this.tracks.splice(override ? 0 : this.tracks.length, override ? this.tracks.length : 0, ...data.tracks.filter(track => this.managerUtils.isTrack(track) || this.managerUtils.isUnresolvedTrack(track)));
       if (Array.isArray(data.previous) && data?.previous.length && data.previous.some(track => this.managerUtils.isTrack(track) || this.managerUtils.isUnresolvedTrack(track))) this.previous.splice(0, override ? this.tracks.length : 0, ...data.previous.filter(track => this.managerUtils.isTrack(track) || this.managerUtils.isUnresolvedTrack(track)));
 

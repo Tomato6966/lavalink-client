@@ -2,7 +2,6 @@ import { LavalinkFilterData } from "./Filters";
 import { LavalinkManager } from "./LavalinkManager";
 import { LavalinkNode, LavalinkNodeOptions, NodeStats } from "./Node";
 import { PlayOptions, Player } from "./Player";
-import { Queue } from "./Queue";
 import { PluginInfo, Track, UnresolvedTrack, UnresolvedQuery } from "./Track";
 export declare const TrackSymbol: unique symbol;
 export declare const UnresolvedTrackSymbol: unique symbol;
@@ -282,5 +281,5 @@ export interface NodeMessage extends NodeStats {
     op: "stats" | "playerUpdate" | "event";
     guildId: string;
 }
-export declare function queueTrackEnd(queue: Queue, addBackToQueue?: boolean): Promise<Track | UnresolvedTrack>;
+export declare function queueTrackEnd(player: Player): Promise<Track>;
 export {};

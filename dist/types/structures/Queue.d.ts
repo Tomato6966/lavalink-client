@@ -52,7 +52,7 @@ export declare class QueueChangesWatcher {
 export declare class Queue {
     readonly tracks: (Track | UnresolvedTrack)[];
     readonly previous: Track[];
-    current: Track | UnresolvedTrack | null;
+    current: Track | null;
     options: {
         maxPreviousTracks: number;
     };
@@ -61,6 +61,7 @@ export declare class Queue {
     private managerUtils;
     private queueChanges;
     constructor(guildId: string, data?: Partial<StoredQueue>, QueueSaver?: QueueSaver, queueOptions?: QueueSaverOptions);
+    private applyData;
     /**
      * Utils for a Queue
      */

@@ -125,10 +125,10 @@ class Player {
         }
         if (options?.track && this.LavalinkManager.utils.isTrack(options?.track)) {
             await this.queue.add(options?.track, 0);
-            await (0, Utils_1.queueTrackEnd)(this.queue, this.repeatMode === "queue");
+            await (0, Utils_1.queueTrackEnd)(this);
         }
         if (!this.queue.current && this.queue.tracks.length)
-            await (0, Utils_1.queueTrackEnd)(this.queue, this.repeatMode === "queue");
+            await (0, Utils_1.queueTrackEnd)(this);
         // @ts-ignore
         if (this.queue.current && this.LavalinkManager.utils.isUnresolvedTrack(this.queue.current)) {
             try {

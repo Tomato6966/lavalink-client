@@ -102,7 +102,7 @@ class ManagerUitls {
      * @param track
      */
     isUnresolvedTrack(data) {
-        return typeof data === "object" && "info" in data && typeof data.info.title === "string";
+        return typeof data === "object" && "info" in data && typeof data.info.title === "string" && typeof data.resolve === "function";
     }
     /**
      * Checks if the provided argument is a valid UnresolvedTrack.
@@ -257,38 +257,43 @@ class MiniMap extends Map {
     }
 }
 exports.MiniMap = MiniMap;
-async function queueTrackEnd(queue, addBackToQueue = false) {
-    if (queue.current) { // if there was a current Track -> Add it
-        queue.previous.unshift(queue.current);
-        if (queue.previous.length > queue.options.maxPreviousTracks)
-            queue.previous.splice(queue.options.maxPreviousTracks, queue.previous.length);
+async function queueTrackEnd(player) {
+    if (player.queue.current) { // if there was a current Track -> Add it
+        player.queue.previous.unshift(player.queue.current);
+        if (player.queue.previous.length > player.queue.options.maxPreviousTracks)
+            player.queue.previous.splice(player.queue.options.maxPreviousTracks, player.queue.previous.length);
     }
     // and if repeatMode == queue, add it back to the queue!
-    if (addBackToQueue && queue.current)
-        queue.tracks.push(queue.current);
+    if (player.repeatMode === "queue" && player.queue.current)
+        player.queue.tracks.push(player.queue.current);
     // change the current Track to the next upcoming one
-    queue.current = queue.tracks.shift() || null;
+    const nextSong = player.queue.tracks.shift();
+    if (player.LavalinkManager.utils.isUnresolvedTrack(nextSong))
+        await nextSong.resolve(player);
+    player.queue.current = nextSong || null;
     // save it in the DB
-    await queue.utils.save();
+    await player.queue.utils.save();
     // return the new current Track
-    return queue.current;
+    return player.queue.current;
 }
 exports.queueTrackEnd = queueTrackEnd;
 async function getClosestTrack(data, player, utils) {
     if (!player || !player.node)
         throw new RangeError("No player with a lavalink node was provided");
+    if (utils.isTrack(data))
+        return utils.buildTrack(data, data.requester);
     if (!utils.isUnresolvedTrack(data))
         throw new RangeError("Track is not an unresolved Track");
     if (!data?.info?.title)
         throw new SyntaxError("the track title is required for unresolved tracks");
     if (!data.requester)
         throw new SyntaxError("The requester is required");
-    if (data.encoded) {
+    if (typeof data.encoded === "string") {
         const r = await player.node.decode.singleTrack(data.encoded);
         if (r)
             return utils.buildTrack(r, data.requester);
     }
-    if (data.info.uri) {
+    if (typeof data.info.uri === "string") {
         const r = await player.search({ query: data?.info?.uri }, data.requester).then(v => v.tracks[0]);
         if (r)
             return r;

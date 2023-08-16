@@ -528,7 +528,7 @@ export class LavalinkNode {
             return this.NodeManager.LavalinkManager.emit("trackEnd", player, track, payload);
         // If a track had an error while starting
         if (["loadFailed", "cleanup"].includes(payload.reason)) {
-            await queueTrackEnd(player.queue, false);
+            await queueTrackEnd(player);
             // if no track available, end queue
             if (!player.queue.current)
                 return this.queueEnd(player, track, payload);
@@ -539,7 +539,7 @@ export class LavalinkNode {
         }
         // remove tracks from the queue
         if (player.repeatMode !== "track")
-            await queueTrackEnd(player.queue, player.repeatMode === "queue");
+            await queueTrackEnd(player);
         // if no track available, end queue
         if (!player.queue.current)
             return this.queueEnd(player, track, payload);
@@ -555,7 +555,7 @@ export class LavalinkNode {
         if (typeof this.NodeManager.LavalinkManager.options?.playerOptions?.onEmptyQueue?.autoPlayFunction === "function") {
             await this.NodeManager.LavalinkManager.options?.playerOptions?.onEmptyQueue?.autoPlayFunction(player, track);
             if (player.queue.tracks.length > 0)
-                await queueTrackEnd(player.queue, player.repeatMode === "queue");
+                await queueTrackEnd(player);
             if (player.queue.current)
                 return player.play({ noReplace: true, paused: false });
         }
@@ -584,7 +584,7 @@ export class LavalinkNode {
         if (!player.queue.tracks.length && player.repeatMode === "off")
             return;
         // remove the current track, and enqueue the next one
-        await queueTrackEnd(player.queue, player.repeatMode === "queue");
+        await queueTrackEnd(player);
         // if no track available, end queue
         if (!player.queue.current)
             return this.queueEnd(player, track, payload);
@@ -594,7 +594,7 @@ export class LavalinkNode {
     async trackError(player, track, payload) {
         this.NodeManager.LavalinkManager.emit("trackError", player, track, payload);
         // remove the current track, and enqueue the next one
-        await queueTrackEnd(player.queue, player.repeatMode === "queue");
+        await queueTrackEnd(player);
         // if no track available, end queue
         if (!player.queue.current)
             return this.queueEnd(player, track, payload);

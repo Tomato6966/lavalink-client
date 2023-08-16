@@ -3,7 +3,6 @@ import { LavalinkManager } from "./LavalinkManager";
 import { DefaultSources, SourceLinksRegexes } from "./LavalinkManagerStatics";
 import { LavalinkNode, LavalinkNodeOptions, NodeStats } from "./Node";
 import { PlayOptions, Player } from "./Player";
-import { Queue } from "./Queue";
 import { TrackInfo, PluginInfo, Track, UnresolvedTrack, UnresolvedQuery, UnresolvedTrackInfo } from "./Track";
 
 export const TrackSymbol = Symbol("LC-Track");
@@ -134,7 +133,7 @@ export class ManagerUitls {
    * @param track
    */
   isUnresolvedTrack(data: UnresolvedTrack | any): boolean {
-    return typeof data === "object" && "info" in data && typeof data.info.title === "string";
+    return typeof data === "object" && "info" in data && typeof data.info.title === "string" && typeof data.resolve === "function";
   }
   /**
    * Checks if the provided argument is a valid UnresolvedTrack.
@@ -555,33 +554,38 @@ export interface NodeMessage extends NodeStats {
 }
 
 
-export async function queueTrackEnd(queue: Queue, addBackToQueue: boolean = false) {
-  if (queue.current) { // if there was a current Track -> Add it
-    queue.previous.unshift(queue.current as Track);
-    if (queue.previous.length > queue.options.maxPreviousTracks) queue.previous.splice(queue.options.maxPreviousTracks, queue.previous.length);
+export async function queueTrackEnd(player: Player) {
+  if (player.queue.current) { // if there was a current Track -> Add it
+    player.queue.previous.unshift(player.queue.current as Track);
+    if (player.queue.previous.length > player.queue.options.maxPreviousTracks) player.queue.previous.splice(player.queue.options.maxPreviousTracks, player.queue.previous.length);
   }
   // and if repeatMode == queue, add it back to the queue!
-  if (addBackToQueue && queue.current) queue.tracks.push(queue.current)
+  if (player.repeatMode === "queue" && player.queue.current) player.queue.tracks.push(player.queue.current)
   // change the current Track to the next upcoming one
-  queue.current = queue.tracks.shift() || null;
+  const nextSong = player.queue.tracks.shift();
+
+  if(player.LavalinkManager.utils.isUnresolvedTrack(nextSong)) await (nextSong as UnresolvedTrack).resolve(player);
+
+  player.queue.current = (nextSong as Track) || null;
   // save it in the DB
-  await queue.utils.save()
+  await player.queue.utils.save()
 
   // return the new current Track
-  return queue.current;
+  return player.queue.current;
 }
 
 async function getClosestTrack(data:UnresolvedTrack, player:Player, utils: ManagerUitls): Promise<Track|undefined> {
   if(!player || !player.node) throw new RangeError("No player with a lavalink node was provided");
+  if(utils.isTrack(data)) return utils.buildTrack(data, data.requester);
   if(!utils.isUnresolvedTrack(data)) throw new RangeError("Track is not an unresolved Track");
   if(!data?.info?.title) throw new SyntaxError("the track title is required for unresolved tracks")
   if(!data.requester) throw new SyntaxError("The requester is required");
-  if(data.encoded) {
+  if(typeof data.encoded === "string") {
     const r = await player.node.decode.singleTrack(data.encoded);
     if(r) return utils.buildTrack(r, data.requester);
   }
   
-  if(data.info.uri) {
+  if(typeof data.info.uri === "string") {
     const r = await player.search({ query: data?.info?.uri }, data.requester).then(v => v.tracks[0]);
     if(r) return r;
   } 
