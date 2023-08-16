@@ -476,6 +476,7 @@ class LavalinkNode {
                         player.filterManager.filterUpdatedState = 0;
                     }
                 }
+                this.NodeManager.LavalinkManager.emit("playerUpdate", player);
                 break;
             case "event":
                 this.handleEvent(payload);

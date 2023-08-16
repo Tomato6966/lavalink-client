@@ -3,7 +3,7 @@ import { LavalinkManager } from "./LavalinkManager";
 import { DefaultSources } from "./LavalinkManagerStatics";
 import { LavalinkNode } from "./Node";
 import { Queue, QueueSaver } from "./Queue";
-import { PluginInfo, Track } from "./Track";
+import { PluginInfo, Track, UnresolvedQuery, UnresolvedTrack } from "./Track";
 import { LavalinkPlayerVoiceOptions, SearchPlatform, SearchResult, LoadTypes, queueTrackEnd } from "./Utils";
 
 type PlayerDestroyReasons = "QueueEmpty" | "NodeDestroy" | "NodeDeleted" | "LavalinkNoVoice" | "NodeReconnectFail" | "PlayerReconnectFail" | "Disconnected" | "ChannelDeleted";
@@ -192,6 +192,17 @@ export class Player {
         }
 
         if(!this.queue.current && this.queue.tracks.length) await queueTrackEnd(this.queue, this.repeatMode === "queue");
+
+        // @ts-ignore
+        if(this.queue.current && this.LavalinkManager.utils.isUnresolvedTrack(this.queue.current)) {
+            try {
+                this.queue.current = await this.LavalinkManager.utils.getClosestTrack({...(this.queue.current||{})} as UnresolvedTrack, this);
+            } catch (error) {
+                this.LavalinkManager.emit("trackError", this, this.queue.current, error);
+                if (this.queue.tracks[0]) return this.play();
+                return;
+            }
+        }
 
         const track = this.queue.current;
         if(!track) throw new Error(`There is no Track in the Queue, nor provided in the PlayOptions`);
@@ -471,6 +482,7 @@ export class Player {
     public toJSON() {
         return {
             guildId: this.guildId,
+            options: this.options,
             voiceChannelId: this.voiceChannelId,
             textChannelId: this.textChannelId,
             position: this.position,
@@ -483,7 +495,6 @@ export class Player {
             createdTimeStamp: this.createdTimeStamp,
             filters: this.filterManager?.data || {},
             equalizer: this.filterManager?.equalizerBands || [],
-            queue: this.queue?.utils?.toJSON?.() || { current: null, tracks: [], previous: [] },
             nodeId: this.node?.id,
         }
     }

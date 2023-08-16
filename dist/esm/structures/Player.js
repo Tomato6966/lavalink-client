@@ -126,6 +126,18 @@ export class Player {
         }
         if (!this.queue.current && this.queue.tracks.length)
             await queueTrackEnd(this.queue, this.repeatMode === "queue");
+        // @ts-ignore
+        if (this.queue.current && this.LavalinkManager.utils.isUnresolvedTrack(this.queue.current)) {
+            try {
+                this.queue.current = await this.LavalinkManager.utils.getClosestTrack({ ...(this.queue.current || {}) }, this);
+            }
+            catch (error) {
+                this.LavalinkManager.emit("trackError", this, this.queue.current, error);
+                if (this.queue.tracks[0])
+                    return this.play();
+                return;
+            }
+        }
         const track = this.queue.current;
         if (!track)
             throw new Error(`There is no Track in the Queue, nor provided in the PlayOptions`);
@@ -376,6 +388,7 @@ export class Player {
     toJSON() {
         return {
             guildId: this.guildId,
+            options: this.options,
             voiceChannelId: this.voiceChannelId,
             textChannelId: this.textChannelId,
             position: this.position,
@@ -388,7 +401,6 @@ export class Player {
             createdTimeStamp: this.createdTimeStamp,
             filters: this.filterManager?.data || {},
             equalizer: this.filterManager?.equalizerBands || [],
-            queue: this.queue?.utils?.toJSON?.() || { current: null, tracks: [], previous: [] },
             nodeId: this.node?.id,
         };
     }

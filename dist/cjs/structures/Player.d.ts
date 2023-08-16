@@ -110,7 +110,7 @@ export declare class Player {
      * Play the next track from the queue / a specific track, with playoptions for Lavalink
      * @param options
      */
-    play(options?: Partial<PlayOptions>): Promise<void>;
+    play(options?: Partial<PlayOptions>): any;
     /**
      * Set the Volume for the Player
      * @param volume The Volume in percent
@@ -148,7 +148,7 @@ export declare class Player {
      * Skip the current song, or a specific amount of songs
      * @param amount provide the index of the next track to skip to
      */
-    skip(skipTo?: number): Promise<true | void>;
+    skip(skipTo?: number): Promise<any>;
     /**
      * Connects the Player to the Voice Channel
      * @returns
@@ -172,6 +172,7 @@ export declare class Player {
     /** Converts the Player including Queue to a Json state */
     toJSON(): {
         guildId: string;
+        options: PlayerOptions;
         voiceChannelId: string;
         textChannelId: string;
         position: number;
@@ -184,7 +185,6 @@ export declare class Player {
         createdTimeStamp: number;
         filters: {};
         equalizer: import("./Filters").EQBand[];
-        queue: import("./Queue").StoredQueue;
         nodeId: string;
     };
 }

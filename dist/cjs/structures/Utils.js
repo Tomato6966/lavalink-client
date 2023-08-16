@@ -97,6 +97,47 @@ class ManagerUitls {
     isTrack(data) {
         return typeof data?.encoded === "string" && typeof data?.info === "object";
     }
+    /**
+     * Checks if the provided argument is a valid UnresolvedTrack.
+     * @param track
+     */
+    isUnresolvedTrack(data) {
+        return typeof data === "object" && "info" in data && typeof data.info.title === "string";
+    }
+    /**
+     * Checks if the provided argument is a valid UnresolvedTrack.
+     * @param track
+     */
+    isUnresolvedTrackQuery(data) {
+        return typeof data === "object" && !("info" in data) && typeof data.title === "string";
+    }
+    async getClosestTrack(data, player) {
+        return getClosestTrack(data, player, this);
+    }
+    /**
+     * Builds a UnresolvedTrack to be resolved before being played  .
+     * @param query
+     * @param requester
+     */
+    buildUnresolvedTrack(query, requester) {
+        if (typeof query === "undefined")
+            throw new RangeError('Argument "query" must be present.');
+        const unresolvedTrack = {
+            encoded: query.encoded || undefined,
+            info: query.info ?? query,
+            requester: typeof this.manager.options?.playerOptions?.requesterTransformer === "function" ? this.manager.options?.playerOptions?.requesterTransformer((query?.requester || requester)) : requester,
+            async resolve(player) {
+                const closest = await getClosestTrack(this, player, player.LavalinkManager.utils);
+                if (!closest)
+                    throw new SyntaxError("No closest Track found");
+                Object.getOwnPropertyNames(this).forEach(prop => delete this[prop]);
+                Object.assign(this, closest);
+                return;
+            }
+        };
+        Object.defineProperty(unresolvedTrack, exports.UnresolvedTrackSymbol, { configurable: true, value: true });
+        return unresolvedTrack;
+    }
     validatedQuery(queryString, node) {
         if (!node.info)
             throw new Error("No Lavalink Node was provided");
@@ -204,9 +245,6 @@ class MiniMap extends Map {
         // toJSON is called recursively by JSON.stringify.
         return [...this.values()];
     }
-    static defaultSort(firstValue, secondValue) {
-        return Number(firstValue > secondValue) || Number(firstValue === secondValue) - 1;
-    }
     map(fn, thisArg) {
         if (typeof thisArg !== 'undefined')
             fn = fn.bind(thisArg);
@@ -236,3 +274,28 @@ async function queueTrackEnd(queue, addBackToQueue = false) {
     return queue.current;
 }
 exports.queueTrackEnd = queueTrackEnd;
+async function getClosestTrack(data, player, utils) {
+    if (!player || !player.node)
+        throw new RangeError("No player with a lavalink node was provided");
+    if (!utils.isUnresolvedTrack(data))
+        throw new RangeError("Track is not an unresolved Track");
+    if (!data?.info?.title)
+        throw new SyntaxError("the track title is required for unresolved tracks");
+    if (!data.requester)
+        throw new SyntaxError("The requester is required");
+    if (data.encoded) {
+        const r = await player.node.decode.singleTrack(data.encoded);
+        if (r)
+            return utils.buildTrack(r, data.requester);
+    }
+    if (data.info.uri) {
+        const r = await player.search({ query: data?.info?.uri }, data.requester).then(v => v.tracks[0]);
+        if (r)
+            return r;
+    }
+    const query = [data.info?.title, data.info?.author].filter(str => !!str).join(" by ");
+    const sourceName = data.info?.sourceName;
+    return await player.search({
+        query, source: sourceName !== "bandcamp" && sourceName !== "twitch" && sourceName !== "flowery-tts" ? sourceName : player.LavalinkManager.options?.playerOptions?.defaultSearchPlatform,
+    }, data.requester).then(v => v.tracks[0]);
+}

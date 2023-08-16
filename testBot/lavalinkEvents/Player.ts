@@ -78,5 +78,10 @@ export function PlayerEvents(client:BotClient) {
                 .setTimestamp()
             ]
         })
+    }).on("playerUpdate", (player) => {
+        // use this event to udpate the player in the your cache if you want to save the player's data(s) externally!
+        /**
+         * 
+        */
     });
 }

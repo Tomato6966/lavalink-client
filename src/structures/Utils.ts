@@ -2,9 +2,9 @@ import { LavalinkFilterData } from "./Filters";
 import { LavalinkManager } from "./LavalinkManager";
 import { DefaultSources, SourceLinksRegexes } from "./LavalinkManagerStatics";
 import { LavalinkNode, LavalinkNodeOptions, NodeStats } from "./Node";
-import { PlayOptions } from "./Player";
+import { PlayOptions, Player } from "./Player";
 import { Queue } from "./Queue";
-import { TrackInfo, PluginInfo, Track } from "./Track";
+import { TrackInfo, PluginInfo, Track, UnresolvedTrack, UnresolvedQuery, UnresolvedTrackInfo } from "./Track";
 
 export const TrackSymbol = Symbol("LC-Track");
 export const UnresolvedTrackSymbol = Symbol("LC-Track-Unresolved");
@@ -58,8 +58,6 @@ export class ManagerUitls {
   constructor(LavalinkManager?: LavalinkManager) {
     this.manager = LavalinkManager;
   }
-
-
 
   buildTrack(data, requester) {
     const encoded = data.encoded || data.encoded;
@@ -130,6 +128,49 @@ export class ManagerUitls {
    */
   isTrack(data: Track | any) {
     return typeof data?.encoded === "string" && typeof data?.info === "object";
+  }
+  /**
+   * Checks if the provided argument is a valid UnresolvedTrack.
+   * @param track
+   */
+  isUnresolvedTrack(data: UnresolvedTrack | any): boolean {
+    return typeof data === "object" && "info" in data && typeof data.info.title === "string";
+  }
+  /**
+   * Checks if the provided argument is a valid UnresolvedTrack.
+   * @param track
+   */
+  isUnresolvedTrackQuery(data: UnresolvedTrack | any): boolean {
+    return typeof data === "object" && !("info" in data) && typeof data.title === "string";
+  }
+
+  async getClosestTrack(data:UnresolvedTrack, player:Player): Promise<Track> {
+    return getClosestTrack(data, player, this);
+  }
+
+  /**
+   * Builds a UnresolvedTrack to be resolved before being played  .
+   * @param query
+   * @param requester
+   */
+  buildUnresolvedTrack(query: UnresolvedQuery | UnresolvedTrack, requester: unknown) {
+    if (typeof query === "undefined")
+      throw new RangeError('Argument "query" must be present.');
+
+    const unresolvedTrack:UnresolvedTrack = { 
+      encoded: query.encoded || undefined,
+      info: (query as UnresolvedTrack).info ?? (query as UnresolvedTrackInfo),
+      requester: typeof this.manager.options?.playerOptions?.requesterTransformer === "function" ? this.manager.options?.playerOptions?.requesterTransformer(((query as UnresolvedTrack)?.requester || requester)) : requester,
+      async resolve(player:Player) {
+          const closest = await getClosestTrack(this, player, player.LavalinkManager.utils);
+          if(!closest) throw new SyntaxError("No closest Track found");
+          Object.getOwnPropertyNames(this).forEach(prop => delete this[prop]);
+          Object.assign(this, closest); 
+          return;
+      }
+    }
+    Object.defineProperty(unresolvedTrack, UnresolvedTrackSymbol, { configurable: true, value: true });
+    return unresolvedTrack as UnresolvedTrack;
   }
 
   validatedQuery(queryString: string, node: LavalinkNode): void {
@@ -279,10 +320,6 @@ export class MiniMap<K, V> extends Map<K, V> {
   public toJSON() {
     // toJSON is called recursively by JSON.stringify.
     return [...this.values()];
-  }
-
-  private static defaultSort<V>(firstValue: V, secondValue: V): number {
-    return Number(firstValue > secondValue) || Number(firstValue === secondValue) - 1;
   }
 
   /**
@@ -532,4 +569,26 @@ export async function queueTrackEnd(queue: Queue, addBackToQueue: boolean = fals
 
   // return the new current Track
   return queue.current;
+}
+
+async function getClosestTrack(data:UnresolvedTrack, player:Player, utils: ManagerUitls): Promise<Track|undefined> {
+  if(!player || !player.node) throw new RangeError("No player with a lavalink node was provided");
+  if(!utils.isUnresolvedTrack(data)) throw new RangeError("Track is not an unresolved Track");
+  if(!data?.info?.title) throw new SyntaxError("the track title is required for unresolved tracks")
+  if(!data.requester) throw new SyntaxError("The requester is required");
+  if(data.encoded) {
+    const r = await player.node.decode.singleTrack(data.encoded);
+    if(r) return utils.buildTrack(r, data.requester);
+  }
+  
+  if(data.info.uri) {
+    const r = await player.search({ query: data?.info?.uri }, data.requester).then(v => v.tracks[0]);
+    if(r) return r;
+  } 
+
+  const query = [data.info?.title, data.info?.author].filter(str => !!str).join(" by ");
+  const sourceName = data.info?.sourceName;
+  return await player.search({
+    query, source: sourceName !== "bandcamp" && sourceName !== "twitch" && sourceName !== "flowery-tts" ? sourceName : player.LavalinkManager.options?.playerOptions?.defaultSearchPlatform,
+  }, data.requester).then(v => v.tracks[0]);
 }

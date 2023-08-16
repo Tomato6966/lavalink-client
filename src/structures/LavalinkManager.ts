@@ -59,32 +59,32 @@ export interface ManagerOptions {
 interface LavalinkManagerEvents {
     /**
      * Emitted when a Track started playing.
-     * @event Manager.playerManager#trackStart
+     * @event Manager#trackStart
      */
     "trackStart": (player:Player, track: Track, payload:TrackStartEvent) => void;
     /**
      * Emitted when a Track finished.
-     * @event Manager.playerManager#trackEnd
+     * @event Manager#trackEnd
      */
     "trackEnd": (player:Player, track: Track, payload:TrackEndEvent) => void;
     /**
      * Emitted when a Track got stuck while playing.
-     * @event Manager.playerManager#trackStuck
+     * @event Manager#trackStuck
      */
     "trackStuck": (player:Player, track: Track, payload:TrackStuckEvent) => void;
     /**
      * Emitted when a Track errored.
-     * @event Manager.playerManager#trackError
+     * @event Manager#trackError
      */
     "trackError": (player:Player, track: Track, payload:TrackExceptionEvent) => void;
     /**
      * Emitted when the Playing finished and no more tracks in the queue.
-     * @event Manager.playerManager#queueEnd
+     * @event Manager#queueEnd
      */
     "queueEnd": (player:Player, track: Track, payload:TrackEndEvent|TrackStuckEvent|TrackExceptionEvent) => void;
     /**
      * Emitted when a Player is created.
-     * @event Manager.playerManager#create
+     * @event Manager#playerCreate
      */
     "playerCreate": (player:Player) => void;
     /**
@@ -94,19 +94,25 @@ interface LavalinkManagerEvents {
     "playerMove": (player:Player, oldVoiceChannelId: string, newVoiceChannelId: string) => void;
     /**
      * Emitted when a Player is disconnected from a channel.
-     * @event Manager.playerManager#disconnect
+     * @event Manager#playerDisconnect
      */
     "playerDisconnect": (player:Player, voiceChannelId: string) => void;
     /**
      * Emitted when a Node-Socket got closed for a specific Player.
-     * @event Manager.playerManager#socketClosed
+     * @event Manager#playerSocketClosed
      */
     "playerSocketClosed": (player:Player, payload: WebSocketClosedEvent) => void;
     /**
      * Emitted when a Player get's destroyed
-     * @event Manager.playerManager#destroy
+     * @event Manager#playerDestroy
      */
     "playerDestroy": (player:Player, destroyReason?:DestroyReasonsType) => void;
+
+    /**
+     * Always emits when the player (on lavalink side) got updated
+     * @event Manager#playerUpdate
+     */
+    "playerUpdate": (player:Player) => void;
 }
 
 export interface LavalinkManager {

@@ -1,9 +1,9 @@
 import { LavalinkFilterData } from "./Filters";
 import { LavalinkManager } from "./LavalinkManager";
 import { LavalinkNode, LavalinkNodeOptions, NodeStats } from "./Node";
-import { PlayOptions } from "./Player";
+import { PlayOptions, Player } from "./Player";
 import { Queue } from "./Queue";
-import { PluginInfo, Track } from "./Track";
+import { PluginInfo, Track, UnresolvedTrack, UnresolvedQuery } from "./Track";
 export declare const TrackSymbol: unique symbol;
 export declare const UnresolvedTrackSymbol: unique symbol;
 export declare const QueueSymbol: unique symbol;
@@ -56,6 +56,23 @@ export declare class ManagerUitls {
      * @returns
      */
     isTrack(data: Track | any): boolean;
+    /**
+     * Checks if the provided argument is a valid UnresolvedTrack.
+     * @param track
+     */
+    isUnresolvedTrack(data: UnresolvedTrack | any): boolean;
+    /**
+     * Checks if the provided argument is a valid UnresolvedTrack.
+     * @param track
+     */
+    isUnresolvedTrackQuery(data: UnresolvedTrack | any): boolean;
+    getClosestTrack(data: UnresolvedTrack, player: Player): Promise<Track>;
+    /**
+     * Builds a UnresolvedTrack to be resolved before being played  .
+     * @param query
+     * @param requester
+     */
+    buildUnresolvedTrack(query: UnresolvedQuery | UnresolvedTrack, requester: unknown): UnresolvedTrack;
     validatedQuery(queryString: string, node: LavalinkNode): void;
 }
 /**
@@ -96,7 +113,6 @@ export declare class MiniMap<K, V> extends Map<K, V> {
     filter<This, V2 extends V>(fn: (this: This, value: V, key: K, miniMap: this) => value is V2, thisArg: This): MiniMap<K, V2>;
     filter<This>(fn: (this: This, value: V, key: K, miniMap: this) => boolean, thisArg: This): MiniMap<K, V>;
     toJSON(): V[];
-    private static defaultSort;
     /**
      * Maps each item to another value into an array. Identical in behavior to
      * [Array.map()](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/map).

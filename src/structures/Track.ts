@@ -1,3 +1,4 @@
+import { Player } from "./Player";
 import { Base64 } from "./Utils";
 
 type LavalinkSourceNames = "youtube" | "youtubemusic" | "soundcloud" | "bandcamp" | "twitch";
@@ -51,11 +52,21 @@ export interface Track extends LavalinkTrack {
 }
 
 
-export interface UnresolvedQuery {
+export interface UnresolvedTrackInfo extends Partial<TrackInfo> {
+    /** Required */
+    title: string;
+}
+export interface UnresolvedQuery extends UnresolvedTrackInfo {
     /** The base64 of the unresolved track to "encode" */
     encoded?: Base64;
-    /** Search for the closest track possible, by providing as much information as you can! */
-    info?: Partial<TrackInfo>;
+}
+export interface UnresolvedTrack {
+    /** Required */
+    resolve: (player:Player) => Promise<void>;
+    /** The Base 64 encoded String */
+    encoded?: Base64;
+    /** Track Information */
+    info: UnresolvedTrackInfo;
     /** The Track's Requester */
     requester?: unknown;
 }

@@ -66,9 +66,9 @@ export class Queue {
         this.guildId = guildId;
         this.QueueSaver = QueueSaver;
         this.options.maxPreviousTracks = this.QueueSaver?.options?.maxPreviousTracks ?? this.options.maxPreviousTracks;
-        this.current = this.managerUtils.isTrack(data.current) ? data.current : null;
-        this.previous = Array.isArray(data.previous) && data.previous.some(track => this.managerUtils.isTrack(track)) ? data.previous.filter(track => this.managerUtils.isTrack(track)) : [];
-        this.tracks = Array.isArray(data.tracks) && data.tracks.some(track => this.managerUtils.isTrack(track)) ? data.tracks.filter(track => this.managerUtils.isTrack(track)) : [];
+        this.current = this.managerUtils.isTrack(data.current) || this.managerUtils.isUnresolvedTrack(data.current) ? data.current : null;
+        this.previous = Array.isArray(data.previous) && data.previous.some(track => this.managerUtils.isTrack(track) || this.managerUtils.isUnresolvedTrack(track)) ? data.previous.filter(track => this.managerUtils.isTrack(track) || this.managerUtils.isUnresolvedTrack(track)) : [];
+        this.tracks = Array.isArray(data.tracks) && data.tracks.some(track => this.managerUtils.isTrack(track) || this.managerUtils.isUnresolvedTrack(track)) ? data.tracks.filter(track => this.managerUtils.isTrack(track) || this.managerUtils.isUnresolvedTrack(track)) : [];
     }
     /**
      * Utils for a Queue
@@ -90,12 +90,12 @@ export class Queue {
             const data = await this.QueueSaver.get(this.guildId);
             if (!data)
                 return console.log("No data found to sync for guildId: ", this.guildId);
-            if (!dontSyncCurrent && !this.current && this.managerUtils.isTrack(data.current))
+            if (!dontSyncCurrent && !this.current && (this.managerUtils.isTrack(data.current) || this.managerUtils.isUnresolvedTrack(data.current)))
                 this.current = data.current;
-            if (Array.isArray(data.tracks) && data?.tracks.length && data.tracks.some(track => this.managerUtils.isTrack(track)))
-                this.tracks.splice(override ? 0 : this.tracks.length, override ? this.tracks.length : 0, ...data.tracks.filter(track => this.managerUtils.isTrack(track)));
-            if (Array.isArray(data.previous) && data?.previous.length && data.previous.some(track => this.managerUtils.isTrack(track)))
-                this.previous.splice(0, override ? this.tracks.length : 0, ...data.previous.filter(track => this.managerUtils.isTrack(track)));
+            if (Array.isArray(data.tracks) && data?.tracks.length && data.tracks.some(track => this.managerUtils.isTrack(track) || this.managerUtils.isUnresolvedTrack(track)))
+                this.tracks.splice(override ? 0 : this.tracks.length, override ? this.tracks.length : 0, ...data.tracks.filter(track => this.managerUtils.isTrack(track) || this.managerUtils.isUnresolvedTrack(track)));
+            if (Array.isArray(data.previous) && data?.previous.length && data.previous.some(track => this.managerUtils.isTrack(track) || this.managerUtils.isUnresolvedTrack(track)))
+                this.previous.splice(0, override ? this.tracks.length : 0, ...data.previous.filter(track => this.managerUtils.isTrack(track) || this.managerUtils.isUnresolvedTrack(track)));
             await this.utils.save();
             return;
         },
@@ -154,14 +154,14 @@ export class Queue {
      */
     async add(TrackOrTracks, index) {
         if (typeof index === "number" && index >= 0 && index < this.tracks.length)
-            return await this.splice(index, 0, ...(Array.isArray(TrackOrTracks) ? TrackOrTracks : [TrackOrTracks]).filter(v => this.managerUtils.isTrack(v)));
+            return await this.splice(index, 0, ...(Array.isArray(TrackOrTracks) ? TrackOrTracks : [TrackOrTracks]).filter(v => this.managerUtils.isTrack(v) || this.managerUtils.isUnresolvedTrack(v)));
         const oldStored = typeof this.queueChanges?.tracksAdd === "function" ? this.utils.toJSON() : null;
         // add the track(s)
-        this.tracks.push(...(Array.isArray(TrackOrTracks) ? TrackOrTracks : [TrackOrTracks]).filter(v => this.managerUtils.isTrack(v)));
+        this.tracks.push(...(Array.isArray(TrackOrTracks) ? TrackOrTracks : [TrackOrTracks]).filter(v => this.managerUtils.isTrack(v) || this.managerUtils.isUnresolvedTrack(v)));
         // log if available
         if (typeof this.queueChanges?.tracksAdd === "function")
             try {
-                this.queueChanges.tracksAdd(this.guildId, (Array.isArray(TrackOrTracks) ? TrackOrTracks : [TrackOrTracks]).filter(v => this.managerUtils.isTrack(v)), this.tracks.length, oldStored, this.utils.toJSON());
+                this.queueChanges.tracksAdd(this.guildId, (Array.isArray(TrackOrTracks) ? TrackOrTracks : [TrackOrTracks]).filter(v => this.managerUtils.isTrack(v) || this.managerUtils.isUnresolvedTrack(v)), this.tracks.length, oldStored, this.utils.toJSON());
             }
             catch (e) { /*  */ }
         // save the queue
@@ -187,11 +187,11 @@ export class Queue {
         // Log if available
         if ((TrackOrTracks) && typeof this.queueChanges?.tracksAdd === "function")
             try {
-                this.queueChanges.tracksAdd(this.guildId, (Array.isArray(TrackOrTracks) ? TrackOrTracks : [TrackOrTracks]).filter(v => this.managerUtils.isTrack(v)), index, oldStored, this.utils.toJSON());
+                this.queueChanges.tracksAdd(this.guildId, (Array.isArray(TrackOrTracks) ? TrackOrTracks : [TrackOrTracks]).filter(v => this.managerUtils.isTrack(v) || this.managerUtils.isUnresolvedTrack(v)), index, oldStored, this.utils.toJSON());
             }
             catch (e) { /*  */ }
         // remove the tracks (and add the new ones)
-        let spliced = TrackOrTracks ? this.tracks.splice(index, amount, ...(Array.isArray(TrackOrTracks) ? TrackOrTracks : [TrackOrTracks]).filter(v => this.managerUtils.isTrack(v))) : this.tracks.splice(index, amount);
+        let spliced = TrackOrTracks ? this.tracks.splice(index, amount, ...(Array.isArray(TrackOrTracks) ? TrackOrTracks : [TrackOrTracks]).filter(v => this.managerUtils.isTrack(v) || this.managerUtils.isUnresolvedTrack(v))) : this.tracks.splice(index, amount);
         // get the spliced array
         spliced = (Array.isArray(spliced) ? spliced : [spliced]);
         // Log if available
