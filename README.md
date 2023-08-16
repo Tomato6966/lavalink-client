@@ -1,16 +1,41 @@
-# lavalink-client
-Easy and advanced lavalink client. Use it with lavalink plugins as well as latest lavalink versions
+# Lavalink Client
+Easy and advanced lavalink client. Use it with lavalink plugins as well as latest lavalink versions.
 
 # Install
 
 Latest stable Version: (currently, unreleased)
-```
+
+<details><summary>👉 via NPM</summary>
+
+```bash
 npm install --save lavalink-client
 ```
+
 Dev Version: (Current)
-```
+
+```bash
 npm install tomato6966/lavalink-client
 ```
+
+</details>
+
+<details><summary>👉 via YARN</summary>
+
+```bash
+yarn add lavalink-client
+```
+
+Dev Version: (Current)
+
+```bash
+yarn add tomato6966/lavalink-client
+```
+
+</details>
+
+# Documentation
+
+Check out the [Documentation](https://lc4.gitbook.io/lavalink-client) for **Examples**, and **__detailled__ Docs**, and to figure out **how to get started**. *note: it's not fully done yet (see the docs)*
 
 # Features
 
@@ -21,6 +46,8 @@ npm install tomato6966/lavalink-client
 
 - ✨ Choose able queue stores (maps, collections, redis, databases, ...)
   - You can create your own queueStore, thus make it easy to sync queues accross multiple connections (e.g. dashboard-bot)
+  - Automated Queue Sync methods 
+  - Automated unresolveable Tracks (save the queries as Partial Track Objects -> Fetch the tracks only once they are gonna play)
 
 - 😍 Included Filter & Equalizer Management
 
@@ -41,98 +68,5 @@ npm install tomato6966/lavalink-client
   - Destroys the player on channeldelete
   - Pauses / resumes the player if it get's muted / unmuted (server-wide) [soon]
   - ...
+
 - 😁 Much much more!
-
-# Documentation
-
-*soon*
-
-# How to Use
-
-1. Import the Manager
-
-```ts
-import { LavalinkManager } from "lavalink-client"; // Modular JS  /  Typescript
-```
-
-```js
-const { LavalinkManager } = require("lavalink-client"); // Common Js
-```
-
-2. create the Manager
-
-```ts
-// Suggest it to extend it to the bot Client
-client.lavalink = new LavalinkManager({
-    nodes: [
-        {
-            authorization: "youshallnotpass",
-            host: "localhost",
-            port: 2333,
-            id: "testnode",
-            requestTimeout: 10000,
-        }
-    ],
-    sendToShard: (guildId, payload) => client.guilds.cache.get(guildId)?.shard?.send(payload),
-    autoSkip: true,
-    client: {
-        id: envConfig.clientId,
-        username: "TESTBOT",
-        shards: "auto"
-    },
-    playerOptions: {
-        applyVolumeAsFilter: false,
-        clientBasedUpdateInterval: 50,
-        defaultSearchPlatform: "dzsearch",
-        volumeDecrementer: 0.7
-    },
-    queueOptions: {
-        maxPreviousTracks: 5
-    },
-    // queueStore: new myCustomStore(client.redis), // OPTIONAL! 'class myCustomStore extends DefaultQueueStore' --> for custom queue stores, e.g. redis, etc. | default is lavalink-client#MiniMap
-    // queueChangesWatcher: new myCustomWatcher(), // OPTIONAL! 'class myCustomWatcher extends QueueChangesWatcher' --> for queue action logs!
-});
-```
-
-3. **VERY IMPORTANT!** - Register Voice State updates + initialize the Manager
-
-```ts
-client.on("raw", d => client.lavalink.sendRawData(d)); // for voice state updates!
-client.on("ready", async () => {
-    console.log("Discord Bot is ready to be Used!");
-    // user.id is required, user.shards (not), user.username (not, but recommended for lavalink stats!) 
-    await client.lavalink.init({ ...client.user!, shards: "auto" }); 
-});
-```
-
-4. **Use it!**
-
-```ts
-// create player
-const player = await client.lavalink.createPlayer({
-    guildId: guild.id, voiceChannelId: voice.id, textChannelId: text.id, // in what guild + channel(s)
-    selfDeaf: true, selfMute: false, volume: 100 // configuration(s)
-}); 
-// connect the player to it's vc
-await player.connect();
-
-const res = await player.search({
-    query: `Elton John`, // source: `soundcloud`,
-}, client.user); // search a query (query-search, url search, identifier search, etc.)
-
-await player.queue.add(res.tracks); // add 1 track, or an array of tracks
-await player.play(); // you can provide specific track, or let the manager choose the track from the queue!
-```
-
-## Example (typescript)
-
-Can be found in the [`/testBot`](https://github.com/Tomato6966/lavalink-client/blob/main/testBot/README.md) Directory
-
-It contains the following features:
-
-- Example Use for `Redis based Queue`
-- Example Use for `Queue Changes Watcher Logger`
-- Example Use for `Filters`, `Audio Output`, `equalizers`
-- How to make an easy, yet advanced `Slash Commands Only Bot`
-- `Slim Memory Usage`
-- `All lavalink-client events` displayments

@@ -28,7 +28,7 @@ client.defaultVolume = 100;
 client.lavalink = new LavalinkManager({
     nodes: [
         {
-            authorization: "milrato_pass_2333",
+            authorization: "yourverystrongpassword",
             host: "localhost",
             port: 2333,
             id: "testnode",
@@ -39,8 +39,7 @@ client.lavalink = new LavalinkManager({
     autoSkip: true,
     client: {
         id: envConfig.clientId, // REQUIRED! (at least after the .init)
-        username: "TESTBOT",
-        shards: "auto"
+        username: "TESTBOT"
     },
     playerOptions: {
         applyVolumeAsFilter: false,
