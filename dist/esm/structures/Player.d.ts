@@ -143,7 +143,7 @@ export declare class Player {
      * Set the Repeatmode of the Player
      * @param repeatMode
      */
-    setRepeatMode(repeatMode: RepeatMode): Promise<void>;
+    setRepeatMode(repeatMode: RepeatMode): Promise<RepeatMode>;
     /**
      * Skip the current song, or a specific amount of songs
      * @param amount provide the index of the next track to skip to

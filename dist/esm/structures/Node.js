@@ -133,9 +133,8 @@ export class LavalinkNode {
             return;
         const headers = {
             Authorization: this.options.authorization,
-            "Num-Shards": String(this.NodeManager.LavalinkManager.options.client.shards || "auto"),
             "User-Id": this.NodeManager.LavalinkManager.options.client.id,
-            "User-Name": this.NodeManager.LavalinkManager.options.client.username || "Lavalink-Client",
+            "Client-Name": this.NodeManager.LavalinkManager.options.client.username || "Lavalink-Client",
         };
         if (typeof this.options.sessionId === "string" || typeof sessionId === "string") {
             headers["Session-Id"] = this.options.sessionId || sessionId;
@@ -519,6 +518,7 @@ export class LavalinkNode {
         return this.NodeManager.LavalinkManager.emit("trackStart", player, track, payload);
     }
     async trackEnd(player, track, payload) {
+        console.log(payload.reason);
         // If there are no songs in the queue
         if (!player.queue.tracks.length && player.repeatMode === "off")
             return this.queueEnd(player, track, payload);
@@ -548,6 +548,7 @@ export class LavalinkNode {
         return this.NodeManager.LavalinkManager.options.autoSkip && player.play({ noReplace: true });
     }
     async queueEnd(player, track, payload) {
+        // add previous track to the queue!
         player.queue.current = null;
         player.playing = false;
         if (typeof this.NodeManager.LavalinkManager.options?.playerOptions?.onEmptyQueue?.autoPlayFunction === "function") {
@@ -557,6 +558,7 @@ export class LavalinkNode {
             if (player.queue.current)
                 return player.play({ noReplace: true, paused: false });
         }
+        player.queue.previous.unshift(track);
         if (payload?.reason !== "stopped") {
             await player.queue.utils.save();
         }

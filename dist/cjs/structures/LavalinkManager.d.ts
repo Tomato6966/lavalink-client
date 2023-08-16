@@ -11,7 +11,6 @@ export interface LavalinkManager {
     utils: ManagerUitls;
 }
 export interface BotClientOptions {
-    shards?: number | number[] | "auto";
     id: string;
     username?: string;
     /** So users can pass entire objects / classes */
@@ -47,8 +46,6 @@ export interface ManagerOptions {
     client?: BotClientOptions;
     playerOptions?: LavalinkPlayerOptions;
     autoSkip?: boolean;
-    defaultLeastUsedNodeSortType?: "memory" | "calls" | "players";
-    defaultLeastLoadNodeSortType?: "cpu" | "memory";
     /** @async */
     sendToShard: (guildId: string, payload: GuildShardPayload) => void;
 }

@@ -45,10 +45,6 @@ class LavalinkManager extends events_1.EventEmitter {
             };
         if (!this.options.autoSkip)
             this.options.autoSkip = true;
-        if (!this.options.defaultLeastLoadNodeSortType)
-            this.options.defaultLeastLoadNodeSortType = "memory";
-        if (!this.options.defaultLeastUsedNodeSortType)
-            this.options.defaultLeastUsedNodeSortType = "players";
         if (!this.options.playerOptions.defaultSearchPlatform)
             this.options.playerOptions.defaultSearchPlatform = "ytsearch";
         // default queue options
@@ -66,13 +62,9 @@ class LavalinkManager extends events_1.EventEmitter {
         if (typeof options.sendToShard !== "function")
             throw new SyntaxError("ManagerOption.sendToShard was not provided, which is required!");
         // only check in .init()
-        // if(typeof options.client !== "object" || typeof options.client.id !== "string") throw new SyntaxError("ManagerOption.client = { id: string, username?:string, shards?: 'auto'|number } was not provided, which is required");
+        // if(typeof options.client !== "object" || typeof options.client.id !== "string") throw new SyntaxError("ManagerOption.client = { id: string, username?:string } was not provided, which is required");
         if (options.autoSkip && typeof options.autoSkip !== "boolean")
             throw new SyntaxError("ManagerOption.autoSkip must be either false | true aka boolean");
-        if (options.defaultLeastLoadNodeSortType && !["memory", "cpu"].includes(options.defaultLeastLoadNodeSortType))
-            throw new SyntaxError("ManagerOption.defaultLeastLoadNodeSortType must be 'memory' | 'cpu'");
-        if (options.defaultLeastUsedNodeSortType && !["memory", "players", "calls"].includes(options.defaultLeastUsedNodeSortType))
-            throw new SyntaxError("ManagerOption.defaultLeastLoadNodeSortType must be 'memory' | 'calls' | 'players'");
         if (!options.nodes || !Array.isArray(options.nodes) || !options.nodes.every(node => this.utils.isNodeOptions(node)))
             throw new SyntaxError("ManagerOption.nodes must be an Array of NodeOptions and is required of at least 1 Node");
         /* QUEUE STORE */
@@ -157,9 +149,7 @@ class LavalinkManager extends events_1.EventEmitter {
      * @param data
      */
     async sendRawData(data) {
-        if (!this.initiated)
-            return;
-        if (!("t" in data))
+        if (!this.initiated || !("t" in data))
             return;
         // for channel Delete
         if ("CHANNEL_DELETE" === data.t) {
@@ -167,9 +157,8 @@ class LavalinkManager extends events_1.EventEmitter {
             if (!update.guild_id)
                 return;
             const player = this.getPlayer(update.guild_id);
-            if (player.voiceChannelId === update.id) {
+            if (player && player.voiceChannelId === update.id)
                 return player.destroy(Player_1.DestroyReasons.ChannelDeleted);
-            }
         }
         // for voice updates
         if (["VOICE_STATE_UPDATE", "VOICE_SERVER_UPDATE"].includes(data.t)) {

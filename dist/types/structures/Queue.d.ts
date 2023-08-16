@@ -57,8 +57,7 @@ export declare class Queue {
         maxPreviousTracks: number;
     };
     private readonly guildId;
-    protected readonly QueueSaver: QueueSaver | null;
-    static readonly StaticSymbol: Symbol;
+    private readonly QueueSaver;
     private managerUtils;
     private queueChanges;
     constructor(guildId: string, data?: Partial<StoredQueue>, QueueSaver?: QueueSaver, queueOptions?: QueueSaverOptions);
@@ -79,7 +78,7 @@ export declare class Queue {
         /**
          * @returns {{current:Track|null, previous:Track[], tracks:Track[]}}The Queue, but in a raw State, which allows easier handling for the storeManager
          */
-        getStored: () => StoredQueue;
+        toJSON: () => StoredQueue;
         /**
          * Get the Total Duration of the Queue-Songs summed up
          * @returns {number}

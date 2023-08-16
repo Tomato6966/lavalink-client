@@ -64,8 +64,10 @@ export class Player {
         this.voiceChannelId = this.options.voiceChannelId;
         this.textChannelId = this.options.textChannelId || null;
         this.node = typeof this.options.node === "string" ? this.LavalinkManager.nodeManager.nodes.get(this.options.node) : this.options.node;
-        if (!this.node || typeof this.node?.request !== "function")
-            this.node = this.LavalinkManager.nodeManager.leastUsedNodes.filter(v => options.vcRegion ? v.options?.regions?.includes(options.vcRegion) : true)[0] || this.LavalinkManager.nodeManager.leastUsedNodes[0] || null;
+        if (!this.node || typeof this.node.request !== "function") {
+            const least = this.LavalinkManager.nodeManager.leastUsedNodes();
+            this.node = least.filter(v => options.vcRegion ? v.options?.regions?.includes(options.vcRegion) : true)[0] || least[0] || null;
+        }
         if (!this.node)
             throw new Error("No available Node was found, please add a LavalinkNode to the Manager via Manager.NodeManager#createNode");
         if (this.LavalinkManager.options.playerOptions.volumeDecrementer)
@@ -274,8 +276,7 @@ export class Player {
     async setRepeatMode(repeatMode) {
         if (!["off", "track", "queue"].includes(repeatMode))
             throw new RangeError("Repeatmode must be either 'off', 'track', or 'queue'");
-        this.repeatMode = repeatMode;
-        return;
+        return this.repeatMode = repeatMode;
     }
     /**
      * Skip the current song, or a specific amount of songs
@@ -387,7 +388,7 @@ export class Player {
             createdTimeStamp: this.createdTimeStamp,
             filters: this.filterManager?.data || {},
             equalizer: this.filterManager?.equalizerBands || [],
-            queue: this.queue?.utils?.getStored?.() || { current: null, tracks: [], previous: [] },
+            queue: this.queue?.utils?.toJSON?.() || { current: null, tracks: [], previous: [] },
             nodeId: this.node?.id,
         };
     }
