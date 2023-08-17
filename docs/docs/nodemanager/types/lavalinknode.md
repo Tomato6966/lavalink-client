@@ -1,0 +1,3 @@
+# LavalinkNode
+
+**Type:** Class

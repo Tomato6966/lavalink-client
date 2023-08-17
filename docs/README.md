@@ -53,6 +53,14 @@ yarn add tomato6966/lavalink-client
 
 </details>
 
+## Libraries Supported
+
+* [Discord.js](https://discord.js.org/)
+* [Eris](https://abal.moe/Eris/)
+* [Discordeno](https://discordeno.js.org)
+
+_...all Discord Client Libraries!_
+
 ## Features
 
 * 💯 Lavalink v4 Supported only (with Lavalink Plugins)

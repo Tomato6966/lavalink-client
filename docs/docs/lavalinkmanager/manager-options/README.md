@@ -1,0 +1,5 @@
+# Manager Options
+
+
+
+<table><thead><tr><th width="163">Parameter</th><th width="267">Type</th><th width="102">Optional</th><th>Description</th></tr></thead><tbody><tr><td>nodes</td><td>LavalinkNodeOptions[]</td><td>X</td><td>Array of Node-Options to connect on Manager<a href="../#.init-clientdata-botclientoptions-important">.init()</a></td></tr><tr><td>sendToShard</td><td>async (guildId:string, payload:GuildShardPayload) => void</td><td>X</td><td>The Function to send the voice connection changes from Lavalink to Discord</td></tr><tr><td>client</td><td>BotClientOptions</td><td>✓</td><td>The Bot Client's Data for Authorization</td></tr><tr><td>queueOptions</td><td>ManagerQueueOptions</td><td>✓</td><td>QueueOptions for all Queues</td></tr><tr><td>playerOptions</td><td>ManagerPlayerOptions</td><td>✓</td><td>PlayerOptions for all Players</td></tr><tr><td>autoSkip</td><td>boolean</td><td>✓</td><td>If it should skip to the next Track on <a href="../#trackend">TrackEnd </a>/ <a href="../#trackerror">TrackError </a>/ <a href="../#trackstuck">TrackStuck </a>events</td></tr></tbody></table>
