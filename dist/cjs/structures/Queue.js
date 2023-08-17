@@ -1,12 +1,12 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.Queue = exports.QueueChangesWatcher = exports.DefaultQueueStore = exports.QueueSaver = void 0;
+exports.Queue = exports.DefaultQueueStore = exports.QueueSaver = void 0;
 const Utils_1 = require("./Utils");
 class QueueSaver {
     constructor(options) {
-        this._ = options.queueStore || new DefaultQueueStore();
+        this._ = options?.queueStore || new DefaultQueueStore();
         this.options = {
-            maxPreviousTracks: options.maxPreviousTracks
+            maxPreviousTracks: options?.maxPreviousTracks || 25,
         };
     }
     async get(guildId) {
@@ -24,9 +24,8 @@ class QueueSaver {
 }
 exports.QueueSaver = QueueSaver;
 class DefaultQueueStore {
-    data = new Map();
-    constructor() {
-    }
+    data = new Utils_1.MiniMap();
+    constructor() { }
     async get(guildId) {
         return await this.data.get(guildId);
     }
@@ -44,20 +43,6 @@ class DefaultQueueStore {
     }
 }
 exports.DefaultQueueStore = DefaultQueueStore;
-class QueueChangesWatcher {
-    constructor() {
-    }
-    tracksAdd(guildId, tracks, position, oldStoredQueue, newStoredQueue) {
-        return;
-    }
-    tracksRemoved(guildId, tracks, position, oldStoredQueue, newStoredQueue) {
-        return;
-    }
-    shuffled(guildId, oldStoredQueue, newStoredQueue) {
-        return;
-    }
-}
-exports.QueueChangesWatcher = QueueChangesWatcher;
 class Queue {
     tracks = [];
     previous = [];
@@ -111,7 +96,7 @@ class Queue {
             return await this.QueueSaver.delete(this.guildId);
         },
         /**
-         * @returns {{current:Track|null, previous:Track[], tracks:Track[]}}The Queue, but in a raw State, which allows easier handling for the storeManager
+         * @returns {{current:Track|null, previous:Track[], tracks:Track[]}}The Queue, but in a raw State, which allows easier handling for the QueueStoreManager
          */
         toJSON: () => {
             if (this.previous.length > this.options.maxPreviousTracks)

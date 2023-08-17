@@ -1,10 +1,11 @@
 import { Track, UnresolvedTrack } from "./Track";
+import { MiniMap } from "./Utils";
 export interface StoredQueue {
     current: Track | null;
     previous: Track[];
     tracks: Track[];
 }
-export interface QueueStoreManager extends Record<any, any> {
+export interface QueueStoreManager extends Record<string, any> {
     /** @async get a Value (MUST RETURN UNPARSED!) */
     get: (guildId: unknown) => Promise<any>;
     /** @async Set a value inside a guildId (MUST BE UNPARSED) */
@@ -17,15 +18,17 @@ export interface QueueStoreManager extends Record<any, any> {
     parse: (value: unknown) => Promise<Partial<StoredQueue>>;
 }
 export interface ManagerQueueOptions {
-    maxPreviousTracks: number;
+    maxPreviousTracks?: number;
     queueStore?: QueueStoreManager;
-    DefaultQueueChangesWatcher?: DefaultQueueChangesWatcher;
+    queueChangesWatcher?: QueueChangesWatcher;
 }
 export interface QueueSaver {
     /** @private */
     _: QueueStoreManager;
     /** @private */
-    options: ManagerQueueOptions;
+    options: {
+        maxPreviousTracks: number;
+    };
 }
 export declare class QueueSaver {
     constructor(options: ManagerQueueOptions);
@@ -34,20 +37,22 @@ export declare class QueueSaver {
     set(guildId: string, value: any): Promise<any>;
     sync(guildId: string): Promise<Partial<StoredQueue>>;
 }
-export declare class DefaultQueueStore {
+export declare class DefaultQueueStore implements QueueStoreManager {
     private data;
     constructor();
-    get(guildId: any): Promise<any>;
-    set(guildId: any, stringifiedValue: any): Promise<Map<any, any>>;
+    get(guildId: any): Promise<unknown>;
+    set(guildId: any, stringifiedValue: any): Promise<MiniMap<unknown, unknown>>;
     delete(guildId: any): Promise<boolean>;
     stringify(value: any): Promise<any>;
     parse(value: any): Promise<Partial<StoredQueue>>;
 }
-export declare class DefaultQueueChangesWatcher {
-    constructor();
-    tracksAdd(guildId: string, tracks: (Track | UnresolvedTrack)[], position: number, oldStoredQueue: StoredQueue, newStoredQueue: StoredQueue): void;
-    tracksRemoved(guildId: string, tracks: (Track | UnresolvedTrack)[], position: number, oldStoredQueue: StoredQueue, newStoredQueue: StoredQueue): void;
-    shuffled(guildId: string, oldStoredQueue: StoredQueue, newStoredQueue: StoredQueue): void;
+export interface QueueChangesWatcher {
+    /** get a Value (MUST RETURN UNPARSED!) */
+    tracksAdd: (guildId: string, tracks: (Track | UnresolvedTrack)[], position: number, oldStoredQueue: StoredQueue, newStoredQueue: StoredQueue) => any;
+    /** Set a value inside a guildId (MUST BE UNPARSED) */
+    tracksRemoved: (guildId: string, tracks: (Track | UnresolvedTrack)[], position: number, oldStoredQueue: StoredQueue, newStoredQueue: StoredQueue) => any;
+    /** Set a value inside a guildId (MUST BE UNPARSED) */
+    shuffled: (guildId: string, oldStoredQueue: StoredQueue, newStoredQueue: StoredQueue) => any;
 }
 export declare class Queue {
     readonly tracks: (Track | UnresolvedTrack)[];

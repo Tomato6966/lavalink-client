@@ -1,4 +1,4 @@
-import { FilterManager, LavalinkFilterData } from "./Filters";
+import { EQBand, FilterData, FilterManager, LavalinkFilterData } from "./Filters";
 import { LavalinkManager } from "./LavalinkManager";
 import { LavalinkNode } from "./Node";
 import { Queue } from "./Queue";
@@ -7,6 +7,27 @@ import { LavalinkPlayerVoiceOptions, SearchPlatform, SearchResult } from "./Util
 type PlayerDestroyReasons = "QueueEmpty" | "NodeDestroy" | "NodeDeleted" | "LavalinkNoVoice" | "NodeReconnectFail" | "PlayerReconnectFail" | "Disconnected" | "ChannelDeleted";
 export type DestroyReasonsType = PlayerDestroyReasons | string;
 export declare const DestroyReasons: Record<PlayerDestroyReasons, PlayerDestroyReasons>;
+export interface PlayerJson {
+    guildId: string;
+    options: PlayerOptions;
+    voiceChannelId: string;
+    textChannelId?: string;
+    position: number;
+    lastPosition: number;
+    volume: number;
+    lavalinkVolume: number;
+    repeatMode: RepeatMode;
+    paused: boolean;
+    playing: boolean;
+    createdTimeStamp?: number;
+    filters: FilterData;
+    ping: {
+        ws: number;
+        lavalink: number;
+    };
+    equalizer: EQBand[];
+    nodeId?: string;
+}
 export type RepeatMode = "queue" | "track" | "off";
 export interface PlayerOptions {
     guildId: string;
@@ -170,22 +191,6 @@ export declare class Player {
      */
     changeNode(newNode: LavalinkNode | string): Promise<string>;
     /** Converts the Player including Queue to a Json state */
-    toJSON(): {
-        guildId: string;
-        options: PlayerOptions;
-        voiceChannelId: string;
-        textChannelId: string;
-        position: number;
-        lastPosition: number;
-        volume: number;
-        lavalinkVolume: number;
-        repeatMode: RepeatMode;
-        paused: boolean;
-        playing: boolean;
-        createdTimeStamp: number;
-        filters: {};
-        equalizer: import("./Filters").EQBand[];
-        nodeId: string;
-    };
+    toJSON(): PlayerJson;
 }
 export {};

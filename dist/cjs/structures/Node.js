@@ -358,7 +358,7 @@ class LavalinkNode {
                 if (data.playerOptions.filters.volume)
                     player.filterManager.data.volume = data.playerOptions.filters.volume;
                 if (data.playerOptions.filters.equalizer)
-                    player.filterManager.data.equalizer = data.playerOptions.filters.equalizer;
+                    player.filterManager.equalizerBands = data.playerOptions.filters.equalizer;
                 if (data.playerOptions.filters.karaoke)
                     player.filterManager.data.karaoke = data.playerOptions.filters.karaoke;
                 if (data.playerOptions.filters.lowPass)
@@ -441,6 +441,7 @@ class LavalinkNode {
                 const player = this.NodeManager.LavalinkManager.getPlayer(payload.guildId);
                 if (!player)
                     return;
+                const oldPlayer = player?.toJSON();
                 if (player.get("internal_updateInterval"))
                     clearInterval(player.get("internal_updateInterval"));
                 // override the position
@@ -478,7 +479,7 @@ class LavalinkNode {
                         player.filterManager.filterUpdatedState = 0;
                     }
                 }
-                this.NodeManager.LavalinkManager.emit("playerUpdate", player);
+                this.NodeManager.LavalinkManager.emit("playerUpdate", oldPlayer, player);
                 break;
             case "event":
                 this.handleEvent(payload);
@@ -525,7 +526,6 @@ class LavalinkNode {
         return this.NodeManager.LavalinkManager.emit("trackStart", player, track, payload);
     }
     async trackEnd(player, track, payload) {
-        console.log(payload.reason);
         // If there are no songs in the queue
         if (!player.queue.tracks.length && player.repeatMode === "off")
             return this.queueEnd(player, track, payload);
@@ -562,8 +562,11 @@ class LavalinkNode {
             await this.NodeManager.LavalinkManager.options?.playerOptions?.onEmptyQueue?.autoPlayFunction(player, track);
             if (player.queue.tracks.length > 0)
                 await (0, Utils_1.queueTrackEnd)(player);
-            if (player.queue.current)
+            if (player.queue.current) {
+                if (payload.type === "TrackEndEvent")
+                    this.NodeManager.LavalinkManager.emit("trackEnd", player, track, payload);
                 return player.play({ noReplace: true, paused: false });
+            }
         }
         player.queue.previous.unshift(track);
         if (payload?.reason !== "stopped") {

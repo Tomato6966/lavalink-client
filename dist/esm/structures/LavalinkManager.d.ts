@@ -2,9 +2,9 @@
 import { EventEmitter } from "events";
 import { NodeManager } from "./NodeManager";
 import { ManagerQueueOptions } from "./Queue";
-import { GuildShardPayload, LavalinkSearchPlatform, ManagerUitls, MiniMap, SearchPlatform, TrackEndEvent, TrackExceptionEvent, TrackStartEvent, TrackStuckEvent, VoicePacket, VoiceServer, VoiceState, WebSocketClosedEvent } from "./Utils";
+import { GuildShardPayload, ManagerUitls, MiniMap, SearchPlatform, TrackEndEvent, TrackExceptionEvent, TrackStartEvent, TrackStuckEvent, VoicePacket, VoiceServer, VoiceState, WebSocketClosedEvent } from "./Utils";
 import { LavalinkNodeOptions } from "./Node";
-import { DestroyReasonsType, Player, PlayerOptions } from "./Player";
+import { DestroyReasonsType, Player, PlayerJson, PlayerOptions } from "./Player";
 import { Track, UnresolvedTrack } from "./Track";
 export interface LavalinkManager {
     nodeManager: NodeManager;
@@ -44,13 +44,18 @@ export interface ManagerPlayerOptions {
     useUnresolvedData?: boolean;
 }
 export interface ManagerOptions {
+    /** The Node Options, for all Nodes! (on init) */
     nodes: LavalinkNodeOptions[];
-    queueOptions?: ManagerQueueOptions;
-    client?: BotClientOptions;
-    playerOptions?: ManagerPlayerOptions;
-    autoSkip?: boolean;
-    /** @async */
+    /** @async The Function to send the voice connection changes from Lavalink to Discord */
     sendToShard: (guildId: string, payload: GuildShardPayload) => void;
+    /** The Bot Client's Data for Authorization */
+    client?: BotClientOptions;
+    /** QueueOptions for all Queues */
+    queueOptions?: ManagerQueueOptions;
+    /** PlayerOptions for all Players */
+    playerOptions?: ManagerPlayerOptions;
+    /** If it should skip to the next Track on TrackEnd / TrackError etc. events */
+    autoSkip?: boolean;
 }
 interface LavalinkManagerEvents {
     /**
@@ -107,7 +112,7 @@ interface LavalinkManagerEvents {
      * Always emits when the player (on lavalink side) got updated
      * @event Manager#playerUpdate
      */
-    "playerUpdate": (player: Player) => void;
+    "playerUpdate": (oldPlayerJson: PlayerJson, newPlayer: Player) => void;
 }
 export interface LavalinkManager {
     options: ManagerOptions;
@@ -115,7 +120,7 @@ export interface LavalinkManager {
     emit<U extends keyof LavalinkManagerEvents>(event: U, ...args: Parameters<LavalinkManagerEvents[U]>): boolean;
 }
 export declare class LavalinkManager extends EventEmitter {
-    static DefaultSources: Record<SearchPlatform, LavalinkSearchPlatform>;
+    static DefaultSources: Record<SearchPlatform, import("./Utils").LavalinkSearchPlatform>;
     static SourceLinksRegexes: Record<import("./Utils").SourcesRegex, RegExp>;
     initiated: boolean;
     readonly players: MiniMap<string, Player>;

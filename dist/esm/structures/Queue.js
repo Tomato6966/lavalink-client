@@ -1,9 +1,9 @@
-import { ManagerUitls } from "./Utils";
+import { ManagerUitls, MiniMap } from "./Utils";
 export class QueueSaver {
     constructor(options) {
-        this._ = options.queueStore || new DefaultQueueStore();
+        this._ = options?.queueStore || new DefaultQueueStore();
         this.options = {
-            maxPreviousTracks: options.maxPreviousTracks
+            maxPreviousTracks: options?.maxPreviousTracks || 25,
         };
     }
     async get(guildId) {
@@ -20,9 +20,8 @@ export class QueueSaver {
     }
 }
 export class DefaultQueueStore {
-    data = new Map();
-    constructor() {
-    }
+    data = new MiniMap();
+    constructor() { }
     async get(guildId) {
         return await this.data.get(guildId);
     }
@@ -37,19 +36,6 @@ export class DefaultQueueStore {
     }
     async parse(value) {
         return value; // JSON.parse(value)
-    }
-}
-export class QueueChangesWatcher {
-    constructor() {
-    }
-    tracksAdd(guildId, tracks, position, oldStoredQueue, newStoredQueue) {
-        return;
-    }
-    tracksRemoved(guildId, tracks, position, oldStoredQueue, newStoredQueue) {
-        return;
-    }
-    shuffled(guildId, oldStoredQueue, newStoredQueue) {
-        return;
     }
 }
 export class Queue {
@@ -105,7 +91,7 @@ export class Queue {
             return await this.QueueSaver.delete(this.guildId);
         },
         /**
-         * @returns {{current:Track|null, previous:Track[], tracks:Track[]}}The Queue, but in a raw State, which allows easier handling for the storeManager
+         * @returns {{current:Track|null, previous:Track[], tracks:Track[]}}The Queue, but in a raw State, which allows easier handling for the QueueStoreManager
          */
         toJSON: () => {
             if (this.previous.length > this.options.maxPreviousTracks)

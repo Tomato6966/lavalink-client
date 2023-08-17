@@ -405,6 +405,7 @@ class Player {
             filters: this.filterManager?.data || {},
             equalizer: this.filterManager?.equalizerBands || [],
             nodeId: this.node?.id,
+            ping: this.ping,
         };
     }
 }

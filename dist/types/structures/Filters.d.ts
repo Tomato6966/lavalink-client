@@ -7,7 +7,7 @@ export declare class FilterManager {
     equalizerBands: EQBand[];
     filterUpdatedState: number;
     filters: PlayerFilters;
-    data: LavalinkFilterData;
+    data: FilterData;
     constructor(player: Player);
     applyPlayerFilters(): Promise<void>;
     /**
@@ -215,9 +215,8 @@ export interface ReverbFilter {
     delay: number;
     decay: number;
 }
-export interface LavalinkFilterData {
+export interface FilterData {
     volume?: number;
-    equalizer?: EQBand[];
     karaoke?: KaraokeFilter;
     timescale?: TimescaleFilter;
     tremolo?: FreqFilter;
@@ -228,4 +227,7 @@ export interface LavalinkFilterData {
     lowPass?: LowPassFilter;
     echo: EchoFilter;
     reverb: ReverbFilter;
+}
+export interface LavalinkFilterData extends FilterData {
+    equalizer?: EQBand[];
 }

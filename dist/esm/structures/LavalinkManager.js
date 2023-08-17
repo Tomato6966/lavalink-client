@@ -78,7 +78,7 @@ export class LavalinkManager extends EventEmitter {
             const keys = Object.getOwnPropertyNames(Object.getPrototypeOf(options.queueOptions?.queueChangesWatcher));
             const requiredKeys = ["tracksAdd", "tracksRemoved", "shuffled"];
             if (!requiredKeys.every(v => keys.includes(v)) || !requiredKeys.every(v => typeof options.queueOptions?.queueChangesWatcher[v] === "function"))
-                throw new SyntaxError(`The provided ManagerOption.QueueChangesWatcher, does not have all required functions: ${requiredKeys.join(", ")}`);
+                throw new SyntaxError(`The provided ManagerOption.DefaultQueueChangesWatcher, does not have all required functions: ${requiredKeys.join(", ")}`);
         }
     }
     constructor(options) {
