@@ -1,7 +1,7 @@
 ---
 description: >-
-  Easy and advanced lavalink client. Use it with lavalink plugins as well as
-  latest lavalink versions.
+  Easy, flexible and feature-rich lavalink@v4 Client. Both for Beginners and
+  Proficients.
 coverY: 311
 ---
 
