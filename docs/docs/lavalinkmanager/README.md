@@ -23,9 +23,276 @@ const { LavalinkManager } = require("lavalink-client");
 {% endtab %}
 {% endtabs %}
 
+<details>
+
+<summary>Example Creation</summary>
+
+```typescript
+import { Client, GatewayIntentBits } from "discord.js";
+import { createClient, RedisClientType } from 'redis';
+import { LavalinkManager } from "../src";
+```
+
+```typescript
+// The Bot Client, here a discord.js one
+const client = new Client({
+    intents: [ GatewayIntentBits.Guilds, GatewayIntentBits.GuildVoiceStates ]
+}) as Client & { redis: RedisClientType, lavalink: LavalinkManager };
+```
+
+<pre class="language-typescript"><code class="lang-typescript"><strong>client.lavalink = new LavalinkManager({
+</strong>    nodes: [
+        {
+            authorization: "yourverystrongpassword",
+            host: "localhost",
+            port: 2333,
+            id: "testnode",
+            requestTimeout: 10000,
+        }
+    ],
+    sendToShard: (guildId, payload) => client.guilds.cache.get(guildId)?.shard?.send(payload),
+    autoSkip: true,
+    client: {
+        id: envConfig.clientId, // REQUIRED! (at least after the .init)
+        username: "TESTBOT"
+    },
+    playerOptions: {
+        applyVolumeAsFilter: false,
+        clientBasedPositionUpdateInterval: 50,
+        defaultSearchPlatform: "ytmsearch",
+        volumeDecrementer: 0.75, // on client 100% == on lavalink 75%
+        onDisconnect: {
+            autoReconnect: true, // automatically attempts a reconnect, if the bot disconnects from the voice channel, if it fails, it get's destroyed
+            destroyPlayer: false // overrides autoReconnect and directly destroys the player if the bot disconnects from the vc
+        },
+        onEmptyQueue: {
+            destroyAfterMs: 30_000, // 0 === instantly destroy | don't provide the option, to don't destroy the player
+        },
+        useUnresolvedData: true
+    },
+    queueOptions: {
+        maxPreviousTracks: 10
+    },
+});
+</code></pre>
+
+Finally, initatlize the Manager and send Raw Data!
+
+```typescript
+client.on("ready", async () => {
+  await client.lavalink.init({
+    id: client.user.id,
+    username: client.user.username
+  });
+});
+
+client.on("raw", data => client.lavalink.sendRawData(data));
+```
+
+</details>
+
+<details>
+
+<summary>Example with <mark style="color:red;">Redis-Queue</mark>, <mark style="color:red;">Request-Transformer</mark>, <mark style="color:red;">Autoplay Function</mark>, ...</summary>
+
+```typescript
+import { Client, GatewayIntentBits } from "discord.js";
+import { createClient, RedisClientType } from 'redis';
+import { LavalinkManager } from "../src";
+```
+
+```typescript
+// The Bot Client, here a discord.js one
+const client = new Client({
+    intents: [ GatewayIntentBits.Guilds, GatewayIntentBits.GuildVoiceStates ]
+}) as Client & { redis: RedisClientType, lavalink: LavalinkManager };
+```
+
+```typescript
+// The Custom Redis Server
+client.redis = createClient({ 
+  url: "redis://localhost:6379", 
+  password: "your_very_strong_password"
+});
+client.redis.connect();
+client.redis.on("error", (err) => console.log('Redis Client Error', err));
+```
+
+```typescript
+// Create the Lavalink Server
+client.lavalink = new LavalinkManager({
+    nodes: [
+        {
+            authorization: "yourverystrongpassword",
+            host: "localhost",
+            port: 2333,
+            id: "testnode",
+            requestTimeout: 10000,
+        }
+    ],
+    sendToShard: (guildId, payload) => client.guilds.cache.get(guildId)?.shard?.send(payload),
+    autoSkip: true,
+    client: {
+        id: envConfig.clientId, // REQUIRED! (at least after the .init)
+        username: "TESTBOT"
+    },
+    playerOptions: {
+        applyVolumeAsFilter: false,
+        clientBasedPositionUpdateInterval: 50,
+        defaultSearchPlatform: "ytmsearch",
+        volumeDecrementer: 0.75, // on client 100% == on lavalink 75%
+        requesterTransformer: requesterTransformer,
+        onDisconnect: {
+            autoReconnect: true, // automatically attempts a reconnect, if the bot disconnects from the voice channel, if it fails, it get's destroyed
+            destroyPlayer: false // overrides autoReconnect and directly destroys the player if the bot disconnects from the vc
+        },
+        onEmptyQueue: {
+            destroyAfterMs: 30_000, // 0 === instantly destroy | don't provide the option, to don't destroy the player
+            autoPlayFunction: autoPlayFunction,
+        },
+        useUnresolvedData: true
+    },
+    queueOptions: {
+        maxPreviousTracks: 10,
+        queueStore: new myCustomStore(client.redis),
+        queueChangesWatcher: new myCustomWatcher(client)
+    },
+});
+```
+
+Custom Queue Store Class (Saving the queue on a redis server)
+
+```typescript
+export class myCustomStore extends DefaultQueueStore {
+    private redis:RedisClientType;
+    constructor(redisClient:RedisClientType) {
+        super();
+        this.redis = redisClient;
+    }
+    async get(guildId: any): Promise<any> {
+        return await this.redis.get(guildId);
+    }
+    async set(guildId: any, stringifiedQueueData: any): Promise<any> {
+        // await this.delete(guildId); // redis requires you to delete it first;
+        return await this.redis.set(guildId, stringifiedQueueData);
+    }
+    async delete(guildId: any): Promise<any> {
+        return await this.redis.del(guildId);
+    }
+    async parse(stringifiedQueueData: any): Promise<Partial<StoredQueue>> {
+        return JSON.parse(stringifiedQueueData);
+    }
+    async stringify(parsedQueueData: any): Promise<any> {
+        return JSON.stringify(parsedQueueData);
+    }
+}
+```
+
+Custom Queue Changes Watcher Class, for seeing changes within the Queue
+
+```typescript
+export class myCustomWatcher extends QueueChangesWatcher {
+    private client:BotClient;
+    constructor(client:BotClient) {
+        super();
+        this.client = client;
+    }
+    shuffled(guildId: string, oldStoredQueue: StoredQueue, newStoredQueue: StoredQueue): void {
+        console.log(`${this.client.guilds.cache.get(guildId)?.name || guildId}: Queue got shuffled`)    
+    }
+    tracksAdd(guildId: string, tracks: Track[], position: number, oldStoredQueue: StoredQueue, newStoredQueue: StoredQueue): void {
+        console.log(`${this.client.guilds.cache.get(guildId)?.name || guildId}: ${tracks.length} Tracks got added into the Queue at position #${position}`);    
+    }
+    tracksRemoved(guildId: string, tracks: Track[], position: number, oldStoredQueue: StoredQueue, newStoredQueue: StoredQueue): void {
+        console.log(`${this.client.guilds.cache.get(guildId)?.name || guildId}: ${tracks.length} Tracks got removed from the Queue at position #${position}`);
+    }
+}
+```
+
+Custom Autoplay function, which get's executed, before the "queueEnd" Event fires, and if there is a new track added in the queue, then it plays it. else "queueEnd" will fire
+
+```typescript
+export const autoPlayFunction = async (player, lastPlayedTrack) => {
+    if(lastPlayedTrack.info.sourceName === "spotify") {
+        const filtered = player.queue.previous.filter(v => v.info.sourceName === "spotify").slice(0, 5);
+        const ids = filtered.map(v => v.info.identifier || v.info.uri.split("/")?.reverse()?.[0] || v.info.uri.split("/")?.reverse()?.[1]);
+        if(ids.length >= 2) {
+            const res = await player.search({
+                query: `seed_tracks=${ids.join(",")}`, //`seed_artists=${artistIds.join(",")}&seed_genres=${genre.join(",")}&seed_tracks=${trackIds.join(",")}`;
+                source: "sprec"
+            }, lastPlayedTrack.requester).then(response => {
+                response.tracks = response.tracks.filter(v => v.info.identifier !== lastPlayedTrack.info.identifier); // remove the lastPlayed track if it's in there..
+                return response;
+            }).catch(console.warn);
+            if(res && res.tracks.length) await player.queue.add(res.tracks.slice(0, 5).map(track => { 
+                // transform the track plugininfo so you can figure out if the track is from autoplay or not. 
+                track.pluginInfo.clientData = { ...(track.pluginInfo.clientData||{}), fromAutoplay: true }; 
+                return track;
+            })); else console.log("Spotify - NOTHING GOT ADDED");
+        }
+        return;
+    }
+    if(lastPlayedTrack.info.sourceName === "youtube" || lastPlayedTrack.info.sourceName === "youtubemusic") {
+        const res = await player.search({
+            query:`https://www.youtube.com/watch?v=${lastPlayedTrack.info.identifier}&list=RD${lastPlayedTrack.info.identifier}`,
+            source: "youtube"
+        }, lastPlayedTrack.requester).then(response => {
+            response.tracks = response.tracks.filter(v => v.info.identifier !== lastPlayedTrack.info.identifier); // remove the lastPlayed track if it's in there..
+            return response;
+        }).catch(console.warn);
+        if(res && res.tracks.length) await player.queue.add(res.tracks.slice(0, 5).map(track => { 
+            // transform the track plugininfo so you can figure out if the track is from autoplay or not. 
+            track.pluginInfo.clientData = { ...(track.pluginInfo.clientData||{}), fromAutoplay: true }; 
+            return track;
+        })); else console.log("YT - NOTHING GOT ADDED");
+        return;
+    }
+    return
+}
+```
+
+Custom requestTransformer Function, which allows you to provide just a User Object into the "requester" parameter(s) and then transform it to save memory!\
+Attention: This function might get executed on already transformed requesters, if you re-use it.
+
+```typescript
+export const requesterTransformer = (requester:any):CustomRequester => {
+    // if it's already the transformed requester
+    if(typeof requester === "object" && "avatar" in requester && Object.keys(requester).length === 3) return requester as CustomRequester; 
+    // if it's still a discord.js User
+    if(typeof requester === "object" && "displayAvatarURL" in requester) { // it's a user
+        return {
+            id: requester.id,
+            username: requester.username,
+            avatar: requester.displayAvatarURL(),
+        }
+    }
+    // if it's non of the above
+    return { id: requester!.toString(), username: "unknown" }; // reteurn something that makes sense for you!
+}
+
+export interface CustomRequester {
+    id: string,
+    username: string,
+    avatar?: string,
+}
+```
+
+Finally, initatlize the Manager and send Raw Data!
+
+```typescript
+client.on("ready", async () => {
+  await client.lavalink.init({
+    id: client.user.id,
+    username: client.user.username
+  });
+});
+
+client.on("raw", data => client.lavalink.sendRawData(data));
+```
+
+</details>
+
 ### <mark style="color:red;">Overview</mark>
-
-
 
 | Properties                     | Methods                                                                                                                                   | Event-Listeners                           |
 | ------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------- |
@@ -39,6 +306,8 @@ const { LavalinkManager } = require("lavalink-client");
 |                                |                                                                                                                                           | [playerSocketClose](./#playersocketclose) |
 |                                |                                                                                                                                           | [playerDestroy](./#playerdestroy)         |
 |                                |                                                                                                                                           | [playerUpdate](./#playerupdate)           |
+
+***
 
 ### <mark style="color:blue;">Properties</mark>
 
