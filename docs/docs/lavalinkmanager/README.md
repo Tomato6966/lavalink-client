@@ -336,7 +336,7 @@ client.on("raw", data => client.lavalink.sendRawData(data));
 
 > _All the Players of the Manager_
 
-**Type**_:_ [_MiniMap_](../managerutils/minimap.md)_\<guildId:_[_string_](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global\_Objects/String)_,_ [_Player_](../player/)_>_
+**Type**_:_ [_MiniMap_](managerutils/minimap.md)_\<guildId:_[_string_](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global\_Objects/String)_,_ [_Player_](../player/)_>_
 
 #### <mark style="color:blue;">.nodeManager</mark>
 
@@ -348,7 +348,7 @@ client.on("raw", data => client.lavalink.sendRawData(data));
 
 > _The Manager's Utils_
 
-**Type**_:_ [_ManagerUtils_](../managerutils/)
+**Type**_:_ [_ManagerUtils_](managerutils/)
 
 ***
 
@@ -410,7 +410,7 @@ Important Conditions to check:
 
 #### <mark style="color:purple;">.deletePlayer(guildId:</mark>[string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global\_Objects/String)<mark style="color:purple;">)</mark>
 
-> _Removes a Player from the saved_ [_MiniMap_](../managerutils/minimap.md)_, needs to be destroyed first_
+> _Removes a Player from the saved_ [_MiniMap_](managerutils/minimap.md)_, needs to be destroyed first_
 
 **Returns**: [Boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global\_Objects/Boolean)
 
