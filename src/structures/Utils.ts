@@ -13,18 +13,24 @@ export const NodeSymbol = Symbol("LC-Node");
 /** @hidden */
 const escapeRegExp = (str: string): string => str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
-export type LavalinkSearchPlatform = "ytsearch" | 
-  "ytmsearch" | 
-  "scsearch" | 
+export type LavaSrcSearchPlatformBase = 
   "spsearch" | 
   "sprec" | 
   "amsearch" | 
   "dzsearch" | 
   "dzisrc" | 
-  "ymsearch" | 
+  "ymsearch";
+export type LavaSrcSearchPlatform = LavaSrcSearchPlatformBase | "ftts"; 
+
+export type DuncteSearchPlatform = 
   "speak" | 
-  "tts" | 
-  "ftts";
+  "tts";
+
+export type LavalinkSearchPlatform = "ytsearch" | 
+  "ytmsearch" | 
+  "scsearch" |  
+  LavaSrcSearchPlatform | 
+  DuncteSearchPlatform;
 
 export type ClientSearchPlatform =
   "youtube" | "yt" | 
@@ -76,6 +82,8 @@ export type SourcesRegex = "YoutubeRegex" |
 export interface PlaylistInfo {
   /** The playlist title. */
   title: string;
+  /** The playlist name (if provided instead of title) */
+  name: string; 
   /** The Playlist Author */
   author?: string;
   /** The Playlist Thumbnail */
@@ -224,7 +232,7 @@ export class ManagerUitls {
     return unresolvedTrack as UnresolvedTrack;
   }
 
-  validatedQuery(queryString: string, node: LavalinkNode): void {
+  validatedQueryString(node: LavalinkNode, queryString: string): void {
     if (!node.info) throw new Error("No Lavalink Node was provided");
     if (!node.info.sourceManagers?.length) throw new Error("Lavalink Node, has no sourceManagers enabled");
 
@@ -265,12 +273,13 @@ export class ManagerUitls {
     if (SourceLinksRegexes.musicYandex.test(queryString) && !node.info.sourceManagers.includes("yandexmusic")) {
       throw new Error("Lavalink Node has not 'yandexmusic' enabled");
     }
+    return;
+  }
+  validateSourceString(node: LavalinkNode, sourceString:SearchPlatform) {
+    if (!sourceString) throw new Error(`No SourceString was provided`);
+    const source = DefaultSources[sourceString.toLowerCase()] as LavalinkSearchPlatform || Object.values(DefaultSources).find(v => v.toLowerCase() === sourceString?.toLowerCase());
 
-    const hasSource = queryString.split(":")[0];
-    if (queryString.split(" ").length <= 1 || !queryString.split(" ")[0].includes(":")) return;
-    const source = DefaultSources[hasSource] as LavalinkSearchPlatform;
-
-    if (!source) throw new Error(`Lavalink Node SearchQuerySource: '${hasSource}' is not available`);
+    if (!source) throw new Error(`Lavalink Node SearchQuerySource: '${sourceString}' is not available`);
 
     if (source === "amsearch" && !node.info.sourceManagers.includes("applemusic")) {
       throw new Error("Lavalink Node has not 'applemusic' enabled, which is required to have 'amsearch' work");
@@ -310,7 +319,7 @@ export class ManagerUitls {
       throw new Error("Lavalink Node has not 'youtube' enabled, which is required to have 'ytsearch' work");
     }
     return;
-  }
+  } 
 }
 /**
  * @internal
@@ -675,4 +684,30 @@ async function getClosestTrack(data:UnresolvedTrack, player:Player, utils: Manag
     // apply unresolved data and return the track
     return applyUnresolvedData(trackToUse || res.tracks[0], data, utils);
   });
+}
+
+export type LavaSearchType = "track" | "album" | "artist" | "playlist" | "text" | "tracks" | "albums" | "artists" | "playlists" | "texts";
+
+export interface LavaSearchFilteredResponse {
+  info: PlaylistInfo,
+  pluginInfo: PluginInfo,
+  tracks: Track[]
+}
+
+export interface LavaSearchResponse {
+  /** An array of tracks, only present if track is in types */
+  tracks: Track[],
+  /** An array of albums, only present if album is in types */
+  albums: LavaSearchFilteredResponse[],
+  /** 	An array of artists, only present if artist is in types */
+  artists: LavaSearchFilteredResponse[],
+  /** 	An array of playlists, only present if playlist is in types */
+  playlists: LavaSearchFilteredResponse[],
+  /** An array of text results, only present if text is in types */
+  texts: {
+    text: string,
+    pluginInfo: PluginInfo
+  }[],
+  /** Addition result data provided by plugins */
+  pluginInfo: PluginInfo
 }

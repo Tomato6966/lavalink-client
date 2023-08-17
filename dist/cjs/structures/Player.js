@@ -123,7 +123,9 @@ class Player {
             clearTimeout(this.get("internal_queueempty"));
             this.set("internal_queueempty", undefined);
         }
-        if (options?.track && this.LavalinkManager.utils.isTrack(options?.track)) {
+        if (options?.track && (this.LavalinkManager.utils.isTrack(options?.track) || this.LavalinkManager.utils.isUnresolvedTrack(options.track))) {
+            if (this.LavalinkManager.utils.isUnresolvedTrack(options.track))
+                await options.track.resolve(this);
             await this.queue.add(options?.track, 0);
             await (0, Utils_1.queueTrackEnd)(this);
         }
@@ -131,13 +133,17 @@ class Player {
             await (0, Utils_1.queueTrackEnd)(this);
         // @ts-ignore
         if (this.queue.current && this.LavalinkManager.utils.isUnresolvedTrack(this.queue.current)) {
-            try {
-                this.queue.current = await this.LavalinkManager.utils.getClosestTrack({ ...(this.queue.current || {}) }, this);
+            try { // @ts-ignore
+                this.queue.current = await this.queue.current.resolve(this);
             }
             catch (error) {
                 this.LavalinkManager.emit("trackError", this, this.queue.current, error);
+                if (options && "track" in options)
+                    delete options.track;
+                if (options && "encodedTrack" in options)
+                    delete options.encodedTrack;
                 if (this.queue.tracks[0])
-                    return this.play();
+                    return this.play(options);
                 return;
             }
         }
@@ -202,6 +208,37 @@ class Player {
         this.ping.lavalink = Math.round((performance.now() - now) / 10) / 100;
         return;
     }
+    async lavaSearch(query, requestUser) {
+        // transform the query object
+        const Query = {
+            query: typeof query === "string" ? query : query.query,
+            types: query.types ? ["track", "playlist", "artist", "album", "text"].filter(v => query.types?.find(x => x.toLowerCase().startsWith(v))) : ["track", "playlist", "artist", "album", "text"],
+            source: LavalinkManagerStatics_1.DefaultSources[(typeof query === "string" ? undefined : query.source?.trim?.()?.toLowerCase?.()) ?? this.LavalinkManager.options.playerOptions.defaultSearchPlatform.toLowerCase()] ?? (typeof query === "string" ? undefined : query.source?.trim?.()?.toLowerCase?.()) ?? this.LavalinkManager.options.playerOptions.defaultSearchPlatform
+        };
+        // if user does player.search("ytsearch:Hello")
+        const foundSource = [...Object.keys(LavalinkManagerStatics_1.DefaultSources)].find(source => Query.query.toLowerCase().startsWith(`${source}:`.toLowerCase()))?.trim?.()?.toLowerCase?.();
+        if (foundSource && LavalinkManagerStatics_1.DefaultSources[foundSource]) {
+            Query.source = LavalinkManagerStatics_1.DefaultSources[foundSource]; // set the source to ytsearch:
+            Query.query = Query.query.slice(`${foundSource}:`.length, Query.query.length); // remove ytsearch: from the query
+        }
+        if (Query.source)
+            this.LavalinkManager.utils.validateSourceString(this.node, Query.source);
+        if (!["spsearch", "sprec", "amsearch", "dzsearch", "dzisrc", "ytmsearch", "ytsearch"].includes(Query.source))
+            throw new SyntaxError(`Query.source must be a source from LavaSrc: "spsearch" | "sprec" | "amsearch" | "dzsearch" | "dzisrc" | "ytmsearch" | "ytsearch"`);
+        if (/^https?:\/\//.test(Query.query))
+            return await this.search({ query: Query.query, source: Query.source }, requestUser);
+        if (!this.node.info.plugins.find(v => v.name === "lavasearch-plugin"))
+            throw new RangeError(`there is no lavasearch-plugin available in the lavalink node: ${this.node.id}`);
+        const res = await this.node.request(`/loadsearch?query=${Query.source ? `${Query.source}:` : ""}${encodeURIComponent(Query.query)}${Query.types?.length ? `&types=${Query.types.join(",")}` : ""}`);
+        return {
+            tracks: res.tracks?.map(v => this.LavalinkManager.utils.buildTrack(v, requestUser)) || [],
+            albums: res.albums?.map(v => ({ info: v.info, pluginInfo: v?.plugin || v.pluginInfo, tracks: v.tracks.map(v => this.LavalinkManager.utils.buildTrack(v, requestUser)) })) || [],
+            artists: res.artists?.map(v => ({ info: v.info, pluginInfo: v?.plugin || v.pluginInfo, tracks: v.tracks.map(v => this.LavalinkManager.utils.buildTrack(v, requestUser)) })) || [],
+            playlists: res.playlists?.map(v => ({ info: v.info, pluginInfo: v?.plugin || v.pluginInfo, tracks: v.tracks.map(v => this.LavalinkManager.utils.buildTrack(v, requestUser)) })) || [],
+            texts: res.texts?.map(v => ({ text: v.text, pluginInfo: v?.plugin || v.pluginInfo })) || [],
+            pluginInfo: res.pluginInfo || res?.plugin
+        };
+    }
     /**
      *
      * @param query Query for your data
@@ -211,14 +248,18 @@ class Player {
         // transform the query object
         const Query = {
             query: typeof query === "string" ? query : query.query,
-            source: LavalinkManagerStatics_1.DefaultSources[(typeof query === "string" ? undefined : query.source) ?? this.LavalinkManager.options.playerOptions.defaultSearchPlatform] ?? (typeof query === "string" ? undefined : query.source) ?? this.LavalinkManager.options.playerOptions.defaultSearchPlatform
+            source: LavalinkManagerStatics_1.DefaultSources[(typeof query === "string" ? undefined : query.source?.trim?.()?.toLowerCase?.()) ?? this.LavalinkManager.options.playerOptions.defaultSearchPlatform.toLowerCase()] ?? (typeof query === "string" ? undefined : query.source?.trim?.()?.toLowerCase?.()) ?? this.LavalinkManager.options.playerOptions.defaultSearchPlatform
         };
         // if user does player.search("ytsearch:Hello")
-        const foundSource = [...Object.keys(LavalinkManagerStatics_1.DefaultSources)].find(source => Query.query.startsWith(`${source}:`));
+        const foundSource = [...Object.keys(LavalinkManagerStatics_1.DefaultSources)].find(source => Query.query?.toLowerCase?.()?.startsWith(`${source}:`.toLowerCase()))?.trim?.()?.toLowerCase?.();
         if (foundSource && LavalinkManagerStatics_1.DefaultSources[foundSource]) {
             Query.source = LavalinkManagerStatics_1.DefaultSources[foundSource]; // set the source to ytsearch:
-            Query.query = Query.query.replace(`${foundSource}:`, ""); // remove ytsearch: from the query
+            Query.query = Query.query.slice(`${foundSource}:`.length, Query.query.length); // remove ytsearch: from the query
         }
+        if (/^https?:\/\//.test(Query.query))
+            this.LavalinkManager.utils.validatedQueryString(this.node, Query.source);
+        else if (Query.source)
+            this.LavalinkManager.utils.validateSourceString(this.node, Query.source);
         // ftts query parameters: ?voice=Olivia&audio_format=ogg_opus&translate=False&silence=1000&speed=1.0 | example raw get query: https://api.flowery.pw/v1/tts?voice=Olivia&audio_format=ogg_opus&translate=False&silence=0&speed=1.0&text=Hello%20World
         // request the data 
         const res = await this.node.request(`/loadtracks?identifier=${!/^https?:\/\//.test(Query.query) ? `${Query.source}:${Query.source === "ftts" ? "//" : ""}` : ""}${encodeURIComponent(Query.query)}`);

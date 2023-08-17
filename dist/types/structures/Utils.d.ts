@@ -7,13 +7,18 @@ export declare const TrackSymbol: unique symbol;
 export declare const UnresolvedTrackSymbol: unique symbol;
 export declare const QueueSymbol: unique symbol;
 export declare const NodeSymbol: unique symbol;
-export type LavalinkSearchPlatform = "ytsearch" | "ytmsearch" | "scsearch" | "spsearch" | "sprec" | "amsearch" | "dzsearch" | "dzisrc" | "ymsearch" | "speak" | "tts" | "ftts";
+export type LavaSrcSearchPlatformBase = "spsearch" | "sprec" | "amsearch" | "dzsearch" | "dzisrc" | "ymsearch";
+export type LavaSrcSearchPlatform = LavaSrcSearchPlatformBase | "ftts";
+export type DuncteSearchPlatform = "speak" | "tts";
+export type LavalinkSearchPlatform = "ytsearch" | "ytmsearch" | "scsearch" | LavaSrcSearchPlatform | DuncteSearchPlatform;
 export type ClientSearchPlatform = "youtube" | "yt" | "youtube music" | "youtubemusic" | "ytm" | "soundcloud" | "sc" | "am" | "apple music" | "applemusic" | "apple" | "sp" | "spsuggestion" | "spotify" | "dz" | "deezer" | "yandex" | "yandex music" | "yandexmusic";
 export type SearchPlatform = LavalinkSearchPlatform | ClientSearchPlatform;
 export type SourcesRegex = "YoutubeRegex" | "YoutubeMusicRegex" | "SoundCloudRegex" | "SoundCloudMobileRegex" | "DeezerTrackRegex" | "DeezerArtistRegex" | "DeezerEpisodeRegex" | "DeezerMixesRegex" | "DeezerPageLinkRegex" | "DeezerPlaylistRegex" | "DeezerAlbumRegex" | "AllDeezerRegex" | "AllDeezerRegexWithoutPageLink" | "SpotifySongRegex" | "SpotifyPlaylistRegex" | "SpotifyArtistRegex" | "SpotifyEpisodeRegex" | "SpotifyShowRegex" | "SpotifyAlbumRegex" | "AllSpotifyRegex" | "mp3Url" | "m3uUrl" | "m3u8Url" | "mp4Url" | "m4aUrl" | "wavUrl" | "aacpUrl" | "tiktok" | "mixcloud" | "musicYandex" | "radiohost" | "bandcamp" | "appleMusic" | "TwitchTv" | "vimeo";
 export interface PlaylistInfo {
     /** The playlist title. */
     title: string;
+    /** The playlist name (if provided instead of title) */
+    name: string;
     /** The Playlist Author */
     author?: string;
     /** The Playlist Thumbnail */
@@ -72,7 +77,8 @@ export declare class ManagerUitls {
      * @param requester
      */
     buildUnresolvedTrack(query: UnresolvedQuery | UnresolvedTrack, requester: unknown): UnresolvedTrack;
-    validatedQuery(queryString: string, node: LavalinkNode): void;
+    validatedQueryString(node: LavalinkNode, queryString: string): void;
+    validateSourceString(node: LavalinkNode, sourceString: SearchPlatform): void;
 }
 /**
  * @internal
@@ -282,4 +288,27 @@ export interface NodeMessage extends NodeStats {
     guildId: string;
 }
 export declare function queueTrackEnd(player: Player): Promise<Track>;
+export type LavaSearchType = "track" | "album" | "artist" | "playlist" | "text" | "tracks" | "albums" | "artists" | "playlists" | "texts";
+export interface LavaSearchFilteredResponse {
+    info: PlaylistInfo;
+    pluginInfo: PluginInfo;
+    tracks: Track[];
+}
+export interface LavaSearchResponse {
+    /** An array of tracks, only present if track is in types */
+    tracks: Track[];
+    /** An array of albums, only present if album is in types */
+    albums: LavaSearchFilteredResponse[];
+    /** 	An array of artists, only present if artist is in types */
+    artists: LavaSearchFilteredResponse[];
+    /** 	An array of playlists, only present if playlist is in types */
+    playlists: LavaSearchFilteredResponse[];
+    /** An array of text results, only present if text is in types */
+    texts: {
+        text: string;
+        pluginInfo: PluginInfo;
+    }[];
+    /** Addition result data provided by plugins */
+    pluginInfo: PluginInfo;
+}
 export {};

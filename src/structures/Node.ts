@@ -207,6 +207,8 @@ export class LavalinkNode {
 
         if (options.method === "DELETE") return;
 
+        if(request.statusCode === 404) throw new Error(`Node Request resulted into an error, request-URL: ${url} | headers: ${JSON.stringify(request.headers)}`)
+       
         return parseAsText ? await request.body.text() : await request.body.json();
     }
 

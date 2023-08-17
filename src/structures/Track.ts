@@ -22,7 +22,21 @@ export interface TrackInfo {
 
 export interface PluginInfo {
     /** The Type provided by a plugin */
-    type?: string;
+    type?: "album" | "playlist" | "artist" | "recommendations" | string;
+    /** The Identifier provided by a plugin */
+    albumName?: string;
+    /** The url of the album art */
+    albumArtUrl?: string;
+    /** The url of the artist */
+    artistUrl?: string;
+    /** The url of the artist artwork */
+    artistArtworkUrl?: string;
+    /** The url of the preview */
+    previewUrl?: string;
+    /** Whether the track is a preview */
+    isPreview?: boolean;
+    /** The total number of tracks in the playlist */
+    totalTracks?: number;
     /** The Identifier provided by a plugin */
     identifier?: string;
     /** The ArtworkUrl provided by a plugin */

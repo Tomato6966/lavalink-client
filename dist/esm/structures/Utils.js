@@ -145,7 +145,7 @@ export class ManagerUitls {
         Object.defineProperty(unresolvedTrack, UnresolvedTrackSymbol, { configurable: true, value: true });
         return unresolvedTrack;
     }
-    validatedQuery(queryString, node) {
+    validatedQueryString(node, queryString) {
         if (!node.info)
             throw new Error("No Lavalink Node was provided");
         if (!node.info.sourceManagers?.length)
@@ -187,12 +187,14 @@ export class ManagerUitls {
         if (SourceLinksRegexes.musicYandex.test(queryString) && !node.info.sourceManagers.includes("yandexmusic")) {
             throw new Error("Lavalink Node has not 'yandexmusic' enabled");
         }
-        const hasSource = queryString.split(":")[0];
-        if (queryString.split(" ").length <= 1 || !queryString.split(" ")[0].includes(":"))
-            return;
-        const source = DefaultSources[hasSource];
+        return;
+    }
+    validateSourceString(node, sourceString) {
+        if (!sourceString)
+            throw new Error(`No SourceString was provided`);
+        const source = DefaultSources[sourceString.toLowerCase()] || Object.values(DefaultSources).find(v => v.toLowerCase() === sourceString?.toLowerCase());
         if (!source)
-            throw new Error(`Lavalink Node SearchQuerySource: '${hasSource}' is not available`);
+            throw new Error(`Lavalink Node SearchQuerySource: '${sourceString}' is not available`);
         if (source === "amsearch" && !node.info.sourceManagers.includes("applemusic")) {
             throw new Error("Lavalink Node has not 'applemusic' enabled, which is required to have 'amsearch' work");
         }

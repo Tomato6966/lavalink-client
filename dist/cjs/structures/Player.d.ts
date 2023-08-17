@@ -2,8 +2,8 @@ import { EQBand, FilterData, FilterManager, LavalinkFilterData } from "./Filters
 import { LavalinkManager } from "./LavalinkManager";
 import { LavalinkNode } from "./Node";
 import { Queue } from "./Queue";
-import { Track } from "./Track";
-import { LavalinkPlayerVoiceOptions, SearchPlatform, SearchResult } from "./Utils";
+import { Track, UnresolvedTrack } from "./Track";
+import { LavalinkPlayerVoiceOptions, SearchPlatform, SearchResult, LavaSearchType, LavaSearchResponse, LavaSrcSearchPlatformBase } from "./Utils";
 type PlayerDestroyReasons = "QueueEmpty" | "NodeDestroy" | "NodeDeleted" | "LavalinkNoVoice" | "NodeReconnectFail" | "PlayerReconnectFail" | "Disconnected" | "ChannelDeleted";
 export type DestroyReasonsType = PlayerDestroyReasons | string;
 export declare const DestroyReasons: Record<PlayerDestroyReasons, PlayerDestroyReasons>;
@@ -43,7 +43,7 @@ export interface PlayerOptions {
 }
 export interface PlayOptions {
     /** Which Track to play | don't provide, if it should pick from the Queue */
-    track?: Track;
+    track?: Track | UnresolvedTrack;
     /** Encoded Track to use, instead of the queue system... */
     encodedTrack?: string | null;
     /** Encoded Track to use&search, instead of the queue system (yt only)... */
@@ -138,6 +138,11 @@ export declare class Player {
      * @param ignoreVolumeDecrementer If it should ignore the volumedecrementer option
      */
     setVolume(volume: number, ignoreVolumeDecrementer?: boolean): Promise<void>;
+    lavaSearch(query: {
+        query: string;
+        source: LavaSrcSearchPlatformBase;
+        types?: LavaSearchType[];
+    }, requestUser: unknown): Promise<SearchResult | LavaSearchResponse>;
     /**
      *
      * @param query Query for your data
