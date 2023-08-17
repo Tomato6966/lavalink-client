@@ -1,4 +1,4 @@
-import { FilterManager, LavalinkFilterData } from "./Filters";
+import { EQBand, FilterData, FilterManager, LavalinkFilterData } from "./Filters";
 import { LavalinkManager } from "./LavalinkManager";
 import { DefaultSources } from "./LavalinkManagerStatics";
 import { LavalinkNode } from "./Node";
@@ -18,6 +18,28 @@ export const DestroyReasons = {
     PlayerReconnectFail: "PlayerReconnectFail",
     ChannelDeleted: "ChannelDeleted"
 } as Record<PlayerDestroyReasons, PlayerDestroyReasons>
+
+export interface PlayerJson {
+    guildId: string;
+    options: PlayerOptions;
+    voiceChannelId: string;
+    textChannelId?: string;
+    position: number;
+    lastPosition: number;
+    volume: number;
+    lavalinkVolume: number;
+    repeatMode: RepeatMode;
+    paused: boolean;
+    playing: boolean;
+    createdTimeStamp?: number;
+    filters: FilterData;
+    ping: {
+        ws: number;
+        lavalink: number;
+    }
+    equalizer: EQBand[];
+    nodeId?: string;
+}
 
 export type RepeatMode = "queue" | "track" | "off";
 export interface PlayerOptions {
@@ -496,6 +518,7 @@ export class Player {
             filters: this.filterManager?.data || {},
             equalizer: this.filterManager?.equalizerBands || [],
             nodeId: this.node?.id,
-        }
+            ping: this.ping,
+        } as PlayerJson
     }
 }

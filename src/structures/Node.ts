@@ -3,7 +3,7 @@ import { Dispatcher, Pool } from "undici";
 import { NodeManager } from "./NodeManager";
 import internal from "stream";
 import { InvalidLavalinkRestRequest, LavalinkPlayer, PlayerEventType, PlayerEvents, PlayerUpdateInfo, RoutePlanner, TrackEndEvent, TrackExceptionEvent, TrackStartEvent, TrackStuckEvent, WebSocketClosedEvent, Session, queueTrackEnd, Base64 } from "./Utils";
-import { DestroyReasons, DestroyReasonsType, Player, PlayerOptions } from "./Player";
+import { DestroyReasons, DestroyReasonsType, Player } from "./Player";
 import { isAbsolute } from "path";
 import { TrackInfo, Track, LavalinkTrack } from "./Track";
 
@@ -482,7 +482,7 @@ export class LavalinkNode {
                 if (data.playerOptions.filters.echo) player.filterManager.data.echo = data.playerOptions.filters.echo;
                 if (data.playerOptions.filters.vibrato) player.filterManager.data.vibrato = data.playerOptions.filters.vibrato;
                 if (data.playerOptions.filters.volume) player.filterManager.data.volume = data.playerOptions.filters.volume;
-                if (data.playerOptions.filters.equalizer) player.filterManager.data.equalizer = data.playerOptions.filters.equalizer;
+                if (data.playerOptions.filters.equalizer) player.filterManager.equalizerBands = data.playerOptions.filters.equalizer;
                 if (data.playerOptions.filters.karaoke) player.filterManager.data.karaoke = data.playerOptions.filters.karaoke;
                 if (data.playerOptions.filters.lowPass) player.filterManager.data.lowPass = data.playerOptions.filters.lowPass;
                 if (data.playerOptions.filters.rotation) player.filterManager.data.rotation = data.playerOptions.filters.rotation;
@@ -569,6 +569,8 @@ export class LavalinkNode {
                 const player = this.NodeManager.LavalinkManager.getPlayer(payload.guildId);
                 if (!player) return;
 
+                const oldPlayer = player?.toJSON();
+
                 if (player.get("internal_updateInterval")) clearInterval(player.get("internal_updateInterval"));
                 // override the position
                 player.position = payload.state.position || 0;
@@ -604,7 +606,7 @@ export class LavalinkNode {
                     }
                 }
 
-                this.NodeManager.LavalinkManager.emit("playerUpdate", player);
+                this.NodeManager.LavalinkManager.emit("playerUpdate", oldPlayer, player);
                 break;
             case "event":
                 this.handleEvent(payload);
@@ -641,8 +643,7 @@ export class LavalinkNode {
     }
 
     private async trackEnd(player: Player, track: Track, payload: TrackEndEvent) {
-        console.log(payload.reason);
-
+       
         // If there are no songs in the queue
         if (!player.queue.tracks.length && player.repeatMode === "off") return this.queueEnd(player, track, payload);
         // If a track was forcibly played
@@ -675,7 +676,10 @@ export class LavalinkNode {
         if(typeof this.NodeManager.LavalinkManager.options?.playerOptions?.onEmptyQueue?.autoPlayFunction === "function") {
             await this.NodeManager.LavalinkManager.options?.playerOptions?.onEmptyQueue?.autoPlayFunction(player, track);
             if(player.queue.tracks.length > 0) await queueTrackEnd(player);
-            if(player.queue.current) return player.play({ noReplace: true, paused: false });
+            if(player.queue.current) {
+                if(payload.type === "TrackEndEvent") this.NodeManager.LavalinkManager.emit("trackEnd", player, track, payload);
+                return player.play({ noReplace: true, paused: false });
+            }
         }
 
         player.queue.previous.unshift(track);

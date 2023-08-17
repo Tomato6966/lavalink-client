@@ -1,5 +1,5 @@
 import { Track, UnresolvedTrack } from "./Track";
-import { ManagerUitls, QueueSymbol } from "./Utils";
+import { ManagerUitls, MiniMap, QueueSymbol } from "./Utils";
 
 export interface StoredQueue {
   current: Track | null;
@@ -7,36 +7,38 @@ export interface StoredQueue {
   tracks: Track[];
 }
 
-export interface StoreManager extends Record<any, any> {
+export interface QueueStoreManager extends Record<string, any>{
   /** @async get a Value (MUST RETURN UNPARSED!) */
   get: (guildId: unknown) => Promise<any>;
   /** @async Set a value inside a guildId (MUST BE UNPARSED) */
   set: (guildId: unknown, value: unknown) => Promise<any>;
   /** @async Delete a Database Value based of it's guildId */
   delete: (guildId: unknown) => Promise<any>;
-  /** @async Transform the value(s) inside of the StoreManager (IF YOU DON'T NEED PARSING/STRINGIFY, then just return the value) */
+  /** @async Transform the value(s) inside of the QueueStoreManager (IF YOU DON'T NEED PARSING/STRINGIFY, then just return the value) */
   stringify: (value: unknown) => Promise<any>;
   /** @async Parse the saved value back to the Queue (IF YOU DON'T NEED PARSING/STRINGIFY, then just return the value) */
   parse: (value: unknown) => Promise<Partial<StoredQueue>>;
 }
-export interface QueueSaverOptions {
-  maxPreviousTracks: number;
-  queueStore?: StoreManager;
+export interface ManagerQueueOptions {
+  maxPreviousTracks?: number;
+  queueStore?: QueueStoreManager;
   queueChangesWatcher?: QueueChangesWatcher;
 }
 export interface QueueSaver {
   /** @private */
-  _: StoreManager;
+  _: QueueStoreManager;
   /** @private */
-  options: QueueSaverOptions;
+  options: {
+    maxPreviousTracks: number
+  };
 }
 
 
 export class QueueSaver {
-  constructor(options: QueueSaverOptions) {
-    this._ = options.queueStore || new DefaultQueueStore();
+  constructor(options: ManagerQueueOptions) {
+    this._ = options?.queueStore || new DefaultQueueStore();
     this.options = {
-      maxPreviousTracks: options.maxPreviousTracks
+      maxPreviousTracks: options?.maxPreviousTracks || 25,
     };
   }
   async get(guildId: string) {
@@ -53,11 +55,9 @@ export class QueueSaver {
   }
 }
 
-export class DefaultQueueStore {
-  private data = new Map();
-  constructor() {
-
-  }
+export class DefaultQueueStore implements QueueStoreManager {
+  private data = new MiniMap();
+  constructor() {}
   async get(guildId) {
     return await this.data.get(guildId);
   }
@@ -75,18 +75,13 @@ export class DefaultQueueStore {
   }
 }
 
-export class QueueChangesWatcher {
-  constructor() {
-  }
-  tracksAdd(guildId:string, tracks: (Track | UnresolvedTrack)[], position: number, oldStoredQueue:StoredQueue, newStoredQueue: StoredQueue) {
-    return;
-  }
-  tracksRemoved(guildId:string, tracks: (Track | UnresolvedTrack)[], position: number, oldStoredQueue:StoredQueue, newStoredQueue: StoredQueue) {
-    return;
-  }
-  shuffled(guildId:string, oldStoredQueue:StoredQueue, newStoredQueue: StoredQueue) {
-    return;
-  }
+export interface QueueChangesWatcher {
+    /** get a Value (MUST RETURN UNPARSED!) */
+    tracksAdd: (guildId:string, tracks: (Track | UnresolvedTrack)[], position: number, oldStoredQueue:StoredQueue, newStoredQueue: StoredQueue) => any;
+    /** Set a value inside a guildId (MUST BE UNPARSED) */
+    tracksRemoved: (guildId:string, tracks: (Track | UnresolvedTrack)[], position: number, oldStoredQueue:StoredQueue, newStoredQueue: StoredQueue) => any;
+    /** Set a value inside a guildId (MUST BE UNPARSED) */
+    shuffled: (guildId:string, oldStoredQueue:StoredQueue, newStoredQueue: StoredQueue) => any;
 }
 
 export class Queue {
@@ -98,7 +93,7 @@ export class Queue {
   private readonly QueueSaver: QueueSaver | null = null;
   private managerUtils = new ManagerUitls();
   private queueChanges: QueueChangesWatcher | null;
-  constructor(guildId: string, data: Partial<StoredQueue> = {}, QueueSaver?: QueueSaver, queueOptions?: QueueSaverOptions) {
+  constructor(guildId: string, data: Partial<StoredQueue> = {}, QueueSaver?: QueueSaver, queueOptions?: ManagerQueueOptions) {
     this.queueChanges = queueOptions.queueChangesWatcher || null;
     this.guildId = guildId;
     this.QueueSaver = QueueSaver;
@@ -146,7 +141,7 @@ export class Queue {
 
     
     /**
-     * @returns {{current:Track|null, previous:Track[], tracks:Track[]}}The Queue, but in a raw State, which allows easier handling for the storeManager
+     * @returns {{current:Track|null, previous:Track[], tracks:Track[]}}The Queue, but in a raw State, which allows easier handling for the QueueStoreManager
      */
     toJSON: () => {
       if (this.previous.length > this.options.maxPreviousTracks) this.previous.splice(this.options.maxPreviousTracks, this.previous.length);

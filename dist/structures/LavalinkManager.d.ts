@@ -1,7 +1,7 @@
 /// <reference types="node" />
 import { EventEmitter } from "node:events";
 import { NodeManager } from "./NodeManager";
-import { QueueSaverOptions, StoreManager } from "./Queue";
+import { ManagerQueueOptions, QueueStoreManager } from "./Queue";
 import { PlayerManager } from "./PlayerManager";
 import { GuildShardPayload, ManagerUitls, SearchPlatform } from "./Utils";
 import { LavalinkNodeOptions } from "./Node";
@@ -15,7 +15,7 @@ export interface BotClientOptions {
     id: string;
     username: string;
 }
-export interface LavalinkPlayerOptions {
+export interface ManagerPlayerOptions {
     volumeDecrementer?: number;
     clientBasedPositionUpdateInterval?: number;
     defaultSearchPlatform?: SearchPlatform;
@@ -23,10 +23,10 @@ export interface LavalinkPlayerOptions {
 }
 export interface ManagerOptions {
     nodes: LavalinkNodeOptions[];
-    queueStore?: StoreManager;
-    queueOptions?: QueueSaverOptions;
+    queueStore?: QueueStoreManager;
+    queueOptions?: ManagerQueueOptions;
     client?: BotClientOptions;
-    playerOptions?: LavalinkPlayerOptions;
+    playerOptions?: ManagerPlayerOptions;
     autoSkip?: boolean;
     /** @async */
     sendToShard: (guildId: string, payload: GuildShardPayload) => void;

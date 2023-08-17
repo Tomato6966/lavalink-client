@@ -1,10 +1,10 @@
 import { EventEmitter } from "events";
 import { NodeManager } from "./NodeManager";
-import { DefaultQueueStore, Queue, QueueChangesWatcher, QueueSaverOptions, StoreManager } from "./Queue";
-import { GuildShardPayload, LavalinkSearchPlatform, ManagerUitls, MiniMap, SearchPlatform, TrackEndEvent, TrackExceptionEvent, TrackStartEvent, TrackStuckEvent, VoicePacket, VoiceServer, VoiceState, WebSocketClosedEvent } from "./Utils";
+import { DefaultQueueStore, ManagerQueueOptions } from "./Queue";
+import { GuildShardPayload, ManagerUitls, MiniMap, SearchPlatform, TrackEndEvent, TrackExceptionEvent, TrackStartEvent, TrackStuckEvent, VoicePacket, VoiceServer, VoiceState, WebSocketClosedEvent } from "./Utils";
 import { LavalinkNodeOptions } from "./Node";
 import { DefaultSources, SourceLinksRegexes } from "./LavalinkManagerStatics";
-import { DestroyReasons, DestroyReasonsType, Player, PlayerOptions } from "./Player";
+import { DestroyReasons, DestroyReasonsType, Player, PlayerJson, PlayerOptions } from "./Player";
 import { Track, UnresolvedTrack } from "./Track";
 
 export interface LavalinkManager {
@@ -21,7 +21,7 @@ export interface BotClientOptions {
   [x: string | number | symbol | undefined]: any;
 }
 
-export interface LavalinkPlayerOptions {
+export interface ManagerPlayerOptions {
   /** If the Lavalink Volume should be decremented by x number */
   volumeDecrementer?: number;
   /** How often it should update the the player Position */
@@ -51,13 +51,18 @@ export interface LavalinkPlayerOptions {
 }
 
 export interface ManagerOptions {
+  /** The Node Options, for all Nodes! (on init) */
   nodes: LavalinkNodeOptions[];
-  queueOptions?: QueueSaverOptions;
-  client?: BotClientOptions;
-  playerOptions?: LavalinkPlayerOptions;
-  autoSkip?: boolean;
-  /** @async */
+  /** @async The Function to send the voice connection changes from Lavalink to Discord */
   sendToShard: (guildId:string, payload:GuildShardPayload) => void;
+  /** The Bot Client's Data for Authorization */
+  client?: BotClientOptions;
+  /** QueueOptions for all Queues */
+  queueOptions?: ManagerQueueOptions;
+  /** PlayerOptions for all Players */
+  playerOptions?: ManagerPlayerOptions;
+  /** If it should skip to the next Track on TrackEnd / TrackError etc. events */
+  autoSkip?: boolean;
 }
 
 interface LavalinkManagerEvents {
@@ -116,7 +121,7 @@ interface LavalinkManagerEvents {
      * Always emits when the player (on lavalink side) got updated
      * @event Manager#playerUpdate
      */
-    "playerUpdate": (player:Player) => void;
+    "playerUpdate": (oldPlayerJson: PlayerJson, newPlayer:Player) => void;
 }
 
 export interface LavalinkManager {
@@ -198,7 +203,7 @@ export class LavalinkManager extends EventEmitter {
     if(options.queueOptions?.queueChangesWatcher) {
       const keys = Object.getOwnPropertyNames(Object.getPrototypeOf(options.queueOptions?.queueChangesWatcher));
       const requiredKeys = ["tracksAdd", "tracksRemoved", "shuffled"];
-      if(!requiredKeys.every(v => keys.includes(v)) || !requiredKeys.every(v => typeof options.queueOptions?.queueChangesWatcher[v] === "function")) throw new SyntaxError(`The provided ManagerOption.QueueChangesWatcher, does not have all required functions: ${requiredKeys.join(", ")}`);
+      if(!requiredKeys.every(v => keys.includes(v)) || !requiredKeys.every(v => typeof options.queueOptions?.queueChangesWatcher[v] === "function")) throw new SyntaxError(`The provided ManagerOption.DefaultQueueChangesWatcher, does not have all required functions: ${requiredKeys.join(", ")}`);
     }
   }
 

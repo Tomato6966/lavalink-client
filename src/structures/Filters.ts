@@ -23,7 +23,7 @@ export class FilterManager {
         lowPass: false,
         audioOutput: "stereo",
     }
-    public data: LavalinkFilterData = {
+    public data: FilterData = {
         lowPass: {
             smoothing: 0
         },
@@ -571,18 +571,19 @@ export interface ReverbFilter {
     delay: number
     decay: number
 }
-export interface LavalinkFilterData {
+export interface FilterData {
     volume?: number;
-    equalizer?: EQBand[];
     karaoke?: KaraokeFilter;
     timescale?: TimescaleFilter;
     tremolo?: FreqFilter;
     vibrato?: FreqFilter;
     rotation?: RotationFilter;
-    // rotating: RotationFilter
     distortion?: DistortionFilter;
     channelMix?: ChannelMixFilter;
     lowPass?: LowPassFilter;
     echo: EchoFilter,
     reverb: ReverbFilter,
+}
+export interface LavalinkFilterData extends FilterData {
+    equalizer?: EQBand[];
 }

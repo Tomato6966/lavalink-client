@@ -31,7 +31,7 @@ export const autoPlayFunction = async (player, lastPlayedTrack) => {
                 // transform the track plugininfo so you can figure out if the track is from autoplay or not. 
                 track.pluginInfo.clientData = { ...(track.pluginInfo.clientData||{}), fromAutoplay: true }; 
                 return track;
-            })); else console.log("Spotify - NOTHING GOT ADDED");
+            })); 
         }
         return;
     }
@@ -40,7 +40,6 @@ export const autoPlayFunction = async (player, lastPlayedTrack) => {
             query:`https://www.youtube.com/watch?v=${lastPlayedTrack.info.identifier}&list=RD${lastPlayedTrack.info.identifier}`,
             source: "youtube"
         }, lastPlayedTrack.requester).then(response => {
-            console.log(response);
             response.tracks = response.tracks.filter(v => v.info.identifier !== lastPlayedTrack.info.identifier); // remove the lastPlayed track if it's in there..
             return response;
         }).catch(console.warn);
@@ -48,7 +47,7 @@ export const autoPlayFunction = async (player, lastPlayedTrack) => {
             // transform the track plugininfo so you can figure out if the track is from autoplay or not. 
             track.pluginInfo.clientData = { ...(track.pluginInfo.clientData||{}), fromAutoplay: true }; 
             return track;
-        })); else console.log("YT - NOTHING GOT ADDED");
+        }));
         return;
     }
     return

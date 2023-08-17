@@ -1,7 +1,7 @@
 /// <reference types="node" />
 import { EventEmitter } from "events";
 import { NodeManager } from "./NodeManager";
-import { QueueSaverOptions } from "./Queue";
+import { ManagerQueueOptions } from "./Queue";
 import { GuildShardPayload, LavalinkSearchPlatform, ManagerUitls, MiniMap, SearchPlatform, TrackEndEvent, TrackExceptionEvent, TrackStartEvent, TrackStuckEvent, VoicePacket, VoiceServer, VoiceState, WebSocketClosedEvent } from "./Utils";
 import { LavalinkNodeOptions } from "./Node";
 import { DestroyReasonsType, Player, PlayerOptions } from "./Player";
@@ -18,7 +18,7 @@ export interface BotClientOptions {
     /** So users can pass entire objects / classes */
     [x: string | number | symbol | undefined]: any;
 }
-export interface LavalinkPlayerOptions {
+export interface ManagerPlayerOptions {
     /** If the Lavalink Volume should be decremented by x number */
     volumeDecrementer?: number;
     /** How often it should update the the player Position */
@@ -45,9 +45,9 @@ export interface LavalinkPlayerOptions {
 }
 export interface ManagerOptions {
     nodes: LavalinkNodeOptions[];
-    queueOptions?: QueueSaverOptions;
+    queueOptions?: ManagerQueueOptions;
     client?: BotClientOptions;
-    playerOptions?: LavalinkPlayerOptions;
+    playerOptions?: ManagerPlayerOptions;
     autoSkip?: boolean;
     /** @async */
     sendToShard: (guildId: string, payload: GuildShardPayload) => void;

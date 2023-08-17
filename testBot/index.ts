@@ -45,7 +45,7 @@ client.lavalink = new LavalinkManager({
         applyVolumeAsFilter: false,
         clientBasedPositionUpdateInterval: 50,
         defaultSearchPlatform: "ytmsearch",
-        volumeDecrementer: 0.75,
+        volumeDecrementer: 0.75, // on client 100% == on lavalink 75%
         requesterTransformer: requesterTransformer,
         onDisconnect: {
             autoReconnect: true, // automatically attempts a reconnect, if the bot disconnects from the voice channel, if it fails, it get's destroyed

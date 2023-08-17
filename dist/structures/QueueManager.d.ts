@@ -17,29 +17,29 @@ export interface QueueManager {
     /** @private */
     LavalinkManager: LavalinkManager;
 }
-export interface StoreManager extends Record<any, any> {
+export interface QueueStoreManager extends Record<any, any> {
     /** @async get a Value */
     get: (key: unknown) => any;
     /** @async Set a value inside a key */
     set: (key: unknown, value: unknown) => any;
     /** @async Delete a Database Value based of it's key */
     delete: (key: unknown) => any;
-    /** @async Transform the value(s) inside of the StoreManager */
+    /** @async Transform the value(s) inside of the QueueStoreManager */
     stringify: (value: unknown) => any;
     /** @async Parse the saved value back to the Queue */
     parse: (value: unknown) => Queue;
 }
-export interface QueueSaverOptions {
+export interface ManagerQueueOptions {
     maxPreviousTracks: number;
 }
 export interface QueueSaver {
     /** @private */
-    _: StoreManager;
+    _: QueueStoreManager;
     /** @private */
-    options: QueueSaverOptions;
+    options: ManagerQueueOptions;
 }
 export declare class QueueSaver {
-    constructor(storeManager: StoreManager, options: QueueSaverOptions);
+    constructor(QueueStoreManager: QueueStoreManager, options: ManagerQueueOptions);
     get(key: string): Promise<Queue>;
     delete(key: string): Promise<any>;
     set(key: string, value: any): Promise<any>;
