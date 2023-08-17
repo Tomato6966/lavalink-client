@@ -13,7 +13,9 @@ export interface LavalinkManager {
 }
 
 export interface BotClientOptions {
+  /** Bot Client Id */
   id: string;
+  /** Bot Client Username */
   username?: string;
   /** So users can pass entire objects / classes */
   [x: string | number | symbol | undefined]: any;
@@ -29,21 +31,23 @@ export interface LavalinkPlayerOptions {
   /** Applies the volume via a filter, not via the lavalink volume transformer */
   applyVolumeAsFilter?:boolean;
   /** Transforms the saved data of a requested user */
-  requesterTransformer?: (requester:unknown) => unknown,
+  requesterTransformer?: (requester:unknown) => unknown;
   /** What lavalink-client should do when the player reconnects */
   onDisconnect?: {
     /** Try to reconnect? -> If fails -> Destroy */
-    autoReconnect?: boolean,
+    autoReconnect?: boolean;
     /** Instantly destroy player (overrides autoReconnect) */
-    destroyPlayer?: boolean,
-  },
+    destroyPlayer?: boolean;
+  };
   /* What the Player should do, when the queue gets empty */
   onEmptyQueue?: {
     /** Get's executed onEmptyQueue -> You can do any track queue previous transformations, if you add a track to the queue -> it will play it, if not queueEnd will execute! */
-    autoPlayFunction?: (player:Player, lastPlayedTrack:Track) => Promise<void>,
+    autoPlayFunction?: (player:Player, lastPlayedTrack:Track) => Promise<void>;
     /* aut. destroy the player after x ms, if 0 it instantly destroys, don't provide to not destroy the player */
-    destroyAfterMs?: number,
-  }
+    destroyAfterMs?: number;
+  };
+  /* If to override the data from the Unresolved Track. for unresolved tracks */
+  useUnresolvedData?: boolean;
 }
 
 export interface ManagerOptions {
