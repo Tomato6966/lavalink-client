@@ -5,7 +5,7 @@ import internal from "stream";
 import { InvalidLavalinkRestRequest, LavalinkPlayer, PlayerEventType, PlayerEvents, PlayerUpdateInfo, RoutePlanner, TrackEndEvent, TrackExceptionEvent, TrackStartEvent, TrackStuckEvent, WebSocketClosedEvent, Session, queueTrackEnd, Base64 } from "./Utils";
 import { DestroyReasons, DestroyReasonsType, Player, PlayerOptions } from "./Player";
 import { isAbsolute } from "path";
-import { TrackInfo, Track } from "./Track";
+import { TrackInfo, Track, LavalinkTrack } from "./Track";
 
 /** Modifies any outgoing REST requests. */
 export type ModifyRequest = (options: Dispatcher.RequestOptions) => void;
@@ -351,10 +351,10 @@ export class LavalinkNode {
          * @param encoded 
          * @returns 
          */
-        singleTrack: async (encoded: Base64) => {
+        singleTrack: async (encoded: Base64, requester:unknown) => {
             if(!encoded) throw new SyntaxError("No encoded (Base64 string) was provided");
-
-            return await this.request(`/decodetrack?encodedTrack=${encoded}`) as TrackInfo;
+            // return the decoded + builded track
+            return this.NodeManager.LavalinkManager.utils.buildTrack(await this.request(`/decodetrack?encodedTrack=${encoded}`) as LavalinkTrack, requester);
         },
 
         /**
@@ -362,14 +362,15 @@ export class LavalinkNode {
          * @param encodeds Decodes multiple tracks into their info
          * @returns 
          */
-        multipleTracks: async (encodeds: Base64[]) => {
+        multipleTracks: async (encodeds: Base64[], requester:unknown) => {
             if(!Array.isArray(encodeds) || !encodeds.every(v => typeof v === "string" && v.length > 1)) throw new SyntaxError("You need to provide encodeds, which is an array of base64 strings")
+            // return the decoded + builded tracks
             return await this.request(`/decodetracks`, r => {
                 r.method = "POST";
                 r.body = JSON.stringify(encodeds);
                 // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
                 r.headers!["Content-Type"] = "application/json";
-            }) as TrackInfo[];
+            }).then((r:TrackInfo[]) => r.map(track => this.NodeManager.LavalinkManager.utils.buildTrack(track, requester)));
         }
     }
 
