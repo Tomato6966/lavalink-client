@@ -10,6 +10,9 @@ export const UnresolvedTrackSymbol = Symbol("LC-Track-Unresolved");
 export const QueueSymbol = Symbol("LC-Queue");
 export const NodeSymbol = Symbol("LC-Node");
 
+/** @hidden */
+const escapeRegExp = (str: string): string => str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
 export type LavalinkSearchPlatform = "ytsearch" | "ytmsearch" | "scsearch" | "spsearch" | "sprec" | "amsearch" | "dzsearch" | "dzisrc" | "sprec" | "ymsearch" | "speak" | "tts" | "ftts";
 
 export type ClientSearchPlatform =
@@ -69,7 +72,7 @@ export class ManagerUitls {
           identifier: data.info?.identifier,
           title: data.info?.title,
           author: data.info?.author,
-          duration: data.info?.length,
+          duration: data.info?.length || data.info?.duration,
           artworkUrl: data.info?.artworkUrl || data.pluginInfo?.artworkUrl || data.plugin?.artworkUrl,
           uri: data.info?.uri,
           sourceName: data.info?.sourceName,
@@ -126,13 +129,17 @@ export class ManagerUitls {
    * @returns
    */
   isTrack(data: Track | any) {
-    return typeof data?.encoded === "string" && typeof data?.info === "object";
+    if(!data) return false;
+    if(data[TrackSymbol] === true) return true;
+    return typeof data?.encoded === "string" && typeof data?.info === "object" && !("resolve" in data);
   }
   /**
    * Checks if the provided argument is a valid UnresolvedTrack.
    * @param track
    */
   isUnresolvedTrack(data: UnresolvedTrack | any): boolean {
+    if(!data) return false;
+    if(data[UnresolvedTrackSymbol] === true) return true;
     return typeof data === "object" && "info" in data && typeof data.info.title === "string" && typeof data.resolve === "function";
   }
   /**
@@ -574,25 +581,53 @@ export async function queueTrackEnd(player: Player) {
   return player.queue.current;
 }
 
+async function applyUnresolvedData(resTrack: Track, data:UnresolvedTrack, utils: ManagerUitls) {
+  if(!resTrack?.info || !data?.info) return;
+  if(utils.manager.options.playerOptions?.useUnresolvedData === true) { // overwrite values
+    if(data.info.uri) resTrack.info.uri = data.info.uri;
+    if(data.info.artworkUrl?.length) resTrack.info.artworkUrl = data.info.artworkUrl;
+    if(data.info.title?.length) resTrack.info.title = data.info.title;
+    if(data.info.author?.length) resTrack.info.author = data.info.author;
+  } else { // only overwrite if undefined / invalid
+    if((resTrack.info.title == 'Unknown title' || resTrack.info.title == "Unspecified description") && resTrack.info.title != data.info.title) resTrack.info.title = data.info.title;
+    if(resTrack.info.author != data.info.author) resTrack.info.author = data.info.author;
+    if(resTrack.info.artworkUrl != data.info.artworkUrl) resTrack.info.artworkUrl = data.info.artworkUrl;
+  }
+  for (const key of Object.keys(data.info)) if (typeof resTrack.info[key] === "undefined" && key !== "resolve" && data.info[key]) resTrack.info[key] = data.info[key]; // add non-existing values
+  return resTrack;
+}
+
 async function getClosestTrack(data:UnresolvedTrack, player:Player, utils: ManagerUitls): Promise<Track|undefined> {
   if(!player || !player.node) throw new RangeError("No player with a lavalink node was provided");
   if(utils.isTrack(data)) return utils.buildTrack(data, data.requester);
   if(!utils.isUnresolvedTrack(data)) throw new RangeError("Track is not an unresolved Track");
   if(!data?.info?.title) throw new SyntaxError("the track title is required for unresolved tracks")
   if(!data.requester) throw new SyntaxError("The requester is required");
+  // try to decode the track, if possible
   if(typeof data.encoded === "string") {
-    const r = await player.node.decode.singleTrack(data.encoded);
-    if(r) return utils.buildTrack(r, data.requester);
+    const r = await player.node.decode.singleTrack(data.encoded, data.requester);
+    if(r) return applyUnresolvedData(r, data, utils);
   }
-  
+  // try to fetch the track via a uri if possible
   if(typeof data.info.uri === "string") {
     const r = await player.search({ query: data?.info?.uri }, data.requester).then(v => v.tracks[0]);
-    if(r) return r;
+    if(r) return applyUnresolvedData(r, data, utils);
   } 
-
+  // search the track as closely as possible
   const query = [data.info?.title, data.info?.author].filter(str => !!str).join(" by ");
   const sourceName = data.info?.sourceName;
+  
   return await player.search({
     query, source: sourceName !== "bandcamp" && sourceName !== "twitch" && sourceName !== "flowery-tts" ? sourceName : player.LavalinkManager.options?.playerOptions?.defaultSearchPlatform,
-  }, data.requester).then(v => v.tracks[0]);
+  }, data.requester).then(res => {
+    let trackToUse = null;
+    // try to find via author name
+    if(data.info.author && !trackToUse) trackToUse = res.tracks.find(track => [data.info.author, `${data.info.author} - Topic`].some(name => new RegExp(`^${escapeRegExp(name)}$`, "i").test(track.info.author)) || new RegExp(`^${escapeRegExp(data.info.title)}$`, "i").test(track.info.title));
+    // try to find via duration
+    if(data.info.duration && !trackToUse) trackToUse = res.tracks.find(track => (track.info.duration >= (data.info.duration - 1500)) && (track.info.duration <= (data.info.duration + 1500)));
+    // try to find via isrc
+    if(data.info.isrc && !trackToUse) trackToUse = res.tracks.find(track =>track.info.isrc === data.info.isrc);
+    // apply unresolved data and return the track
+    return applyUnresolvedData(trackToUse || res.tracks[0], data, utils);
+  });
 }
