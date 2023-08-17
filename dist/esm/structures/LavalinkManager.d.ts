@@ -11,7 +11,9 @@ export interface LavalinkManager {
     utils: ManagerUitls;
 }
 export interface BotClientOptions {
+    /** Bot Client Id */
     id: string;
+    /** Bot Client Username */
     username?: string;
     /** So users can pass entire objects / classes */
     [x: string | number | symbol | undefined]: any;
@@ -39,6 +41,7 @@ export interface LavalinkPlayerOptions {
         autoPlayFunction?: (player: Player, lastPlayedTrack: Track) => Promise<void>;
         destroyAfterMs?: number;
     };
+    useUnresolvedData?: boolean;
 }
 export interface ManagerOptions {
     nodes: LavalinkNodeOptions[];

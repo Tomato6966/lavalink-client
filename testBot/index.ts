@@ -54,10 +54,11 @@ client.lavalink = new LavalinkManager({
         onEmptyQueue: {
             destroyAfterMs: 30_000, // 0 === instantly destroy | don't provide the option, to don't destroy the player
             autoPlayFunction: autoPlayFunction,
-        }
+        },
+        useUnresolvedData: true
     },
     queueOptions: {
-        maxPreviousTracks: 0,
+        maxPreviousTracks: 10,
         queueStore: new myCustomStore(client.redis),
         queueChangesWatcher: new myCustomWatcher(client)
     },

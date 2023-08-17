@@ -227,25 +227,27 @@ class LavalinkNode {
          * @param encoded
          * @returns
          */
-        singleTrack: async (encoded) => {
+        singleTrack: async (encoded, requester) => {
             if (!encoded)
                 throw new SyntaxError("No encoded (Base64 string) was provided");
-            return await this.request(`/decodetrack?encodedTrack=${encoded}`);
+            // return the decoded + builded track
+            return this.NodeManager.LavalinkManager.utils.buildTrack(await this.request(`/decodetrack?encodedTrack=${encoded}`), requester);
         },
         /**
          *
          * @param encodeds Decodes multiple tracks into their info
          * @returns
          */
-        multipleTracks: async (encodeds) => {
+        multipleTracks: async (encodeds, requester) => {
             if (!Array.isArray(encodeds) || !encodeds.every(v => typeof v === "string" && v.length > 1))
                 throw new SyntaxError("You need to provide encodeds, which is an array of base64 strings");
+            // return the decoded + builded tracks
             return await this.request(`/decodetracks`, r => {
                 r.method = "POST";
                 r.body = JSON.stringify(encodeds);
                 // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
                 r.headers["Content-Type"] = "application/json";
-            });
+            }).then((r) => r.map(track => this.NodeManager.LavalinkManager.utils.buildTrack(track, requester)));
         }
     };
     /**

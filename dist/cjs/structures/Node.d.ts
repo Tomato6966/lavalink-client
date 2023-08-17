@@ -4,7 +4,7 @@ import { NodeManager } from "./NodeManager";
 import internal from "stream";
 import { InvalidLavalinkRestRequest, LavalinkPlayer, PlayerUpdateInfo, RoutePlanner, Session, Base64 } from "./Utils";
 import { DestroyReasonsType } from "./Player";
-import { TrackInfo } from "./Track";
+import { Track } from "./Track";
 /** Modifies any outgoing REST requests. */
 export type ModifyRequest = (options: Dispatcher.RequestOptions) => void;
 export interface LavalinkNodeOptions {
@@ -185,13 +185,13 @@ export declare class LavalinkNode {
          * @param encoded
          * @returns
          */
-        singleTrack: (encoded: Base64) => Promise<TrackInfo>;
+        singleTrack: (encoded: Base64, requester: unknown) => Promise<Track>;
         /**
          *
          * @param encodeds Decodes multiple tracks into their info
          * @returns
          */
-        multipleTracks: (encodeds: Base64[]) => Promise<TrackInfo[]>;
+        multipleTracks: (encodeds: Base64[], requester: unknown) => Promise<Track[]>;
     };
     /**
      * Request Lavalink statistics.
