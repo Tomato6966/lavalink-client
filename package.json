@@ -1,6 +1,6 @@
 {
   "name": "lavalink-client",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Easy and advanced lavalink client. Use it with lavalink plugins as well as latest lavalink versions",
   "main": "dist/cjs/index.js",
   "module": "dist/esm/index.js",
@@ -42,7 +42,7 @@
   "bugs": {
     "url": "https://github.com/tomato6966/lavalink-client/issues"
   },
-  "homepage": "https://github.com/tomato6966/lavalink-client#readme",
+  "homepage": "https://lc4.gitbook.io/lavalink-client/",
   "devDependencies": {
     "@types/node": "^20.4.8",
     "@types/ws": "^8.5.5",
