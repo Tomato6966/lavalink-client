@@ -193,7 +193,7 @@ export class ManagerUitls {
   isUnresolvedTrack(data: UnresolvedTrack | any): boolean {
     if(!data) return false;
     if(data[UnresolvedTrackSymbol] === true) return true;
-    return typeof data === "object" && "info" in data && typeof data.info.title === "string" && typeof data.resolve === "function";
+    return typeof data === "object" && (("info" in data && typeof data.info.title === "string") || typeof data.encoded === "string") && typeof data.resolve === "function";
   }
   /**
    * Checks if the provided argument is a valid UnresolvedTrack.
@@ -218,7 +218,7 @@ export class ManagerUitls {
 
     const unresolvedTrack:UnresolvedTrack = { 
       encoded: query.encoded || undefined,
-      info: (query as UnresolvedTrack).info ?? (query as UnresolvedTrackInfo),
+      info: (query as UnresolvedTrack).info ? (query as UnresolvedTrack).info : (query as UnresolvedQuery).title ? query as UnresolvedQuery : undefined,
       requester: typeof this.manager.options?.playerOptions?.requesterTransformer === "function" ? this.manager.options?.playerOptions?.requesterTransformer(((query as UnresolvedTrack)?.requester || requester)) : requester,
       async resolve(player:Player) {
           const closest = await getClosestTrack(this, player, player.LavalinkManager.utils);
@@ -228,6 +228,9 @@ export class ManagerUitls {
           return;
       }
     }
+    
+    if(!this.isUnresolvedTrack(unresolvedTrack)) throw SyntaxError("Could not build Unresolved Track");
+
     Object.defineProperty(unresolvedTrack, UnresolvedTrackSymbol, { configurable: true, value: true });
     return unresolvedTrack as UnresolvedTrack;
   }
@@ -655,7 +658,7 @@ async function getClosestTrack(data:UnresolvedTrack, player:Player, utils: Manag
   if(!player || !player.node) throw new RangeError("No player with a lavalink node was provided");
   if(utils.isTrack(data)) return utils.buildTrack(data, data.requester);
   if(!utils.isUnresolvedTrack(data)) throw new RangeError("Track is not an unresolved Track");
-  if(!data?.info?.title) throw new SyntaxError("the track title is required for unresolved tracks")
+  if(!data?.info?.title && typeof data.encoded !== "string" && !data.info.uri) throw new SyntaxError("the track uri / title / encoded Base64 string is required for unresolved tracks")
   if(!data.requester) throw new SyntaxError("The requester is required");
   // try to decode the track, if possible
   if(typeof data.encoded === "string") {

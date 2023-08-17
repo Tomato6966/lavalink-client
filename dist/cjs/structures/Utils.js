@@ -112,7 +112,7 @@ class ManagerUitls {
             return false;
         if (data[exports.UnresolvedTrackSymbol] === true)
             return true;
-        return typeof data === "object" && "info" in data && typeof data.info.title === "string" && typeof data.resolve === "function";
+        return typeof data === "object" && (("info" in data && typeof data.info.title === "string") || typeof data.encoded === "string") && typeof data.resolve === "function";
     }
     /**
      * Checks if the provided argument is a valid UnresolvedTrack.
@@ -134,7 +134,7 @@ class ManagerUitls {
             throw new RangeError('Argument "query" must be present.');
         const unresolvedTrack = {
             encoded: query.encoded || undefined,
-            info: query.info ?? query,
+            info: query.info ? query.info : query.title ? query : undefined,
             requester: typeof this.manager.options?.playerOptions?.requesterTransformer === "function" ? this.manager.options?.playerOptions?.requesterTransformer((query?.requester || requester)) : requester,
             async resolve(player) {
                 const closest = await getClosestTrack(this, player, player.LavalinkManager.utils);
@@ -145,6 +145,8 @@ class ManagerUitls {
                 return;
             }
         };
+        if (!this.isUnresolvedTrack(unresolvedTrack))
+            throw SyntaxError("Could not build Unresolved Track");
         Object.defineProperty(unresolvedTrack, exports.UnresolvedTrackSymbol, { configurable: true, value: true });
         return unresolvedTrack;
     }
@@ -322,8 +324,8 @@ async function getClosestTrack(data, player, utils) {
         return utils.buildTrack(data, data.requester);
     if (!utils.isUnresolvedTrack(data))
         throw new RangeError("Track is not an unresolved Track");
-    if (!data?.info?.title)
-        throw new SyntaxError("the track title is required for unresolved tracks");
+    if (!data?.info?.title && typeof data.encoded !== "string" && !data.info.uri)
+        throw new SyntaxError("the track uri / title / encoded Base64 string is required for unresolved tracks");
     if (!data.requester)
         throw new SyntaxError("The requester is required");
     // try to decode the track, if possible
