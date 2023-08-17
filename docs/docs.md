@@ -6,4 +6,3 @@ description: >-
 
 # Documentation
 
-Don't be scared of all those setup steps, many are optional.\

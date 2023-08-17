@@ -1,7 +1,7 @@
 ---
 description: >-
-  Easy and advanced lavalink client. Use it with lavalink plugins as well as
-  latest lavalink versions.
+  Easy, flexible and feature-rich lavalink@v4 Client. Both for Beginners and
+  Proficients.
 coverY: 311
 ---
 
@@ -52,6 +52,14 @@ yarn add tomato6966/lavalink-client
 ```
 
 </details>
+
+## Libraries Supported
+
+* [Discord.js](https://discord.js.org/)
+* [Eris](https://abal.moe/Eris/)
+* [Discordeno](https://discordeno.js.org)
+
+_...all Discord Client Libraries!_
 
 ## Features
 
