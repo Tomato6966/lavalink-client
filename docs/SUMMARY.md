@@ -33,6 +33,8 @@
       * [KaraokeFilter](docs/other-types/filterdata/karaokefilter.md)
     * [Track](docs/other-types/track.md)
     * [UnresolvedTrack](docs/other-types/unresolvedtrack.md)
+    * [UnresolvedQuery](docs/other-types/unresolvedquery.md)
+    * [LavalinkTrack](docs/other-types/lavalinktrack.md)
     * [Payloads](docs/other-types/payloads/README.md)
       * [GuildShardPayload](docs/other-types/payloads/guildshardpayload.md)
       * [PlayerEvent](docs/other-types/payloads/playerevent.md)
