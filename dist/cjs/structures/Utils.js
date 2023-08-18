@@ -197,7 +197,7 @@ class ManagerUitls {
     validateSourceString(node, sourceString) {
         if (!sourceString)
             throw new Error(`No SourceString was provided`);
-        const source = LavalinkManagerStatics_1.DefaultSources[sourceString.toLowerCase()] || Object.keys(LavalinkManagerStatics_1.DefaultSources).find(v => v.toLowerCase() === sourceString?.toLowerCase());
+        const source = LavalinkManagerStatics_1.DefaultSources[sourceString.toLowerCase().trim()];
         if (!source)
             throw new Error(`Lavalink Node SearchQuerySource: '${sourceString}' is not available`);
         if (source === "amsearch" && !node.info.sourceManagers.includes("applemusic")) {
@@ -224,7 +224,7 @@ class ManagerUitls {
         if (source === "tts" && !node.info.sourceManagers.includes("tts")) {
             throw new Error("Lavalink Node has not 'tts' enabled, which is required to have 'tts' work");
         }
-        if (source === "ftts" && !node.info.sourceManagers.includes("ftts")) {
+        if (source === "ftts" && !node.info.sourceManagers.includes("ftts") && !node.info.sourceManagers.includes("flowerytts")) {
             console.log(node.info.sourceManagers);
             throw new Error("Lavalink Node has not 'ftts' enabled, which is required to have 'ftts' work");
         }
