@@ -2,6 +2,7 @@
 
 * [😁 Lavalink Client](README.md)
 * [Basics](basics/README.md)
+  * [How it works](basics/how-it-works.md)
   * [Get Started](basics/getting-started.md)
   * [Example Discord Bot](basics/example-discord-bot.md)
 * [Documentation](docs.md)
@@ -14,8 +15,8 @@
         * [RequestTransformer](docs/lavalinkmanager/manager-options/managerplayeroptions/requesttransformer.md)
         * [AutoplayFunction](docs/lavalinkmanager/manager-options/managerplayeroptions/autoplayfunction.md)
       * [BotClientOptions](docs/lavalinkmanager/manager-options/botclientoptions.md)
-  * [ManagerUtils](docs/managerutils/README.md)
-    * [MiniMap](docs/managerutils/minimap.md)
+    * [ManagerUtils](docs/lavalinkmanager/managerutils/README.md)
+      * [MiniMap](docs/lavalinkmanager/managerutils/minimap.md)
   * [NodeManager](docs/nodemanager/README.md)
     * [Types](docs/nodemanager/types/README.md)
       * [LavalinkNode](docs/nodemanager/types/lavalinknode.md)
