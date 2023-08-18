@@ -9,32 +9,32 @@ exports.NodeSymbol = Symbol("LC-Node");
 /** @hidden */
 const escapeRegExp = (str) => str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 class ManagerUitls {
+    LavalinkManager = null;
     constructor(LavalinkManager) {
-        this.manager = LavalinkManager;
+        this.LavalinkManager = LavalinkManager;
     }
     buildTrack(data, requester) {
-        const encoded = data.encoded || data.encoded;
-        if (!encoded)
-            throw new RangeError("Argument 'data.encoded' / 'data.encoded' / 'data.track' must be present.");
+        if (!data?.encoded || typeof data.encoded !== "string")
+            throw new RangeError("Argument 'data.encoded' must be present.");
         if (!data.info)
-            data.info = {};
+            throw new RangeError("Argument 'data.info' must be present.");
         try {
             const r = {
-                encoded,
+                encoded: data.encoded,
                 info: {
-                    identifier: data.info?.identifier,
-                    title: data.info?.title,
-                    author: data.info?.author,
-                    duration: data.info?.length || data.info?.duration,
-                    artworkUrl: data.info?.artworkUrl || data.pluginInfo?.artworkUrl || data.plugin?.artworkUrl,
-                    uri: data.info?.uri,
-                    sourceName: data.info?.sourceName,
-                    isSeekable: data.info?.isSeekable,
-                    isStream: data.info?.isStream,
-                    isrc: data.info?.isrc,
+                    identifier: data.info.identifier,
+                    title: data.info.title,
+                    author: data.info.author,
+                    duration: data.info.length || data.info.duration,
+                    artworkUrl: data.info.artworkUrl || data.pluginInfo?.artworkUrl || data.plugin?.artworkUrl,
+                    uri: data.info.uri,
+                    sourceName: data.info.sourceName,
+                    isSeekable: data.info.isSeekable,
+                    isStream: data.info.isStream,
+                    isrc: data.info.isrc,
                 },
                 pluginInfo: data.pluginInfo || data.plugin || {},
-                requester: typeof this.manager.options?.playerOptions?.requesterTransformer === "function" ? this.manager.options?.playerOptions?.requesterTransformer(data?.requester || requester) : requester,
+                requester: typeof this.LavalinkManager?.options?.playerOptions?.requesterTransformer === "function" ? this.LavalinkManager?.options?.playerOptions?.requesterTransformer(data?.requester || requester) : requester,
             };
             Object.defineProperty(r, exports.TrackSymbol, { configurable: true, value: true });
             return r;
@@ -42,6 +42,32 @@ class ManagerUitls {
         catch (error) {
             throw new RangeError(`Argument "data" is not a valid track: ${error.message}`);
         }
+    }
+    /**
+     * Builds a UnresolvedTrack to be resolved before being played  .
+     * @param query
+     * @param requester
+     */
+    buildUnresolvedTrack(query, requester) {
+        if (typeof query === "undefined")
+            throw new RangeError('Argument "query" must be present.');
+        const unresolvedTrack = {
+            encoded: query.encoded || undefined,
+            info: query.info ? query.info : query.title ? query : undefined,
+            requester: typeof this.LavalinkManager?.options?.playerOptions?.requesterTransformer === "function" ? this.LavalinkManager?.options?.playerOptions?.requesterTransformer((query?.requester || requester)) : requester,
+            async resolve(player) {
+                const closest = await getClosestTrack(this, player, player.LavalinkManager.utils);
+                if (!closest)
+                    throw new SyntaxError("No closest Track found");
+                Object.getOwnPropertyNames(this).forEach(prop => delete this[prop]);
+                Object.assign(this, closest);
+                return;
+            }
+        };
+        if (!this.isUnresolvedTrack(unresolvedTrack))
+            throw SyntaxError("Could not build Unresolved Track");
+        Object.defineProperty(unresolvedTrack, exports.UnresolvedTrackSymbol, { configurable: true, value: true });
+        return unresolvedTrack;
     }
     /**
      * Validate if a data is equal to a node
@@ -124,33 +150,7 @@ class ManagerUitls {
     async getClosestTrack(data, player) {
         return getClosestTrack(data, player, this);
     }
-    /**
-     * Builds a UnresolvedTrack to be resolved before being played  .
-     * @param query
-     * @param requester
-     */
-    buildUnresolvedTrack(query, requester) {
-        if (typeof query === "undefined")
-            throw new RangeError('Argument "query" must be present.');
-        const unresolvedTrack = {
-            encoded: query.encoded || undefined,
-            info: query.info ? query.info : query.title ? query : undefined,
-            requester: typeof this.manager.options?.playerOptions?.requesterTransformer === "function" ? this.manager.options?.playerOptions?.requesterTransformer((query?.requester || requester)) : requester,
-            async resolve(player) {
-                const closest = await getClosestTrack(this, player, player.LavalinkManager.utils);
-                if (!closest)
-                    throw new SyntaxError("No closest Track found");
-                Object.getOwnPropertyNames(this).forEach(prop => delete this[prop]);
-                Object.assign(this, closest);
-                return;
-            }
-        };
-        if (!this.isUnresolvedTrack(unresolvedTrack))
-            throw SyntaxError("Could not build Unresolved Track");
-        Object.defineProperty(unresolvedTrack, exports.UnresolvedTrackSymbol, { configurable: true, value: true });
-        return unresolvedTrack;
-    }
-    validatedQueryString(node, queryString) {
+    validateQueryString(node, queryString) {
         if (!node.info)
             throw new Error("No Lavalink Node was provided");
         if (!node.info.sourceManagers?.length)
@@ -197,7 +197,7 @@ class ManagerUitls {
     validateSourceString(node, sourceString) {
         if (!sourceString)
             throw new Error(`No SourceString was provided`);
-        const source = LavalinkManagerStatics_1.DefaultSources[sourceString.toLowerCase()] || Object.values(LavalinkManagerStatics_1.DefaultSources).find(v => v.toLowerCase() === sourceString?.toLowerCase());
+        const source = LavalinkManagerStatics_1.DefaultSources[sourceString.toLowerCase()] || Object.keys(LavalinkManagerStatics_1.DefaultSources).find(v => v.toLowerCase() === sourceString?.toLowerCase());
         if (!source)
             throw new Error(`Lavalink Node SearchQuerySource: '${sourceString}' is not available`);
         if (source === "amsearch" && !node.info.sourceManagers.includes("applemusic")) {
@@ -294,7 +294,7 @@ exports.queueTrackEnd = queueTrackEnd;
 async function applyUnresolvedData(resTrack, data, utils) {
     if (!resTrack?.info || !data?.info)
         return;
-    if (utils.manager.options.playerOptions?.useUnresolvedData === true) { // overwrite values
+    if (utils?.LavalinkManager?.options?.playerOptions?.useUnresolvedData === true) { // overwrite values
         if (data.info.uri)
             resTrack.info.uri = data.info.uri;
         if (data.info.artworkUrl?.length)

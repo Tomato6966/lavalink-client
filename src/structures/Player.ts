@@ -297,7 +297,7 @@ export class Player {
         }
 
         // if user does player.search("ytsearch:Hello")
-        const foundSource = [...Object.keys(DefaultSources)].find(source => Query.query.toLowerCase().startsWith(`${source}:`.toLowerCase()))?.trim?.()?.toLowerCase?.() as SearchPlatform | undefined;
+        const foundSource = Object.keys(DefaultSources).find(source => Query.query.toLowerCase().startsWith(`${source}:`.toLowerCase()))?.trim?.()?.toLowerCase?.() as SearchPlatform | undefined;
         if(foundSource && DefaultSources[foundSource]){
             Query.source = DefaultSources[foundSource]; // set the source to ytsearch:
             Query.query = Query.query.slice(`${foundSource}:`.length, Query.query.length); // remove ytsearch: from the query
@@ -334,12 +334,12 @@ export class Player {
         }
         
         // if user does player.search("ytsearch:Hello")
-        const foundSource = [...Object.keys(DefaultSources)].find(source => Query.query?.toLowerCase?.()?.startsWith(`${source}:`.toLowerCase()))?.trim?.()?.toLowerCase?.() as SearchPlatform | undefined;
+        const foundSource = Object.keys(DefaultSources).find(source => Query.query?.toLowerCase?.()?.startsWith(`${source}:`.toLowerCase()))?.trim?.()?.toLowerCase?.() as SearchPlatform | undefined;
         if(foundSource && DefaultSources[foundSource]){
             Query.source = DefaultSources[foundSource]; // set the source to ytsearch:
             Query.query = Query.query.slice(`${foundSource}:`.length, Query.query.length); // remove ytsearch: from the query
         }
-        if(/^https?:\/\//.test(Query.query)) this.LavalinkManager.utils.validatedQueryString(this.node, Query.source);
+        if(/^https?:\/\//.test(Query.query)) this.LavalinkManager.utils.validateQueryString(this.node, Query.source);
         else if(Query.source) this.LavalinkManager.utils.validateSourceString(this.node, Query.source);
 
         // ftts query parameters: ?voice=Olivia&audio_format=ogg_opus&translate=False&silence=1000&speed=1.0 | example raw get query: https://api.flowery.pw/v1/tts?voice=Olivia&audio_format=ogg_opus&translate=False&silence=0&speed=1.0&text=Hello%20World

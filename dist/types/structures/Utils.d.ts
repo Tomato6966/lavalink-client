@@ -2,7 +2,7 @@ import { LavalinkFilterData } from "./Filters";
 import { LavalinkManager } from "./LavalinkManager";
 import { LavalinkNode, LavalinkNodeOptions, NodeStats } from "./Node";
 import { PlayOptions, Player } from "./Player";
-import { PluginInfo, Track, UnresolvedTrack, UnresolvedQuery } from "./Track";
+import { PluginInfo, Track, UnresolvedTrack, UnresolvedQuery, LavalinkTrack } from "./Track";
 export declare const TrackSymbol: unique symbol;
 export declare const UnresolvedTrackSymbol: unique symbol;
 export declare const QueueSymbol: unique symbol;
@@ -37,13 +37,16 @@ export interface SearchResult {
     playlist: PlaylistInfo | null;
     tracks: Track[];
 }
-export interface ManagerUitls {
-    /** @private */
-    manager: LavalinkManager;
-}
 export declare class ManagerUitls {
+    LavalinkManager: LavalinkManager | null;
     constructor(LavalinkManager?: LavalinkManager);
-    buildTrack(data: any, requester: any): Track;
+    buildTrack(data: LavalinkTrack | Track, requester: unknown): Track;
+    /**
+     * Builds a UnresolvedTrack to be resolved before being played  .
+     * @param query
+     * @param requester
+     */
+    buildUnresolvedTrack(query: UnresolvedQuery | UnresolvedTrack, requester: unknown): UnresolvedTrack;
     /**
      * Validate if a data is equal to a node
      * @param data
@@ -69,15 +72,9 @@ export declare class ManagerUitls {
      * Checks if the provided argument is a valid UnresolvedTrack.
      * @param track
      */
-    isUnresolvedTrackQuery(data: UnresolvedTrack | any): boolean;
-    getClosestTrack(data: UnresolvedTrack, player: Player): Promise<Track>;
-    /**
-     * Builds a UnresolvedTrack to be resolved before being played  .
-     * @param query
-     * @param requester
-     */
-    buildUnresolvedTrack(query: UnresolvedQuery | UnresolvedTrack, requester: unknown): UnresolvedTrack;
-    validatedQueryString(node: LavalinkNode, queryString: string): void;
+    isUnresolvedTrackQuery(data: UnresolvedQuery | any): boolean;
+    getClosestTrack(data: UnresolvedTrack, player: Player): Promise<Track | undefined>;
+    validateQueryString(node: LavalinkNode, queryString: string): void;
     validateSourceString(node: LavalinkNode, sourceString: SearchPlatform): void;
 }
 /**

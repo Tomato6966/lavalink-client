@@ -3,6 +3,18 @@ import { Base64 } from "./Utils";
 type LavalinkSourceNames = "youtube" | "youtubemusic" | "soundcloud" | "bandcamp" | "twitch";
 type LavalinkPlugin_LavaSrc_SourceNames = "deezer" | "spotify" | "applemusic" | "yandexmusic" | "flowery-tts";
 type SourceNames = LavalinkSourceNames | LavalinkPlugin_LavaSrc_SourceNames;
+export interface LavalinkTrackInfo {
+    identifier: string;
+    title: string;
+    author: string;
+    length: number;
+    artworkUrl: string | null;
+    uri: string;
+    sourceName: SourceNames;
+    isSeekable: boolean;
+    isStream: boolean;
+    isrc: string | null;
+}
 export interface TrackInfo {
     identifier: string;
     title: string;
@@ -51,11 +63,17 @@ export interface LavalinkTrack {
     /** The Base 64 encoded String */
     encoded?: Base64;
     /** Track Information */
-    info: TrackInfo;
+    info: LavalinkTrackInfo;
     /** Plugin Information from Lavalink */
     pluginInfo: Partial<PluginInfo>;
 }
-export interface Track extends LavalinkTrack {
+export interface Track {
+    /** The Base 64 encoded String */
+    encoded?: Base64;
+    /** Track Information */
+    info: TrackInfo;
+    /** Plugin Information from Lavalink */
+    pluginInfo: Partial<PluginInfo>;
     /** The Track's Requester */
     requester?: unknown;
 }

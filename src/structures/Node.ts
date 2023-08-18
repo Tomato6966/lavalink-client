@@ -372,7 +372,7 @@ export class LavalinkNode {
                 r.body = JSON.stringify(encodeds);
                 // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
                 r.headers!["Content-Type"] = "application/json";
-            }).then((r:TrackInfo[]) => r.map(track => this.NodeManager.LavalinkManager.utils.buildTrack(track, requester)));
+            }).then((r:LavalinkTrack[]) => r.map(track => this.NodeManager.LavalinkManager.utils.buildTrack(track, requester)));
         }
     }
 
