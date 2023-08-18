@@ -104,7 +104,7 @@ export interface SearchResult {
   tracks: Track[]
 }
 
-export class ManagerUitls {
+export class ManagerUtils {
   public LavalinkManager: LavalinkManager | null = null;
   constructor(LavalinkManager?: LavalinkManager) {
     this.LavalinkManager = LavalinkManager;
@@ -632,7 +632,7 @@ export async function queueTrackEnd(player: Player) {
   return player.queue.current;
 }
 
-async function applyUnresolvedData(resTrack: Track, data:UnresolvedTrack, utils: ManagerUitls) {
+async function applyUnresolvedData(resTrack: Track, data:UnresolvedTrack, utils: ManagerUtils) {
   if(!resTrack?.info || !data?.info) return;
   if(utils?.LavalinkManager?.options?.playerOptions?.useUnresolvedData === true) { // overwrite values
     if(data.info.uri) resTrack.info.uri = data.info.uri;
@@ -648,7 +648,7 @@ async function applyUnresolvedData(resTrack: Track, data:UnresolvedTrack, utils:
   return resTrack;
 }
 
-async function getClosestTrack(data:UnresolvedTrack, player:Player, utils: ManagerUitls): Promise<Track|undefined> {
+async function getClosestTrack(data:UnresolvedTrack, player:Player, utils: ManagerUtils): Promise<Track|undefined> {
   if(!player || !player.node) throw new RangeError("No player with a lavalink node was provided");
   if(utils.isTrack(data)) return utils.buildTrack(data as any, data.requester);
   if(!utils.isUnresolvedTrack(data)) throw new RangeError("Track is not an unresolved Track");

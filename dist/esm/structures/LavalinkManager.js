@@ -1,7 +1,7 @@
 import { EventEmitter } from "events";
 import { NodeManager } from "./NodeManager";
 import { DefaultQueueStore } from "./Queue";
-import { ManagerUitls, MiniMap } from "./Utils";
+import { ManagerUtils, MiniMap } from "./Utils";
 import { DefaultSources, SourceLinksRegexes } from "./LavalinkManagerStatics";
 import { DestroyReasons, Player } from "./Player";
 export class LavalinkManager extends EventEmitter {
@@ -87,7 +87,7 @@ export class LavalinkManager extends EventEmitter {
             throw new SyntaxError("No Manager Options Provided");
         // create options
         this.options = options;
-        this.utils = new ManagerUitls(this);
+        this.utils = new ManagerUtils(this);
         // use the validators
         this.validateAndApply(options);
         this.applyDefaultOptions();

@@ -1,4 +1,4 @@
-import { ManagerUitls, MiniMap } from "./Utils";
+import { ManagerUtils, MiniMap } from "./Utils";
 export class QueueSaver {
     constructor(options) {
         this._ = options?.queueStore || new DefaultQueueStore();
@@ -45,7 +45,7 @@ export class Queue {
     options = { maxPreviousTracks: 25 };
     guildId = "";
     QueueSaver = null;
-    managerUtils = new ManagerUitls();
+    managerUtils = new ManagerUtils();
     queueChanges;
     constructor(guildId, data = {}, QueueSaver, queueOptions) {
         this.queueChanges = queueOptions.queueChangesWatcher || null;

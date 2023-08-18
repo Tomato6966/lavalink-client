@@ -1,5 +1,5 @@
 import { Track, UnresolvedTrack } from "./Track";
-import { ManagerUitls, MiniMap, QueueSymbol } from "./Utils";
+import { ManagerUtils, MiniMap, QueueSymbol } from "./Utils";
 
 export interface StoredQueue {
   current: Track | null;
@@ -91,7 +91,7 @@ export class Queue {
   public options = { maxPreviousTracks: 25 };
   private readonly guildId: string = "";
   private readonly QueueSaver: QueueSaver | null = null;
-  private managerUtils = new ManagerUitls();
+  private managerUtils = new ManagerUtils();
   private queueChanges: QueueChangesWatcher | null;
   constructor(guildId: string, data: Partial<StoredQueue> = {}, QueueSaver?: QueueSaver, queueOptions?: ManagerQueueOptions) {
     this.queueChanges = queueOptions.queueChangesWatcher || null;

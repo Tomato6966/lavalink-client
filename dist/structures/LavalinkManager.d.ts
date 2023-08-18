@@ -3,12 +3,12 @@ import { EventEmitter } from "node:events";
 import { NodeManager } from "./NodeManager";
 import { ManagerQueueOptions, QueueStoreManager } from "./Queue";
 import { PlayerManager } from "./PlayerManager";
-import { GuildShardPayload, ManagerUitls, SearchPlatform } from "./Utils";
+import { GuildShardPayload, ManagerUtils, SearchPlatform } from "./Utils";
 import { LavalinkNodeOptions } from "./Node";
 export interface LavalinkManager {
     playerManager: PlayerManager;
     nodeManager: NodeManager;
-    utilManager: ManagerUitls;
+    utilManager: ManagerUtils;
 }
 export interface BotClientOptions {
     shards?: number | "auto";

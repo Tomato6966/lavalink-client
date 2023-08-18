@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.queueTrackEnd = exports.MiniMap = exports.ManagerUitls = exports.NodeSymbol = exports.QueueSymbol = exports.UnresolvedTrackSymbol = exports.TrackSymbol = void 0;
+exports.queueTrackEnd = exports.MiniMap = exports.ManagerUtils = exports.NodeSymbol = exports.QueueSymbol = exports.UnresolvedTrackSymbol = exports.TrackSymbol = void 0;
 const LavalinkManagerStatics_1 = require("./LavalinkManagerStatics");
 exports.TrackSymbol = Symbol("LC-Track");
 exports.UnresolvedTrackSymbol = Symbol("LC-Track-Unresolved");
@@ -8,7 +8,7 @@ exports.QueueSymbol = Symbol("LC-Queue");
 exports.NodeSymbol = Symbol("LC-Node");
 /** @hidden */
 const escapeRegExp = (str) => str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-class ManagerUitls {
+class ManagerUtils {
     LavalinkManager = null;
     constructor(LavalinkManager) {
         this.LavalinkManager = LavalinkManager;
@@ -240,7 +240,7 @@ class ManagerUitls {
         return;
     }
 }
-exports.ManagerUitls = ManagerUitls;
+exports.ManagerUtils = ManagerUtils;
 class MiniMap extends Map {
     constructor(data = []) {
         super(data);

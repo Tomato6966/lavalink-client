@@ -5,7 +5,7 @@ export const QueueSymbol = Symbol("LC-Queue");
 export const NodeSymbol = Symbol("LC-Node");
 /** @hidden */
 const escapeRegExp = (str) => str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-export class ManagerUitls {
+export class ManagerUtils {
     LavalinkManager = null;
     constructor(LavalinkManager) {
         this.LavalinkManager = LavalinkManager;

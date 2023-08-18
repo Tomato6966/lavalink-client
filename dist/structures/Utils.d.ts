@@ -31,11 +31,11 @@ export interface SearchResult {
     playlist: PlaylistInfo | null;
     tracks: Track[];
 }
-export interface ManagerUitls {
+export interface ManagerUtils {
     /** @private */
     manager: LavalinkManager;
 }
-export declare class ManagerUitls {
+export declare class ManagerUtils {
     constructor(LavalinkManager: LavalinkManager);
     buildTrack(data: any, requester: any): Track;
 }

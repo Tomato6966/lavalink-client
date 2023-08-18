@@ -1,7 +1,7 @@
 import { EventEmitter } from "events";
 import { NodeManager } from "./NodeManager";
 import { DefaultQueueStore, ManagerQueueOptions } from "./Queue";
-import { GuildShardPayload, ManagerUitls, MiniMap, SearchPlatform, TrackEndEvent, TrackExceptionEvent, TrackStartEvent, TrackStuckEvent, VoicePacket, VoiceServer, VoiceState, WebSocketClosedEvent } from "./Utils";
+import { GuildShardPayload, ManagerUtils, MiniMap, SearchPlatform, TrackEndEvent, TrackExceptionEvent, TrackStartEvent, TrackStuckEvent, VoicePacket, VoiceServer, VoiceState, WebSocketClosedEvent } from "./Utils";
 import { LavalinkNodeOptions } from "./Node";
 import { DefaultSources, SourceLinksRegexes } from "./LavalinkManagerStatics";
 import { DestroyReasons, DestroyReasonsType, Player, PlayerJson, PlayerOptions } from "./Player";
@@ -9,7 +9,7 @@ import { Track, UnresolvedTrack } from "./Track";
 
 export interface LavalinkManager {
   nodeManager: NodeManager;
-  utils: ManagerUitls;
+  utils: ManagerUtils;
 }
 
 export interface BotClientOptions {
@@ -214,7 +214,7 @@ export class LavalinkManager extends EventEmitter {
     // create options
     this.options = options;
 
-    this.utils = new ManagerUitls(this);
+    this.utils = new ManagerUtils(this);
     
     // use the validators
     this.validateAndApply(options);

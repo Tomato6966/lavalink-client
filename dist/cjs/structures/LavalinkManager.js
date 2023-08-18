@@ -90,7 +90,7 @@ class LavalinkManager extends events_1.EventEmitter {
             throw new SyntaxError("No Manager Options Provided");
         // create options
         this.options = options;
-        this.utils = new Utils_1.ManagerUitls(this);
+        this.utils = new Utils_1.ManagerUtils(this);
         // use the validators
         this.validateAndApply(options);
         this.applyDefaultOptions();

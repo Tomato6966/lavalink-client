@@ -50,7 +50,7 @@ class Queue {
     options = { maxPreviousTracks: 25 };
     guildId = "";
     QueueSaver = null;
-    managerUtils = new Utils_1.ManagerUitls();
+    managerUtils = new Utils_1.ManagerUtils();
     queueChanges;
     constructor(guildId, data = {}, QueueSaver, queueOptions) {
         this.queueChanges = queueOptions.queueChangesWatcher || null;

@@ -37,7 +37,7 @@ export interface SearchResult {
     playlist: PlaylistInfo | null;
     tracks: Track[];
 }
-export declare class ManagerUitls {
+export declare class ManagerUtils {
     LavalinkManager: LavalinkManager | null;
     constructor(LavalinkManager?: LavalinkManager);
     buildTrack(data: LavalinkTrack | Track, requester: unknown): Track;
