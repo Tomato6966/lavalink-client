@@ -3,11 +3,12 @@ import { LavalinkManager } from "./LavalinkManager";
 import { DefaultSources } from "./LavalinkManagerStatics";
 import { LavalinkNode } from "./Node";
 import { Queue, QueueSaver } from "./Queue";
-import { PluginInfo, Track, UnresolvedQuery, UnresolvedTrack } from "./Track";
-import { LavalinkPlayerVoiceOptions, SearchPlatform, SearchResult, LoadTypes, queueTrackEnd, LavaSearchType, LavaSearchResponse, Exception, LavaSrcSearchPlatform, LavaSrcSearchPlatformBase } from "./Utils";
+import { PluginInfo, Track, UnresolvedTrack } from "./Track";
+import { LavalinkPlayerVoiceOptions, SearchPlatform, SearchResult, LoadTypes, queueTrackEnd, LavaSearchType, LavaSearchResponse, LavaSrcSearchPlatformBase } from "./Utils";
 
 type PlayerDestroyReasons = "QueueEmpty" | "NodeDestroy" | "NodeDeleted" | "LavalinkNoVoice" | "NodeReconnectFail" | "PlayerReconnectFail" | "Disconnected" | "ChannelDeleted";
 export type DestroyReasonsType = PlayerDestroyReasons | string;
+
 export const DestroyReasons = {
     QueueEmpty: "QueueEmpty",
     NodeDestroy: "NodeDestroy",
@@ -215,10 +216,10 @@ export class Player {
         }
         if(!this.queue.current && this.queue.tracks.length) await queueTrackEnd(this);
 
-        // @ts-ignore
         if(this.queue.current && this.LavalinkManager.utils.isUnresolvedTrack(this.queue.current)) {
-            try { // @ts-ignore
-                this.queue.current = await (this.queue.current as UnresolvedTrack).resolve(this);
+            try { 
+                // resolve the unresolved track
+                await (this.queue.current as unknown as UnresolvedTrack).resolve(this);
             } catch (error) {
                 this.LavalinkManager.emit("trackError", this, this.queue.current, error);
                 if(options && "track" in options) delete options.track;
@@ -314,11 +315,11 @@ export class Player {
         const res = await this.node.request(`/loadsearch?query=${Query.source ? `${Query.source}:` : ""}${encodeURIComponent(Query.query)}${Query.types?.length ? `&types=${Query.types.join(",")}`: ""}`) as LavaSearchResponse;
         return {
             tracks: res.tracks?.map(v => this.LavalinkManager.utils.buildTrack(v, requestUser)) || [],
-            albums: res.albums?.map(v => ({info: v.info, pluginInfo: (v as any)?.plugin || v.pluginInfo, tracks: v.tracks.map(v => this.LavalinkManager.utils.buildTrack(v, requestUser)) })) || [],
-            artists: res.artists?.map(v => ({info: v.info, pluginInfo: (v as any)?.plugin || v.pluginInfo, tracks: v.tracks.map(v => this.LavalinkManager.utils.buildTrack(v, requestUser)) })) || [],
-            playlists: res.playlists?.map(v => ({info: v.info, pluginInfo: (v as any)?.plugin || v.pluginInfo, tracks: v.tracks.map(v => this.LavalinkManager.utils.buildTrack(v, requestUser)) })) || [],
-            texts: res.texts?.map(v => ({text: v.text, pluginInfo: (v as any)?.plugin || v.pluginInfo })) || [],
-            pluginInfo: res.pluginInfo || (res as any)?.plugin
+            albums: res.albums?.map(v => ({info: v.info, pluginInfo: (v as unknown as { plugin: unknown })?.plugin || v.pluginInfo, tracks: v.tracks.map(v => this.LavalinkManager.utils.buildTrack(v, requestUser)) })) || [],
+            artists: res.artists?.map(v => ({info: v.info, pluginInfo: (v as unknown as { plugin: unknown })?.plugin || v.pluginInfo, tracks: v.tracks.map(v => this.LavalinkManager.utils.buildTrack(v, requestUser)) })) || [],
+            playlists: res.playlists?.map(v => ({info: v.info, pluginInfo: (v as unknown as { plugin: unknown })?.plugin || v.pluginInfo, tracks: v.tracks.map(v => this.LavalinkManager.utils.buildTrack(v, requestUser)) })) || [],
+            texts: res.texts?.map(v => ({text: v.text, pluginInfo: (v as unknown as { plugin: unknown })?.plugin || v.pluginInfo })) || [],
+            pluginInfo: res.pluginInfo || (res as unknown as { plugin: unknown })?.plugin
         } as LavaSearchResponse
     }
     /**

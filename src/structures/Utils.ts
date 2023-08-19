@@ -3,12 +3,19 @@ import { LavalinkManager } from "./LavalinkManager";
 import { DefaultSources, SourceLinksRegexes } from "./LavalinkManagerStatics";
 import { LavalinkNode, LavalinkNodeOptions, NodeStats } from "./Node";
 import { PlayOptions, Player } from "./Player";
-import { TrackInfo, PluginInfo, Track, UnresolvedTrack, UnresolvedQuery, UnresolvedTrackInfo, LavalinkTrack } from "./Track";
+import { PluginInfo, Track, UnresolvedTrack, UnresolvedQuery, LavalinkTrack } from "./Track";
 
 export const TrackSymbol = Symbol("LC-Track");
 export const UnresolvedTrackSymbol = Symbol("LC-Track-Unresolved");
 export const QueueSymbol = Symbol("LC-Queue");
 export const NodeSymbol = Symbol("LC-Node");
+
+// Helper for generating Opaque types.
+type Opaque<T, K> = T & { __opaque__: K };
+// 2 opaque types created with the helper
+export type IntegerNumber = Opaque<number, 'Int'>;
+export type FloatNumber = Opaque<number, 'Float'>;
+
 
 /** @hidden */
 const escapeRegExp = (str: string): string => str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");

@@ -2,10 +2,10 @@ import WebSocket from "ws";
 import { Dispatcher, Pool } from "undici";
 import { NodeManager } from "./NodeManager";
 import internal from "stream";
-import { InvalidLavalinkRestRequest, LavalinkPlayer, PlayerEventType, PlayerEvents, PlayerUpdateInfo, RoutePlanner, TrackEndEvent, TrackExceptionEvent, TrackStartEvent, TrackStuckEvent, WebSocketClosedEvent, Session, queueTrackEnd, Base64 } from "./Utils";
+import { InvalidLavalinkRestRequest, LavalinkPlayer, PlayerEventType, PlayerEvents, PlayerUpdateInfo, RoutePlanner, TrackEndEvent, TrackExceptionEvent, TrackStartEvent, TrackStuckEvent, WebSocketClosedEvent, Session, queueTrackEnd, Base64, NodeSymbol } from "./Utils";
 import { DestroyReasons, DestroyReasonsType, Player } from "./Player";
 import { isAbsolute } from "path";
-import { TrackInfo, Track, LavalinkTrack } from "./Track";
+import { Track, LavalinkTrack } from "./Track";
 
 /** Modifies any outgoing REST requests. */
 export type ModifyRequest = (options: Dispatcher.RequestOptions) => void;
@@ -178,6 +178,8 @@ export class LavalinkNode {
 
         this.rest = new Pool(this.poolAddress, this.options.poolOptions);
         this.options.regions = (this.options.regions || []).map(a => a.toLowerCase());
+
+        Object.defineProperty(this, NodeSymbol, { configurable: true, value: true });
     }
 
     /**

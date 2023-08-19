@@ -60,8 +60,7 @@ class Queue {
         this.current = this.managerUtils.isTrack(data.current) ? data.current : null;
         this.previous = Array.isArray(data.previous) && data.previous.some(track => this.managerUtils.isTrack(track) || this.managerUtils.isUnresolvedTrack(track)) ? data.previous.filter(track => this.managerUtils.isTrack(track) || this.managerUtils.isUnresolvedTrack(track)) : [];
         this.tracks = Array.isArray(data.tracks) && data.tracks.some(track => this.managerUtils.isTrack(track) || this.managerUtils.isUnresolvedTrack(track)) ? data.tracks.filter(track => this.managerUtils.isTrack(track) || this.managerUtils.isUnresolvedTrack(track)) : [];
-    }
-    applyData(data) {
+        Object.defineProperty(this, Utils_1.QueueSymbol, { configurable: true, value: true });
     }
     /**
      * Utils for a Queue

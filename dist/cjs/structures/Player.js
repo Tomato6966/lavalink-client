@@ -131,10 +131,10 @@ class Player {
         }
         if (!this.queue.current && this.queue.tracks.length)
             await (0, Utils_1.queueTrackEnd)(this);
-        // @ts-ignore
         if (this.queue.current && this.LavalinkManager.utils.isUnresolvedTrack(this.queue.current)) {
-            try { // @ts-ignore
-                this.queue.current = await this.queue.current.resolve(this);
+            try {
+                // resolve the unresolved track
+                await this.queue.current.resolve(this);
             }
             catch (error) {
                 this.LavalinkManager.emit("trackError", this, this.queue.current, error);

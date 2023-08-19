@@ -7,13 +7,13 @@ export interface StoredQueue {
 }
 export interface QueueStoreManager extends Record<string, any> {
     /** @async get a Value (MUST RETURN UNPARSED!) */
-    get: (guildId: unknown) => Promise<any>;
+    get: (guildId: unknown) => Promise<unknown>;
     /** @async Set a value inside a guildId (MUST BE UNPARSED) */
-    set: (guildId: unknown, value: unknown) => Promise<any>;
+    set: (guildId: unknown, value: unknown) => Promise<unknown>;
     /** @async Delete a Database Value based of it's guildId */
-    delete: (guildId: unknown) => Promise<any>;
+    delete: (guildId: unknown) => Promise<unknown>;
     /** @async Transform the value(s) inside of the QueueStoreManager (IF YOU DON'T NEED PARSING/STRINGIFY, then just return the value) */
-    stringify: (value: unknown) => Promise<any>;
+    stringify: (value: unknown) => Promise<unknown>;
     /** @async Parse the saved value back to the Queue (IF YOU DON'T NEED PARSING/STRINGIFY, then just return the value) */
     parse: (value: unknown) => Promise<Partial<StoredQueue>>;
 }
@@ -33,8 +33,8 @@ export interface QueueSaver {
 export declare class QueueSaver {
     constructor(options: ManagerQueueOptions);
     get(guildId: string): Promise<Partial<StoredQueue>>;
-    delete(guildId: string): Promise<any>;
-    set(guildId: string, value: any): Promise<any>;
+    delete(guildId: string): Promise<unknown>;
+    set(guildId: string, value: any): Promise<unknown>;
     sync(guildId: string): Promise<Partial<StoredQueue>>;
 }
 export declare class DefaultQueueStore implements QueueStoreManager {
@@ -66,7 +66,6 @@ export declare class Queue {
     private managerUtils;
     private queueChanges;
     constructor(guildId: string, data?: Partial<StoredQueue>, QueueSaver?: QueueSaver, queueOptions?: ManagerQueueOptions);
-    private applyData;
     /**
      * Utils for a Queue
      */
@@ -74,13 +73,13 @@ export declare class Queue {
         /**
          * Save the current cached Queue on the database/server (overides the server)
          */
-        save: () => Promise<any>;
+        save: () => Promise<unknown>;
         /**
          * Sync the current queue database/server with the cached one
          * @returns {void}
          */
         sync: (override?: boolean, dontSyncCurrent?: boolean) => Promise<void>;
-        destroy: () => Promise<any>;
+        destroy: () => Promise<unknown>;
         /**
          * @returns {{current:Track|null, previous:Track[], tracks:Track[]}}The Queue, but in a raw State, which allows easier handling for the QueueStoreManager
          */

@@ -9,13 +9,13 @@ export interface StoredQueue {
 
 export interface QueueStoreManager extends Record<string, any>{
   /** @async get a Value (MUST RETURN UNPARSED!) */
-  get: (guildId: unknown) => Promise<any>;
+  get: (guildId: unknown) => Promise<unknown>;
   /** @async Set a value inside a guildId (MUST BE UNPARSED) */
-  set: (guildId: unknown, value: unknown) => Promise<any>;
+  set: (guildId: unknown, value: unknown) => Promise<unknown>;
   /** @async Delete a Database Value based of it's guildId */
-  delete: (guildId: unknown) => Promise<any>;
+  delete: (guildId: unknown) => Promise<unknown>;
   /** @async Transform the value(s) inside of the QueueStoreManager (IF YOU DON'T NEED PARSING/STRINGIFY, then just return the value) */
-  stringify: (value: unknown) => Promise<any>;
+  stringify: (value: unknown) => Promise<unknown>;
   /** @async Parse the saved value back to the Queue (IF YOU DON'T NEED PARSING/STRINGIFY, then just return the value) */
   parse: (value: unknown) => Promise<Partial<StoredQueue>>;
 }
@@ -102,9 +102,8 @@ export class Queue {
     this.current = this.managerUtils.isTrack(data.current)  ? data.current : null;
     this.previous = Array.isArray(data.previous) && data.previous.some(track => this.managerUtils.isTrack(track) || this.managerUtils.isUnresolvedTrack(track)) ? data.previous.filter(track => this.managerUtils.isTrack(track) || this.managerUtils.isUnresolvedTrack(track)) : [];
     this.tracks = Array.isArray(data.tracks) && data.tracks.some(track => this.managerUtils.isTrack(track) || this.managerUtils.isUnresolvedTrack(track)) ? data.tracks.filter(track => this.managerUtils.isTrack(track) || this.managerUtils.isUnresolvedTrack(track)) : [];
-  }
-  private applyData(data: Partial<StoredQueue>) {
-
+    
+    Object.defineProperty(this, QueueSymbol, { configurable: true, value: true });
   }
 
   /**

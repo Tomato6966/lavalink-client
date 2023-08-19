@@ -7,6 +7,11 @@ export declare const TrackSymbol: unique symbol;
 export declare const UnresolvedTrackSymbol: unique symbol;
 export declare const QueueSymbol: unique symbol;
 export declare const NodeSymbol: unique symbol;
+type Opaque<T, K> = T & {
+    __opaque__: K;
+};
+export type IntegerNumber = Opaque<number, 'Int'>;
+export type FloatNumber = Opaque<number, 'Float'>;
 export type LavaSrcSearchPlatformBase = "spsearch" | "sprec" | "amsearch" | "dzsearch" | "dzisrc" | "ymsearch";
 export type LavaSrcSearchPlatform = LavaSrcSearchPlatformBase | "ftts";
 export type DuncteSearchPlatform = "speak" | "tts";

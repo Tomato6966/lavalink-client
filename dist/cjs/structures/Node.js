@@ -67,6 +67,7 @@ class LavalinkNode {
             throw new SyntaxError("If secure is true, then the port must be 443");
         this.rest = new undici_1.Pool(this.poolAddress, this.options.poolOptions);
         this.options.regions = (this.options.regions || []).map(a => a.toLowerCase());
+        Object.defineProperty(this, Utils_1.NodeSymbol, { configurable: true, value: true });
     }
     /**
      * Makes an API call to the Node

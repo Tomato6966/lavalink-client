@@ -16,7 +16,7 @@ export interface BotClientOptions {
     /** Bot Client Username */
     username?: string;
     /** So users can pass entire objects / classes */
-    [x: string | number | symbol | undefined]: any;
+    [x: string | number | symbol | undefined]: unknown;
 }
 export interface ManagerPlayerOptions {
     /** If the Lavalink Volume should be decremented by x number */

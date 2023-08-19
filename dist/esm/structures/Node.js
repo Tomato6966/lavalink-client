@@ -1,6 +1,6 @@
 import WebSocket from "ws";
 import { Pool } from "undici";
-import { queueTrackEnd } from "./Utils";
+import { queueTrackEnd, NodeSymbol } from "./Utils";
 import { DestroyReasons } from "./Player";
 import { isAbsolute } from "path";
 export class LavalinkNode {
@@ -63,6 +63,7 @@ export class LavalinkNode {
             throw new SyntaxError("If secure is true, then the port must be 443");
         this.rest = new Pool(this.poolAddress, this.options.poolOptions);
         this.options.regions = (this.options.regions || []).map(a => a.toLowerCase());
+        Object.defineProperty(this, NodeSymbol, { configurable: true, value: true });
     }
     /**
      * Makes an API call to the Node
