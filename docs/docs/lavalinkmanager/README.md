@@ -72,7 +72,7 @@ const { LavalinkManager } = require("lavalink-client");
 
 > _All the Players of the Manager_
 
-**Type**_:_ [_MiniMap_](managerutils/minimap.md)_\<guildId:_[_string_](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global\_Objects/String)_,_ [_Player_](../player/)_>_
+**Type**_:_ [_MiniMap_](../other-utils-and-classes/minimap.md)_\<guildId:_[_string_](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global\_Objects/String)_,_ [_Player_](../player/)_>_
 
 ### <mark style="color:blue;">.nodeManager</mark>
 
@@ -84,7 +84,7 @@ const { LavalinkManager } = require("lavalink-client");
 
 > _The Manager's Utils_
 
-**Type**_:_ [_ManagerUtils_](managerutils/)
+**Type**_:_ [_ManagerUtils_](managerutils.md)
 
 ***
 
@@ -146,7 +146,7 @@ Important Conditions to check:
 
 ### <mark style="color:purple;">.deletePlayer(guildId:</mark>[string](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global\_Objects/String)<mark style="color:purple;">)</mark>
 
-> _Removes a Player from the saved_ [_MiniMap_](managerutils/minimap.md)_, needs to be destroyed first_
+> _Removes a Player from the saved_ [_MiniMap_](../other-utils-and-classes/minimap.md)_, needs to be destroyed first_
 
 **Returns**: [Boolean](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global\_Objects/Boolean)
 
@@ -173,7 +173,7 @@ Important Conditions to check:
 
 > _Emitted whenever a Track plays_&#x20;
 
-<table><thead><tr><th width="145.33333333333331">Parameter</th><th width="187">Type</th><th>Description</th></tr></thead><tbody><tr><td>player</td><td><a href="../player/">Player</a></td><td>The Player for this Event</td></tr><tr><td>track</td><td><a href="../other-types/track.md">Track</a></td><td>The current playing track (player.queue.current)</td></tr><tr><td>payload</td><td><a href="../other-types/payloads/trackstartevent.md">TrackStartEvent</a></td><td>The Payload Lavalink sent</td></tr></tbody></table>
+<table><thead><tr><th width="145.33333333333331">Parameter</th><th width="187">Type</th><th>Description</th></tr></thead><tbody><tr><td>player</td><td><a href="../player/">Player</a></td><td>The Player for this Event</td></tr><tr><td>track</td><td><a href="../other-types/track/">Track</a></td><td>The current playing track (player.queue.current)</td></tr><tr><td>payload</td><td><a href="../other-types/payloads/trackstartevent.md">TrackStartEvent</a></td><td>The Payload Lavalink sent</td></tr></tbody></table>
 
 ```typescript
 client.lavalink.on("trackStart", (player, track, payload) => { });
@@ -183,7 +183,7 @@ client.lavalink.on("trackStart", (player, track, payload) => { });
 
 > _Emitted whenever a Track finished playing._
 
-<table><thead><tr><th width="145.33333333333331">Parameter</th><th width="187">Type</th><th>Description</th></tr></thead><tbody><tr><td>player</td><td><a href="../player/">Player</a></td><td>The Player for this Event</td></tr><tr><td>track</td><td><a href="../other-types/track.md">Track</a></td><td>The Track that finished Playing</td></tr><tr><td>payload</td><td><a href="../other-types/payloads/trackendevent.md">TrackEndEvent</a></td><td>The Payload Lavalink sent</td></tr></tbody></table>
+<table><thead><tr><th width="145.33333333333331">Parameter</th><th width="187">Type</th><th>Description</th></tr></thead><tbody><tr><td>player</td><td><a href="../player/">Player</a></td><td>The Player for this Event</td></tr><tr><td>track</td><td><a href="../other-types/track/">Track</a></td><td>The Track that finished Playing</td></tr><tr><td>payload</td><td><a href="../other-types/payloads/trackendevent.md">TrackEndEvent</a></td><td>The Payload Lavalink sent</td></tr></tbody></table>
 
 ```typescript
 client.lavalink.on("trackEnd", (player, track, payload) => { });
@@ -193,7 +193,7 @@ client.lavalink.on("trackEnd", (player, track, payload) => { });
 
 > _Emitted whenever a Track got stuck while playing_
 
-<table><thead><tr><th width="145.33333333333331">Parameter</th><th width="187">Type</th><th>Description</th></tr></thead><tbody><tr><td>player</td><td><a href="../player/">Player</a></td><td>The Player for this Event</td></tr><tr><td>track</td><td><a href="../other-types/track.md">Track</a></td><td>The Track that got stuck</td></tr><tr><td>payload</td><td><a href="../other-types/payloads/trackstuckevent.md">TrackStuckEvent</a></td><td>The Payload Lavalink sent</td></tr></tbody></table>
+<table><thead><tr><th width="145.33333333333331">Parameter</th><th width="187">Type</th><th>Description</th></tr></thead><tbody><tr><td>player</td><td><a href="../player/">Player</a></td><td>The Player for this Event</td></tr><tr><td>track</td><td><a href="../other-types/track/">Track</a></td><td>The Track that got stuck</td></tr><tr><td>payload</td><td><a href="../other-types/payloads/trackstuckevent.md">TrackStuckEvent</a></td><td>The Payload Lavalink sent</td></tr></tbody></table>
 
 ```typescript
 client.lavalink.on("trackStuck", (player, track, payload) => { });
@@ -203,7 +203,7 @@ client.lavalink.on("trackStuck", (player, track, payload) => { });
 
 > Emitted whenever a Track errored
 
-<table><thead><tr><th width="145.33333333333331">Parameter</th><th width="193">Type</th><th>Description</th></tr></thead><tbody><tr><td>player</td><td><a href="../player/">Player</a></td><td>The Player for this Event</td></tr><tr><td>track</td><td><a href="../other-types/track.md">Track</a> | <a href="../other-types/unresolvedtrack.md">UnresolvedTrack</a></td><td>The Track that Errored</td></tr><tr><td>payload</td><td><a href="../other-types/payloads/trackexceptionevent.md">TrackExceptionEvent</a></td><td>The Payload Lavalink sent</td></tr></tbody></table>
+<table><thead><tr><th width="145.33333333333331">Parameter</th><th width="193">Type</th><th>Description</th></tr></thead><tbody><tr><td>player</td><td><a href="../player/">Player</a></td><td>The Player for this Event</td></tr><tr><td>track</td><td><a href="../other-types/track/">Track</a> | <a href="../other-types/unresolvedtrack.md">UnresolvedTrack</a></td><td>The Track that Errored</td></tr><tr><td>payload</td><td><a href="../other-types/payloads/trackexceptionevent.md">TrackExceptionEvent</a></td><td>The Payload Lavalink sent</td></tr></tbody></table>
 
 ```typescript
 client.lavalink.on("trackError", (player, track, payload) => { });
@@ -215,7 +215,7 @@ client.lavalink.on("trackError", (player, track, payload) => { });
 >
 > (trackEnd, does NOT get exexcuted)&#x20;
 
-<table><thead><tr><th width="145.33333333333331">Parameter</th><th width="198">Type</th><th>Description</th></tr></thead><tbody><tr><td>player</td><td><a href="../player/">Player</a></td><td>The Player for this Event</td></tr><tr><td>track</td><td><a href="../other-types/track.md">Track</a></td><td>The last played track</td></tr><tr><td>payload</td><td><a href="../other-types/payloads/trackendevent.md">TrackEndEvent</a> | <a href="../other-types/payloads/trackstuckevent.md">TrackStuckEvent</a> | <a href="../other-types/payloads/trackexceptionevent.md">TrackExceptionEvent</a></td><td>The Payload Lavalink sent</td></tr></tbody></table>
+<table><thead><tr><th width="145.33333333333331">Parameter</th><th width="198">Type</th><th>Description</th></tr></thead><tbody><tr><td>player</td><td><a href="../player/">Player</a></td><td>The Player for this Event</td></tr><tr><td>track</td><td><a href="../other-types/track/">Track</a></td><td>The last played track</td></tr><tr><td>payload</td><td><a href="../other-types/payloads/trackendevent.md">TrackEndEvent</a> | <a href="../other-types/payloads/trackstuckevent.md">TrackStuckEvent</a> | <a href="../other-types/payloads/trackexceptionevent.md">TrackExceptionEvent</a></td><td>The Payload Lavalink sent</td></tr></tbody></table>
 
 ```typescript
 client.lavalink.on("queueEnd", (player, track, payload) => { });

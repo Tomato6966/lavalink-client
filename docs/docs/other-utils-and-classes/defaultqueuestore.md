@@ -1,6 +1,6 @@
 # DefaultQueueStore
 
-The Default Queue Store, stores the queue in-process using [MiniMap](../lavalinkmanager/managerutils/minimap.md), which extends [Map](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global\_Objects/Map)\
+The Default Queue Store, stores the queue in-process using [MiniMap](minimap.md), which extends [Map](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global\_Objects/Map)\
 That's the fastest Store possibility, but not the most flexible one.
 
 Please Note, the Queue is always "cached" on the client side, which means it's still quite fast, however, the speed of "saving and syncing" depends on the StoreManager.
