@@ -349,6 +349,7 @@ export class MiniMap<K, V> extends Map<K, V> {
   constructor(data = []) {
     super(data);
   }
+
   /**
    * Identical to
    * [Array.filter()](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/filter),
@@ -382,8 +383,7 @@ export class MiniMap<K, V> extends Map<K, V> {
   }
 
   public toJSON() {
-    // toJSON is called recursively by JSON.stringify.
-    return [...this.values()];
+    return [...this.entries()];
   }
 
   /**

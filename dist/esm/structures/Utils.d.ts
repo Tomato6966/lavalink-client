@@ -119,7 +119,7 @@ export declare class MiniMap<K, V> extends Map<K, V> {
     filter<This, K2 extends K>(fn: (this: This, value: V, key: K, miniMap: this) => key is K2, thisArg: This): MiniMap<K2, V>;
     filter<This, V2 extends V>(fn: (this: This, value: V, key: K, miniMap: this) => value is V2, thisArg: This): MiniMap<K, V2>;
     filter<This>(fn: (this: This, value: V, key: K, miniMap: this) => boolean, thisArg: This): MiniMap<K, V>;
-    toJSON(): V[];
+    toJSON(): [K, V][];
     /**
      * Maps each item to another value into an array. Identical in behavior to
      * [Array.map()](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/map).

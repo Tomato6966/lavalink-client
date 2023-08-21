@@ -18,8 +18,11 @@ export interface QueueStoreManager extends Record<string, any> {
     parse: (value: unknown) => Promise<Partial<StoredQueue>>;
 }
 export interface ManagerQueueOptions {
+    /** Maximum Amount of tracks for the queue.previous array */
     maxPreviousTracks?: number;
+    /** Custom Queue Store option */
     queueStore?: QueueStoreManager;
+    /** Custom Queue Watcher class */
     queueChangesWatcher?: QueueChangesWatcher;
 }
 export interface QueueSaver {

@@ -252,8 +252,7 @@ export class MiniMap extends Map {
         return results;
     }
     toJSON() {
-        // toJSON is called recursively by JSON.stringify.
-        return [...this.values()];
+        return [...this.entries()];
     }
     map(fn, thisArg) {
         if (typeof thisArg !== 'undefined')

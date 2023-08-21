@@ -19,11 +19,16 @@ export interface QueueStoreManager extends Record<string, any>{
   /** @async Parse the saved value back to the Queue (IF YOU DON'T NEED PARSING/STRINGIFY, then just return the value) */
   parse: (value: unknown) => Promise<Partial<StoredQueue>>;
 }
+
 export interface ManagerQueueOptions {
+  /** Maximum Amount of tracks for the queue.previous array */
   maxPreviousTracks?: number;
+  /** Custom Queue Store option */
   queueStore?: QueueStoreManager;
+  /** Custom Queue Watcher class */
   queueChangesWatcher?: QueueChangesWatcher;
 }
+
 export interface QueueSaver {
   /** @private */
   _: QueueStoreManager;

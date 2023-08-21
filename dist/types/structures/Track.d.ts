@@ -1,30 +1,53 @@
 import { Player } from "./Player";
 import { Base64 } from "./Utils";
-type LavalinkSourceNames = "youtube" | "youtubemusic" | "soundcloud" | "bandcamp" | "twitch";
-type LavalinkPlugin_LavaSrc_SourceNames = "deezer" | "spotify" | "applemusic" | "yandexmusic" | "flowery-tts";
-type SourceNames = LavalinkSourceNames | LavalinkPlugin_LavaSrc_SourceNames;
+/** Sourcenames provided by lavalink server */
+export type LavalinkSourceNames = "youtube" | "youtubemusic" | "soundcloud" | "bandcamp" | "twitch";
+/** Source Names provided by lava src plugin */
+export type LavalinkPlugin_LavaSrc_SourceNames = "deezer" | "spotify" | "applemusic" | "yandexmusic" | "flowery-tts";
+/** The SourceNames provided by lavalink */
+export type SourceNames = LavalinkSourceNames | LavalinkPlugin_LavaSrc_SourceNames;
 export interface LavalinkTrackInfo {
+    /** The Identifier of the Track */
     identifier: string;
+    /** The Track Title / Name */
     title: string;
+    /** The Name of the Author */
     author: string;
+    /** The duration of the Track */
     length: number;
+    /** The URL of the artwork if available */
     artworkUrl: string | null;
+    /** The URL (aka Link) of the Track called URI */
     uri: string;
+    /** The Source name of the Track, e.g. soundcloud, youtube, spotify */
     sourceName: SourceNames;
+    /** Wether the audio is seekable */
     isSeekable: boolean;
+    /** Wether the audio is of a live stream */
     isStream: boolean;
+    /** If isrc code is available, it's provided */
     isrc: string | null;
 }
 export interface TrackInfo {
+    /** The Identifier of the Track */
     identifier: string;
+    /** The Track Title / Name */
     title: string;
+    /** The Name of the Author */
     author: string;
+    /** The duration of the Track */
     duration: number;
+    /** The URL of the artwork if available */
     artworkUrl: string | null;
+    /** The URL (aka Link) of the Track called URI */
     uri: string;
+    /** The Source name of the Track, e.g. soundcloud, youtube, spotify */
     sourceName: SourceNames;
+    /** Wether the audio is seekable */
     isSeekable: boolean;
+    /** Wether the audio is of a live stream */
     isStream: boolean;
+    /** If isrc code is available, it's provided */
     isrc: string | null;
 }
 export interface PluginInfo {
@@ -95,4 +118,3 @@ export interface UnresolvedTrack {
     /** The Track's Requester */
     requester?: unknown;
 }
-export {};
