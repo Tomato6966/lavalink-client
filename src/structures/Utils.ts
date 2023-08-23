@@ -641,8 +641,8 @@ export async function queueTrackEnd(player: Player) {
 
 async function applyUnresolvedData(resTrack: Track, data:UnresolvedTrack, utils: ManagerUtils) {
   if(!resTrack?.info || !data?.info) return;
+  if(data.info.uri) resTrack.info.uri = data.info.uri;
   if(utils?.LavalinkManager?.options?.playerOptions?.useUnresolvedData === true) { // overwrite values
-    if(data.info.uri) resTrack.info.uri = data.info.uri;
     if(data.info.artworkUrl?.length) resTrack.info.artworkUrl = data.info.artworkUrl;
     if(data.info.title?.length) resTrack.info.title = data.info.title;
     if(data.info.author?.length) resTrack.info.author = data.info.author;

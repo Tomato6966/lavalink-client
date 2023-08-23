@@ -56,6 +56,11 @@ export interface ManagerOptions {
     playerOptions?: ManagerPlayerOptions;
     /** If it should skip to the next Track on TrackEnd / TrackError etc. events */
     autoSkip?: boolean;
+    /** optional */
+    debugOptions?: {
+        /** logs for debugging the "no-Audio" playing error */
+        noAudio: boolean;
+    };
 }
 interface LavalinkManagerEvents {
     /**
@@ -124,8 +129,8 @@ export declare class LavalinkManager extends EventEmitter {
     static SourceLinksRegexes: Record<import("./Utils").SourcesRegex, RegExp>;
     initiated: boolean;
     readonly players: MiniMap<string, Player>;
-    private applyDefaultOptions;
-    private validateAndApply;
+    private applyOptions;
+    private validateOptions;
     constructor(options: ManagerOptions);
     createPlayer(options: PlayerOptions): Player;
     getPlayer(guildId: string): Player;

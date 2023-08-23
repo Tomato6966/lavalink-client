@@ -12,94 +12,83 @@ class LavalinkManager extends events_1.EventEmitter {
     static SourceLinksRegexes = LavalinkManagerStatics_1.SourceLinksRegexes;
     initiated = false;
     players = new Utils_1.MiniMap();
-    applyDefaultOptions() {
-        if (!this.options.playerOptions)
-            this.options.playerOptions = {
-                applyVolumeAsFilter: false,
-                clientBasedPositionUpdateInterval: 100,
-                defaultSearchPlatform: "ytsearch",
+    applyOptions(options) {
+        this.options = {
+            client: {
+                ...(options?.client || {}),
+                id: options?.client?.id,
+                username: options?.client?.username ?? "lavalink-client"
+            },
+            sendToShard: options?.sendToShard,
+            nodes: options?.nodes,
+            playerOptions: {
+                applyVolumeAsFilter: options?.playerOptions?.applyVolumeAsFilter ?? false,
+                clientBasedPositionUpdateInterval: options?.playerOptions?.clientBasedPositionUpdateInterval ?? 100,
+                defaultSearchPlatform: options?.playerOptions?.defaultSearchPlatform ?? "ytsearch",
                 onDisconnect: {
-                    destroyPlayer: true,
-                    autoReconnect: false
+                    destroyPlayer: options?.playerOptions?.onDisconnect?.destroyPlayer ?? true,
+                    autoReconnect: options?.playerOptions?.onDisconnect?.autoReconnect ?? false
                 },
                 onEmptyQueue: {
-                    autoPlayFunction: null,
-                    destroyAfterMs: undefined
+                    autoPlayFunction: options?.playerOptions?.onEmptyQueue?.autoPlayFunction ?? null,
+                    destroyAfterMs: options?.playerOptions?.onEmptyQueue?.destroyAfterMs ?? undefined
                 },
-                requesterTransformer: (requester) => {
-                    // if it's already the transformed requester
-                    if (typeof requester === "object" && "avatar" in requester && Object.keys(requester).length === 3)
-                        return requester;
-                    // if it's still a discord.js User
-                    if (typeof requester === "object" && "displayAvatarURL" in requester) { // it's a user
-                        return {
-                            id: requester.id,
-                            username: requester.username,
-                            avatar: requester.displayAvatarURL(),
-                        };
-                    }
-                    // if it's non of the above
-                    return { id: requester.toString(), username: "unknown" }; // reteurn something that makes sense for you!
-                },
-                volumeDecrementer: 1
-            };
-        if (!this.options.autoSkip)
-            this.options.autoSkip = true;
-        if (!this.options.playerOptions.defaultSearchPlatform)
-            this.options.playerOptions.defaultSearchPlatform = "ytsearch";
-        // default queue options
-        if (!this.options.queueOptions)
-            this.options.queueOptions = {
-                maxPreviousTracks: 25,
-                queueChangesWatcher: null,
-                queueStore: new Queue_1.DefaultQueueStore()
-            };
-        if (typeof this.options?.queueOptions?.maxPreviousTracks !== "number" || this.options.queueOptions.maxPreviousTracks < 0)
-            this.options.queueOptions.maxPreviousTracks = 25;
+                volumeDecrementer: options?.playerOptions?.volumeDecrementer ?? 1,
+                requesterTransformer: options?.playerOptions?.requesterTransformer ?? null,
+                useUnresolvedData: options?.playerOptions?.useUnresolvedData ?? false,
+            },
+            autoSkip: options?.autoSkip ?? true,
+            queueOptions: {
+                maxPreviousTracks: options?.queueOptions?.maxPreviousTracks ?? 25,
+                queueChangesWatcher: options?.queueOptions?.queueChangesWatcher ?? null,
+                queueStore: options?.queueOptions?.queueStore ?? new Queue_1.DefaultQueueStore(),
+            },
+            debugOptions: {
+                noAudio: options?.debugOptions?.noAudio ?? false
+            }
+        };
         return;
     }
-    validateAndApply(options) {
-        if (typeof options.sendToShard !== "function")
+    validateOptions(options) {
+        if (typeof options?.sendToShard !== "function")
             throw new SyntaxError("ManagerOption.sendToShard was not provided, which is required!");
         // only check in .init()
-        // if(typeof options.client !== "object" || typeof options.client.id !== "string") throw new SyntaxError("ManagerOption.client = { id: string, username?:string } was not provided, which is required");
-        if (options.autoSkip && typeof options.autoSkip !== "boolean")
+        // if(typeof options?.client !== "object" || typeof options?.client.id !== "string") throw new SyntaxError("ManagerOption.client = { id: string, username?:string } was not provided, which is required");
+        if (options?.autoSkip && typeof options?.autoSkip !== "boolean")
             throw new SyntaxError("ManagerOption.autoSkip must be either false | true aka boolean");
-        if (!options.nodes || !Array.isArray(options.nodes) || !options.nodes.every(node => this.utils.isNodeOptions(node)))
+        if (!options?.nodes || !Array.isArray(options?.nodes) || !options?.nodes.every(node => this.utils.isNodeOptions(node)))
             throw new SyntaxError("ManagerOption.nodes must be an Array of NodeOptions and is required of at least 1 Node");
         /* QUEUE STORE */
-        if (options.queueOptions?.queueStore) {
-            const keys = Object.getOwnPropertyNames(Object.getPrototypeOf(options.queueOptions?.queueStore));
+        if (options?.queueOptions?.queueStore) {
+            const keys = Object.getOwnPropertyNames(Object.getPrototypeOf(options?.queueOptions?.queueStore));
             const requiredKeys = ["get", "set", "stringify", "parse", "delete"];
-            if (!requiredKeys.every(v => keys.includes(v)) || !requiredKeys.every(v => typeof options.queueOptions?.queueStore[v] === "function"))
+            if (!requiredKeys.every(v => keys.includes(v)) || !requiredKeys.every(v => typeof options?.queueOptions?.queueStore[v] === "function"))
                 throw new SyntaxError(`The provided ManagerOption.QueueStore, does not have all required functions: ${requiredKeys.join(", ")}`);
         }
-        else
-            this.options.queueOptions.queueStore = new Queue_1.DefaultQueueStore();
         /* QUEUE WATCHER */
-        if (options.queueOptions?.queueChangesWatcher) {
-            const keys = Object.getOwnPropertyNames(Object.getPrototypeOf(options.queueOptions?.queueChangesWatcher));
+        if (options?.queueOptions?.queueChangesWatcher) {
+            const keys = Object.getOwnPropertyNames(Object.getPrototypeOf(options?.queueOptions?.queueChangesWatcher));
             const requiredKeys = ["tracksAdd", "tracksRemoved", "shuffled"];
-            if (!requiredKeys.every(v => keys.includes(v)) || !requiredKeys.every(v => typeof options.queueOptions?.queueChangesWatcher[v] === "function"))
+            if (!requiredKeys.every(v => keys.includes(v)) || !requiredKeys.every(v => typeof options?.queueOptions?.queueChangesWatcher[v] === "function"))
                 throw new SyntaxError(`The provided ManagerOption.DefaultQueueChangesWatcher, does not have all required functions: ${requiredKeys.join(", ")}`);
         }
+        if (typeof options?.queueOptions?.maxPreviousTracks !== "number" || options?.queueOptions?.maxPreviousTracks < 0)
+            options.queueOptions.maxPreviousTracks = 25;
     }
     constructor(options) {
         super();
         if (!options)
             throw new SyntaxError("No Manager Options Provided");
-        // create options
-        this.options = options;
         this.utils = new Utils_1.ManagerUtils(this);
         // use the validators
-        this.validateAndApply(options);
-        this.applyDefaultOptions();
+        this.applyOptions(options);
+        this.validateOptions(options);
         // create classes
         this.nodeManager = new NodeManager_1.NodeManager(this);
     }
     createPlayer(options) {
-        if (this.players.has(options.guildId))
-            return this.players.get(options.guildId);
+        if (this.players.has(options?.guildId))
+            return this.players.get(options?.guildId);
         const newPlayer = new Player_1.Player(options, this);
         this.players.set(newPlayer.guildId, newPlayer);
         return newPlayer;
@@ -122,10 +111,11 @@ class LavalinkManager extends events_1.EventEmitter {
     async init(clientData) {
         if (this.initiated)
             return this;
-        this.options.client = { ...(this.options.client || {}), ...clientData };
-        if (!this.options.client.id)
+        clientData = clientData ?? {};
+        this.options.client = { ...(this.options?.client || {}), ...clientData };
+        if (!this.options?.client.id)
             throw new Error('"client.id" is not set. Pass it in Manager#init() or as a option in the constructor.');
-        if (typeof this.options.client.id !== "string")
+        if (typeof this.options?.client.id !== "string")
             throw new Error('"client.id" set is not type of "string"');
         let success = 0;
         for (const node of [...this.nodeManager.nodes.values()]) {
@@ -149,8 +139,16 @@ class LavalinkManager extends events_1.EventEmitter {
      * @param data
      */
     async sendRawData(data) {
-        if (!this.initiated || !("t" in data))
+        if (!this.initiated) {
+            if (this.options?.debugOptions?.noAudio === true)
+                console.debug("Lavalink-Client-Debug | NO-AUDIO [::] sendRawData function, manager is not initated yet");
             return;
+        }
+        if (!("t" in data)) {
+            if (this.options?.debugOptions?.noAudio === true)
+                console.debug("Lavalink-Client-Debug | NO-AUDIO [::] sendRawData function, no 't' in payload-data of the raw event:", data);
+            return;
+        }
         // for channel Delete
         if ("CHANNEL_DELETE" === data.t) {
             const update = "d" in data ? data.d : data;
@@ -163,11 +161,22 @@ class LavalinkManager extends events_1.EventEmitter {
         // for voice updates
         if (["VOICE_STATE_UPDATE", "VOICE_SERVER_UPDATE"].includes(data.t)) {
             const update = "d" in data ? data.d : data;
-            if (!update || !("token" in update) && !("session_id" in update))
+            if (!update) {
+                if (this.options?.debugOptions?.noAudio === true)
+                    console.debug("Lavalink-Client-Debug | NO-AUDIO [::] sendRawData function, no update data found in payload:", data);
                 return;
+            }
+            if (!("token" in update) && !("session_id" in update)) {
+                if (this.options?.debugOptions?.noAudio === true)
+                    console.debug("Lavalink-Client-Debug | NO-AUDIO [::] sendRawData function, no 'token' nor 'session_id' found in payload:", data);
+                return;
+            }
             const player = this.getPlayer(update.guild_id);
-            if (!player)
+            if (!player) {
+                if (this.options?.debugOptions?.noAudio === true)
+                    console.debug("Lavalink-Client-Debug | NO-AUDIO [::] sendRawData function, No Lavalink Player found via key: 'guild_id' of update-data:", update);
                 return;
+            }
             if ("token" in update) {
                 if (!player.node?.sessionId)
                     throw new Error("Lavalink Node is either not ready or not up to date");
@@ -181,11 +190,16 @@ class LavalinkManager extends events_1.EventEmitter {
                         }
                     }
                 });
+                if (this.options?.debugOptions?.noAudio === true)
+                    console.debug("Lavalink-Client-Debug | NO-AUDIO [::] sendRawData function, Sent updatePlayer for voice token session", { voice: { token: update.token, endpoint: update.endpoint, sessionId: player.voice?.sessionId, } });
                 return;
             }
             /* voice state update */
-            if (update.user_id !== this.options.client.id)
+            if (update.user_id !== this.options?.client.id) {
+                if (this.options?.debugOptions?.noAudio === true)
+                    console.debug("Lavalink-Client-Debug | NO-AUDIO [::] sendRawData function, voice update user is not equal to provided client id of the manageroptions#client#id", "user:", update.user_id, "manager client id:", this.options?.client.id);
                 return;
+            }
             if (update.channel_id) {
                 if (player.voiceChannelId !== update.channel_id)
                     this.emit("playerMove", player, player.voiceChannelId, update.channel_id);
@@ -193,12 +207,12 @@ class LavalinkManager extends events_1.EventEmitter {
                 player.voiceChannelId = update.channel_id;
             }
             else {
-                if (this.options.playerOptions.onDisconnect?.destroyPlayer === true) {
+                if (this.options?.playerOptions?.onDisconnect?.destroyPlayer === true) {
                     return await player.destroy(Player_1.DestroyReasons.Disconnected);
                 }
                 this.emit("playerDisconnect", player, player.voiceChannelId);
                 await player.pause();
-                if (this.options.playerOptions.onDisconnect?.autoReconnect === true) {
+                if (this.options?.playerOptions?.onDisconnect?.autoReconnect === true) {
                     try {
                         await player.connect();
                     }
