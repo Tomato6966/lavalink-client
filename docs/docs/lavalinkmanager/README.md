@@ -90,7 +90,7 @@ const { LavalinkManager } = require("lavalink-client");
 
 ## <mark style="color:purple;">Methods</mark>
 
-### <mark style="color:purple;">.init(clientData:</mark> [BotClientOptions](../../botclientoptions.md)<mark style="color:purple;">)</mark> <mark style="color:red;">IMPORTANT!</mark>
+### <mark style="color:purple;">.init(clientData:</mark> [BotClientOptions](../../requirements.md)<mark style="color:purple;">)</mark> <mark style="color:red;">IMPORTANT!</mark>
 
 > _Initializes the Manager and connects all Nodes_
 
