@@ -59,12 +59,10 @@ lavalink:
 </strong>#      repository: "https://m2.duncte123.dev/releases"
 #    - dependency: "me.rohank05:lavalink-filter-plugin:0.0.2" # lavalink-filter plugin (echo filter)
 #      repository: "https://jitpack.io"
-    - dependency: "com.github.esmBot:lava-xm-plugin:v0.2.1" # 
-      repository: "https://jitpack.io"
-    - dependency: "com.github.topi314.lavasrc:lavasrc-plugin:5a227df" # LavaSrc - extra sources like deezer, spotify, etc.
-      repository: "https://maven.topi.wtf/snapshots"
-    - dependency: "com.github.topi314.lavasearch:lavasearch-plugin:26bd2f9"
-      repository: "https://maven.topi.wtf/snapshots"
+    - dependency: "com.github.topi314.lavasrc:lavasrc-plugin:4.0.0-beta.4"
+      repository: "https://maven.topi.wtf/releases"
+    - dependency: "com.github.topi314.lavasearch:lavasearch-plugin:v1.0.0-beta.1"
+      repository: "https://maven.topi.wtf/releases"
 
 
 plugins:

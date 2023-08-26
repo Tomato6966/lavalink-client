@@ -17,7 +17,7 @@ plugins:
 #  name: # Name of the plugin
 #    some_key: some_value # Some key-value pair for the plugin
 #    another_key: another_value
-lavalink:
+lavalink:+
   plugins:
 #    - dependency: "group:artifact:version"
 #      repository: "repository"
