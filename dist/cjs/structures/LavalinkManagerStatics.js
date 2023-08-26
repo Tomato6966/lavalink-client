@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.SourceLinksRegexes = exports.DefaultSources = void 0;
+exports.SourceLinksRegexes = exports.LavalinkPlugins = exports.DefaultSources = void 0;
 exports.DefaultSources = {
     // youtubemusic
     "youtube music": "ytmsearch",
@@ -41,6 +41,13 @@ exports.DefaultSources = {
     "speak": "speak",
     "tts": "tts",
     "ftts": "ftts"
+};
+exports.LavalinkPlugins = {
+    DuncteBot_Plugin: "DuncteBot-plugin",
+    LavaSrc: "lavasrc-plugin",
+    GoogleCloudTTS: "tts-plugin",
+    LavaSearch: "lavasearch-plugin",
+    LavalinkFilterPlugin: "lavalink-filter-plugin"
 };
 exports.SourceLinksRegexes = {
     /** DEFAULT SUPPORTED BY LAVALINK */

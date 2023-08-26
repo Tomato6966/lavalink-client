@@ -42,6 +42,14 @@ export const DefaultSources: Record<SearchPlatform, LavalinkSearchPlatform> = {
     "ftts": "ftts"
 }
 
+export const LavalinkPlugins = {
+    DuncteBot_Plugin: "DuncteBot-plugin",
+    LavaSrc: "lavasrc-plugin",
+    GoogleCloudTTS: "tts-plugin",
+    LavaSearch: "lavasearch-plugin",
+    LavalinkFilterPlugin: "lavalink-filter-plugin"
+}
+
 export const SourceLinksRegexes: Record<SourcesRegex, RegExp> = {
     /** DEFAULT SUPPORTED BY LAVALINK */
     YoutubeRegex: /https?:\/\/?(?:www\.)?(?:(m|www)\.)?(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|shorts|playlist\?|watch\?v=|watch\?.+(?:&|&#38;);v=))([a-zA-Z0-9\-_]{11})?(?:(?:\?|&|&#38;)index=((?:\d){1,3}))?(?:(?:\?|&|&#38;)?list=([a-zA-Z\-_0-9]{34}))?(?:\S+)?/,

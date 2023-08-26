@@ -37,13 +37,13 @@ client.lavalink = new LavalinkManager({
     ],
     sendToShard: (guildId, payload) => client.guilds.cache.get(guildId)?.shard?.send(payload),
     autoSkip: true,
-    client: {
+    client: { // client: client.user
         id: envConfig.clientId, // REQUIRED! (at least after the .init)
         username: "TESTBOT"
     },
     playerOptions: {
         applyVolumeAsFilter: false,
-        clientBasedPositionUpdateInterval: 50,
+        clientBasedPositionUpdateInterval: 50, // in ms to up-calc player.position
         defaultSearchPlatform: "ytmsearch",
         volumeDecrementer: 0.75, // on client 100% == on lavalink 75%
         requesterTransformer: requesterTransformer,

@@ -1,4 +1,4 @@
-import { DefaultSources, SourceLinksRegexes } from "./LavalinkManagerStatics";
+import { DefaultSources, LavalinkPlugins, SourceLinksRegexes } from "./LavalinkManagerStatics";
 export const TrackSymbol = Symbol("LC-Track");
 export const UnresolvedTrackSymbol = Symbol("LC-Track-Unresolved");
 export const QueueSymbol = Symbol("LC-Queue");
@@ -215,15 +215,14 @@ export class ManagerUtils {
         if (source === "scsearch" && !node.info.sourceManagers.includes("soundcloud")) {
             throw new Error("Lavalink Node has not 'soundcloud' enabled, which is required to have 'scsearch' work");
         }
-        if (source === "speak" && !node.info.sourceManagers.includes("speak")) {
+        if (source === "speak" && !node.info.plugins.find(c => c.name.toLowerCase().includes(LavalinkPlugins.DuncteBot_Plugin.toLowerCase()))) {
             throw new Error("Lavalink Node has not 'speak' enabled, which is required to have 'speak' work");
         }
-        if (source === "tts" && !node.info.sourceManagers.includes("tts")) {
+        if (source === "tts" && !node.info.plugins.find(c => c.name.toLowerCase().includes(LavalinkPlugins.GoogleCloudTTS.toLowerCase()))) {
             throw new Error("Lavalink Node has not 'tts' enabled, which is required to have 'tts' work");
         }
-        if (source === "ftts" && !node.info.sourceManagers.includes("ftts") && !node.info.sourceManagers.includes("flowerytts")) {
-            console.log(node.info.sourceManagers);
-            throw new Error("Lavalink Node has not 'ftts' enabled, which is required to have 'ftts' work");
+        if (source === "ftts" && !(node.info.sourceManagers.includes("ftts") || node.info.sourceManagers.includes("flowery-tts") || node.info.sourceManagers.includes("flowerytts"))) {
+            throw new Error("Lavalink Node has not 'flowery-tts' enabled, which is required to have 'ftts' work");
         }
         if (source === "ymsearch" && !node.info.sourceManagers.includes("yandexmusic")) {
             throw new Error("Lavalink Node has not 'yandexmusic' enabled, which is required to have 'ymsearch' work");
