@@ -335,12 +335,12 @@ export class LavalinkNode {
                 player.voice = data.playerOptions.voice;
             if (typeof data.playerOptions.volume !== "undefined") {
                 if (this.NodeManager.LavalinkManager.options.playerOptions.volumeDecrementer) {
-                    player.volume = data.playerOptions.volume / this.NodeManager.LavalinkManager.options.playerOptions.volumeDecrementer;
-                    player.lavalinkVolume = data.playerOptions.volume;
+                    player.volume = Math.round(data.playerOptions.volume / this.NodeManager.LavalinkManager.options.playerOptions.volumeDecrementer);
+                    player.lavalinkVolume = Math.round(data.playerOptions.volume);
                 }
                 else {
-                    player.volume = data.playerOptions.volume;
-                    player.lavalinkVolume = data.playerOptions.volume;
+                    player.volume = Math.round(data.playerOptions.volume);
+                    player.lavalinkVolume = Math.round(data.playerOptions.volume);
                 }
             }
             if (typeof data.playerOptions.filters !== "undefined") {

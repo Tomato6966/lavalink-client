@@ -74,7 +74,7 @@ class Player {
         if (!this.node)
             throw new Error("No available Node was found, please add a LavalinkNode to the Manager via Manager.NodeManager#createNode");
         if (this.LavalinkManager.options.playerOptions.volumeDecrementer)
-            this.volume *= this.LavalinkManager.options.playerOptions.volumeDecrementer;
+            this.volume = Math.round(this.volume * this.LavalinkManager.options.playerOptions.volumeDecrementer);
         this.LavalinkManager.emit("playerCreate", this);
         if (typeof options.volume === "number" && !isNaN(options.volume))
             this.setVolume(options.volume);
@@ -155,8 +155,8 @@ class Player {
             let vol = Number(this.volume);
             if (this.LavalinkManager.options.playerOptions.volumeDecrementer)
                 vol *= this.LavalinkManager.options.playerOptions.volumeDecrementer;
-            this.lavalinkVolume = Math.floor(vol * 100) / 100;
-            options.volume = vol;
+            this.lavalinkVolume = Math.round(vol);
+            options.volume = this.lavalinkVolume;
         }
         const finalOptions = {
             encodedTrack: track.encoded,
@@ -193,17 +193,17 @@ class Player {
         volume = Number(volume);
         if (isNaN(volume))
             throw new TypeError("Volume must be a number.");
-        this.volume = Math.max(Math.min(volume, 500), 0);
+        this.volume = Math.round(Math.max(Math.min(volume, 500), 0));
         volume = Number(this.volume);
         if (this.LavalinkManager.options.playerOptions.volumeDecrementer && !ignoreVolumeDecrementer)
             volume *= this.LavalinkManager.options.playerOptions.volumeDecrementer;
-        this.lavalinkVolume = Math.floor(volume * 100) / 100;
+        this.lavalinkVolume = Math.floor(volume);
         const now = performance.now();
         if (this.LavalinkManager.options.playerOptions.applyVolumeAsFilter) {
             await this.node.updatePlayer({ guildId: this.guildId, playerOptions: { filters: { volume: volume / 100 } } });
         }
         else {
-            await this.node.updatePlayer({ guildId: this.guildId, playerOptions: { volume } });
+            await this.node.updatePlayer({ guildId: this.guildId, playerOptions: { volume: this.lavalinkVolume } });
         }
         this.ping.lavalink = Math.round((performance.now() - now) / 10) / 100;
         return;
@@ -420,7 +420,7 @@ class Player {
             noReplace: false,
             playerOptions: {
                 position: data.position,
-                volume: data.volume,
+                volume: Math.round(data.volume),
                 paused: data.paused,
                 filters: { ...data.filters, equalizer: data.equalizer },
             },
