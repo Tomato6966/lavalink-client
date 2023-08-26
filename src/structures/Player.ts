@@ -153,12 +153,17 @@ export class Player {
             this.node = least.filter(v => options.vcRegion ? v.options?.regions?.includes(options.vcRegion) : true)[0] || least[0] || null;
         }
         if(!this.node) throw new Error("No available Node was found, please add a LavalinkNode to the Manager via Manager.NodeManager#createNode")
-       
-        if(this.LavalinkManager.options.playerOptions.volumeDecrementer) this.volume = Math.round(this.volume * this.LavalinkManager.options.playerOptions.volumeDecrementer);
         
+        if(typeof options.volume === "number" && !isNaN(options.volume)) this.volume = Number(options.volume);
+        
+        this.volume = Math.round(Math.max(Math.min(this.volume, 1000), 0));
+        
+        this.lavalinkVolume = Math.round(Math.max(Math.min(Math.round(
+            this.LavalinkManager.options.playerOptions.volumeDecrementer
+            ? this.volume * this.LavalinkManager.options.playerOptions.volumeDecrementer
+            : this.volume), 1000), 0));
 
         this.LavalinkManager.emit("playerCreate", this);
-        if(typeof options.volume === "number" && !isNaN(options.volume)) this.setVolume(options.volume);
 
         this.queue = new Queue(this.guildId, {}, new QueueSaver(this.LavalinkManager.options.queueOptions), this.LavalinkManager.options.queueOptions)
     }
@@ -275,16 +280,16 @@ export class Player {
 
         if (isNaN(volume)) throw new TypeError("Volume must be a number.");
         
-        this.volume = Math.round(Math.max(Math.min(volume, 500), 0));
-
-        volume = Number(this.volume);
+        this.volume = Math.round(Math.max(Math.min(volume, 1000), 0));
         
-        if(this.LavalinkManager.options.playerOptions.volumeDecrementer && !ignoreVolumeDecrementer) volume *= this.LavalinkManager.options.playerOptions.volumeDecrementer;
-        this.lavalinkVolume = Math.floor(volume);
+        this.lavalinkVolume = Math.round(Math.max(Math.min(Math.round(
+            this.LavalinkManager.options.playerOptions.volumeDecrementer && !ignoreVolumeDecrementer
+            ? this.volume * this.LavalinkManager.options.playerOptions.volumeDecrementer
+            : this.volume), 1000), 0));
 
         const now = performance.now();
         if(this.LavalinkManager.options.playerOptions.applyVolumeAsFilter) {
-            await this.node.updatePlayer({ guildId: this.guildId, playerOptions: { filters: { volume: volume / 100 } } });
+            await this.node.updatePlayer({ guildId: this.guildId, playerOptions: { filters: { volume: this.lavalinkVolume / 100 } } });
         } else {
             await this.node.updatePlayer({ guildId: this.guildId, playerOptions: { volume: this.lavalinkVolume } });
         }
@@ -533,7 +538,7 @@ export class Player {
             noReplace: false,
             playerOptions: {
                 position: data.position,
-                volume: Math.round(data.volume),
+                volume: Math.round(Math.max(Math.min(data.volume, 1000), 0)),
                 paused: data.paused,
                 filters: { ...data.filters, equalizer: data.equalizer },
             },
