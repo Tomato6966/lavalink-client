@@ -224,6 +224,7 @@ export class LavalinkNode {
         // transform the data which can be Error, Track or Track[] to enfore [Track] 
         const resTracks = res.loadType === "playlist" ? res.data?.tracks : res.loadType === "track" ? [res.data] : res.loadType === "search" ? Array.isArray(res.data) ? res.data : [res.data] : [];
 
+        
         return {
             loadType: res.loadType,
             exception: res.loadType === "error" ? res.data : null,
