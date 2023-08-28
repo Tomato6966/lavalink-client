@@ -92,6 +92,25 @@ export class LavalinkNode {
             throw new Error(`Node Request resulted into an error, request-URL: ${url} | headers: ${JSON.stringify(request.headers)}`);
         return parseAsText ? await request.body.text() : await request.body.json();
     }
+    async search(querySourceString, requestUser) {
+        const res = await this.request(`/loadsearch?query=${encodeURIComponent(decodeURIComponent(querySourceString))}`);
+        // transform the data which can be Error, Track or Track[] to enfore [Track] 
+        const resTracks = res.loadType === "playlist" ? res.data?.tracks : res.loadType === "track" ? [res.data] : res.loadType === "search" ? Array.isArray(res.data) ? res.data : [res.data] : [];
+        return {
+            loadType: res.loadType,
+            exception: res.loadType === "error" ? res.data : null,
+            pluginInfo: res.pluginInfo || {},
+            playlist: res.loadType === "playlist" ? {
+                title: res.data.info?.name || res.data.pluginInfo?.name || null,
+                author: res.data.info?.author || res.data.pluginInfo?.author || null,
+                thumbnail: (res.data.info?.artworkUrl) || (res.data.pluginInfo?.artworkUrl) || ((typeof res.data?.info?.selectedTrack !== "number" || res.data?.info?.selectedTrack === -1) ? null : resTracks[res.data?.info?.selectedTrack] ? (resTracks[res.data?.info?.selectedTrack]?.info?.artworkUrl || resTracks[res.data?.info?.selectedTrack]?.info?.pluginInfo?.artworkUrl) : null) || null,
+                uri: res.data.info?.url || res.data.info?.uri || res.data.info?.link || res.data.pluginInfo?.url || res.data.pluginInfo?.uri || res.data.pluginInfo?.link || null,
+                selectedTrack: typeof res.data?.info?.selectedTrack !== "number" || res.data?.info?.selectedTrack === -1 ? null : resTracks[res.data?.info?.selectedTrack] ? this.NodeManager.LavalinkManager.utils.buildTrack(resTracks[res.data?.info?.selectedTrack], requestUser) : null,
+                duration: resTracks.length ? resTracks.reduce((acc, cur) => acc + (cur?.info?.duration || 0), 0) : 0,
+            } : null,
+            tracks: (resTracks.length ? resTracks.map(t => this.NodeManager.LavalinkManager.utils.buildTrack(t, requestUser)) : [])
+        };
+    }
     /**
      * Update the Player State on the Lavalink Server
      * @param data

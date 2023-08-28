@@ -37,7 +37,10 @@ export const DefaultSources = {
     // speak PLUGIN
     "speak": "speak",
     "tts": "tts",
-    "ftts": "ftts"
+    "ftts": "ftts",
+    // Client sided search platforms
+    "bandcamp": "bcsearch",
+    "bcsearch": "bcsearch",
 };
 export const LavalinkPlugins = {
     DuncteBot_Plugin: "DuncteBot-plugin",

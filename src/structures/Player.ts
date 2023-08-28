@@ -1,3 +1,4 @@
+import { bandCampSearch } from "./CustomSearches/BandCampSearch";
 import { EQBand, FilterData, FilterManager, LavalinkFilterData } from "./Filters";
 import { LavalinkManager } from "./LavalinkManager";
 import { DefaultSources } from "./LavalinkManagerStatics";
@@ -351,6 +352,11 @@ export class Player {
         if(/^https?:\/\//.test(Query.query)) this.LavalinkManager.utils.validateQueryString(this.node, Query.source);
         else if(Query.source) this.LavalinkManager.utils.validateSourceString(this.node, Query.source);
 
+        
+        if(["bcsearch", "bandcamp"].includes(Query.source)) {
+            return await bandCampSearch(this, Query.query, requestUser);
+        }
+
         // ftts query parameters: ?voice=Olivia&audio_format=ogg_opus&translate=False&silence=1000&speed=1.0 | example raw get query: https://api.flowery.pw/v1/tts?voice=Olivia&audio_format=ogg_opus&translate=False&silence=0&speed=1.0&text=Hello%20World
         // request the data 
         const res = await this.node.request(`/loadtracks?identifier=${!/^https?:\/\//.test(Query.query) ? `${Query.source}:${Query.source === "ftts" ? "//" : ""}` : ""}${encodeURIComponent(Query.query)}`) as {
@@ -358,7 +364,6 @@ export class Player {
             data: any,
             pluginInfo: PluginInfo,
         };
-
 
         // transform the data which can be Error, Track or Track[] to enfore [Track] 
         const resTracks = res.loadType === "playlist" ? res.data?.tracks : res.loadType === "track" ? [res.data] : res.loadType === "search" ? Array.isArray(res.data) ? res.data : [res.data] : [];
@@ -375,7 +380,7 @@ export class Player {
                 selectedTrack: typeof res.data?.info?.selectedTrack !== "number" || res.data?.info?.selectedTrack === -1 ? null : resTracks[res.data?.info?.selectedTrack] ? this.LavalinkManager.utils.buildTrack(resTracks[res.data?.info?.selectedTrack], requestUser) : null,
                 duration: resTracks.length ? resTracks.reduce((acc, cur) => acc + (cur?.info?.duration || 0), 0) : 0,
             } : null,
-            tracks: resTracks.length ? resTracks.map(t => this.LavalinkManager.utils.buildTrack(t, requestUser)) : []
+            tracks: (resTracks.length ? resTracks.map(t => this.LavalinkManager.utils.buildTrack(t, requestUser)) : []) as Track[]
         } as SearchResult;
     }
 
@@ -521,7 +526,6 @@ export class Player {
      * @param newNode New Node / New Node Id 
      */
     public async changeNode(newNode: LavalinkNode | string) {
-        
         const updateNode = typeof newNode === "string" ? this.LavalinkManager.nodeManager.nodes.get(newNode) : newNode;
         if(!updateNode) throw new Error("Could not find the new Node");
 
@@ -530,9 +534,9 @@ export class Player {
         await this.node.destroyPlayer(this.guildId);
         
         this.node = updateNode;
-        await this.connect();
 
         const now = performance.now();
+
         await this.node.updatePlayer({
             guildId: this.guildId,
             noReplace: false,
@@ -541,9 +545,13 @@ export class Player {
                 volume: Math.round(Math.max(Math.min(data.volume, 1000), 0)),
                 paused: data.paused,
                 filters: { ...data.filters, equalizer: data.equalizer },
+                voice: this.voice,
+                // track: this.queue.current,
             },
         });
+
         this.ping.lavalink = Math.round((performance.now() - now) / 10) / 100;
+        
         return this.node.id;
     }
 

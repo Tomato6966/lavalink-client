@@ -33,11 +33,16 @@ export type DuncteSearchPlatform =
   "speak" | 
   "tts";
 
+export type LavalinkClientSearchPlatform = "bcsearch";
+export type LavalinkClientSearchPlatformResolve = "bandcamp";
+
+
 export type LavalinkSearchPlatform = "ytsearch" | 
   "ytmsearch" | 
   "scsearch" |  
   LavaSrcSearchPlatform | 
-  DuncteSearchPlatform;
+  DuncteSearchPlatform | 
+  LavalinkClientSearchPlatform;
 
 export type ClientSearchPlatform =
   "youtube" | "yt" | 
@@ -46,7 +51,7 @@ export type ClientSearchPlatform =
   "am" | "apple music" | "applemusic" | "apple" | 
   "sp" | "spsuggestion" | "spotify" |
   "dz" | "deezer" |
-  "yandex" | "yandex music" |"yandexmusic";
+  "yandex" | "yandex music" |"yandexmusic" | LavalinkClientSearchPlatformResolve | LavalinkClientSearchPlatform;
 
 export type SearchPlatform = LavalinkSearchPlatform | ClientSearchPlatform;
 
@@ -108,7 +113,7 @@ export interface SearchResult {
   exception: Exception | null,
   pluginInfo: PluginInfo,
   playlist: PlaylistInfo | null,
-  tracks: Track[]
+  tracks: (Track | UnresolvedTrack)[]
 }
 
 export class ManagerUtils {
@@ -159,7 +164,7 @@ export class ManagerUtils {
       info: (query as UnresolvedTrack).info ? (query as UnresolvedTrack).info : (query as UnresolvedQuery).title ? query as UnresolvedQuery : undefined,
       requester: typeof this.LavalinkManager?.options?.playerOptions?.requesterTransformer === "function" ? this.LavalinkManager?.options?.playerOptions?.requesterTransformer(((query as UnresolvedTrack)?.requester || requester)) : requester,
       async resolve(player:Player) {
-          const closest = await getClosestTrack(this, player, player.LavalinkManager.utils);
+          const closest = await getClosestTrack(this, player);
           if(!closest) throw new SyntaxError("No closest Track found");
           Object.getOwnPropertyNames(this).forEach(prop => delete this[prop]);
           Object.assign(this, closest); 
@@ -232,7 +237,7 @@ export class ManagerUtils {
   }
 
   async getClosestTrack(data:UnresolvedTrack, player:Player): Promise<Track|undefined> {
-    return getClosestTrack(data, player, this);
+    return getClosestTrack(data, player);
   }
 
 
@@ -654,38 +659,38 @@ async function applyUnresolvedData(resTrack: Track, data:UnresolvedTrack, utils:
   return resTrack;
 }
 
-async function getClosestTrack(data:UnresolvedTrack, player:Player, utils: ManagerUtils): Promise<Track|undefined> {
+async function getClosestTrack(data:UnresolvedTrack, player:Player): Promise<Track|undefined> {
   if(!player || !player.node) throw new RangeError("No player with a lavalink node was provided");
-  if(utils.isTrack(data)) return utils.buildTrack(data as any, data.requester);
-  if(!utils.isUnresolvedTrack(data)) throw new RangeError("Track is not an unresolved Track");
+  if(player.LavalinkManager.utils.isTrack(data)) return player.LavalinkManager.utils.buildTrack(data as any, data.requester);
+  if(!player.LavalinkManager.utils.isUnresolvedTrack(data)) throw new RangeError("Track is not an unresolved Track");
   if(!data?.info?.title && typeof data.encoded !== "string" && !data.info.uri) throw new SyntaxError("the track uri / title / encoded Base64 string is required for unresolved tracks")
   if(!data.requester) throw new SyntaxError("The requester is required");
   // try to decode the track, if possible
   if(typeof data.encoded === "string") {
     const r = await player.node.decode.singleTrack(data.encoded, data.requester);
-    if(r) return applyUnresolvedData(r, data, utils);
+    if(r) return applyUnresolvedData(r, data, player.LavalinkManager.utils);
   }
   // try to fetch the track via a uri if possible
   if(typeof data.info.uri === "string") {
-    const r = await player.search({ query: data?.info?.uri }, data.requester).then(v => v.tracks[0]);
-    if(r) return applyUnresolvedData(r, data, utils);
+    const r = await player.search({ query: data?.info?.uri }, data.requester).then(v => v.tracks?.[0] as Track | undefined);
+    if(r) return applyUnresolvedData(r, data, player.LavalinkManager.utils);
   } 
   // search the track as closely as possible
   const query = [data.info?.title, data.info?.author].filter(str => !!str).join(" by ");
   const sourceName = data.info?.sourceName;
   
   return await player.search({
-    query, source: sourceName !== "bandcamp" && sourceName !== "twitch" && sourceName !== "flowery-tts" ? sourceName : player.LavalinkManager.options?.playerOptions?.defaultSearchPlatform,
+    query, source: sourceName !== "twitch" && sourceName !== "flowery-tts" ? sourceName : player.LavalinkManager.options?.playerOptions?.defaultSearchPlatform,
   }, data.requester).then(res => {
     let trackToUse = null;
     // try to find via author name
-    if(data.info.author && !trackToUse) trackToUse = res.tracks.find(track => [data.info.author, `${data.info.author} - Topic`].some(name => new RegExp(`^${escapeRegExp(name)}$`, "i").test(track.info.author)) || new RegExp(`^${escapeRegExp(data.info.title)}$`, "i").test(track.info.title));
+    if(data.info.author && !trackToUse) trackToUse = res.tracks.find(track => [data.info?.author||"", `${data.info?.author} - Topic`].some(name => new RegExp(`^${escapeRegExp(name)}$`, "i").test(track.info?.author)) || new RegExp(`^${escapeRegExp(data.info?.title)}$`, "i").test(track.info?.title));
     // try to find via duration
-    if(data.info.duration && !trackToUse) trackToUse = res.tracks.find(track => (track.info.duration >= (data.info.duration - 1500)) && (track.info.duration <= (data.info.duration + 1500)));
+    if(data.info.duration && !trackToUse) trackToUse = res.tracks.find(track => (track.info?.duration >= (data.info?.duration - 1500)) && (track?.info.duration <= (data.info?.duration + 1500)));
     // try to find via isrc
-    if(data.info.isrc && !trackToUse) trackToUse = res.tracks.find(track =>track.info.isrc === data.info.isrc);
+    if(data.info.isrc && !trackToUse) trackToUse = res.tracks.find(track =>track.info?.isrc === data.info?.isrc);
     // apply unresolved data and return the track
-    return applyUnresolvedData(trackToUse || res.tracks[0], data, utils);
+    return applyUnresolvedData(trackToUse || res.tracks[0], data, player.LavalinkManager.utils);
   });
 }
 

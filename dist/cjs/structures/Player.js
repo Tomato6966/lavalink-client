@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Player = exports.DestroyReasons = void 0;
+const BandCampSearch_1 = require("./CustomSearches/BandCampSearch");
 const Filters_1 = require("./Filters");
 const LavalinkManagerStatics_1 = require("./LavalinkManagerStatics");
 const Queue_1 = require("./Queue");
@@ -261,6 +262,9 @@ class Player {
             this.LavalinkManager.utils.validateQueryString(this.node, Query.source);
         else if (Query.source)
             this.LavalinkManager.utils.validateSourceString(this.node, Query.source);
+        if (["bcsearch", "bandcamp"].includes(Query.source)) {
+            return await (0, BandCampSearch_1.bandCampSearch)(this, Query.query, requestUser);
+        }
         // ftts query parameters: ?voice=Olivia&audio_format=ogg_opus&translate=False&silence=1000&speed=1.0 | example raw get query: https://api.flowery.pw/v1/tts?voice=Olivia&audio_format=ogg_opus&translate=False&silence=0&speed=1.0&text=Hello%20World
         // request the data 
         const res = await this.node.request(`/loadtracks?identifier=${!/^https?:\/\//.test(Query.query) ? `${Query.source}:${Query.source === "ftts" ? "//" : ""}` : ""}${encodeURIComponent(Query.query)}`);
@@ -278,7 +282,7 @@ class Player {
                 selectedTrack: typeof res.data?.info?.selectedTrack !== "number" || res.data?.info?.selectedTrack === -1 ? null : resTracks[res.data?.info?.selectedTrack] ? this.LavalinkManager.utils.buildTrack(resTracks[res.data?.info?.selectedTrack], requestUser) : null,
                 duration: resTracks.length ? resTracks.reduce((acc, cur) => acc + (cur?.info?.duration || 0), 0) : 0,
             } : null,
-            tracks: resTracks.length ? resTracks.map(t => this.LavalinkManager.utils.buildTrack(t, requestUser)) : []
+            tracks: (resTracks.length ? resTracks.map(t => this.LavalinkManager.utils.buildTrack(t, requestUser)) : [])
         };
     }
     /**
@@ -414,7 +418,6 @@ class Player {
         const data = this.toJSON();
         await this.node.destroyPlayer(this.guildId);
         this.node = updateNode;
-        await this.connect();
         const now = performance.now();
         await this.node.updatePlayer({
             guildId: this.guildId,
@@ -424,6 +427,8 @@ class Player {
                 volume: Math.round(Math.max(Math.min(data.volume, 1000), 0)),
                 paused: data.paused,
                 filters: { ...data.filters, equalizer: data.equalizer },
+                voice: this.voice,
+                // track: this.queue.current,
             },
         });
         this.ping.lavalink = Math.round((performance.now() - now) / 10) / 100;

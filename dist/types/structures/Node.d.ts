@@ -2,7 +2,7 @@
 import { Dispatcher, Pool } from "undici";
 import { NodeManager } from "./NodeManager";
 import internal from "stream";
-import { InvalidLavalinkRestRequest, LavalinkPlayer, PlayerUpdateInfo, RoutePlanner, Session, Base64 } from "./Utils";
+import { InvalidLavalinkRestRequest, LavalinkPlayer, PlayerUpdateInfo, RoutePlanner, Session, Base64, SearchResult } from "./Utils";
 import { DestroyReasonsType } from "./Player";
 import { Track } from "./Track";
 /** Modifies any outgoing REST requests. */
@@ -135,6 +135,7 @@ export declare class LavalinkNode {
      * @returns The returned data
      */
     request(endpoint: string, modify?: ModifyRequest, parseAsText?: boolean): Promise<unknown>;
+    search(querySourceString: string, requestUser: unknown): Promise<SearchResult>;
     /**
      * Update the Player State on the Lavalink Server
      * @param data

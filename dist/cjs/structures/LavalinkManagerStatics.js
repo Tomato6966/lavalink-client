@@ -40,7 +40,10 @@ exports.DefaultSources = {
     // speak PLUGIN
     "speak": "speak",
     "tts": "tts",
-    "ftts": "ftts"
+    "ftts": "ftts",
+    // Client sided search platforms
+    "bandcamp": "bcsearch",
+    "bcsearch": "bcsearch",
 };
 exports.LavalinkPlugins = {
     DuncteBot_Plugin: "DuncteBot-plugin",

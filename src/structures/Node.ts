@@ -2,10 +2,10 @@ import WebSocket from "ws";
 import { Dispatcher, Pool } from "undici";
 import { NodeManager } from "./NodeManager";
 import internal from "stream";
-import { InvalidLavalinkRestRequest, LavalinkPlayer, PlayerEventType, PlayerEvents, PlayerUpdateInfo, RoutePlanner, TrackEndEvent, TrackExceptionEvent, TrackStartEvent, TrackStuckEvent, WebSocketClosedEvent, Session, queueTrackEnd, Base64, NodeSymbol } from "./Utils";
+import { InvalidLavalinkRestRequest, LavalinkPlayer, PlayerEventType, PlayerEvents, PlayerUpdateInfo, RoutePlanner, TrackEndEvent, TrackExceptionEvent, TrackStartEvent, TrackStuckEvent, WebSocketClosedEvent, Session, queueTrackEnd, Base64, NodeSymbol, LoadTypes, SearchResult } from "./Utils";
 import { DestroyReasons, DestroyReasonsType, Player } from "./Player";
 import { isAbsolute } from "path";
-import { Track, LavalinkTrack } from "./Track";
+import { Track, LavalinkTrack, PluginInfo } from "./Track";
 
 /** Modifies any outgoing REST requests. */
 export type ModifyRequest = (options: Dispatcher.RequestOptions) => void;
@@ -212,6 +212,32 @@ export class LavalinkNode {
         if(request.statusCode === 404) throw new Error(`Node Request resulted into an error, request-URL: ${url} | headers: ${JSON.stringify(request.headers)}`)
        
         return parseAsText ? await request.body.text() : await request.body.json();
+    }
+
+    public async search(querySourceString: string, requestUser: unknown) {
+        const res = await this.request(`/loadsearch?query=${encodeURIComponent(decodeURIComponent(querySourceString))}`) as {
+            loadType: LoadTypes,
+            data: any,
+            pluginInfo: PluginInfo,
+        };
+
+        // transform the data which can be Error, Track or Track[] to enfore [Track] 
+        const resTracks = res.loadType === "playlist" ? res.data?.tracks : res.loadType === "track" ? [res.data] : res.loadType === "search" ? Array.isArray(res.data) ? res.data : [res.data] : [];
+
+        return {
+            loadType: res.loadType,
+            exception: res.loadType === "error" ? res.data : null,
+            pluginInfo: res.pluginInfo || {},
+            playlist: res.loadType === "playlist" ? {
+                title: res.data.info?.name || res.data.pluginInfo?.name || null,
+                author: res.data.info?.author || res.data.pluginInfo?.author || null,
+                thumbnail: (res.data.info?.artworkUrl) || (res.data.pluginInfo?.artworkUrl) || ((typeof res.data?.info?.selectedTrack !== "number" || res.data?.info?.selectedTrack === -1) ? null : resTracks[res.data?.info?.selectedTrack] ? (resTracks[res.data?.info?.selectedTrack]?.info?.artworkUrl || resTracks[res.data?.info?.selectedTrack]?.info?.pluginInfo?.artworkUrl) : null) || null,
+                uri: res.data.info?.url || res.data.info?.uri || res.data.info?.link || res.data.pluginInfo?.url || res.data.pluginInfo?.uri || res.data.pluginInfo?.link || null,
+                selectedTrack: typeof res.data?.info?.selectedTrack !== "number" || res.data?.info?.selectedTrack === -1 ? null : resTracks[res.data?.info?.selectedTrack] ? this.NodeManager.LavalinkManager.utils.buildTrack(resTracks[res.data?.info?.selectedTrack], requestUser) : null,
+                duration: resTracks.length ? resTracks.reduce((acc, cur) => acc + (cur?.info?.duration || 0), 0) : 0,
+            } : null,
+            tracks: (resTracks.length ? resTracks.map(t => this.NodeManager.LavalinkManager.utils.buildTrack(t, requestUser)) : []) as Track[]
+        } as SearchResult;
     }
 
     /**
@@ -457,6 +483,7 @@ export class LavalinkNode {
         if (typeof data === "object" && typeof data?.guildId === "string" && typeof data.playerOptions === "object" && Object.keys(data.playerOptions).length > 1) {
             const player = this.NodeManager.LavalinkManager.getPlayer(data.guildId);
             if (!player) return;
+
             if (typeof data.playerOptions.paused !== "undefined") {
                 player.paused = data.playerOptions.paused;
                 player.playing = !data.playerOptions.paused;

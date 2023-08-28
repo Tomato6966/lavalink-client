@@ -39,7 +39,10 @@ export const DefaultSources: Record<SearchPlatform, LavalinkSearchPlatform> = {
     // speak PLUGIN
     "speak": "speak",
     "tts": "tts",
-    "ftts": "ftts"
+    "ftts": "ftts",
+    // Client sided search platforms
+    "bandcamp": "bcsearch",
+    "bcsearch": "bcsearch",
 }
 
 export const LavalinkPlugins = {
