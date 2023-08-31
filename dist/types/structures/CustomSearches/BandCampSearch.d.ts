@@ -1,3 +1,3 @@
 import { Player } from "../Player";
-import { SearchResult } from "../Utils";
-export declare const bandCampSearch: (player: Player, query: string, requestUser: unknown) => Promise<SearchResult>;
+import { UnresolvedSearchResult } from "../Utils";
+export declare const bandCampSearch: (player: Player, query: string, requestUser: unknown) => Promise<UnresolvedSearchResult>;

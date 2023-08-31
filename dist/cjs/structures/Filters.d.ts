@@ -95,11 +95,11 @@ export declare class FilterManager {
     toggleEcho(delay?: number, decay?: number): Promise<boolean>;
     /**
      * Enabels / Disables the Echo effect, IMPORTANT! Only works with the correct Lavalink Plugin installed. (Optional: provide your Own Data)
-     * @param delay
-     * @param decay
+     * @param delays
+     * @param gains
      * @returns
      */
-    toggleReverb(delay?: number, decay?: number): Promise<boolean>;
+    toggleReverb(delays?: number[], gains?: number[]): Promise<boolean>;
     /**
      * Enables / Disabels a Nightcore-like filter Effect. Disables/Overwrides both: custom and Vaporwave Filter
      * @param speed
@@ -276,8 +276,8 @@ export interface EchoFilter {
  * A Plugin Filter
  */
 export interface ReverbFilter {
-    delay: number;
-    decay: number;
+    delays: number[];
+    gains: number[];
 }
 /**
  * Filter Data stored in the Client and partially sent to Lavalink
@@ -292,6 +292,13 @@ export interface FilterData {
     distortion?: DistortionFilter;
     channelMix?: ChannelMixFilter;
     lowPass?: LowPassFilter;
+    pluginFilters?: Record<PluginFiltersKey, PluginFiltersValues>;
+}
+export type PluginFiltersKey = "lavalink-filter-plugin" | string;
+export interface PluginFiltersValues extends LavalinkFiltersPlugin {
+    [key: string]: any;
+}
+export interface LavalinkFiltersPlugin {
     echo: EchoFilter;
     reverb: ReverbFilter;
 }

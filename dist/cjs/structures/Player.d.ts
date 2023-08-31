@@ -142,7 +142,7 @@ export declare class Player {
         query: string;
         source: LavaSrcSearchPlatformBase;
         types?: LavaSearchType[];
-    }, requestUser: unknown): Promise<SearchResult | LavaSearchResponse>;
+    }, requestUser: unknown): Promise<import("./Utils").UnresolvedSearchResult | SearchResult | LavaSearchResponse>;
     /**
      *
      * @param query Query for your data
@@ -151,7 +151,7 @@ export declare class Player {
     search(query: {
         query: string;
         source?: SearchPlatform;
-    } | string, requestUser: unknown): Promise<SearchResult>;
+    } | string, requestUser: unknown): Promise<import("./Utils").UnresolvedSearchResult | SearchResult>;
     /**
      * Pause the player
      */

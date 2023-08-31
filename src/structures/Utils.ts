@@ -113,7 +113,15 @@ export interface SearchResult {
   exception: Exception | null,
   pluginInfo: PluginInfo,
   playlist: PlaylistInfo | null,
-  tracks: (Track | UnresolvedTrack)[]
+  tracks: Track[]
+}
+
+export interface UnresolvedSearchResult {
+  loadType: LoadTypes,
+  exception: Exception | null,
+  pluginInfo: PluginInfo,
+  playlist: PlaylistInfo | null,
+  tracks: UnresolvedTrack[]
 }
 
 export class ManagerUtils {
@@ -681,7 +689,7 @@ async function getClosestTrack(data:UnresolvedTrack, player:Player): Promise<Tra
   
   return await player.search({
     query, source: sourceName !== "twitch" && sourceName !== "flowery-tts" ? sourceName : player.LavalinkManager.options?.playerOptions?.defaultSearchPlatform,
-  }, data.requester).then(res => {
+  }, data.requester).then((res:SearchResult) => {
     let trackToUse = null;
     // try to find via author name
     if(data.info.author && !trackToUse) trackToUse = res.tracks.find(track => [data.info?.author||"", `${data.info?.author} - Topic`].some(name => new RegExp(`^${escapeRegExp(name)}$`, "i").test(track.info?.author)) || new RegExp(`^${escapeRegExp(data.info?.title)}$`, "i").test(track.info?.title));

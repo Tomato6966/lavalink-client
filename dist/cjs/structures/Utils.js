@@ -343,7 +343,7 @@ async function getClosestTrack(data, player) {
     const sourceName = data.info?.sourceName;
     return await player.search({
         query, source: sourceName !== "twitch" && sourceName !== "flowery-tts" ? sourceName : player.LavalinkManager.options?.playerOptions?.defaultSearchPlatform,
-    }, data.requester).then(res => {
+    }, data.requester).then((res) => {
         let trackToUse = null;
         // try to find via author name
         if (data.info.author && !trackToUse)

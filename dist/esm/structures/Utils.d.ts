@@ -42,7 +42,14 @@ export interface SearchResult {
     exception: Exception | null;
     pluginInfo: PluginInfo;
     playlist: PlaylistInfo | null;
-    tracks: (Track | UnresolvedTrack)[];
+    tracks: Track[];
+}
+export interface UnresolvedSearchResult {
+    loadType: LoadTypes;
+    exception: Exception | null;
+    pluginInfo: PluginInfo;
+    playlist: PlaylistInfo | null;
+    tracks: UnresolvedTrack[];
 }
 export declare class ManagerUtils {
     LavalinkManager: LavalinkManager | null;

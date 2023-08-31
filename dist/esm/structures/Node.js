@@ -369,8 +369,8 @@ export class LavalinkNode {
                     player.filterManager.data.timescale = data.playerOptions.filters.timescale;
                 if (data.playerOptions.filters.distortion)
                     player.filterManager.data.distortion = data.playerOptions.filters.distortion;
-                if (data.playerOptions.filters.echo)
-                    player.filterManager.data.echo = data.playerOptions.filters.echo;
+                if (data.playerOptions.filters.pluginFilters)
+                    player.filterManager.data.pluginFilters = data.playerOptions.filters.pluginFilters;
                 if (data.playerOptions.filters.vibrato)
                     player.filterManager.data.vibrato = data.playerOptions.filters.vibrato;
                 if (data.playerOptions.filters.volume)

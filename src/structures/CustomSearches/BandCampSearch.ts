@@ -1,6 +1,6 @@
 import { Player } from "../Player";
 import { fetch } from "undici";
-import { SearchResult } from "../Utils";
+import { SearchResult, UnresolvedSearchResult } from "../Utils";
 import { request } from "http";
 import { UnresolvedTrack } from "../Track";
 
@@ -32,6 +32,6 @@ export const bandCampSearch = async (player:Player, query: string, requestUser: 
         exception: error,
         pluginInfo: {},
         playlist:  null,
-        tracks: tracks as UnresolvedTrack[]
-    } as SearchResult;
+        tracks: tracks
+    } as UnresolvedSearchResult;
 }
