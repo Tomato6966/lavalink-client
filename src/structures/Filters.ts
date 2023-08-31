@@ -48,20 +48,20 @@ export class FilterManager {
             depth: 0// 0 < x = 1
         },
         vibrato: {
-            frequency: 0, // 0 < x = 14
-            depth: 0     // 0 < x = 1
+            frequency: 0, // 0 < x <= 14
+            depth: 0     // 0 < x <= 1
         },
         pluginFilters: {
-            /*"lavalink-filter-plugin": {
+            "lavalink-filter-plugin": {
                 echo: {
-                    delay: 0,
-                    decay: 0
+                    delay: 0, // in seconds
+                    decay: 0 // 0 < 1
                 },
                 reverb: {
-                    delays: [0.037, 0.042, 0.048, 0.053],
-                    gains: [0.84, 0.83, 0.82, 0.81]
+                    delays: [], // [0.037, 0.042, 0.048, 0.053]
+                    gains: [] // [0.84, 0.83, 0.82, 0.81]
                 }
-            }*/
+            }
         },
         channelMix: audioOutputsData.stereo,
         /*distortion: {
@@ -87,8 +87,8 @@ export class FilterManager {
      * Apply Player filters for lavalink filter sending data, if the filter is enabled / not
      */
     async applyPlayerFilters() {
+        
         const sendData = { ...this.data } as LavalinkFilterData & { equalizer: EQBand[] };
-
         this.checkFiltersState();
 
         if (!this.filters.volume) delete sendData.volume;
@@ -96,18 +96,27 @@ export class FilterManager {
         if (!this.filters.vibrato) delete sendData.vibrato;
         if (!this.filters.echo) delete sendData.pluginFilters?.["lavalink-filter-plugin"]?.echo;
         if (!this.filters.reverb) delete sendData.pluginFilters?.["lavalink-filter-plugin"]?.reverb;
+        if(sendData.pluginFilters?.["lavalink-filter-plugin"] && Object.values(sendData.pluginFilters?.["lavalink-filter-plugin"]).length === 0) delete sendData.pluginFilters["lavalink-filter-plugin"];
+        if(sendData.pluginFilters && Object.values(sendData.pluginFilters).length === 0) delete sendData.pluginFilters;
         if (!this.filters.lowPass) delete sendData.lowPass;
         if (!this.filters.karaoke) delete sendData.karaoke;
         if (!this.filters.rotation) delete sendData.rotation;
         if (this.filters.audioOutput === "stereo") delete sendData.channelMix;
+
         if(Object.values(this.data.timescale).every(v => v === 1)) delete sendData.timescale;
         
         if (!this.player.node.sessionId) throw new Error("The Lavalink-Node is either not ready or not up to date");
 
         sendData.equalizer = [...this.equalizerBands];
+        if(sendData.equalizer.length === 0) delete sendData.equalizer;
+        
         for (const key of [...Object.keys(sendData)]) {
             // delete disabled filters
-            if (this.player.node.info && !this.player.node.info?.filters?.includes?.(key)) delete sendData[key];
+            if(key === "pluginFilters") {
+                for(const key of [...Object.keys(sendData.pluginFilters)]) {
+                    // if (this.player.node.info && !this.player.node.info?.plugins?.find?.(v => v.name === key)) delete sendData[key];
+                }
+            } else if (this.player.node.info && !this.player.node.info?.filters?.includes?.(key)) delete sendData[key];
         }
 
         const now = performance.now();
@@ -163,7 +172,7 @@ export class FilterManager {
         this.filters.karaoke = false;
         this.filters.volume = false;
         this.filters.audioOutput = "stereo";
-        // disable all filters
+        // reset all filter datas
         for (const [key, value] of Object.entries({
             volume: 1,
             lowPass: {
@@ -180,13 +189,17 @@ export class FilterManager {
                 pitch: 1, // 0 = x
                 rate: 1 // 0 = x
             },
-            echo: {
-                delay: 0,
-                decay: 0
-            },
-            reverb: {
-                delays: [], 
-                gains: []
+            pluginFilters: {
+                "lavalink-filter-plugin": {
+                    echo: {
+                        delay: 0,
+                        decay: 0
+                    },
+                    reverb: {
+                        delays: [], 
+                        gains: []
+                    },
+                }
             },
             rotation: {
                 rotationHz: 0
@@ -370,13 +383,14 @@ export class FilterManager {
      * @param decay
      * @returns 
      */
-    public async toggleEcho(delay = 1, decay = 0.5): Promise<boolean> {
+    public async toggleEcho(delay = 4, decay = 0.8): Promise<boolean> {
         if (this.player.node.info && !this.player.node.info?.filters?.includes("echo")) throw new Error("Node#Info#filters does not include the 'echo' Filter (Node has it not enable aka not installed!)")
         
         if(!this.data) this.data = {};
         if(!this.data.pluginFilters) this.data.pluginFilters = {}
         if(!this.data.pluginFilters["lavalink-filter-plugin"]) this.data.pluginFilters["lavalink-filter-plugin"] = { echo: { decay: 0, delay: 0 }, reverb: { delays: [], gains: [] } };
-       
+        if(!this.data.pluginFilters["lavalink-filter-plugin"].echo) this.data.pluginFilters["lavalink-filter-plugin"].echo = { decay: 0, delay: 0 };
+        
         this.data.pluginFilters["lavalink-filter-plugin"].echo.delay = this.filters.echo ? 0 : delay;
         this.data.pluginFilters["lavalink-filter-plugin"].echo.decay = this.filters.echo ? 0 : decay;
         
@@ -396,7 +410,7 @@ export class FilterManager {
         if(!this.data) this.data = {};
         if(!this.data.pluginFilters) this.data.pluginFilters = {}
         if(!this.data.pluginFilters["lavalink-filter-plugin"]) this.data.pluginFilters["lavalink-filter-plugin"] = { echo: { decay: 0, delay: 0 }, reverb: { delays: [], gains: [] } };
-       
+        if(!this.data.pluginFilters["lavalink-filter-plugin"].reverb) this.data.pluginFilters["lavalink-filter-plugin"].reverb = { delays: [], gains: [] };
         this.data.pluginFilters["lavalink-filter-plugin"].reverb.delays = this.filters.reverb ? [] : delays;
         this.data.pluginFilters["lavalink-filter-plugin"].reverb.gains = this.filters.reverb ? [] : gains;
         

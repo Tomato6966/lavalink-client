@@ -49,19 +49,19 @@ class FilterManager {
         },
         vibrato: {
             frequency: 0,
-            depth: 0 // 0 < x = 1
+            depth: 0 // 0 < x <= 1
         },
         pluginFilters: {
-        /*"lavalink-filter-plugin": {
-            echo: {
-                delay: 0,
-                decay: 0
-            },
-            reverb: {
-                delays: [0.037, 0.042, 0.048, 0.053],
-                gains: [0.84, 0.83, 0.82, 0.81]
+            "lavalink-filter-plugin": {
+                echo: {
+                    delay: 0,
+                    decay: 0 // 0 < 1
+                },
+                reverb: {
+                    delays: [],
+                    gains: [] // [0.84, 0.83, 0.82, 0.81]
+                }
             }
-        }*/
         },
         channelMix: exports.audioOutputsData.stereo,
         /*distortion: {
@@ -98,6 +98,10 @@ class FilterManager {
             delete sendData.pluginFilters?.["lavalink-filter-plugin"]?.echo;
         if (!this.filters.reverb)
             delete sendData.pluginFilters?.["lavalink-filter-plugin"]?.reverb;
+        if (sendData.pluginFilters?.["lavalink-filter-plugin"] && Object.values(sendData.pluginFilters?.["lavalink-filter-plugin"]).length === 0)
+            delete sendData.pluginFilters["lavalink-filter-plugin"];
+        if (sendData.pluginFilters && Object.values(sendData.pluginFilters).length === 0)
+            delete sendData.pluginFilters;
         if (!this.filters.lowPass)
             delete sendData.lowPass;
         if (!this.filters.karaoke)
@@ -111,9 +115,16 @@ class FilterManager {
         if (!this.player.node.sessionId)
             throw new Error("The Lavalink-Node is either not ready or not up to date");
         sendData.equalizer = [...this.equalizerBands];
+        if (sendData.equalizer.length === 0)
+            delete sendData.equalizer;
         for (const key of [...Object.keys(sendData)]) {
             // delete disabled filters
-            if (this.player.node.info && !this.player.node.info?.filters?.includes?.(key))
+            if (key === "pluginFilters") {
+                for (const key of [...Object.keys(sendData.pluginFilters)]) {
+                    // if (this.player.node.info && !this.player.node.info?.plugins?.find?.(v => v.name === key)) delete sendData[key];
+                }
+            }
+            else if (this.player.node.info && !this.player.node.info?.filters?.includes?.(key))
                 delete sendData[key];
         }
         const now = performance.now();
@@ -166,7 +177,7 @@ class FilterManager {
         this.filters.karaoke = false;
         this.filters.volume = false;
         this.filters.audioOutput = "stereo";
-        // disable all filters
+        // reset all filter datas
         for (const [key, value] of Object.entries({
             volume: 1,
             lowPass: {
@@ -183,13 +194,17 @@ class FilterManager {
                 pitch: 1,
                 rate: 1 // 0 = x
             },
-            echo: {
-                delay: 0,
-                decay: 0
-            },
-            reverb: {
-                delays: [],
-                gains: []
+            pluginFilters: {
+                "lavalink-filter-plugin": {
+                    echo: {
+                        delay: 0,
+                        decay: 0
+                    },
+                    reverb: {
+                        delays: [],
+                        gains: []
+                    },
+                }
             },
             rotation: {
                 rotationHz: 0
@@ -363,7 +378,7 @@ class FilterManager {
      * @param decay
      * @returns
      */
-    async toggleEcho(delay = 1, decay = 0.5) {
+    async toggleEcho(delay = 4, decay = 0.8) {
         if (this.player.node.info && !this.player.node.info?.filters?.includes("echo"))
             throw new Error("Node#Info#filters does not include the 'echo' Filter (Node has it not enable aka not installed!)");
         if (!this.data)
@@ -372,6 +387,8 @@ class FilterManager {
             this.data.pluginFilters = {};
         if (!this.data.pluginFilters["lavalink-filter-plugin"])
             this.data.pluginFilters["lavalink-filter-plugin"] = { echo: { decay: 0, delay: 0 }, reverb: { delays: [], gains: [] } };
+        if (!this.data.pluginFilters["lavalink-filter-plugin"].echo)
+            this.data.pluginFilters["lavalink-filter-plugin"].echo = { decay: 0, delay: 0 };
         this.data.pluginFilters["lavalink-filter-plugin"].echo.delay = this.filters.echo ? 0 : delay;
         this.data.pluginFilters["lavalink-filter-plugin"].echo.decay = this.filters.echo ? 0 : decay;
         this.filters.echo = !this.filters.echo;
@@ -393,6 +410,8 @@ class FilterManager {
             this.data.pluginFilters = {};
         if (!this.data.pluginFilters["lavalink-filter-plugin"])
             this.data.pluginFilters["lavalink-filter-plugin"] = { echo: { decay: 0, delay: 0 }, reverb: { delays: [], gains: [] } };
+        if (!this.data.pluginFilters["lavalink-filter-plugin"].reverb)
+            this.data.pluginFilters["lavalink-filter-plugin"].reverb = { delays: [], gains: [] };
         this.data.pluginFilters["lavalink-filter-plugin"].reverb.delays = this.filters.reverb ? [] : delays;
         this.data.pluginFilters["lavalink-filter-plugin"].reverb.gains = this.filters.reverb ? [] : gains;
         this.filters.reverb = !this.filters.reverb;
