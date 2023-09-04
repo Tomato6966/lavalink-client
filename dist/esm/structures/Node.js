@@ -101,7 +101,14 @@ export class LavalinkNode {
         if (["bcsearch", "bandcamp"].includes(Query.source)) {
             throw new Error("Bandcamp Search only works on the player!");
         }
-        const res = await this.request(`/loadtracks?identifier=${!/^https?:\/\//.test(Query.query) ? `${Query.source}:${Query.source === "ftts" ? "//" : ""}` : ""}${encodeURIComponent(decodeURIComponent(Query.query))}`);
+        let uri = `/loadtracks?identifier=`;
+        if (!/^https?:\/\//.test(Query.query))
+            uri += `${Query.source}:`;
+        if (Query.source === "ftts")
+            uri += `//${encodeURIComponent(encodeURI(decodeURIComponent(Query.query)))}`;
+        else
+            uri += encodeURIComponent(decodeURIComponent(Query.query));
+        const res = await this.request(uri);
         // transform the data which can be Error, Track or Track[] to enfore [Track] 
         const resTracks = res.loadType === "playlist" ? res.data?.tracks : res.loadType === "track" ? [res.data] : res.loadType === "search" ? Array.isArray(res.data) ? res.data : [res.data] : [];
         return {

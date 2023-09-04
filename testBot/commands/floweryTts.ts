@@ -15,13 +15,7 @@ export default {
         const vc = (interaction.member as GuildMember)?.voice?.channel as VoiceChannel;
         if(!vc.joinable || !vc.speakable) return interaction.reply({ ephemeral: true, content: "I am not able to join your channel / speak in there." });
         
-        const player = client.lavalink.getPlayer(interaction.guildId);
-        if(player?.voiceChannelId && player.connected) return interaction.reply({ ephemeral: true, content: "I'm already connected." })
-        if(player) { // player already created, but not connected yet -> connect to it!
-            player.voiceChannelId = player?.voiceChannelId || vcId;
-            await player.connect();
-        }
-        const newPlayer = await client.lavalink.createPlayer({
+        const player = await client.lavalink.createPlayer({
             guildId: interaction.guildId, 
             voiceChannelId: vcId, 
             textChannelId: interaction.channelId, 
@@ -33,13 +27,23 @@ export default {
             // node: "YOUR_NODE_ID",
             // vcRegion: (interaction.member as GuildMember)?.voice.channel?.rtcRegion!
         });
-        await newPlayer.connect();
+        const connected = player.connected;
+
+        if(!connected) await player.connect();
+        if(player.voiceChannelId !== vcId) return interaction.reply({ ephemeral: true, content: "You need to be in my Voice Channel" });
         
-        const r = await newPlayer.search({ query: (interaction.options as CommandInteractionOptionResolver ).getString("text")!, source: "ftts" }, interaction.user);
+        
+        const response = await player.search({ query: (interaction.options as CommandInteractionOptionResolver ).getString("text")!, source: "ftts" }, interaction.user);
        
+        if(!response || !response.tracks?.length) return interaction.reply({ content: `No Tracks found`, ephemeral: true });
+
+        player.queue.add(response.tracks[0]);
+
         await interaction.reply({
-            content: `Joined your Voice Channel`,
+            content: `Added your TTs request to queue position. #${player.queue.tracks.length}`,
             ephemeral: true,
-        })
+        });
+
+        if(!player.playing) await player.play(connected ? { volume: client.defaultVolume, paused: false } : undefined);
     }
 } as Command;

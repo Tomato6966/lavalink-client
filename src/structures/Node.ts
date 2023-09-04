@@ -217,14 +217,20 @@ export class LavalinkNode {
 
     public async search(query: SearchQuery, requestUser: unknown) {
         const Query = this.NodeManager.LavalinkManager.utils.transformQuery(query);
-
+        
         if(/^https?:\/\//.test(Query.query)) this.NodeManager.LavalinkManager.utils.validateQueryString(this, Query.source);
         else if(Query.source) this.NodeManager.LavalinkManager.utils.validateSourceString(this, Query.source);
         
         if(["bcsearch", "bandcamp"].includes(Query.source)) {
             throw new Error("Bandcamp Search only works on the player!");
         }
-        const res = await this.request(`/loadtracks?identifier=${!/^https?:\/\//.test(Query.query) ? `${Query.source}:${Query.source === "ftts" ? "//" : ""}` : ""}${encodeURIComponent(decodeURIComponent(Query.query))}`) as {
+
+        let uri = `/loadtracks?identifier=`;
+        if(!/^https?:\/\//.test(Query.query)) uri += `${Query.source}:`;
+        if(Query.source === "ftts") uri += `//${encodeURIComponent(encodeURI(decodeURIComponent(Query.query)))}`;
+        else uri += encodeURIComponent(decodeURIComponent(Query.query));
+
+        const res = await this.request(uri) as {
             loadType: LoadTypes,
             data: any,
             pluginInfo: PluginInfo,
