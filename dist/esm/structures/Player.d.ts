@@ -3,8 +3,8 @@ import { LavalinkManager } from "./LavalinkManager";
 import { LavalinkNode } from "./Node";
 import { Queue } from "./Queue";
 import { Track, UnresolvedTrack } from "./Track";
-import { LavalinkPlayerVoiceOptions, SearchPlatform, SearchResult, LavaSearchType, LavaSearchResponse, LavaSrcSearchPlatformBase } from "./Utils";
-type PlayerDestroyReasons = "QueueEmpty" | "NodeDestroy" | "NodeDeleted" | "LavalinkNoVoice" | "NodeReconnectFail" | "PlayerReconnectFail" | "Disconnected" | "ChannelDeleted";
+import { LavalinkPlayerVoiceOptions, SearchResult, LavaSearchResponse, LavaSearchQuery, SearchQuery } from "./Utils";
+type PlayerDestroyReasons = "QueueEmpty" | "NodeDestroy" | "NodeDeleted" | "LavalinkNoVoice" | "NodeReconnectFail" | "PlayerReconnectFail" | "Disconnected" | "ChannelDeleted" | "ReconnectAllNodes" | "DisconnectAllNodes";
 export type DestroyReasonsType = PlayerDestroyReasons | string;
 export declare const DestroyReasons: Record<PlayerDestroyReasons, PlayerDestroyReasons>;
 export interface PlayerJson {
@@ -138,20 +138,13 @@ export declare class Player {
      * @param ignoreVolumeDecrementer If it should ignore the volumedecrementer option
      */
     setVolume(volume: number, ignoreVolumeDecrementer?: boolean): Promise<void>;
-    lavaSearch(query: {
-        query: string;
-        source: LavaSrcSearchPlatformBase;
-        types?: LavaSearchType[];
-    }, requestUser: unknown): Promise<import("./Utils").UnresolvedSearchResult | SearchResult | LavaSearchResponse>;
+    lavaSearch(query: LavaSearchQuery, requestUser: unknown): Promise<SearchResult | LavaSearchResponse>;
     /**
      *
      * @param query Query for your data
      * @param requestUser
      */
-    search(query: {
-        query: string;
-        source?: SearchPlatform;
-    } | string, requestUser: unknown): Promise<import("./Utils").UnresolvedSearchResult | SearchResult>;
+    search(query: SearchQuery, requestUser: unknown): Promise<import("./Utils").UnresolvedSearchResult | SearchResult>;
     /**
      * Pause the player
      */

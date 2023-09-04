@@ -96,8 +96,16 @@ class LavalinkNode {
             throw new Error(`Node Request resulted into an error, request-URL: ${url} | headers: ${JSON.stringify(request.headers)}`);
         return parseAsText ? await request.body.text() : await request.body.json();
     }
-    async search(querySourceString, requestUser) {
-        const res = await this.request(`/loadsearch?query=${encodeURIComponent(decodeURIComponent(querySourceString))}`);
+    async search(query, requestUser) {
+        const Query = this.NodeManager.LavalinkManager.utils.transformQuery(query);
+        if (/^https?:\/\//.test(Query.query))
+            this.NodeManager.LavalinkManager.utils.validateQueryString(this, Query.source);
+        else if (Query.source)
+            this.NodeManager.LavalinkManager.utils.validateSourceString(this, Query.source);
+        if (["bcsearch", "bandcamp"].includes(Query.source)) {
+            throw new Error("Bandcamp Search only works on the player!");
+        }
+        const res = await this.request(`/loadtracks?identifier=${!/^https?:\/\//.test(Query.query) ? `${Query.source}:${Query.source === "ftts" ? "//" : ""}` : ""}${encodeURIComponent(decodeURIComponent(Query.query))}`);
         // transform the data which can be Error, Track or Track[] to enfore [Track] 
         const resTracks = res.loadType === "playlist" ? res.data?.tracks : res.loadType === "track" ? [res.data] : res.loadType === "search" ? Array.isArray(res.data) ? res.data : [res.data] : [];
         return {
@@ -113,6 +121,28 @@ class LavalinkNode {
                 duration: resTracks.length ? resTracks.reduce((acc, cur) => acc + (cur?.info?.duration || 0), 0) : 0,
             } : null,
             tracks: (resTracks.length ? resTracks.map(t => this.NodeManager.LavalinkManager.utils.buildTrack(t, requestUser)) : [])
+        };
+    }
+    async lavaSearch(query, requestUser) {
+        const Query = this.NodeManager.LavalinkManager.utils.transformLavaSearchQuery(query);
+        if (Query.source)
+            this.NodeManager.LavalinkManager.utils.validateSourceString(this, Query.source);
+        if (/^https?:\/\//.test(Query.query))
+            return await this.search({ query: Query.query, source: Query.source }, requestUser);
+        if (!["spsearch", "sprec", "amsearch", "dzsearch", "dzisrc", "ytmsearch", "ytsearch"].includes(Query.source))
+            throw new SyntaxError(`Query.source must be a source from LavaSrc: "spsearch" | "sprec" | "amsearch" | "dzsearch" | "dzisrc" | "ytmsearch" | "ytsearch"`);
+        if (!this.info.plugins.find(v => v.name === "lavasearch-plugin"))
+            throw new RangeError(`there is no lavasearch-plugin available in the lavalink node: ${this.id}`);
+        if (!this.info.plugins.find(v => v.name === "lavasrc-plugin"))
+            throw new RangeError(`there is no lavasrc-plugin available in the lavalink node: ${this.id}`);
+        const res = await this.request(`/loadsearch?query=${Query.source ? `${Query.source}:` : ""}${encodeURIComponent(Query.query)}${Query.types?.length ? `&types=${Query.types.join(",")}` : ""}`);
+        return {
+            tracks: res.tracks?.map(v => this.NodeManager.LavalinkManager.utils.buildTrack(v, requestUser)) || [],
+            albums: res.albums?.map(v => ({ info: v.info, pluginInfo: v?.plugin || v.pluginInfo, tracks: v.tracks.map(v => this.NodeManager.LavalinkManager.utils.buildTrack(v, requestUser)) })) || [],
+            artists: res.artists?.map(v => ({ info: v.info, pluginInfo: v?.plugin || v.pluginInfo, tracks: v.tracks.map(v => this.NodeManager.LavalinkManager.utils.buildTrack(v, requestUser)) })) || [],
+            playlists: res.playlists?.map(v => ({ info: v.info, pluginInfo: v?.plugin || v.pluginInfo, tracks: v.tracks.map(v => this.NodeManager.LavalinkManager.utils.buildTrack(v, requestUser)) })) || [],
+            texts: res.texts?.map(v => ({ text: v.text, pluginInfo: v?.plugin || v.pluginInfo })) || [],
+            pluginInfo: res.pluginInfo || res?.plugin
         };
     }
     /**
@@ -168,7 +198,7 @@ class LavalinkNode {
         }
         this.socket = new ws_1.default(`ws${this.options.secure ? "s" : ""}://${this.options.host}:${this.options.port}/v4/websocket`, { headers });
         this.socket.on("open", this.open.bind(this));
-        this.socket.on("close", this.close.bind(this));
+        this.socket.on("close", (code, reason) => this.close(code, reason?.toString()));
         this.socket.on("message", this.message.bind(this));
         this.socket.on("error", this.error.bind(this));
     }
@@ -180,19 +210,24 @@ class LavalinkNode {
      * Destroys the Node-Connection (Websocket) and all player's of the node
      * @returns
      */
-    destroy(destroyReason) {
+    destroy(destroyReason, deleteNode = true) {
         if (!this.connected)
             return;
         const players = this.NodeManager.LavalinkManager.players.filter(p => p.node.id == this.id);
         if (players)
             players.forEach(p => p.destroy(destroyReason || Player_1.DestroyReasons.NodeDestroy));
-        this.socket.close(1000, "destroy");
+        this.socket.close(1000, "Node-Destroy");
         this.socket.removeAllListeners();
         this.socket = null;
         this.reconnectAttempts = 1;
         clearTimeout(this.reconnectTimeout);
-        this.NodeManager.emit("destroy", this, destroyReason);
-        this.NodeManager.nodes.delete(this.id);
+        if (deleteNode) {
+            this.NodeManager.emit("destroy", this, destroyReason);
+            this.NodeManager.nodes.delete(this.id);
+        }
+        else {
+            this.NodeManager.emit("disconnect", this, { code: 1000, reason: destroyReason });
+        }
         return;
     }
     /** Returns if connected to the Node. */
@@ -406,7 +441,20 @@ class LavalinkNode {
     get poolAddress() {
         return `http${this.options.secure ? "s" : ""}://${this.options.host}:${this.options.port}`;
     }
-    reconnect() {
+    reconnect(instaReconnect = false) {
+        if (instaReconnect) {
+            if (this.reconnectAttempts >= this.options.retryAmount) {
+                const error = new Error(`Unable to connect after ${this.options.retryAmount} attempts.`);
+                this.NodeManager.emit("error", this, error);
+                return this.destroy(Player_1.DestroyReasons.NodeReconnectFail);
+            }
+            this.socket.removeAllListeners();
+            this.socket = null;
+            this.NodeManager.emit("reconnecting", this);
+            this.connect();
+            this.reconnectAttempts++;
+            return;
+        }
         this.reconnectTimeout = setTimeout(() => {
             if (this.reconnectAttempts >= this.options.retryAmount) {
                 const error = new Error(`Unable to connect after ${this.options.retryAmount} attempts.`);
@@ -437,7 +485,7 @@ class LavalinkNode {
     }
     close(code, reason) {
         this.NodeManager.emit("disconnect", this, { code, reason });
-        if (code !== 1000 || reason !== "destroy")
+        if (code !== 1000 || reason !== "Node-Destroy")
             this.reconnect();
     }
     error(error) {

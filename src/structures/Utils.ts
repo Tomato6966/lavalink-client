@@ -293,6 +293,35 @@ export class ManagerUtils {
     return;
   }
   
+  transformQuery(query: SearchQuery) {
+    const Query = { 
+      query: typeof query === "string" ? query : query.query, 
+      source: DefaultSources[(typeof query === "string" ? undefined : query.source?.trim?.()?.toLowerCase?.()) ?? this.LavalinkManager?.options?.playerOptions?.defaultSearchPlatform?.toLowerCase?.()] ?? (typeof query === "string" ? undefined : query.source?.trim?.()?.toLowerCase?.()) ?? this.LavalinkManager?.options?.playerOptions?.defaultSearchPlatform?.toLowerCase?.() 
+    }
+    const foundSource = Object.keys(DefaultSources).find(source => Query.query?.toLowerCase?.()?.startsWith(`${source}:`.toLowerCase()))?.trim?.()?.toLowerCase?.() as SearchPlatform | undefined;
+    if(foundSource && DefaultSources[foundSource]){
+        Query.source = DefaultSources[foundSource]; // set the source to ytsearch:
+        Query.query = Query.query.slice(`${foundSource}:`.length, Query.query.length); // remove ytsearch: from the query
+    }
+    return Query;
+  }
+
+  transformLavaSearchQuery(query: LavaSearchQuery) {
+    // transform the query object
+    const Query = { 
+      query: typeof query === "string" ? query : query.query, 
+      types: query.types ? ["track", "playlist", "artist", "album", "text"].filter(v => query.types?.find(x => x.toLowerCase().startsWith(v))) : ["track", "playlist", "artist", "album", /*"text"*/],
+      source: DefaultSources[(typeof query === "string" ? undefined : query.source?.trim?.()?.toLowerCase?.()) ?? this.LavalinkManager?.options?.playerOptions?.defaultSearchPlatform?.toLowerCase?.()] ?? (typeof query === "string" ? undefined : query.source?.trim?.()?.toLowerCase?.()) ?? this.LavalinkManager?.options?.playerOptions?.defaultSearchPlatform?.toLowerCase?.() 
+    }
+
+    const foundSource = Object.keys(DefaultSources).find(source => Query.query.toLowerCase().startsWith(`${source}:`.toLowerCase()))?.trim?.()?.toLowerCase?.() as SearchPlatform | undefined;
+    if(foundSource && DefaultSources[foundSource]){
+        Query.source = DefaultSources[foundSource]; // set the source to ytsearch:
+        Query.query = Query.query.slice(`${foundSource}:`.length, Query.query.length); // remove ytsearch: from the query
+    }
+    return Query;
+  }
+
   validateSourceString(node: LavalinkNode, sourceString:SearchPlatform) {
     if (!sourceString) throw new Error(`No SourceString was provided`);
     const source = DefaultSources[sourceString.toLowerCase().trim()] as LavalinkSearchPlatform;
@@ -729,3 +758,7 @@ export interface LavaSearchResponse {
   /** Addition result data provided by plugins */
   pluginInfo: PluginInfo
 }
+
+
+export type SearchQuery = { query: string, source?: SearchPlatform } | string;
+export type LavaSearchQuery = { query: string, source: LavaSrcSearchPlatformBase, types?: LavaSearchType[] };

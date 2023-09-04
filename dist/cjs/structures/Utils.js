@@ -194,6 +194,32 @@ class ManagerUtils {
         }
         return;
     }
+    transformQuery(query) {
+        const Query = {
+            query: typeof query === "string" ? query : query.query,
+            source: LavalinkManagerStatics_1.DefaultSources[(typeof query === "string" ? undefined : query.source?.trim?.()?.toLowerCase?.()) ?? this.LavalinkManager?.options?.playerOptions?.defaultSearchPlatform?.toLowerCase?.()] ?? (typeof query === "string" ? undefined : query.source?.trim?.()?.toLowerCase?.()) ?? this.LavalinkManager?.options?.playerOptions?.defaultSearchPlatform?.toLowerCase?.()
+        };
+        const foundSource = Object.keys(LavalinkManagerStatics_1.DefaultSources).find(source => Query.query?.toLowerCase?.()?.startsWith(`${source}:`.toLowerCase()))?.trim?.()?.toLowerCase?.();
+        if (foundSource && LavalinkManagerStatics_1.DefaultSources[foundSource]) {
+            Query.source = LavalinkManagerStatics_1.DefaultSources[foundSource]; // set the source to ytsearch:
+            Query.query = Query.query.slice(`${foundSource}:`.length, Query.query.length); // remove ytsearch: from the query
+        }
+        return Query;
+    }
+    transformLavaSearchQuery(query) {
+        // transform the query object
+        const Query = {
+            query: typeof query === "string" ? query : query.query,
+            types: query.types ? ["track", "playlist", "artist", "album", "text"].filter(v => query.types?.find(x => x.toLowerCase().startsWith(v))) : ["track", "playlist", "artist", "album", /*"text"*/],
+            source: LavalinkManagerStatics_1.DefaultSources[(typeof query === "string" ? undefined : query.source?.trim?.()?.toLowerCase?.()) ?? this.LavalinkManager?.options?.playerOptions?.defaultSearchPlatform?.toLowerCase?.()] ?? (typeof query === "string" ? undefined : query.source?.trim?.()?.toLowerCase?.()) ?? this.LavalinkManager?.options?.playerOptions?.defaultSearchPlatform?.toLowerCase?.()
+        };
+        const foundSource = Object.keys(LavalinkManagerStatics_1.DefaultSources).find(source => Query.query.toLowerCase().startsWith(`${source}:`.toLowerCase()))?.trim?.()?.toLowerCase?.();
+        if (foundSource && LavalinkManagerStatics_1.DefaultSources[foundSource]) {
+            Query.source = LavalinkManagerStatics_1.DefaultSources[foundSource]; // set the source to ytsearch:
+            Query.query = Query.query.slice(`${foundSource}:`.length, Query.query.length); // remove ytsearch: from the query
+        }
+        return Query;
+    }
     validateSourceString(node, sourceString) {
         if (!sourceString)
             throw new Error(`No SourceString was provided`);

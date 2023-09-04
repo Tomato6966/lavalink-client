@@ -89,6 +89,15 @@ export declare class ManagerUtils {
     isUnresolvedTrackQuery(data: UnresolvedQuery | any): boolean;
     getClosestTrack(data: UnresolvedTrack, player: Player): Promise<Track | undefined>;
     validateQueryString(node: LavalinkNode, queryString: string): void;
+    transformQuery(query: SearchQuery): {
+        query: string;
+        source: any;
+    };
+    transformLavaSearchQuery(query: LavaSearchQuery): {
+        query: string;
+        types: string[];
+        source: any;
+    };
     validateSourceString(node: LavalinkNode, sourceString: SearchPlatform): void;
 }
 /**
@@ -322,4 +331,13 @@ export interface LavaSearchResponse {
     /** Addition result data provided by plugins */
     pluginInfo: PluginInfo;
 }
+export type SearchQuery = {
+    query: string;
+    source?: SearchPlatform;
+} | string;
+export type LavaSearchQuery = {
+    query: string;
+    source: LavaSrcSearchPlatformBase;
+    types?: LavaSearchType[];
+};
 export {};

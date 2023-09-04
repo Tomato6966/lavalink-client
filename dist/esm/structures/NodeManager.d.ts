@@ -54,6 +54,22 @@ export declare interface NodeManager {
 export declare class NodeManager extends EventEmitter {
     nodes: MiniMap<string, LavalinkNode>;
     constructor(LavalinkManager: LavalinkManager);
+    /**
+     * Disconnects all Nodes from lavalink ws sockets
+     * @param deleteAllNodes if the nodes should also be deleted from nodeManager.nodes
+     * @returns amount of disconnected Nodes
+     */
+    disconnectAll(deleteAllNodes?: boolean): Promise<number>;
+    /**
+     * Connects all not connected nodes
+     * @returns Amount of connected Nodes
+     */
+    connectAll(): Promise<number>;
+    /**
+     * Forcefully reconnects all nodes
+     * @returns amount of nodes
+     */
+    reconnectAll(): Promise<number>;
     createNode(options: LavalinkNodeOptions): LavalinkNode;
     leastUsedNodes(sortType?: "memory" | "cpuLavalink" | "cpuSystem" | "calls" | "playingPlayers" | "players"): LavalinkNode[];
     deleteNode(node: LavalinkNodeIdentifier | LavalinkNode): void;

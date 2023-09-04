@@ -2,7 +2,7 @@
 import { Dispatcher, Pool } from "undici";
 import { NodeManager } from "./NodeManager";
 import internal from "stream";
-import { InvalidLavalinkRestRequest, LavalinkPlayer, PlayerUpdateInfo, RoutePlanner, Session, Base64, SearchResult } from "./Utils";
+import { InvalidLavalinkRestRequest, LavalinkPlayer, PlayerUpdateInfo, RoutePlanner, Session, Base64, SearchResult, LavaSearchResponse, LavaSearchQuery, SearchQuery } from "./Utils";
 import { DestroyReasonsType } from "./Player";
 import { Track } from "./Track";
 /** Modifies any outgoing REST requests. */
@@ -135,7 +135,8 @@ export declare class LavalinkNode {
      * @returns The returned data
      */
     request(endpoint: string, modify?: ModifyRequest, parseAsText?: boolean): Promise<unknown>;
-    search(querySourceString: string, requestUser: unknown): Promise<SearchResult>;
+    search(query: SearchQuery, requestUser: unknown): Promise<SearchResult>;
+    lavaSearch(query: LavaSearchQuery, requestUser: unknown): Promise<SearchResult | LavaSearchResponse>;
     /**
      * Update the Player State on the Lavalink Server
      * @param data
@@ -160,7 +161,7 @@ export declare class LavalinkNode {
      * Destroys the Node-Connection (Websocket) and all player's of the node
      * @returns
      */
-    destroy(destroyReason?: DestroyReasonsType): void;
+    destroy(destroyReason?: DestroyReasonsType, deleteNode?: boolean): void;
     /** Returns if connected to the Node. */
     get connected(): boolean;
     /**
