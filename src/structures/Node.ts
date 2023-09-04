@@ -2,10 +2,11 @@ import WebSocket from "ws";
 import { Dispatcher, Pool } from "undici";
 import { NodeManager } from "./NodeManager";
 import internal from "stream";
-import { InvalidLavalinkRestRequest, LavalinkPlayer, PlayerEventType, PlayerEvents, PlayerUpdateInfo, RoutePlanner, TrackEndEvent, TrackExceptionEvent, TrackStartEvent, TrackStuckEvent, WebSocketClosedEvent, Session, queueTrackEnd, Base64, NodeSymbol, LoadTypes, SearchResult } from "./Utils";
+import { InvalidLavalinkRestRequest, LavalinkPlayer, PlayerEventType, PlayerEvents, PlayerUpdateInfo, RoutePlanner, TrackEndEvent, TrackExceptionEvent, TrackStartEvent, TrackStuckEvent, WebSocketClosedEvent, Session, queueTrackEnd, Base64, NodeSymbol, LoadTypes, SearchResult, LavaSearchType, LavaSrcSearchPlatformBase, SearchPlatform, LavaSearchResponse, LavaSearchQuery, SearchQuery } from "./Utils";
 import { DestroyReasons, DestroyReasonsType, Player } from "./Player";
 import { isAbsolute } from "path";
 import { Track, LavalinkTrack, PluginInfo } from "./Track";
+import { DefaultSources } from "./LavalinkManagerStatics";
 
 /** Modifies any outgoing REST requests. */
 export type ModifyRequest = (options: Dispatcher.RequestOptions) => void;
@@ -214,8 +215,16 @@ export class LavalinkNode {
         return parseAsText ? await request.body.text() : await request.body.json();
     }
 
-    public async search(querySourceString: string, requestUser: unknown) {
-        const res = await this.request(`/loadsearch?query=${encodeURIComponent(decodeURIComponent(querySourceString))}`) as {
+    public async search(query: SearchQuery, requestUser: unknown) {
+        const Query = this.NodeManager.LavalinkManager.utils.transformQuery(query);
+
+        if(/^https?:\/\//.test(Query.query)) this.NodeManager.LavalinkManager.utils.validateQueryString(this, Query.source);
+        else if(Query.source) this.NodeManager.LavalinkManager.utils.validateSourceString(this, Query.source);
+        
+        if(["bcsearch", "bandcamp"].includes(Query.source)) {
+            throw new Error("Bandcamp Search only works on the player!");
+        }
+        const res = await this.request(`/loadtracks?identifier=${!/^https?:\/\//.test(Query.query) ? `${Query.source}:${Query.source === "ftts" ? "//" : ""}` : ""}${encodeURIComponent(decodeURIComponent(Query.query))}`) as {
             loadType: LoadTypes,
             data: any,
             pluginInfo: PluginInfo,
@@ -224,7 +233,6 @@ export class LavalinkNode {
         // transform the data which can be Error, Track or Track[] to enfore [Track] 
         const resTracks = res.loadType === "playlist" ? res.data?.tracks : res.loadType === "track" ? [res.data] : res.loadType === "search" ? Array.isArray(res.data) ? res.data : [res.data] : [];
 
-        
         return {
             loadType: res.loadType,
             exception: res.loadType === "error" ? res.data : null,
@@ -239,6 +247,29 @@ export class LavalinkNode {
             } : null,
             tracks: (resTracks.length ? resTracks.map(t => this.NodeManager.LavalinkManager.utils.buildTrack(t, requestUser)) : []) as Track[]
         } as SearchResult;
+    }
+    
+    async lavaSearch(query:LavaSearchQuery, requestUser: unknown) {
+        const Query = this.NodeManager.LavalinkManager.utils.transformLavaSearchQuery(query);
+
+        if(Query.source) this.NodeManager.LavalinkManager.utils.validateSourceString(this, Query.source);
+        if(/^https?:\/\//.test(Query.query)) return await this.search({ query: Query.query, source: Query.source }, requestUser);
+
+        if(!["spsearch", "sprec", "amsearch", "dzsearch", "dzisrc", "ytmsearch", "ytsearch"].includes(Query.source)) throw new SyntaxError(`Query.source must be a source from LavaSrc: "spsearch" | "sprec" | "amsearch" | "dzsearch" | "dzisrc" | "ytmsearch" | "ytsearch"`)
+        
+        if(!this.info.plugins.find(v => v.name === "lavasearch-plugin")) throw new RangeError(`there is no lavasearch-plugin available in the lavalink node: ${this.id}`);
+        if(!this.info.plugins.find(v => v.name === "lavasrc-plugin")) throw new RangeError(`there is no lavasrc-plugin available in the lavalink node: ${this.id}`);
+
+        const res = await this.request(`/loadsearch?query=${Query.source ? `${Query.source}:` : ""}${encodeURIComponent(Query.query)}${Query.types?.length ? `&types=${Query.types.join(",")}`: ""}`) as LavaSearchResponse;
+        
+        return {
+            tracks: res.tracks?.map(v => this.NodeManager.LavalinkManager.utils.buildTrack(v, requestUser)) || [],
+            albums: res.albums?.map(v => ({info: v.info, pluginInfo: (v as unknown as { plugin: unknown })?.plugin || v.pluginInfo, tracks: v.tracks.map(v => this.NodeManager.LavalinkManager.utils.buildTrack(v, requestUser)) })) || [],
+            artists: res.artists?.map(v => ({info: v.info, pluginInfo: (v as unknown as { plugin: unknown })?.plugin || v.pluginInfo, tracks: v.tracks.map(v => this.NodeManager.LavalinkManager.utils.buildTrack(v, requestUser)) })) || [],
+            playlists: res.playlists?.map(v => ({info: v.info, pluginInfo: (v as unknown as { plugin: unknown })?.plugin || v.pluginInfo, tracks: v.tracks.map(v => this.NodeManager.LavalinkManager.utils.buildTrack(v, requestUser)) })) || [],
+            texts: res.texts?.map(v => ({text: v.text, pluginInfo: (v as unknown as { plugin: unknown })?.plugin || v.pluginInfo })) || [],
+            pluginInfo: res.pluginInfo || (res as unknown as { plugin: unknown })?.plugin
+        } as LavaSearchResponse
     }
 
     /**
@@ -300,7 +331,7 @@ export class LavalinkNode {
 
         this.socket = new WebSocket(`ws${this.options.secure ? "s" : ""}://${this.options.host}:${this.options.port}/v4/websocket`, { headers });
         this.socket.on("open", this.open.bind(this));
-        this.socket.on("close", this.close.bind(this));
+        this.socket.on("close", (code, reason) => this.close(code, reason?.toString()));
         this.socket.on("message", this.message.bind(this));
         this.socket.on("error", this.error.bind(this));
     }
@@ -314,20 +345,24 @@ export class LavalinkNode {
      * Destroys the Node-Connection (Websocket) and all player's of the node
      * @returns 
      */
-    public destroy(destroyReason?:DestroyReasonsType) {
+    public destroy(destroyReason?:DestroyReasonsType, deleteNode = true) {
         if (!this.connected) return
         const players = this.NodeManager.LavalinkManager.players.filter(p => p.node.id == this.id);
         if (players) players.forEach(p => p.destroy(destroyReason || DestroyReasons.NodeDestroy));
 
-        this.socket.close(1000, "destroy");
+        this.socket.close(1000, "Node-Destroy");
         this.socket.removeAllListeners();
         this.socket = null;
 
         this.reconnectAttempts = 1;
         clearTimeout(this.reconnectTimeout);
 
-        this.NodeManager.emit("destroy", this, destroyReason);
-        this.NodeManager.nodes.delete(this.id);
+        if(deleteNode) {
+            this.NodeManager.emit("destroy", this, destroyReason);
+            this.NodeManager.nodes.delete(this.id);
+        } else {
+            this.NodeManager.emit("disconnect", this, { code: 1000, reason: destroyReason });
+        }
         return;
     }
 
@@ -540,7 +575,21 @@ export class LavalinkNode {
         return `http${this.options.secure ? "s" : ""}://${this.options.host}:${this.options.port}`;
     }
 
-    private reconnect(): void {
+    private reconnect(instaReconnect = false): void {
+        if(instaReconnect) {
+            if (this.reconnectAttempts >= this.options.retryAmount) {
+                const error = new Error(`Unable to connect after ${this.options.retryAmount} attempts.`)
+
+                this.NodeManager.emit("error", this, error);
+                return this.destroy(DestroyReasons.NodeReconnectFail);
+            }
+            this.socket.removeAllListeners();
+            this.socket = null;
+            this.NodeManager.emit("reconnecting", this);
+            this.connect();
+            this.reconnectAttempts++;
+            return;
+        }
         this.reconnectTimeout = setTimeout(() => {
             if (this.reconnectAttempts >= this.options.retryAmount) {
                 const error = new Error(`Unable to connect after ${this.options.retryAmount} attempts.`)
@@ -574,7 +623,7 @@ export class LavalinkNode {
 
     private close(code: number, reason: string): void {
         this.NodeManager.emit("disconnect", this, { code, reason });
-        if (code !== 1000 || reason !== "destroy") this.reconnect();
+        if (code !== 1000 || reason !== "Node-Destroy") this.reconnect();
     }
 
     private error(error: Error): void {
