@@ -475,20 +475,17 @@ class LavalinkNode {
             this.reconnectAttempts++;
         }, this.options.retryDelay || 1000);
     }
-    open() {
+    async open() {
         if (this.reconnectTimeout)
             clearTimeout(this.reconnectTimeout);
         // reset the reconnect attempts amount
         this.reconnectAttempts = 1;
+        this.info = await this.fetchInfo().catch(() => null);
+        if (!this.info && ["v3", "v4"].includes(this.version)) {
+            const errorString = `Lavalink Node (${this.poolAddress}) does not provide any /${this.version}/info`;
+            throw new Error(errorString);
+        }
         this.NodeManager.emit("connect", this);
-        setTimeout(() => {
-            this.fetchInfo().then(x => this.info = x).catch(() => null).then(() => {
-                if (!this.info && ["v3", "v4"].includes(this.version)) {
-                    const errorString = `Lavalink Node (${this.poolAddress}) does not provide any /${this.version}/info`;
-                    throw new Error(errorString);
-                }
-            });
-        }, 1500);
     }
     close(code, reason) {
         this.NodeManager.emit("disconnect", this, { code, reason });
