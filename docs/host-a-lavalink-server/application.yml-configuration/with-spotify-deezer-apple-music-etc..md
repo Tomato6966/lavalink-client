@@ -57,25 +57,30 @@ lavalink:
   plugins:
 <strong>#    - dependency: "com.dunctebot:skybot-lavalink-plugin:1.4.2" # DuncteBot lavalink plugin
 </strong>#      repository: "https://m2.duncte123.dev/releases"
-#    - dependency: "me.rohank05:lavalink-filter-plugin:0.0.2" # lavalink-filter plugin (echo filter)
+#    - dependency: "me.rohank05:lavalink-filter-plugin:0.0.4" # lavalink-filter plugin (echo+reverb filter [currently not working on v4])
 #      repository: "https://jitpack.io"
-    - dependency: "com.github.topi314.lavasrc:lavasrc-plugin:4.0.0-beta.4"
-      repository: "https://maven.topi.wtf/releases"
-    - dependency: "com.github.topi314.lavasearch:lavasearch-plugin:v1.0.0-beta.1"
-      repository: "https://maven.topi.wtf/releases"
+#     - dependency: "com.github.topi314.sponsorblock:sponsorblock-plugin:3.0.0-beta.3" # Not really needed, but adds support for skipping sponsor-block/chapter segments 
+#      repository: "https://maven.topi.wtf/releases"
 
+# The following plugins are the ones which add the support for the advanced searches + sources
+    - dependency: "com.github.topi314.lavasrc:lavasrc-plugin:4.0.0-beta.6" # adds support for spotify, deezer, yandexmusic, applemusic
+      repository: "https://maven.topi.wtf/releases"
+    - dependency: "com.github.topi314.lavasearch:lavasearch-plugin:1.0.0-beta.2" # adds support for filtered searches for track, playlist, album, artist, text ( player.lavaSearch() )
+      repository: "https://maven.topi.wtf/releases"
+    
 
 plugins:
   lavasrc:
     providers:
-      - "ytsearch:\"%ISRC%\""
-      - "dzisrc:%ISRC%"
-      - "ytsearch:%QUERY%"
-      - "dzsearch:%QUERY%"
-      - "scsearch:%QUERY%"
+      - "dzisrc:%ISRC%" # If ISRC available, search on deezer
+      - "ytsearch:\"%ISRC%\"" # If ISRC available, search on youtube
+      - "dzsearch:%QUERY%" # Search on deezer, if no results found use the next provider
+      - "ytmsearch:%QUERY%" # If you want music.youtube results first
+      - "ytsearch:%QUERY%" # If no result found on music.youtube, search on www.youtube
+      - "scsearch:%QUERY%" # Last try to search on soundcloud.
     sources:
       spotify: true
-      applemusic: true
+      applemusic: true # only enable applemusic if you have the mediaAPIToken provided
       deezer: true
       yandexmusic: true
       flowerytts: true # Enable Flowery TTS source
@@ -94,7 +99,7 @@ plugins:
       masterDecryptionKey: "g.............1"
     yandexmusic:
       accessToken: "...."
-    flowerytts:
+    flowerytts: # Example (correct + working) configuration for flowery-tts
       voice: "Olivia" # (case-sensitive) get default voice from here https://api.flowery.pw/v1/tts/voices
       translate: false # whether to translate the text to the native language of voice
       silence: 0 # the silence parameter is in milliseconds. Range is 0 to 10000. The default is 0.
@@ -113,7 +118,7 @@ sentry:
 #    some_key: some_value
 #    another_key: another_value
 
-logging:
+logging: # keep logs as low (on storage size) as possible to save space
   file:
     max-history: 10
     max-size: 10MB
@@ -135,5 +140,4 @@ logging:
     rollingpolicy:
       max-file-size: 10MB
       max-history: 10
-
 </code></pre>
