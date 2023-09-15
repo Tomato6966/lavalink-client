@@ -65,7 +65,7 @@ lavalink:
 # The following plugins are the ones which add the support for the advanced searches + sources
     - dependency: "com.github.topi314.lavasrc:lavasrc-plugin:4.0.0-beta.6" # adds support for spotify, deezer, yandexmusic, applemusic
       repository: "https://maven.topi.wtf/releases"
-    - dependency: "com.github.topi314.lavasearch:lavasearch-plugin:1.0.0-beta.2" # adds support for filtered searches for track, playlist, album, artist, text ( player.lavaSearch() )
+    - dependency: "com.github.topi314.lavasearch:lavasearch-plugin:v1.0.0-beta.1" # adds support for filtered searches for track, playlist, album, artist, text ( player.lavaSearch() )
       repository: "https://maven.topi.wtf/releases"
     
 
