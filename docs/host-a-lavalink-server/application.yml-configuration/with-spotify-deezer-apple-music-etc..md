@@ -38,12 +38,12 @@ lavalink:
     youtubeSearchEnabled: true
     soundcloudSearchEnabled: true
     gc-warnings: true
-    ratelimit: # 2604:2dc0:100:96e::/64
-      ipBlocks: ["2604:2dc0:100:96e::/64"] # list of ip blocks
+    #ratelimit: # 
+      #ipBlocks: [] # list of ip blocks, e.g. ["1234:2abc:100:10e::/64"]
       #excludedIps: ["...", "..."] # ips which should be explicit excluded from usage by lavalink
-      strategy: "RotateOnBan" # RotateOnBan | LoadBalance | NanoSwitch | RotatingNanoSwitch
-      searchTriggersFail: true # Whether a search 429 should trigger marking the ip as failing
-      retryLimit: -1 # -1 = use default lavaplayer value | 0 = infinity | >0 = retry will happen this numbers times
+      #strategy: "RotateOnBan" # RotateOnBan | LoadBalance | NanoSwitch | RotatingNanoSwitch
+      #searchTriggersFail: true # Whether a search 429 should trigger marking the ip as failing
+      #retryLimit: -1 # -1 = use default lavaplayer value | 0 = infinity | >0 = retry will happen this numbers times
     #youtubeConfig: # Required for avoiding all age restrictions by YouTube, some restricted videos still can be played without.
       #email: "" # Email of Google account
       #password: "" # Password of Google account
