@@ -344,9 +344,10 @@ export class LavalinkManager extends EventEmitter {
         if(this.options?.playerOptions?.onDisconnect?.destroyPlayer === true) {
           return await player.destroy(DestroyReasons.Disconnected);
         }
+        
         this.emit("playerDisconnect", player, player.voiceChannelId);
 
-        await player.pause();
+        if(!player.paused) await player.pause();
 
         if(this.options?.playerOptions?.onDisconnect?.autoReconnect === true) {
           try {
@@ -354,7 +355,7 @@ export class LavalinkManager extends EventEmitter {
           } catch {
             return await player.destroy(DestroyReasons.PlayerReconnectFail);
           }
-          return await player.resume();
+          return player.paused && await player.resume();
         }
 
         player.voiceChannelId = null;
