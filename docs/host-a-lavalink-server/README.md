@@ -4,7 +4,7 @@ There is an official [Getting-started](https://lavalink.dev/getting-started/inde
 
 1. Install <mark style="color:red;">Java 17</mark> or higher. You can download it [here](https://www.azul.com/downloads/?package=jdk#zulu).&#x20;
    1. _I recommend Java 20 or higher_
-2. Download the latest <mark style="color:red;">`Lavalink.jar`</mark> from [GitHub-Releases-Page](https://github.com/lavalink-devs/Lavalink/releases/latest). or directly via this [latest-download-link](https://github.com/lavalink-devs/Lavalink/releases/latest/download/Lavalink.jar)
+2. Download the latest <mark style="color:red;">`Lavalink.jar`</mark> from [GitHub-Releases-Page](https://github.com/lavalink-devs/Lavalink/releases/latest). or directly via [my download-lavalink-server script](./#download-latest-lavalink-server-version)
 3. Now configure the Lavalink-Server via an `application.yml` file or env-variables. \
    _For that check out the_ [_configuration_](https://lavalink.dev/configuration/index.html) _page to learn out how._
    1. [_My configuration guide_](application.yml-configuration/)
@@ -33,3 +33,23 @@ when you provide `-Xmx4G` for example, you tell java to allocate 4gigs of memory
 ### Spotify, Deezer, Apple-Music, etc. etc.
 
 There are Lavalink-Server Plugins, check out [my example](application.yml-configuration/with-spotify-deezer-apple-music-etc..md)
+
+## <mark style="color:red;">Download Latest Lavalink Server Version</mark>
+
+Following BASH (Linux \*.sh) Script, **downloads the latest lavalink** version, including pre-releases.\
+It also deletes the old, pre-existing Lavalink.jar file, if available
+
+<pre class="language-bash" data-title="updateLavalink.sh" data-line-numbers><code class="lang-bash"><strong># Delete old Lavalink.jar if available
+</strong>if [[ -f "./Lavalink.jar" ]]
+then
+  rm Lavalink.jar
+fi
+# get the content of all releases
+content=$(curl --silent https://api.github.com/repos/lavalink-devs/Lavalink/releases)
+# get latest release (incl. pre-releases)
+releaseName=$(jq -r 'map(select(.prerelease)) | first | .tag_name' &#x3C;&#x3C;&#x3C; "${content}")
+# download latest release
+wget "https://github.com/lavalink-devs/Lavalink/releases/download/${releaseName}/Lavalink.jar" -O Lavalink.jar
+</code></pre>
+
+Or just browse through the [Releases Page](https://github.com/lavalink-devs/Lavalink/releases) or download the [latest stable release](https://github.com/lavalink-devs/Lavalink/releases/latest/download/Lavalink.jar)
