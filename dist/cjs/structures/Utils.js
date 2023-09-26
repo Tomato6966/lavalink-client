@@ -13,6 +13,12 @@ class ManagerUtils {
     constructor(LavalinkManager) {
         this.LavalinkManager = LavalinkManager;
     }
+    buildPluginInfo(data, clientData = {}) {
+        return {
+            clientData: clientData,
+            ...(data.pluginInfo || data.plugin || {})
+        };
+    }
     buildTrack(data, requester) {
         if (!data?.encoded || typeof data.encoded !== "string")
             throw new RangeError("Argument 'data.encoded' must be present.");
@@ -33,7 +39,7 @@ class ManagerUtils {
                     isStream: data.info.isStream,
                     isrc: data.info.isrc,
                 },
-                pluginInfo: data.pluginInfo || data.plugin || {},
+                pluginInfo: this.buildPluginInfo(data),
                 requester: typeof this.LavalinkManager?.options?.playerOptions?.requesterTransformer === "function" ? this.LavalinkManager?.options?.playerOptions?.requesterTransformer(data?.requester || requester) : requester,
             };
             Object.defineProperty(r, exports.TrackSymbol, { configurable: true, value: true });
@@ -54,6 +60,7 @@ class ManagerUtils {
         const unresolvedTrack = {
             encoded: query.encoded || undefined,
             info: query.info ? query.info : query.title ? query : undefined,
+            pluginInfo: this.buildPluginInfo(query),
             requester: typeof this.LavalinkManager?.options?.playerOptions?.requesterTransformer === "function" ? this.LavalinkManager?.options?.playerOptions?.requesterTransformer((query?.requester || requester)) : requester,
             async resolve(player) {
                 const closest = await getClosestTrack(this, player);

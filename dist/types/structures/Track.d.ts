@@ -115,6 +115,8 @@ export interface UnresolvedTrack {
     encoded?: Base64;
     /** Track Information */
     info: UnresolvedTrackInfo;
+    /** Plugin Information from Lavalink */
+    pluginInfo: Partial<PluginInfo>;
     /** The Track's Requester */
     requester?: unknown;
 }

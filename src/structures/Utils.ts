@@ -2,8 +2,8 @@ import { LavalinkFilterData } from "./Filters";
 import { LavalinkManager } from "./LavalinkManager";
 import { DefaultSources, LavalinkPlugins, SourceLinksRegexes } from "./LavalinkManagerStatics";
 import { LavalinkNode, LavalinkNodeOptions, NodeStats } from "./Node";
-import { PlayOptions, Player } from "./Player";
-import { PluginInfo, Track, UnresolvedTrack, UnresolvedQuery, LavalinkTrack } from "./Track";
+import { Player, PlayOptions } from "./Player";
+import { LavalinkTrack, PluginInfo, Track, UnresolvedQuery, UnresolvedTrack } from "./Track";
 
 export const TrackSymbol = Symbol("LC-Track");
 export const UnresolvedTrackSymbol = Symbol("LC-Track-Unresolved");
@@ -130,6 +130,12 @@ export class ManagerUtils {
     this.LavalinkManager = LavalinkManager;
   }
 
+  buildPluginInfo(data:any, clientData:any={}) {
+    return {
+      clientData: clientData,
+      ...(data.pluginInfo || (data as any).plugin || {})
+    }
+  } 
   buildTrack(data:LavalinkTrack | Track, requester:unknown) {
     if (!data?.encoded || typeof data.encoded !== "string") throw new RangeError("Argument 'data.encoded' must be present.");
     if (!data.info) throw new RangeError("Argument 'data.info' must be present.");
@@ -148,7 +154,7 @@ export class ManagerUtils {
           isStream: data.info.isStream,
           isrc: data.info.isrc,
         },
-        pluginInfo: data.pluginInfo || (data as any).plugin || {},
+        pluginInfo: this.buildPluginInfo(data),
         requester: typeof this.LavalinkManager?.options?.playerOptions?.requesterTransformer === "function" ? this.LavalinkManager?.options?.playerOptions?.requesterTransformer((data as Track)?.requester || requester) : requester,
       } as Track;
       Object.defineProperty(r, TrackSymbol, { configurable: true, value: true });
@@ -170,6 +176,7 @@ export class ManagerUtils {
     const unresolvedTrack:UnresolvedTrack = { 
       encoded: query.encoded || undefined,
       info: (query as UnresolvedTrack).info ? (query as UnresolvedTrack).info : (query as UnresolvedQuery).title ? query as UnresolvedQuery : undefined,
+      pluginInfo: this.buildPluginInfo(query),
       requester: typeof this.LavalinkManager?.options?.playerOptions?.requesterTransformer === "function" ? this.LavalinkManager?.options?.playerOptions?.requesterTransformer(((query as UnresolvedTrack)?.requester || requester)) : requester,
       async resolve(player:Player) {
           const closest = await getClosestTrack(this, player);

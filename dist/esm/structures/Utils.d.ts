@@ -1,8 +1,8 @@
 import { LavalinkFilterData } from "./Filters";
 import { LavalinkManager } from "./LavalinkManager";
 import { LavalinkNode, LavalinkNodeOptions, NodeStats } from "./Node";
-import { PlayOptions, Player } from "./Player";
-import { PluginInfo, Track, UnresolvedTrack, UnresolvedQuery, LavalinkTrack } from "./Track";
+import { Player, PlayOptions } from "./Player";
+import { LavalinkTrack, PluginInfo, Track, UnresolvedQuery, UnresolvedTrack } from "./Track";
 export declare const TrackSymbol: unique symbol;
 export declare const UnresolvedTrackSymbol: unique symbol;
 export declare const QueueSymbol: unique symbol;
@@ -54,6 +54,7 @@ export interface UnresolvedSearchResult {
 export declare class ManagerUtils {
     LavalinkManager: LavalinkManager | null;
     constructor(LavalinkManager?: LavalinkManager);
+    buildPluginInfo(data: any, clientData?: any): any;
     buildTrack(data: LavalinkTrack | Track, requester: unknown): Track;
     /**
      * Builds a UnresolvedTrack to be resolved before being played  .
