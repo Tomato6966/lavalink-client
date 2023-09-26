@@ -1,4 +1,4 @@
-import { LavalinkSearchPlatform, SearchPlatform, SourcesRegex } from "./Utils"
+import { LavalinkSearchPlatform, SearchPlatform, SourcesRegex } from "./Utils";
 
 export const DefaultSources: Record<SearchPlatform, LavalinkSearchPlatform> = {
     // youtubemusic

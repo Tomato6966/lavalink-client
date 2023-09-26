@@ -2,7 +2,6 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.bandCampSearch = void 0;
 const undici_1 = require("undici");
-const http_1 = require("http");
 const bandCampSearch = async (player, query, requestUser) => {
     let error = null;
     let tracks = [];
@@ -20,7 +19,7 @@ const bandCampSearch = async (player, query, requestUser) => {
             author: item.band_name,
             title: item.name,
             identifier: item.id ? `${item.id}` : item.url?.split("/").reverse()[0],
-        }, http_1.request));
+        }, requestUser));
     }
     catch (e) {
         error = e;

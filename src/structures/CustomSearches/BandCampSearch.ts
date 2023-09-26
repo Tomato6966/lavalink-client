@@ -1,8 +1,7 @@
-import { Player } from "../Player";
 import { fetch } from "undici";
-import { SearchResult, UnresolvedSearchResult } from "../Utils";
-import { request } from "http";
-import { UnresolvedTrack } from "../Track";
+
+import { Player } from "../Player";
+import { UnresolvedSearchResult } from "../Utils";
 
 export const bandCampSearch = async (player:Player, query: string, requestUser: unknown) => {
     let error = null;
@@ -23,7 +22,7 @@ export const bandCampSearch = async (player:Player, query: string, requestUser: 
             author: item.band_name,
             title: item.name,
             identifier: item.id ? `${item.id}` : item.url?.split("/").reverse()[0],
-        }, request));
+        }, requestUser));
 
     } catch (e) { error = e; }
 

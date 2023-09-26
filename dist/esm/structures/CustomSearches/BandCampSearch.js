@@ -1,5 +1,4 @@
 import { fetch } from "undici";
-import { request } from "http";
 export const bandCampSearch = async (player, query, requestUser) => {
     let error = null;
     let tracks = [];
@@ -17,7 +16,7 @@ export const bandCampSearch = async (player, query, requestUser) => {
             author: item.band_name,
             title: item.name,
             identifier: item.id ? `${item.id}` : item.url?.split("/").reverse()[0],
-        }, request));
+        }, requestUser));
     }
     catch (e) {
         error = e;

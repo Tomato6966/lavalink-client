@@ -2,11 +2,11 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.LavalinkNode = void 0;
 const tslib_1 = require("tslib");
-const ws_1 = tslib_1.__importDefault(require("ws"));
-const undici_1 = require("undici");
-const Utils_1 = require("./Utils");
-const Player_1 = require("./Player");
 const path_1 = require("path");
+const undici_1 = require("undici");
+const ws_1 = tslib_1.__importDefault(require("ws"));
+const Player_1 = require("./Player");
+const Utils_1 = require("./Utils");
 class LavalinkNode {
     /** The provided Options of the Node */
     options;

@@ -1,8 +1,8 @@
-import WebSocket from "ws";
-import { Pool } from "undici";
-import { queueTrackEnd, NodeSymbol } from "./Utils";
-import { DestroyReasons } from "./Player";
 import { isAbsolute } from "path";
+import { Pool } from "undici";
+import WebSocket from "ws";
+import { DestroyReasons } from "./Player";
+import { NodeSymbol, queueTrackEnd } from "./Utils";
 export class LavalinkNode {
     /** The provided Options of the Node */
     options;

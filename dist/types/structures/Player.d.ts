@@ -3,7 +3,7 @@ import { LavalinkManager } from "./LavalinkManager";
 import { LavalinkNode } from "./Node";
 import { Queue } from "./Queue";
 import { Track, UnresolvedTrack } from "./Track";
-import { LavalinkPlayerVoiceOptions, SearchResult, LavaSearchResponse, LavaSearchQuery, SearchQuery } from "./Utils";
+import { LavalinkPlayerVoiceOptions, LavaSearchQuery, SearchQuery } from "./Utils";
 type PlayerDestroyReasons = "QueueEmpty" | "NodeDestroy" | "NodeDeleted" | "LavalinkNoVoice" | "NodeReconnectFail" | "PlayerReconnectFail" | "Disconnected" | "ChannelDeleted" | "ReconnectAllNodes" | "DisconnectAllNodes";
 export type DestroyReasonsType = PlayerDestroyReasons | string;
 export declare const DestroyReasons: Record<PlayerDestroyReasons, PlayerDestroyReasons>;
@@ -138,13 +138,13 @@ export declare class Player {
      * @param ignoreVolumeDecrementer If it should ignore the volumedecrementer option
      */
     setVolume(volume: number, ignoreVolumeDecrementer?: boolean): Promise<void>;
-    lavaSearch(query: LavaSearchQuery, requestUser: unknown): Promise<SearchResult | LavaSearchResponse>;
+    lavaSearch(query: LavaSearchQuery, requestUser: unknown): Promise<import("./Utils").SearchResult | import("./Utils").LavaSearchResponse>;
     /**
      *
      * @param query Query for your data
      * @param requestUser
      */
-    search(query: SearchQuery, requestUser: unknown): Promise<import("./Utils").UnresolvedSearchResult | SearchResult>;
+    search(query: SearchQuery, requestUser: unknown): Promise<import("./Utils").SearchResult | import("./Utils").UnresolvedSearchResult>;
     /**
      * Pause the player
      */

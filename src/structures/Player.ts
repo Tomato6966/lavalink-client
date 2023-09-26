@@ -1,11 +1,10 @@
 import { bandCampSearch } from "./CustomSearches/BandCampSearch";
 import { EQBand, FilterData, FilterManager, LavalinkFilterData } from "./Filters";
 import { LavalinkManager } from "./LavalinkManager";
-import { DefaultSources } from "./LavalinkManagerStatics";
 import { LavalinkNode } from "./Node";
 import { Queue, QueueSaver } from "./Queue";
-import { PluginInfo, Track, UnresolvedTrack } from "./Track";
-import { LavalinkPlayerVoiceOptions, SearchPlatform, SearchResult, LoadTypes, queueTrackEnd, LavaSearchType, LavaSearchResponse, LavaSrcSearchPlatformBase, LavaSearchQuery, SearchQuery } from "./Utils";
+import { Track, UnresolvedTrack } from "./Track";
+import { LavalinkPlayerVoiceOptions, LavaSearchQuery, queueTrackEnd, SearchQuery } from "./Utils";
 
 type PlayerDestroyReasons = "QueueEmpty" | "NodeDestroy" | "NodeDeleted" | "LavalinkNoVoice" | "NodeReconnectFail" | "PlayerReconnectFail" | "Disconnected" | "ChannelDeleted" | "ReconnectAllNodes" | "DisconnectAllNodes";
 export type DestroyReasonsType = PlayerDestroyReasons | string;

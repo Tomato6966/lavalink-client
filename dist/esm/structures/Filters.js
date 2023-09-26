@@ -117,9 +117,9 @@ export class FilterManager {
         for (const key of [...Object.keys(sendData)]) {
             // delete disabled filters
             if (key === "pluginFilters") {
-                for (const key of [...Object.keys(sendData.pluginFilters)]) {
-                    // if (this.player.node.info && !this.player.node.info?.plugins?.find?.(v => v.name === key)) delete sendData[key];
-                }
+                // for(const key of [...Object.keys(sendData.pluginFilters)]) {
+                // if (this.player.node.info && !this.player.node.info?.plugins?.find?.(v => v.name === key)) delete sendData[key];
+                // }
             }
             else if (this.player.node.info && !this.player.node.info?.filters?.includes?.(key))
                 delete sendData[key];

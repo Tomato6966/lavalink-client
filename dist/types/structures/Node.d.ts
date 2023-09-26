@@ -1,10 +1,10 @@
 /// <reference types="node" />
+import internal from "stream";
 import { Dispatcher, Pool } from "undici";
 import { NodeManager } from "./NodeManager";
-import internal from "stream";
-import { InvalidLavalinkRestRequest, LavalinkPlayer, PlayerUpdateInfo, RoutePlanner, Session, Base64, SearchResult, LavaSearchResponse, LavaSearchQuery, SearchQuery } from "./Utils";
 import { DestroyReasonsType } from "./Player";
 import { Track } from "./Track";
+import { Base64, InvalidLavalinkRestRequest, LavalinkPlayer, LavaSearchQuery, LavaSearchResponse, PlayerUpdateInfo, RoutePlanner, SearchQuery, SearchResult, Session } from "./Utils";
 /** Modifies any outgoing REST requests. */
 export type ModifyRequest = (options: Dispatcher.RequestOptions) => void;
 export interface LavalinkNodeOptions {
