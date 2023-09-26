@@ -175,9 +175,9 @@ export class Player {
      * @param key
      * @param value
      */
-    public set(key: string, value: unknown): void { 
+    public set(key: string, value: unknown) { 
         this.data[key] = value; 
-        return;
+        return this;
     }
 
     /**
@@ -191,13 +191,13 @@ export class Player {
     /**
      * CLears all the custom data.
      */
-    public clearData(): void {
+    public clearData() {
         const toKeep = Object.keys(this.data).filter(v => v.startsWith("internal_"));
         for(const key in this.data) {
             if(toKeep.includes(key)) continue;
             delete this.data[key];
         }
-        return;
+        return this;
     }
 
     /**
@@ -233,7 +233,7 @@ export class Player {
                 if(options && "track" in options) delete options.track;
                 if(options && "encodedTrack" in options) delete options.encodedTrack;
                 if (this.queue.tracks[0]) return this.play(options);
-                return;
+                return this;
             }
         }
 
@@ -270,6 +270,7 @@ export class Player {
             playerOptions: finalOptions,
         });
         this.ping.lavalink = Math.round((performance.now() - now) / 10) / 100;
+        return this;
     }
 
     /**
@@ -296,7 +297,7 @@ export class Player {
             await this.node.updatePlayer({ guildId: this.guildId, playerOptions: { volume: this.lavalinkVolume } });
         }
         this.ping.lavalink = Math.round((performance.now() - now) / 10) / 100;
-        return;
+        return this;
     }
 
     async lavaSearch(query:LavaSearchQuery, requestUser: unknown) {
@@ -328,7 +329,7 @@ export class Player {
         const now = performance.now();
         await this.node.updatePlayer({ guildId: this.guildId, playerOptions: { paused: true } });
         this.ping.lavalink = Math.round((performance.now() - now) / 10) / 100;
-        return;
+        return this;
     }
     
     /**
@@ -340,7 +341,7 @@ export class Player {
         const now = performance.now();
         await this.node.updatePlayer({ guildId: this.guildId, playerOptions: { paused: false } });
         this.ping.lavalink = Math.round((performance.now() - now) / 10) / 100;
-        return;
+        return this;
     }
 
     /**
@@ -366,7 +367,7 @@ export class Player {
         await this.node.updatePlayer({ guildId:this.guildId, playerOptions: { position }});
         this.ping.lavalink = Math.round((performance.now() - now) / 10) / 100;
 
-        return;
+        return this;
     }
 
     /**
@@ -375,7 +376,8 @@ export class Player {
      */
     async setRepeatMode(repeatMode:RepeatMode) {
         if(!["off", "track", "queue"].includes(repeatMode)) throw new RangeError("Repeatmode must be either 'off', 'track', or 'queue'");
-        return this.repeatMode = repeatMode;
+        this.repeatMode = repeatMode;
+        return this;
     }
 
     /**
@@ -394,7 +396,7 @@ export class Player {
         const now = performance.now();
         await this.node.updatePlayer({ guildId:this.guildId, playerOptions: { encodedTrack: null }});
         this.ping.lavalink = Math.round((performance.now() - now) / 10) / 100;
-        return true;
+        return this;
     }
 
     /**
@@ -414,7 +416,7 @@ export class Player {
             }
         });
 
-        return;
+        return this;
     }
 
     /**
@@ -437,7 +439,7 @@ export class Player {
 
         this.voiceChannelId = null;
 
-        return;
+        return this;
     }
     
     /**
@@ -453,7 +455,7 @@ export class Player {
         await this.node.destroyPlayer(this.guildId);
 
         this.LavalinkManager.emit("playerDestroy", this, reason);
-        return;
+        return this;
     }
 
     /**
