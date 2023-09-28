@@ -34,27 +34,26 @@ export type DuncteSearchPlatform =
   "tts";
 
 export type LavalinkClientSearchPlatform = "bcsearch";
-export type LavalinkClientSearchPlatformResolve = "bandcamp";
-
-
+export type LavalinkClientSearchPlatformResolve = "bandcamp" | "bc";
+  
 export type LavalinkSearchPlatform = "ytsearch" | 
-  "ytmsearch" | 
-  "scsearch" |  
-  LavaSrcSearchPlatform | 
-  DuncteSearchPlatform | 
-  LavalinkClientSearchPlatform;
-
+    "ytmsearch" | 
+    "scsearch" |  
+    LavaSrcSearchPlatform | 
+    DuncteSearchPlatform | 
+    LavalinkClientSearchPlatform;
+  
 export type ClientSearchPlatform =
-  "youtube" | "yt" | 
-  "youtube music" | "youtubemusic" | "ytm" |
-  "soundcloud" | "sc" |
-  "am" | "apple music" | "applemusic" | "apple" | 
-  "sp" | "spsuggestion" | "spotify" |
-  "dz" | "deezer" |
-  "yandex" | "yandex music" |"yandexmusic" | LavalinkClientSearchPlatformResolve | LavalinkClientSearchPlatform;
-
+    "youtube" | "yt" | 
+    "youtube music" | "youtubemusic" | "ytm" | "musicyoutube" | "music youtube" |
+    "soundcloud" | "sc" |
+    "am" | "apple music" | "applemusic" | "apple" | "musicapple" | "music apple" |
+    "sp" | "spsuggestion" | "spotify" | "spotify.com" | "spotifycom" |
+    "dz" | "deezer" |
+    "yandex" | "yandex music" |"yandexmusic" | LavalinkClientSearchPlatformResolve | LavalinkClientSearchPlatform;
+  
 export type SearchPlatform = LavalinkSearchPlatform | ClientSearchPlatform;
-
+  
 export type SourcesRegex = "YoutubeRegex" | 
   "YoutubeMusicRegex" | 
   "SoundCloudRegex" | 
@@ -179,11 +178,16 @@ export class ManagerUtils {
       pluginInfo: this.buildPluginInfo(query),
       requester: typeof this.LavalinkManager?.options?.playerOptions?.requesterTransformer === "function" ? this.LavalinkManager?.options?.playerOptions?.requesterTransformer(((query as UnresolvedTrack)?.requester || requester)) : requester,
       async resolve(player:Player) {
-          const closest = await getClosestTrack(this, player);
-          if(!closest) throw new SyntaxError("No closest Track found");
-          Object.getOwnPropertyNames(this).forEach(prop => delete this[prop]);
-          Object.assign(this, closest); 
-          return;
+        const closest = await getClosestTrack(this, player);
+        if(!closest) throw new SyntaxError("No closest Track found");
+
+        for(const prop of Object.getOwnPropertyNames(this)) delete this[prop]
+        // delete symbol
+        delete this[UnresolvedTrackSymbol];
+        // assign new symbol
+        Object.defineProperty(this, TrackSymbol, { configurable: true, value: true });
+        
+        return Object.assign(this, closest);
       }
     }
     
