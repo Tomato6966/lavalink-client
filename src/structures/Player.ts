@@ -46,24 +46,25 @@ export interface PlayerJson {
 
 export type RepeatMode = "queue" | "track" | "off";
 export interface PlayerOptions {
+    /** Guild id of the player */
     guildId: string;
-    
+    /** The Voice Channel Id */
     voiceChannelId: string;
-    
-    volume?: number;
-
-    vcRegion?: string;
-
-    selfDeaf?: boolean;
-
-    selfMute?: boolean;
-
+    /** The Text Channel Id of the Player */
     textChannelId?: string;
-
+    /** instantly change volume with the one play request */
+    volume?: number;
+    /** VC Region for node selections */
+    vcRegion?: string;
+    /** if it should join deafened */
+    selfDeaf?: boolean;
+    /** If it should join muted */
+    selfMute?: boolean;
+    /** If it should use a specific lavalink node */
     node?: LavalinkNode|string;
-
+    /** If when applying filters, it should use the insta apply filters fix  */
     instaUpdateFiltersFix?:boolean;
-
+    /** If a volume should be applied via filters instead of lavalink-volume */
     applyVolumeAsFilter?:boolean;
 }
 
