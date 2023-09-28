@@ -6,6 +6,8 @@ export const DefaultSources: Record<SearchPlatform, LavalinkSearchPlatform> = {
     "youtubemusic": "ytmsearch",
     "ytmsearch": "ytmsearch",
     "ytm": "ytmsearch",
+    "musicyoutube": "ytmsearch",
+    "music youtube": "ytmsearch",
     // youtube
     "youtube": "ytsearch",
     "yt": "ytsearch",
@@ -20,10 +22,14 @@ export const DefaultSources: Record<SearchPlatform, LavalinkSearchPlatform> = {
     "applemusic": "amsearch",
     "amsearch": "amsearch",
     "am": "amsearch",
+    "musicapple": "amsearch",
+    "music apple": "amsearch",
     // spotify 
     "spotify": "spsearch",
     "spsearch": "spsearch",
     "sp": "spsearch",
+    "spotify.com": "spsearch",
+    "spotifycom": "spsearch",
     "sprec": "sprec",
     "spsuggestion": "sprec",
     // deezer
@@ -42,6 +48,7 @@ export const DefaultSources: Record<SearchPlatform, LavalinkSearchPlatform> = {
     "ftts": "ftts",
     // Client sided search platforms
     "bandcamp": "bcsearch",
+    "bc": "bcsearch",
     "bcsearch": "bcsearch",
 }
 

@@ -47,15 +47,23 @@ export interface PlayerJson {
 export type RepeatMode = "queue" | "track" | "off";
 export interface PlayerOptions {
     guildId: string;
+    
     voiceChannelId: string;
     
     volume?: number;
+
     vcRegion?: string;
+
     selfDeaf?: boolean;
+
     selfMute?: boolean;
+
     textChannelId?: string;
+
     node?: LavalinkNode|string;
+
     instaUpdateFiltersFix?:boolean;
+
     applyVolumeAsFilter?:boolean;
 }
 
