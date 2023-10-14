@@ -30,15 +30,25 @@ export interface PlayerJson {
 }
 export type RepeatMode = "queue" | "track" | "off";
 export interface PlayerOptions {
+    /** Guild id of the player */
     guildId: string;
+    /** The Voice Channel Id */
     voiceChannelId: string;
-    volume?: number;
-    vcRegion?: string;
-    selfDeaf?: boolean;
-    selfMute?: boolean;
+    /** The Text Channel Id of the Player */
     textChannelId?: string;
+    /** instantly change volume with the one play request */
+    volume?: number;
+    /** VC Region for node selections */
+    vcRegion?: string;
+    /** if it should join deafened */
+    selfDeaf?: boolean;
+    /** If it should join muted */
+    selfMute?: boolean;
+    /** If it should use a specific lavalink node */
     node?: LavalinkNode | string;
+    /** If when applying filters, it should use the insta apply filters fix  */
     instaUpdateFiltersFix?: boolean;
+    /** If a volume should be applied via filters instead of lavalink-volume */
     applyVolumeAsFilter?: boolean;
 }
 export interface PlayOptions {
@@ -113,7 +123,7 @@ export declare class Player {
      * @param key
      * @param value
      */
-    set(key: string, value: unknown): void;
+    set(key: string, value: unknown): this;
     /**
      * Get custom data.
      * @param key
@@ -122,7 +132,7 @@ export declare class Player {
     /**
      * CLears all the custom data.
      */
-    clearData(): void;
+    clearData(): this;
     /**
      * Get all custom Data
      */
@@ -137,32 +147,32 @@ export declare class Player {
      * @param volume The Volume in percent
      * @param ignoreVolumeDecrementer If it should ignore the volumedecrementer option
      */
-    setVolume(volume: number, ignoreVolumeDecrementer?: boolean): Promise<void>;
+    setVolume(volume: number, ignoreVolumeDecrementer?: boolean): Promise<this>;
     lavaSearch(query: LavaSearchQuery, requestUser: unknown): Promise<import("./Utils").SearchResult | import("./Utils").LavaSearchResponse>;
     /**
      *
      * @param query Query for your data
      * @param requestUser
      */
-    search(query: SearchQuery, requestUser: unknown): Promise<import("./Utils").SearchResult | import("./Utils").UnresolvedSearchResult>;
+    search(query: SearchQuery, requestUser: unknown): Promise<import("./Utils").UnresolvedSearchResult | import("./Utils").SearchResult>;
     /**
      * Pause the player
      */
-    pause(): Promise<void>;
+    pause(): Promise<this>;
     /**
      * Resume the Player
      */
-    resume(): Promise<void>;
+    resume(): Promise<this>;
     /**
      * Seek to a specific Position
      * @param position
      */
-    seek(position: number): Promise<any>;
+    seek(position: number): Promise<this>;
     /**
      * Set the Repeatmode of the Player
      * @param repeatMode
      */
-    setRepeatMode(repeatMode: RepeatMode): Promise<RepeatMode>;
+    setRepeatMode(repeatMode: RepeatMode): Promise<this>;
     /**
      * Skip the current song, or a specific amount of songs
      * @param amount provide the index of the next track to skip to
@@ -172,17 +182,17 @@ export declare class Player {
      * Connects the Player to the Voice Channel
      * @returns
      */
-    connect(): Promise<void>;
+    connect(): Promise<this>;
     /**
      * Disconnects the Player from the Voice Channel, but keeps the player in the cache
      * @param force If false it throws an error, if player thinks it's already disconnected
      * @returns
      */
-    disconnect(force?: boolean): Promise<void>;
+    disconnect(force?: boolean): Promise<this>;
     /**
      * Destroy the player and disconnect from the voice channel
      */
-    destroy(reason?: string): Promise<void>;
+    destroy(reason?: string): Promise<this>;
     /**
      * Move the player on a different Audio-Node
      * @param newNode New Node / New Node Id

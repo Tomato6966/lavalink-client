@@ -296,11 +296,11 @@ export interface FilterData {
 }
 export type PluginFiltersKey = "lavalink-filter-plugin" | string;
 export interface PluginFiltersValues extends LavalinkFiltersPlugin {
-    [key: string]: any;
+    [key: string]: string | number | string[] | number[] | EchoFilter | ReverbFilter;
 }
 export interface LavalinkFiltersPlugin {
-    echo: EchoFilter;
-    reverb: ReverbFilter;
+    "echo": EchoFilter;
+    "reverb": ReverbFilter;
 }
 /**
  * Actual Filter Data sent to Lavalink

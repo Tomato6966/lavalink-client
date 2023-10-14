@@ -2,11 +2,11 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.LavalinkManager = void 0;
 const events_1 = require("events");
+const LavalinkManagerStatics_1 = require("./LavalinkManagerStatics");
 const NodeManager_1 = require("./NodeManager");
+const Player_1 = require("./Player");
 const Queue_1 = require("./Queue");
 const Utils_1 = require("./Utils");
-const LavalinkManagerStatics_1 = require("./LavalinkManagerStatics");
-const Player_1 = require("./Player");
 class LavalinkManager extends events_1.EventEmitter {
     static DefaultSources = LavalinkManagerStatics_1.DefaultSources;
     static SourceLinksRegexes = LavalinkManagerStatics_1.SourceLinksRegexes;
@@ -156,11 +156,11 @@ class LavalinkManager extends events_1.EventEmitter {
                 return;
             const player = this.getPlayer(update.guild_id);
             if (player && player.voiceChannelId === update.id)
-                return player.destroy(Player_1.DestroyReasons.ChannelDeleted);
+                return void player.destroy(Player_1.DestroyReasons.ChannelDeleted);
         }
         // for voice updates
         if (["VOICE_STATE_UPDATE", "VOICE_SERVER_UPDATE"].includes(data.t)) {
-            const update = "d" in data ? data.d : data;
+            const update = ("d" in data ? data.d : data);
             if (!update) {
                 if (this.options?.debugOptions?.noAudio === true)
                     console.debug("Lavalink-Client-Debug | NO-AUDIO [::] sendRawData function, no update data found in payload:", data);
@@ -208,7 +208,7 @@ class LavalinkManager extends events_1.EventEmitter {
             }
             else {
                 if (this.options?.playerOptions?.onDisconnect?.destroyPlayer === true) {
-                    return await player.destroy(Player_1.DestroyReasons.Disconnected);
+                    return void await player.destroy(Player_1.DestroyReasons.Disconnected);
                 }
                 this.emit("playerDisconnect", player, player.voiceChannelId);
                 if (!player.paused)
@@ -218,9 +218,9 @@ class LavalinkManager extends events_1.EventEmitter {
                         await player.connect();
                     }
                     catch {
-                        return await player.destroy(Player_1.DestroyReasons.PlayerReconnectFail);
+                        return void await player.destroy(Player_1.DestroyReasons.PlayerReconnectFail);
                     }
-                    return player.paused && await player.resume();
+                    return void player.paused && await player.resume();
                 }
                 player.voiceChannelId = null;
                 player.voice = Object.assign({});

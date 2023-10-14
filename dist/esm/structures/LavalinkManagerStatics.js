@@ -4,6 +4,8 @@ export const DefaultSources = {
     "youtubemusic": "ytmsearch",
     "ytmsearch": "ytmsearch",
     "ytm": "ytmsearch",
+    "musicyoutube": "ytmsearch",
+    "music youtube": "ytmsearch",
     // youtube
     "youtube": "ytsearch",
     "yt": "ytsearch",
@@ -18,10 +20,14 @@ export const DefaultSources = {
     "applemusic": "amsearch",
     "amsearch": "amsearch",
     "am": "amsearch",
+    "musicapple": "amsearch",
+    "music apple": "amsearch",
     // spotify 
     "spotify": "spsearch",
     "spsearch": "spsearch",
     "sp": "spsearch",
+    "spotify.com": "spsearch",
+    "spotifycom": "spsearch",
     "sprec": "sprec",
     "spsuggestion": "sprec",
     // deezer
@@ -40,6 +46,7 @@ export const DefaultSources = {
     "ftts": "ftts",
     // Client sided search platforms
     "bandcamp": "bcsearch",
+    "bc": "bcsearch",
     "bcsearch": "bcsearch",
 };
 export const LavalinkPlugins = {

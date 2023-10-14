@@ -88,7 +88,7 @@ export class Player {
      */
     set(key, value) {
         this.data[key] = value;
-        return;
+        return this;
     }
     /**
      * Get custom data.
@@ -107,7 +107,7 @@ export class Player {
                 continue;
             delete this.data[key];
         }
-        return;
+        return this;
     }
     /**
      * Get all custom Data
@@ -145,7 +145,7 @@ export class Player {
                     delete options.encodedTrack;
                 if (this.queue.tracks[0])
                     return this.play(options);
-                return;
+                return this;
             }
         }
         const track = this.queue.current;
@@ -184,6 +184,7 @@ export class Player {
             playerOptions: finalOptions,
         });
         this.ping.lavalink = Math.round((performance.now() - now) / 10) / 100;
+        return this;
     }
     /**
      * Set the Volume for the Player
@@ -206,7 +207,7 @@ export class Player {
             await this.node.updatePlayer({ guildId: this.guildId, playerOptions: { volume: this.lavalinkVolume } });
         }
         this.ping.lavalink = Math.round((performance.now() - now) / 10) / 100;
-        return;
+        return this;
     }
     async lavaSearch(query, requestUser) {
         return this.node.lavaSearch(query, requestUser);
@@ -236,7 +237,7 @@ export class Player {
         const now = performance.now();
         await this.node.updatePlayer({ guildId: this.guildId, playerOptions: { paused: true } });
         this.ping.lavalink = Math.round((performance.now() - now) / 10) / 100;
-        return;
+        return this;
     }
     /**
      * Resume the Player
@@ -248,7 +249,7 @@ export class Player {
         const now = performance.now();
         await this.node.updatePlayer({ guildId: this.guildId, playerOptions: { paused: false } });
         this.ping.lavalink = Math.round((performance.now() - now) / 10) / 100;
-        return;
+        return this;
     }
     /**
      * Seek to a specific Position
@@ -269,7 +270,7 @@ export class Player {
         const now = performance.now();
         await this.node.updatePlayer({ guildId: this.guildId, playerOptions: { position } });
         this.ping.lavalink = Math.round((performance.now() - now) / 10) / 100;
-        return;
+        return this;
     }
     /**
      * Set the Repeatmode of the Player
@@ -278,7 +279,8 @@ export class Player {
     async setRepeatMode(repeatMode) {
         if (!["off", "track", "queue"].includes(repeatMode))
             throw new RangeError("Repeatmode must be either 'off', 'track', or 'queue'");
-        return this.repeatMode = repeatMode;
+        this.repeatMode = repeatMode;
+        return this;
     }
     /**
      * Skip the current song, or a specific amount of songs
@@ -297,7 +299,7 @@ export class Player {
         const now = performance.now();
         await this.node.updatePlayer({ guildId: this.guildId, playerOptions: { encodedTrack: null } });
         this.ping.lavalink = Math.round((performance.now() - now) / 10) / 100;
-        return true;
+        return this;
     }
     /**
      * Connects the Player to the Voice Channel
@@ -315,7 +317,7 @@ export class Player {
                 self_deaf: this.options.selfDeaf ?? true,
             }
         });
-        return;
+        return this;
     }
     /**
      * Disconnects the Player from the Voice Channel, but keeps the player in the cache
@@ -335,7 +337,7 @@ export class Player {
             }
         });
         this.voiceChannelId = null;
-        return;
+        return this;
     }
     /**
      * Destroy the player and disconnect from the voice channel
@@ -346,7 +348,7 @@ export class Player {
         this.LavalinkManager.deletePlayer(this.guildId);
         await this.node.destroyPlayer(this.guildId);
         this.LavalinkManager.emit("playerDestroy", this, reason);
-        return;
+        return this;
     }
     /**
      * Move the player on a different Audio-Node

@@ -1,11 +1,12 @@
 import { Client, GatewayIntentBits } from "discord.js";
-import { createClient } from 'redis';
+import { createClient } from "redis";
+
 import { LavalinkManager } from "../src";
-import { BotClient } from "./types/Client";
 import { envConfig } from "./config";
 import { loadCommands } from "./handler/commandLoader";
 import { loadEvents } from "./handler/eventsLoader";
 import { loadLavalinkEvents } from "./lavalinkEvents";
+import { BotClient } from "./types/Client";
 import { myCustomStore, myCustomWatcher } from "./Utils/CustomClasses";
 import { autoPlayFunction, requesterTransformer } from "./Utils/OptionalFunctions";
 
@@ -63,6 +64,8 @@ client.lavalink = new LavalinkManager({
         queueChangesWatcher: new myCustomWatcher(client)
     },
 });
+
+
 
 loadCommands(client);
 loadEvents(client);

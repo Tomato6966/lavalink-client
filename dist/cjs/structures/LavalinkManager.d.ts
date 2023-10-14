@@ -1,11 +1,11 @@
 /// <reference types="node" />
 import { EventEmitter } from "events";
-import { NodeManager } from "./NodeManager";
-import { ManagerQueueOptions } from "./Queue";
-import { GuildShardPayload, ManagerUtils, MiniMap, SearchPlatform, TrackEndEvent, TrackExceptionEvent, TrackStartEvent, TrackStuckEvent, VoicePacket, VoiceServer, VoiceState, WebSocketClosedEvent } from "./Utils";
 import { LavalinkNodeOptions } from "./Node";
+import { NodeManager } from "./NodeManager";
 import { DestroyReasonsType, Player, PlayerJson, PlayerOptions } from "./Player";
+import { ManagerQueueOptions } from "./Queue";
 import { Track, UnresolvedTrack } from "./Track";
+import { ChannelDeletePacket, GuildShardPayload, ManagerUtils, MiniMap, SearchPlatform, TrackEndEvent, TrackExceptionEvent, TrackStartEvent, TrackStuckEvent, VoicePacket, VoiceServer, VoiceState, WebSocketClosedEvent } from "./Utils";
 export interface LavalinkManager {
     nodeManager: NodeManager;
     utils: ManagerUtils;
@@ -145,6 +145,6 @@ export declare class LavalinkManager extends EventEmitter {
      * Sends voice data to the Lavalink server.
      * @param data
      */
-    sendRawData(data: VoicePacket | VoiceServer | VoiceState | any): Promise<void>;
+    sendRawData(data: VoicePacket | VoiceServer | VoiceState | ChannelDeletePacket): Promise<void>;
 }
 export {};

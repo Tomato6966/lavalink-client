@@ -642,6 +642,14 @@ export interface LavalinkPlayer {
   filters: Partial<LavalinkFilterData>;
 }
 
+
+export interface ChannelDeletePacket {
+  t: "CHANNEL_DELETE",
+  d: {
+    guild_id: string;
+    id: string;
+  }
+}
 export interface VoiceState {
   op: "voiceUpdate";
   guildId: string;

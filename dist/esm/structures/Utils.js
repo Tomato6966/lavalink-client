@@ -63,9 +63,13 @@ export class ManagerUtils {
                 const closest = await getClosestTrack(this, player);
                 if (!closest)
                     throw new SyntaxError("No closest Track found");
-                Object.getOwnPropertyNames(this).forEach(prop => delete this[prop]);
-                Object.assign(this, closest);
-                return;
+                for (const prop of Object.getOwnPropertyNames(this))
+                    delete this[prop];
+                // delete symbol
+                delete this[UnresolvedTrackSymbol];
+                // assign new symbol
+                Object.defineProperty(this, TrackSymbol, { configurable: true, value: true });
+                return Object.assign(this, closest);
             }
         };
         if (!this.isUnresolvedTrack(unresolvedTrack))

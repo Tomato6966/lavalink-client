@@ -1,11 +1,16 @@
 import { EventEmitter } from "events";
-import { NodeManager } from "./NodeManager";
-import { DefaultQueueStore, ManagerQueueOptions } from "./Queue";
-import { GuildShardPayload, ManagerUtils, MiniMap, SearchPlatform, TrackEndEvent, TrackExceptionEvent, TrackStartEvent, TrackStuckEvent, VoicePacket, VoiceServer, VoiceState, WebSocketClosedEvent } from "./Utils";
-import { LavalinkNodeOptions } from "./Node";
+
 import { DefaultSources, SourceLinksRegexes } from "./LavalinkManagerStatics";
+import { LavalinkNodeOptions } from "./Node";
+import { NodeManager } from "./NodeManager";
 import { DestroyReasons, DestroyReasonsType, Player, PlayerJson, PlayerOptions } from "./Player";
+import { DefaultQueueStore, ManagerQueueOptions } from "./Queue";
 import { Track, UnresolvedTrack } from "./Track";
+import {
+	ChannelDeletePacket, GuildShardPayload, ManagerUtils, MiniMap, SearchPlatform, TrackEndEvent,
+	TrackExceptionEvent, TrackStartEvent, TrackStuckEvent, VoicePacket, VoiceServer, VoiceState,
+	WebSocketClosedEvent
+} from "./Utils";
 
 export interface LavalinkManager {
   nodeManager: NodeManager;
@@ -277,7 +282,7 @@ export class LavalinkManager extends EventEmitter {
    * Sends voice data to the Lavalink server.
    * @param data
    */
-  public async sendRawData(data: VoicePacket | VoiceServer | VoiceState | any): Promise<void> {
+  public async sendRawData(data: VoicePacket | VoiceServer | VoiceState | ChannelDeletePacket): Promise<void> {
     if(!this.initiated) {
       if(this.options?.debugOptions?.noAudio === true) console.debug("Lavalink-Client-Debug | NO-AUDIO [::] sendRawData function, manager is not initated yet");
       return;
@@ -293,12 +298,12 @@ export class LavalinkManager extends EventEmitter {
       const update = "d" in data ? data.d : data;
       if(!update.guild_id) return;
       const player = this.getPlayer(update.guild_id);
-      if(player && player.voiceChannelId === update.id) return player.destroy(DestroyReasons.ChannelDeleted);
+      if(player && player.voiceChannelId === update.id) return void player.destroy(DestroyReasons.ChannelDeleted);
     }
 
     // for voice updates
     if (["VOICE_STATE_UPDATE", "VOICE_SERVER_UPDATE"].includes(data.t)) {
-      const update: VoiceServer | VoiceState = "d" in data ? data.d : data;
+      const update = ("d" in data ? data.d : data) as VoiceServer | VoiceState;
       if (!update) {
         if(this.options?.debugOptions?.noAudio === true) console.debug("Lavalink-Client-Debug | NO-AUDIO [::] sendRawData function, no update data found in payload:", data);
         return;
@@ -342,7 +347,7 @@ export class LavalinkManager extends EventEmitter {
         player.voiceChannelId = update.channel_id;
       } else {
         if(this.options?.playerOptions?.onDisconnect?.destroyPlayer === true) {
-          return await player.destroy(DestroyReasons.Disconnected);
+          return void await player.destroy(DestroyReasons.Disconnected);
         }
         
         this.emit("playerDisconnect", player, player.voiceChannelId);
@@ -353,9 +358,9 @@ export class LavalinkManager extends EventEmitter {
           try {
             await player.connect();
           } catch {
-            return await player.destroy(DestroyReasons.PlayerReconnectFail);
+            return void await player.destroy(DestroyReasons.PlayerReconnectFail);
           }
-          return player.paused && await player.resume();
+          return void player.paused && await player.resume();
         }
 
         player.voiceChannelId = null;

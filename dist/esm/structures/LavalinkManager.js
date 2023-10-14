@@ -1,9 +1,9 @@
 import { EventEmitter } from "events";
+import { DefaultSources, SourceLinksRegexes } from "./LavalinkManagerStatics";
 import { NodeManager } from "./NodeManager";
+import { DestroyReasons, Player } from "./Player";
 import { DefaultQueueStore } from "./Queue";
 import { ManagerUtils, MiniMap } from "./Utils";
-import { DefaultSources, SourceLinksRegexes } from "./LavalinkManagerStatics";
-import { DestroyReasons, Player } from "./Player";
 export class LavalinkManager extends EventEmitter {
     static DefaultSources = DefaultSources;
     static SourceLinksRegexes = SourceLinksRegexes;
@@ -153,11 +153,11 @@ export class LavalinkManager extends EventEmitter {
                 return;
             const player = this.getPlayer(update.guild_id);
             if (player && player.voiceChannelId === update.id)
-                return player.destroy(DestroyReasons.ChannelDeleted);
+                return void player.destroy(DestroyReasons.ChannelDeleted);
         }
         // for voice updates
         if (["VOICE_STATE_UPDATE", "VOICE_SERVER_UPDATE"].includes(data.t)) {
-            const update = "d" in data ? data.d : data;
+            const update = ("d" in data ? data.d : data);
             if (!update) {
                 if (this.options?.debugOptions?.noAudio === true)
                     console.debug("Lavalink-Client-Debug | NO-AUDIO [::] sendRawData function, no update data found in payload:", data);
@@ -205,7 +205,7 @@ export class LavalinkManager extends EventEmitter {
             }
             else {
                 if (this.options?.playerOptions?.onDisconnect?.destroyPlayer === true) {
-                    return await player.destroy(DestroyReasons.Disconnected);
+                    return void await player.destroy(DestroyReasons.Disconnected);
                 }
                 this.emit("playerDisconnect", player, player.voiceChannelId);
                 if (!player.paused)
@@ -215,9 +215,9 @@ export class LavalinkManager extends EventEmitter {
                         await player.connect();
                     }
                     catch {
-                        return await player.destroy(DestroyReasons.PlayerReconnectFail);
+                        return void await player.destroy(DestroyReasons.PlayerReconnectFail);
                     }
-                    return player.paused && await player.resume();
+                    return void player.paused && await player.resume();
                 }
                 player.voiceChannelId = null;
                 player.voice = Object.assign({});
