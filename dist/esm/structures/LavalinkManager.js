@@ -41,7 +41,11 @@ export class LavalinkManager extends EventEmitter {
                 queueStore: options?.queueOptions?.queueStore ?? new DefaultQueueStore(),
             },
             debugOptions: {
-                noAudio: options?.debugOptions?.noAudio ?? false
+                noAudio: options?.debugOptions?.noAudio ?? false,
+                playerDestroy: {
+                    dontThrowError: options?.debugOptions?.playerDestroy?.dontThrowError ?? false,
+                    debugLog: options?.debugOptions?.playerDestroy?.debugLog ?? false,
+                }
             }
         };
         return;
@@ -84,8 +88,9 @@ export class LavalinkManager extends EventEmitter {
         this.nodeManager = new NodeManager(this);
     }
     createPlayer(options) {
-        if (this.players.has(options?.guildId))
-            return this.players.get(options?.guildId);
+        const oldPlayer = this.getPlayer(options?.guildId);
+        if (oldPlayer)
+            return oldPlayer;
         const newPlayer = new Player(options, this);
         this.players.set(newPlayer.guildId, newPlayer);
         return newPlayer;
@@ -93,9 +98,16 @@ export class LavalinkManager extends EventEmitter {
     getPlayer(guildId) {
         return this.players.get(guildId);
     }
-    deletePlayer(guildId) {
-        if (typeof this.players.get(guildId)?.voiceChannelId === "string")
-            throw new Error("Use Player#destroy(true) not PlayerManager#deletePlayer() to stop the Player");
+    deletePlayer(guildId, throwError = true) {
+        const oldPlayer = this.getPlayer(guildId);
+        if (!oldPlayer)
+            return;
+        if (oldPlayer.voiceChannelId === "string" && oldPlayer.connected) {
+            if (throwError)
+                throw new Error(`Use Player#destroy(true) not PlayerManager#deletePlayer() to stop the Player ${JSON.stringify(oldPlayer.toJSON?.())}`);
+            else
+                console.error("Use Player#destroy(true) not PlayerManager#deletePlayer() to stop the Player", oldPlayer.toJSON?.());
+        }
         return this.players.delete(guildId);
     }
     get useable() {
@@ -172,6 +184,11 @@ export class LavalinkManager extends EventEmitter {
             if (!player) {
                 if (this.options?.debugOptions?.noAudio === true)
                     console.debug("Lavalink-Client-Debug | NO-AUDIO [::] sendRawData function, No Lavalink Player found via key: 'guild_id' of update-data:", update);
+                return;
+            }
+            if (player.get("internal_destroystatus") === true) {
+                if (this.options?.debugOptions?.noAudio === true)
+                    console.debug("Lavalink-Client-Debug | NO-AUDIO [::] sendRawData function, Player is in a destroying state. can't signal the voice states");
                 return;
             }
             if ("token" in update) {

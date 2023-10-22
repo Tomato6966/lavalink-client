@@ -59,7 +59,14 @@ export interface ManagerOptions {
     /** optional */
     debugOptions?: {
         /** logs for debugging the "no-Audio" playing error */
-        noAudio: boolean;
+        noAudio?: boolean;
+        /** For Logging the Destroy function */
+        playerDestroy?: {
+            /** To show the debug reason at all times. */
+            debugLog?: boolean;
+            /** If you get 'Error: Use Player#destroy(true) not PlayerManager#deletePlayer() to stop the Player' put it on true */
+            dontThrowError?: boolean;
+        };
     };
 }
 interface LavalinkManagerEvents {
@@ -134,7 +141,7 @@ export declare class LavalinkManager extends EventEmitter {
     constructor(options: ManagerOptions);
     createPlayer(options: PlayerOptions): Player;
     getPlayer(guildId: string): Player;
-    deletePlayer(guildId: string): boolean;
+    deletePlayer(guildId: string, throwError?: boolean): boolean;
     get useable(): boolean;
     /**
      * Initiates the Manager.
