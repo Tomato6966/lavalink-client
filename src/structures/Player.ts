@@ -454,7 +454,7 @@ export class Player {
     /**
      * Destroy the player and disconnect from the voice channel
      */
-    public async destroy(reason?:string) { //  [disconnect -> queue destroy -> cache delete -> lavalink destroy -> event emit]
+    public async destroy(reason?:string, disconnect:boolean = true) { //  [disconnect -> queue destroy -> cache delete -> lavalink destroy -> event emit]
         if(this.LavalinkManager.options.debugOptions.playerDestroy.debugLog) console.log(`Lavalink-Client-Debug | PlayerDestroy [::] destroy Function, [guildId ${this.guildId}] - Destroy-Reason: ${String(reason)}`);
         if(this.get("internal_destroystatus") === true) {
             if(this.LavalinkManager.options.debugOptions.playerDestroy.debugLog) console.log(`Lavalink-Client-Debug | PlayerDestroy [::] destroy Function, [guildId ${this.guildId}] - Already destroying somewhere else..`);
@@ -462,11 +462,12 @@ export class Player {
         }
         this.set("internal_destroystatus", true);
         // disconnect player and set VoiceChannel to Null
-        await this.disconnect(true);
+        if(disconnect) await this.disconnect(true);
+        else this.set("internal_destroywithoutdisconnect", true);
         // Destroy the queue
         await this.queue.utils.destroy();
         // delete the player from cache
-        this.LavalinkManager.deletePlayer(this.guildId, !this.LavalinkManager.options.debugOptions.playerDestroy.dontThrowError);
+        this.LavalinkManager.deletePlayer(this.guildId);
         // destroy the player on lavalink side
         await this.node.destroyPlayer(this.guildId);
 

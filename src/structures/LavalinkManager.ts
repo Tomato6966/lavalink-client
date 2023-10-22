@@ -76,7 +76,7 @@ export interface ManagerOptions {
     playerDestroy?: {
       /** To show the debug reason at all times. */
       debugLog?: boolean;
-      /** If you get 'Error: Use Player#destroy(true) not PlayerManager#deletePlayer() to stop the Player' put it on true */
+      /** If you get 'Error: Use Player#destroy("reason") not LavalinkManager#deletePlayer() to stop the Player' put it on true */
       dontThrowError?: boolean;
     }
   }
@@ -115,7 +115,7 @@ interface LavalinkManagerEvents {
   "playerCreate": (player: Player) => void;
   /**
    * Emitted when a Player is moved within the channel.
-   * @event Manager.playerManager#move
+   * @event Manager#playerMove
    */
   "playerMove": (player: Player, oldVoiceChannelId: string, newVoiceChannelId: string) => void;
   /**
@@ -255,12 +255,17 @@ export class LavalinkManager extends EventEmitter {
     return this.players.get(guildId);
   }
 
-  public deletePlayer(guildId: string, throwError:boolean = true) {
+  public destroyPlayer(guildId: string, destroyReason?: string) {
     const oldPlayer = this.getPlayer(guildId);
     if(!oldPlayer) return;
-    if (oldPlayer.voiceChannelId === "string" && oldPlayer.connected) {
-      if(throwError) throw new Error(`Use Player#destroy(true) not PlayerManager#deletePlayer() to stop the Player ${JSON.stringify(oldPlayer.toJSON?.())}`)
-      else console.error("Use Player#destroy(true) not PlayerManager#deletePlayer() to stop the Player", oldPlayer.toJSON?.())
+    return oldPlayer.destroy(destroyReason);
+  }
+  public deletePlayer(guildId: string) {
+    const oldPlayer = this.getPlayer(guildId);
+    if(!oldPlayer) return;
+    if (oldPlayer.voiceChannelId === "string" && oldPlayer.connected && !oldPlayer.get("internal_destroywithoutdisconnect")) {
+      if(!this.options?.debugOptions?.playerDestroy?.dontThrowError) throw new Error(`Use Player#destroy() not LavalinkManager#deletePlayer() to stop the Player ${JSON.stringify(oldPlayer.toJSON?.())}`)
+      else console.error("Use Player#destroy() not LavalinkManager#deletePlayer() to stop the Player", oldPlayer.toJSON?.())
     }
     return this.players.delete(guildId);
   }
