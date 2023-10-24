@@ -64,7 +64,7 @@ export interface ManagerOptions {
         playerDestroy?: {
             /** To show the debug reason at all times. */
             debugLog?: boolean;
-            /** If you get 'Error: Use Player#destroy(true) not PlayerManager#deletePlayer() to stop the Player' put it on true */
+            /** If you get 'Error: Use Player#destroy("reason") not LavalinkManager#deletePlayer() to stop the Player' put it on true */
             dontThrowError?: boolean;
         };
     };
@@ -102,7 +102,7 @@ interface LavalinkManagerEvents {
     "playerCreate": (player: Player) => void;
     /**
      * Emitted when a Player is moved within the channel.
-     * @event Manager.playerManager#move
+     * @event Manager#playerMove
      */
     "playerMove": (player: Player, oldVoiceChannelId: string, newVoiceChannelId: string) => void;
     /**
@@ -141,7 +141,8 @@ export declare class LavalinkManager extends EventEmitter {
     constructor(options: ManagerOptions);
     createPlayer(options: PlayerOptions): Player;
     getPlayer(guildId: string): Player;
-    deletePlayer(guildId: string, throwError?: boolean): boolean;
+    destroyPlayer(guildId: string, destroyReason?: string): Promise<Player>;
+    deletePlayer(guildId: string): boolean;
     get useable(): boolean;
     /**
      * Initiates the Manager.

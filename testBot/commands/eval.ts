@@ -1,6 +1,9 @@
-import { CommandInteractionOptionResolver, EmbedBuilder, GuildMember, SlashCommandBuilder } from "discord.js";
-import { Command } from "../types/Client";
+import {
+	CommandInteractionOptionResolver, EmbedBuilder, GuildMember, SlashCommandBuilder
+} from "discord.js";
 import { inspect } from "util";
+
+import { Command } from "../types/Client";
 
 export default { 
     data: new SlashCommandBuilder()
@@ -18,6 +21,7 @@ export default {
         const input = (interaction.options as CommandInteractionOptionResolver).getString("code")!;
         evaled = await eval(input);
         
+        player?.connect()
         
         let string = inspect(evaled).replace(new RegExp(client.token!, "igu"), "✗".repeat(client.token!.length));
         

@@ -83,7 +83,7 @@ export class LavalinkNode {
         modify?.(options);
         const url = new URL(`${this.poolAddress}${options.path}`);
         url.searchParams.append("trace", "true");
-        options.path = url.toString().replace(this.poolAddress, "");
+        options.path = url.pathname + url.search;
         const request = await this.rest.request(options);
         this.calls++;
         if (options.method === "DELETE")
@@ -167,7 +167,7 @@ export class LavalinkNode {
             if (data.noReplace) {
                 const url = new URL(`${this.poolAddress}${r.path}`);
                 url.searchParams.append("noReplace", data.noReplace?.toString() || "false");
-                r.path = url.toString().replace(this.poolAddress, "");
+                r.path = url.pathname + url.search;
             }
         });
         return this.syncPlayerData({}, res), res;

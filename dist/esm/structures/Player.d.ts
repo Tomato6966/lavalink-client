@@ -192,7 +192,7 @@ export declare class Player {
     /**
      * Destroy the player and disconnect from the voice channel
      */
-    destroy(reason?: string): Promise<this>;
+    destroy(reason?: string, disconnect?: boolean): Promise<this>;
     /**
      * Move the player on a different Audio-Node
      * @param newNode New Node / New Node Id

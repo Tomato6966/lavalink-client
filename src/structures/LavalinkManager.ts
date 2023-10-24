@@ -263,6 +263,7 @@ export class LavalinkManager extends EventEmitter {
   public deletePlayer(guildId: string) {
     const oldPlayer = this.getPlayer(guildId);
     if(!oldPlayer) return;
+    // oldPlayer.connected is operational. you could also do oldPlayer.voice?.token 
     if (oldPlayer.voiceChannelId === "string" && oldPlayer.connected && !oldPlayer.get("internal_destroywithoutdisconnect")) {
       if(!this.options?.debugOptions?.playerDestroy?.dontThrowError) throw new Error(`Use Player#destroy() not LavalinkManager#deletePlayer() to stop the Player ${JSON.stringify(oldPlayer.toJSON?.())}`)
       else console.error("Use Player#destroy() not LavalinkManager#deletePlayer() to stop the Player", oldPlayer.toJSON?.())

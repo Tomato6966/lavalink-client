@@ -64,10 +64,10 @@ client.lavalink = new LavalinkManager({
         queueChangesWatcher: new myCustomWatcher(client)
     },
     debugOptions: {
-        noAudio: true,
+        noAudio: false,
         playerDestroy: {
-            dontThrowError: true,
-            debugLog: true
+            dontThrowError: false,
+            debugLog: false
         }
     }
 });
