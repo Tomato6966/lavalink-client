@@ -111,7 +111,7 @@ Check out the [Documentation](https://lc4.gitbook.io/lavalink-client) for **Exam
   - `player.deleteSponsorBlock()` / `node.deleteSponsorBlock()`
     - That Plugin adds following **Events** to the **Manager**: `"SegmentsLoaded"`, `"SegmentSkipped"`, `"ChapterStarted"`, `"ChaptersLoaded"`
 - Example Bot show example in autoplayFunction how to "disable" / "enable" Autoplay with bot data variables.
-- Added `ManagerOptions#onlyEmitNewTracks`. If set to true, it won't emit "trackStart" Event, when track.loop is active, or the new current track == the previous (current) track. 
+- Added `ManagerOptions#emitNewSongsOnly`. If set to true, it won't emit "trackStart" Event, when track.loop is active, or the new current track == the previous (current) track. 
 - Added `ManagerOptions#linksBlacklist` which allows user to specify an array of regExp / strings to match query strings (for links / words) and if a match happens it doesn't allow the request (blacklist) 
 - Added `ManagerOptions#linksWhitelist` which allows user to specify an array of regExp / strings to match query strings (for links only) and if a match does NOT HAPPEN it doesn't allow the request (whitelist)
 - Added `ManagerOptions#linksAllowed` if set to false, it does not allow requests which are links
