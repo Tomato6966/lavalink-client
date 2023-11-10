@@ -170,6 +170,8 @@ export class ManagerUtils {
         }
         if (!/^https?:\/\//.test(queryString))
             return;
+        else if (this.LavalinkManager.options?.linksAllowed === false)
+            throw new Error("Using links to make a request is not allowed.");
         // checks for if the query is whitelisted (should only work for links, so it skips the check for no link queries)
         if (this.LavalinkManager.options?.linksWhitelist?.length > 0 && !this.LavalinkManager.options?.linksWhitelist.some(v => (typeof v === "string" && (queryString.toLowerCase().includes(v.toLowerCase()) || v.toLowerCase().includes(queryString.toLowerCase()))) || isRegExp(v) && v.test(queryString))) {
             throw new Error(`Query string contains a link / word which isn't whitelisted.`);
