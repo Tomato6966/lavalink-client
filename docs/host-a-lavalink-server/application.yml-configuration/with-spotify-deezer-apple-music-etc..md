@@ -59,7 +59,9 @@ lavalink:
 </strong>#      repository: "https://m2.duncte123.dev/releases"
 #    - dependency: "me.rohank05:lavalink-filter-plugin:0.0.4" # lavalink-filter plugin (echo+reverb filter [currently not working on v4])
 #      repository: "https://jitpack.io"
-#     - dependency: "com.github.topi314.sponsorblock:sponsorblock-plugin:3.0.0-beta.3" # Not really needed, but adds support for skipping sponsor-block/chapter segments 
+
+# Most users won't need this plugin, but it's nativly supported by my library
+#     - dependency: "com.github.topi314.sponsorblock:sponsorblock-plugin:3.0.0-beta.4" # Not really needed, but adds support for skipping sponsor-block/chapter segments 
 #      repository: "https://maven.topi.wtf/releases"
 
 # The following plugins are the ones which add the support for the advanced searches + sources
