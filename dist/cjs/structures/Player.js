@@ -215,6 +215,15 @@ class Player {
     async lavaSearch(query, requestUser) {
         return this.node.lavaSearch(query, requestUser);
     }
+    async setSponsorBlock(segments = ["sponsor", "selfpromo"]) {
+        return this.node.setSponsorBlock(this, segments);
+    }
+    async getSponsorBlock() {
+        return this.node.getSponsorBlock(this);
+    }
+    async deleteSponsorBlock() {
+        return this.node.deleteSponsorBlock(this);
+    }
     /**
      *
      * @param query Query for your data
@@ -222,10 +231,6 @@ class Player {
      */
     async search(query, requestUser) {
         const Query = this.LavalinkManager.utils.transformQuery(query);
-        if (/^https?:\/\//.test(Query.query))
-            this.LavalinkManager.utils.validateQueryString(this.node, Query.source);
-        else if (Query.source)
-            this.LavalinkManager.utils.validateSourceString(this.node, Query.source);
         if (["bcsearch", "bandcamp"].includes(Query.source))
             return await (0, BandCampSearch_1.bandCampSearch)(this, Query.query, requestUser);
         return this.node.search(Query, requestUser);
@@ -289,8 +294,8 @@ class Player {
      * Skip the current song, or a specific amount of songs
      * @param amount provide the index of the next track to skip to
      */
-    async skip(skipTo = 0) {
-        if (!this.queue.tracks.length)
+    async skip(skipTo = 0, throwError = true) {
+        if (!this.queue.tracks.length && (throwError || (typeof skipTo === "boolean" && skipTo === true)))
             throw new RangeError("Can't skip more than the queue size");
         if (typeof skipTo === "number" && skipTo > 1) {
             if (skipTo > this.queue.tracks.length)
@@ -305,12 +310,26 @@ class Player {
         return this;
     }
     /**
+     * Clears the queue and stops playing. Does not destroy the Player and not leave the channel
+     * @returns
+     */
+    async stopPlaying() {
+        // remove tracks from the queue
+        if (this.queue.tracks.length)
+            await this.queue.splice(0, this.queue.tracks.length);
+        const now = performance.now();
+        // send to lavalink, that it should stop playing
+        await this.node.updatePlayer({ guildId: this.guildId, playerOptions: { encodedTrack: null } });
+        this.ping.lavalink = Math.round((performance.now() - now) / 10) / 100;
+        return this;
+    }
+    /**
      * Connects the Player to the Voice Channel
      * @returns
      */
     async connect() {
         if (!this.options.voiceChannelId)
-            throw new RangeError("No Voice Channel id has been set.");
+            throw new RangeError("No Voice Channel id has been set. (player.options.voiceChannelId)");
         await this.LavalinkManager.options.sendToShard(this.guildId, {
             op: 4,
             d: {
@@ -320,6 +339,26 @@ class Player {
                 self_deaf: this.options.selfDeaf ?? true,
             }
         });
+        this.voiceChannelId = this.options.voiceChannelId;
+        return this;
+    }
+    async changeVoiceState(data) {
+        if (this.options.voiceChannelId === data.voiceChannelId)
+            throw new RangeError("New Channel can't be equal to the old Channel.");
+        await this.LavalinkManager.options.sendToShard(this.guildId, {
+            op: 4,
+            d: {
+                guild_id: this.guildId,
+                channel_id: data.voiceChannelId,
+                self_mute: data.selfMute ?? this.options.selfMute ?? false,
+                self_deaf: data.selfDeaf ?? this.options.selfDeaf ?? true,
+            }
+        });
+        // override the options
+        this.options.voiceChannelId = data.voiceChannelId;
+        this.options.selfMute = data.selfMute;
+        this.options.selfDeaf = data.selfDeaf;
+        this.voiceChannelId = data.voiceChannelId;
         return this;
     }
     /**
@@ -329,7 +368,7 @@ class Player {
      */
     async disconnect(force = false) {
         if (!force && !this.options.voiceChannelId)
-            throw new RangeError("No Voice Channel id has been set.");
+            throw new RangeError("No Voice Channel id has been set. (player.options.voiceChannelId)");
         await this.LavalinkManager.options.sendToShard(this.guildId, {
             op: 4,
             d: {
@@ -346,10 +385,10 @@ class Player {
      * Destroy the player and disconnect from the voice channel
      */
     async destroy(reason, disconnect = true) {
-        if (this.LavalinkManager.options.debugOptions.playerDestroy.debugLog)
+        if (this.LavalinkManager.options.advancedOptions?.debugOptions.playerDestroy.debugLog)
             console.log(`Lavalink-Client-Debug | PlayerDestroy [::] destroy Function, [guildId ${this.guildId}] - Destroy-Reason: ${String(reason)}`);
         if (this.get("internal_destroystatus") === true) {
-            if (this.LavalinkManager.options.debugOptions.playerDestroy.debugLog)
+            if (this.LavalinkManager.options.advancedOptions?.debugOptions.playerDestroy.debugLog)
                 console.log(`Lavalink-Client-Debug | PlayerDestroy [::] destroy Function, [guildId ${this.guildId}] - Already destroying somewhere else..`);
             return;
         }
@@ -365,7 +404,7 @@ class Player {
         this.LavalinkManager.deletePlayer(this.guildId);
         // destroy the player on lavalink side
         await this.node.destroyPlayer(this.guildId);
-        if (this.LavalinkManager.options.debugOptions.playerDestroy.debugLog)
+        if (this.LavalinkManager.options.advancedOptions?.debugOptions.playerDestroy.debugLog)
             console.log(`Lavalink-Client-Debug | PlayerDestroy [::] destroy Function, [guildId ${this.guildId}] - Player got destroyed successfully`);
         // emit the event
         this.LavalinkManager.emit("playerDestroy", this, reason);

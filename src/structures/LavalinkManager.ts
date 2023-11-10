@@ -7,9 +7,10 @@ import { DestroyReasons, DestroyReasonsType, Player, PlayerJson, PlayerOptions }
 import { DefaultQueueStore, ManagerQueueOptions } from "./Queue";
 import { Track, UnresolvedTrack } from "./Track";
 import {
-	ChannelDeletePacket, GuildShardPayload, ManagerUtils, MiniMap, SearchPlatform, TrackEndEvent,
-	TrackExceptionEvent, TrackStartEvent, TrackStuckEvent, VoicePacket, VoiceServer, VoiceState,
-	WebSocketClosedEvent
+	ChannelDeletePacket, GuildShardPayload, ManagerUtils, MiniMap, SearchPlatform,
+	SponsorBlockChaptersLoaded, SponsorBlockChapterStarted, SponsorBlockSegmentSkipped,
+	SponsorBlockSegmentsLoaded, TrackEndEvent, TrackExceptionEvent, TrackStartEvent,
+	TrackStuckEvent, VoicePacket, VoiceServer, VoiceState, WebSocketClosedEvent
 } from "./Utils";
 
 export interface LavalinkManager {
@@ -41,7 +42,7 @@ export interface ManagerPlayerOptions {
   onDisconnect?: {
     /** Try to reconnect? -> If fails -> Destroy */
     autoReconnect?: boolean;
-    /** Instantly destroy player (overrides autoReconnect) */
+    /** Instantly destroy player (overrides autoReconnect) | Don't provide == disable feature*/
     destroyPlayer?: boolean;
   };
   /* What the Player should do, when the queue gets empty */
@@ -68,16 +69,27 @@ export interface ManagerOptions {
   playerOptions?: ManagerPlayerOptions;
   /** If it should skip to the next Track on TrackEnd / TrackError etc. events */
   autoSkip?: boolean;
-  /** optional */
-  debugOptions?: {
-    /** logs for debugging the "no-Audio" playing error */
-    noAudio?: boolean;
-    /** For Logging the Destroy function */
-    playerDestroy?: {
-      /** To show the debug reason at all times. */
-      debugLog?: boolean;
-      /** If you get 'Error: Use Player#destroy("reason") not LavalinkManager#deletePlayer() to stop the Player' put it on true */
-      dontThrowError?: boolean;
+  /** If it should emit only new (unique) songs and not when a looping track (or similar) is plaid, default false */
+  emitNewSongsOnly?: boolean;
+  /** Only allow link requests with links either matching some of that regExp or including some of that string */
+  linksWhitelist?: (RegExp|string)[];
+  /** Never allow link requests with links either matching some of that regExp or including some of that string (doesn't even allow if it's whitelisted) */
+  linksBlacklist?: (RegExp|string)[];
+  /** If links should be allowed or not. If set to false, it will throw an error if a link was provided. */
+  linksAllowed?: boolean;
+  /** Advanced Options for the Library, which may or may not be "library breaking" */
+  advancedOptions?: {
+    /** optional */
+    debugOptions?: {
+      /** logs for debugging the "no-Audio" playing error */
+      noAudio?: boolean;
+      /** For Logging the Destroy function */
+      playerDestroy?: {
+        /** To show the debug reason at all times. */
+        debugLog?: boolean;
+        /** If you get 'Error: Use Player#destroy("reason") not LavalinkManager#deletePlayer() to stop the Player' put it on true */
+        dontThrowError?: boolean;
+      }
     }
   }
 }
@@ -139,6 +151,39 @@ interface LavalinkManagerEvents {
    * @event Manager#playerUpdate
    */
   "playerUpdate": (oldPlayerJson: PlayerJson, newPlayer: Player) => void;
+
+
+  /**
+   * SPONSORBLOCK-PLUGIN EVENT
+   * Emitted when Segments are loaded
+   * @link https://github.com/topi314/Sponsorblock-Plugin#segmentsloaded
+   * @event Manager#trackError
+   */
+  "SegmentsLoaded": (player: Player, track: Track | UnresolvedTrack, payload: SponsorBlockSegmentsLoaded) => void;
+
+  /**
+   * SPONSORBLOCK-PLUGIN EVENT
+   * Emitted when a specific Segment was skipped
+   * @link https://github.com/topi314/Sponsorblock-Plugin#segmentskipped
+   * @event Manager#trackError
+   */
+  "SegmentSkipped": (player: Player, track: Track | UnresolvedTrack, payload: SponsorBlockSegmentSkipped) => void;
+
+  /**
+   * SPONSORBLOCK-PLUGIN EVENT
+   * Emitted when a specific Chapter starts playing
+   * @link https://github.com/topi314/Sponsorblock-Plugin#chapterstarted
+   * @event Manager#trackError
+   */
+  "ChapterStarted": (player: Player, track: Track | UnresolvedTrack, payload: SponsorBlockChapterStarted) => void;
+
+  /**
+   * SPONSORBLOCK-PLUGIN EVENT
+   * Emitted when Chapters are loaded
+   * @link https://github.com/topi314/Sponsorblock-Plugin#chaptersloaded
+   * @event Manager#trackError
+   */
+  "ChaptersLoaded": (player: Player, track: Track | UnresolvedTrack, payload: SponsorBlockChaptersLoaded) => void;
 }
 
 export interface LavalinkManager {
@@ -183,17 +228,22 @@ export class LavalinkManager extends EventEmitter {
         requesterTransformer: options?.playerOptions?.requesterTransformer ?? null,
         useUnresolvedData: options?.playerOptions?.useUnresolvedData ?? false,
       },
+      linksWhitelist: options?.linksWhitelist ?? [],
+      linksBlacklist: options?.linksBlacklist ?? [],
       autoSkip: options?.autoSkip ?? true,
+      emitNewSongsOnly: options?.emitNewSongsOnly ?? false,
       queueOptions: {
         maxPreviousTracks: options?.queueOptions?.maxPreviousTracks ?? 25,
         queueChangesWatcher: options?.queueOptions?.queueChangesWatcher ?? null,
         queueStore: options?.queueOptions?.queueStore ?? new DefaultQueueStore(),
       },
-      debugOptions: {
-        noAudio: options?.debugOptions?.noAudio ?? false,
-        playerDestroy: {
-          dontThrowError: options?.debugOptions?.playerDestroy?.dontThrowError ?? false,
-          debugLog: options?.debugOptions?.playerDestroy?.debugLog ?? false,
+      advancedOptions: {
+        debugOptions: {
+          noAudio: options?.advancedOptions?.debugOptions?.noAudio ?? false,
+          playerDestroy: {
+            dontThrowError: options?.advancedOptions?.debugOptions?.playerDestroy?.dontThrowError ?? false,
+            debugLog: options?.advancedOptions?.debugOptions?.playerDestroy?.debugLog ?? false,
+          }
         }
       }
     }
@@ -205,6 +255,8 @@ export class LavalinkManager extends EventEmitter {
     // if(typeof options?.client !== "object" || typeof options?.client.id !== "string") throw new SyntaxError("ManagerOption.client = { id: string, username?:string } was not provided, which is required");
 
     if (options?.autoSkip && typeof options?.autoSkip !== "boolean") throw new SyntaxError("ManagerOption.autoSkip must be either false | true aka boolean");
+
+    if (options?.emitNewSongsOnly && typeof options?.emitNewSongsOnly !== "boolean") throw new SyntaxError("ManagerOption.emitNewSongsOnly must be either false | true aka boolean");
 
     if (!options?.nodes || !Array.isArray(options?.nodes) || !options?.nodes.every(node => this.utils.isNodeOptions(node))) throw new SyntaxError("ManagerOption.nodes must be an Array of NodeOptions and is required of at least 1 Node");
 
@@ -265,7 +317,7 @@ export class LavalinkManager extends EventEmitter {
     if(!oldPlayer) return;
     // oldPlayer.connected is operational. you could also do oldPlayer.voice?.token 
     if (oldPlayer.voiceChannelId === "string" && oldPlayer.connected && !oldPlayer.get("internal_destroywithoutdisconnect")) {
-      if(!this.options?.debugOptions?.playerDestroy?.dontThrowError) throw new Error(`Use Player#destroy() not LavalinkManager#deletePlayer() to stop the Player ${JSON.stringify(oldPlayer.toJSON?.())}`)
+      if(!this.options?.advancedOptions?.debugOptions?.playerDestroy?.dontThrowError) throw new Error(`Use Player#destroy() not LavalinkManager#deletePlayer() to stop the Player ${JSON.stringify(oldPlayer.toJSON?.())}`)
       else console.error("Use Player#destroy() not LavalinkManager#deletePlayer() to stop the Player", oldPlayer.toJSON?.())
     }
     return this.players.delete(guildId);
@@ -308,12 +360,12 @@ export class LavalinkManager extends EventEmitter {
    */
   public async sendRawData(data: VoicePacket | VoiceServer | VoiceState | ChannelDeletePacket): Promise<void> {
     if (!this.initiated) {
-      if (this.options?.debugOptions?.noAudio === true) console.debug("Lavalink-Client-Debug | NO-AUDIO [::] sendRawData function, manager is not initated yet");
+      if (this.options?.advancedOptions?.debugOptions?.noAudio === true) console.debug("Lavalink-Client-Debug | NO-AUDIO [::] sendRawData function, manager is not initated yet");
       return;
     }
 
     if (!("t" in data)) {
-      if (this.options?.debugOptions?.noAudio === true) console.debug("Lavalink-Client-Debug | NO-AUDIO [::] sendRawData function, no 't' in payload-data of the raw event:", data);
+      if (this.options?.advancedOptions?.debugOptions?.noAudio === true) console.debug("Lavalink-Client-Debug | NO-AUDIO [::] sendRawData function, no 't' in payload-data of the raw event:", data);
       return;
     }
 
@@ -329,21 +381,21 @@ export class LavalinkManager extends EventEmitter {
     if (["VOICE_STATE_UPDATE", "VOICE_SERVER_UPDATE"].includes(data.t)) {
       const update = ("d" in data ? data.d : data) as VoiceServer | VoiceState;
       if (!update) {
-        if (this.options?.debugOptions?.noAudio === true) console.debug("Lavalink-Client-Debug | NO-AUDIO [::] sendRawData function, no update data found in payload:", data);
+        if (this.options?.advancedOptions?.debugOptions?.noAudio === true) console.debug("Lavalink-Client-Debug | NO-AUDIO [::] sendRawData function, no update data found in payload:", data);
         return;
       }
       if (!("token" in update) && !("session_id" in update)) {
-        if (this.options?.debugOptions?.noAudio === true) console.debug("Lavalink-Client-Debug | NO-AUDIO [::] sendRawData function, no 'token' nor 'session_id' found in payload:", data);
+        if (this.options?.advancedOptions?.debugOptions?.noAudio === true) console.debug("Lavalink-Client-Debug | NO-AUDIO [::] sendRawData function, no 'token' nor 'session_id' found in payload:", data);
         return;
       }
 
       const player = this.getPlayer(update.guild_id) as Player;
       if (!player) {
-        if (this.options?.debugOptions?.noAudio === true) console.debug("Lavalink-Client-Debug | NO-AUDIO [::] sendRawData function, No Lavalink Player found via key: 'guild_id' of update-data:", update);
+        if (this.options?.advancedOptions?.debugOptions?.noAudio === true) console.debug("Lavalink-Client-Debug | NO-AUDIO [::] sendRawData function, No Lavalink Player found via key: 'guild_id' of update-data:", update);
         return;
       }
       if(player.get("internal_destroystatus") === true) {
-        if (this.options?.debugOptions?.noAudio === true) console.debug("Lavalink-Client-Debug | NO-AUDIO [::] sendRawData function, Player is in a destroying state. can't signal the voice states")
+        if (this.options?.advancedOptions?.debugOptions?.noAudio === true) console.debug("Lavalink-Client-Debug | NO-AUDIO [::] sendRawData function, Player is in a destroying state. can't signal the voice states")
         return;
       }
 
@@ -359,13 +411,13 @@ export class LavalinkManager extends EventEmitter {
             }
           }
         });
-        if (this.options?.debugOptions?.noAudio === true) console.debug("Lavalink-Client-Debug | NO-AUDIO [::] sendRawData function, Sent updatePlayer for voice token session", { voice: { token: update.token, endpoint: update.endpoint, sessionId: player.voice?.sessionId, } });
+        if (this.options?.advancedOptions?.debugOptions?.noAudio === true) console.debug("Lavalink-Client-Debug | NO-AUDIO [::] sendRawData function, Sent updatePlayer for voice token session", { voice: { token: update.token, endpoint: update.endpoint, sessionId: player.voice?.sessionId, } });
         return
       }
 
       /* voice state update */
       if (update.user_id !== this.options?.client.id) {
-        if (this.options?.debugOptions?.noAudio === true) console.debug("Lavalink-Client-Debug | NO-AUDIO [::] sendRawData function, voice update user is not equal to provided client id of the manageroptions#client#id", "user:", update.user_id, "manager client id:", this.options?.client.id);
+        if (this.options?.advancedOptions?.debugOptions?.noAudio === true) console.debug("Lavalink-Client-Debug | NO-AUDIO [::] sendRawData function, voice update user is not equal to provided client id of the manageroptions#client#id", "user:", update.user_id, "manager client id:", this.options?.client.id);
         return;
       }
 

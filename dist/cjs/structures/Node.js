@@ -1,12 +1,13 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.LavalinkNode = void 0;
+exports.LavalinkNode = exports.validSponsorBlocks = void 0;
 const tslib_1 = require("tslib");
 const path_1 = require("path");
 const undici_1 = require("undici");
 const ws_1 = tslib_1.__importDefault(require("ws"));
 const Player_1 = require("./Player");
 const Utils_1 = require("./Utils");
+exports.validSponsorBlocks = ["sponsor", "selfpromo", "interaction", "intro", "outro", "preview", "music_offtopic", "filler"];
 class LavalinkNode {
     /** The provided Options of the Node */
     options;
@@ -98,9 +99,8 @@ class LavalinkNode {
     }
     async search(query, requestUser) {
         const Query = this.NodeManager.LavalinkManager.utils.transformQuery(query);
-        if (/^https?:\/\//.test(Query.query))
-            this.NodeManager.LavalinkManager.utils.validateQueryString(this, Query.source);
-        else if (Query.source)
+        this.NodeManager.LavalinkManager.utils.validateQueryString(this, Query.query);
+        if (Query.source)
             this.NodeManager.LavalinkManager.utils.validateSourceString(this, Query.source);
         if (["bcsearch", "bandcamp"].includes(Query.source)) {
             throw new Error("Bandcamp Search only works on the player!");
@@ -588,15 +588,42 @@ class LavalinkNode {
             case "WebSocketClosedEvent":
                 this.socketClosed(player, payload);
                 break;
+            case "SegmentsLoaded":
+                this.SponsorBlockSegmentLoaded(player, player.queue.current, payload);
+                break;
+            case "SegmentSkipped":
+                this.SponsorBlockSegmentkipped(player, player.queue.current, payload);
+                break;
+            case "ChaptersLoaded":
+                this.SponsorBlockChaptersLoaded(player, player.queue.current, payload);
+                break;
+            case "ChapterStarted":
+                this.SponsorBlockChapterStarted(player, player.queue.current, payload);
+                break;
             default:
                 this.NodeManager.emit("error", this, new Error(`Node#event unknown event '${payload.type}'.`), payload);
                 break;
         }
         return;
     }
+    SponsorBlockSegmentLoaded(player, track, payload) {
+        return this.NodeManager.LavalinkManager.emit("SegmentsLoaded", player, track, payload);
+    }
+    SponsorBlockSegmentkipped(player, track, payload) {
+        return this.NodeManager.LavalinkManager.emit("SegmentSkipped", player, track, payload);
+    }
+    SponsorBlockChaptersLoaded(player, track, payload) {
+        return this.NodeManager.LavalinkManager.emit("ChaptersLoaded", player, track, payload);
+    }
+    SponsorBlockChapterStarted(player, track, payload) {
+        return this.NodeManager.LavalinkManager.emit("ChapterStarted", player, track, payload);
+    }
     trackStart(player, track, payload) {
         player.playing = true;
         player.paused = false;
+        // don't emit the event if previous track == new track aka track loop
+        if (this.NodeManager.LavalinkManager.options?.emitNewSongsOnly === true && player.queue.previous[0]?.info?.identifier === track?.info?.identifier)
+            return;
         return this.NodeManager.LavalinkManager.emit("trackStart", player, track, payload);
     }
     async trackEnd(player, track, payload) {
@@ -620,6 +647,12 @@ class LavalinkNode {
         // remove tracks from the queue
         if (player.repeatMode !== "track")
             await (0, Utils_1.queueTrackEnd)(player);
+        else if (player.queue.current) { // If there was a current Track already and repeatmode === true, add it to the queue.
+            player.queue.previous.unshift(player.queue.current);
+            if (player.queue.previous.length > player.queue.options.maxPreviousTracks)
+                player.queue.previous.splice(player.queue.options.maxPreviousTracks, player.queue.previous.length);
+            await player.queue.utils.save();
+        }
         // if no track available, end queue
         if (!player.queue.current)
             return this.queueEnd(player, track, payload);
@@ -627,6 +660,42 @@ class LavalinkNode {
         this.NodeManager.LavalinkManager.emit("trackEnd", player, track, payload);
         // play track if autoSkip is true
         return this.NodeManager.LavalinkManager.options.autoSkip && player.play({ noReplace: true });
+    }
+    async getSponsorBlock(player) {
+        // no plugin enabled
+        if (!this.info.plugins.find(v => v.name === "sponsorblock-plugin"))
+            throw new RangeError(`there is no sponsorblock-plugin available in the lavalink node: ${this.id}`);
+        // do the request
+        return await this.request(`/sessions/${this.sessionId}/players/${player.guildId}/sponsorblock/categories`);
+    }
+    async setSponsorBlock(player, segments = ["sponsor", "selfpromo"]) {
+        // no plugin enabled
+        if (!this.info.plugins.find(v => v.name === "sponsorblock-plugin"))
+            throw new RangeError(`there is no sponsorblock-plugin available in the lavalink node: ${this.id}`);
+        // no segments length
+        if (!segments.length)
+            throw new RangeError("No Segments provided. Did you ment to use 'deleteSponsorBlock'?");
+        // a not valid segment
+        if (segments.some(v => !exports.validSponsorBlocks.includes(v.toLowerCase())))
+            throw new SyntaxError(`You provided a sponsorblock which isn't valid, valid ones are: ${exports.validSponsorBlocks.map(v => `'${v}'`).join(", ")}`);
+        // do the request
+        await this.request(`/sessions/${this.sessionId}/players/${player.guildId}/sponsorblock/categories`, (request) => {
+            request.method = "PUT";
+            request.body = JSON.stringify(segments.map(v => v.toLowerCase()));
+            return request;
+        });
+        return;
+    }
+    async deleteSponsorBlock(player) {
+        // no plugin enabled
+        if (!this.info.plugins.find(v => v.name === "sponsorblock-plugin"))
+            throw new RangeError(`there is no sponsorblock-plugin available in the lavalink node: ${this.id}`);
+        // do the request
+        await this.request(`/sessions/${this.sessionId}/players/${player.guildId}/sponsorblock/categories`, (request) => {
+            request.method = "DELETE";
+            return request;
+        });
+        return;
     }
     async queueEnd(player, track, payload) {
         // add previous track to the queue!

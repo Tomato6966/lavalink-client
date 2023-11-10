@@ -79,7 +79,6 @@ export const SourceLinksRegexes: Record<SourcesRegex, RegExp> = {
     wavUrl: /(https?|ftp|file):\/\/(www.)?(.*?)\.(wav)$/,
     aacpUrl: /(https?|ftp|file):\/\/(www.)?(.*?)\.(aacp)$/,
 
-
     /** FROM LAVA SOURCE */
     DeezerTrackRegex: /(https?:\/\/|)?(?:www\.)?deezer\.com\/(?:\w{2}\/)?track\/(\d+)/,
     DeezerPageLinkRegex: /(https?:\/\/|)?(?:www\.)?deezer\.page\.link\/(\S+)/,

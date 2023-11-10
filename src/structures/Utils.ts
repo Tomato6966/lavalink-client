@@ -1,3 +1,5 @@
+import { isRegExp } from "util/types";
+
 import { LavalinkFilterData } from "./Filters";
 import { LavalinkManager } from "./LavalinkManager";
 import { DefaultSources, LavalinkPlugins, SourceLinksRegexes } from "./LavalinkManagerStatics";
@@ -263,7 +265,19 @@ export class ManagerUtils {
   validateQueryString(node: LavalinkNode, queryString: string): void {
     if (!node.info) throw new Error("No Lavalink Node was provided");
     if (!node.info.sourceManagers?.length) throw new Error("Lavalink Node, has no sourceManagers enabled");
+    
+    // checks for blacklisted links / domains / queries
+    if(this.LavalinkManager.options?.linksBlacklist?.length > 0 && this.LavalinkManager.options?.linksBlacklist.some(v => (typeof v === "string" && (queryString.toLowerCase().includes(v.toLowerCase()) || v.toLowerCase().includes(queryString.toLowerCase()))) || isRegExp(v) && v.test(queryString))) {
+      throw new Error(`Query string contains a link / word which is blacklisted.`)
+    }
 
+    if(!/^https?:\/\//.test(queryString)) return;
+
+    // checks for if the query is whitelisted (should only work for links, so it skips the check for no link queries)
+    if(this.LavalinkManager.options?.linksWhitelist?.length > 0 && !this.LavalinkManager.options?.linksWhitelist.some(v => (typeof v === "string" && (queryString.toLowerCase().includes(v.toLowerCase()) || v.toLowerCase().includes(queryString.toLowerCase()))) || isRegExp(v) && v.test(queryString))) {
+      throw new Error(`Query string contains a link / word which isn't whitelisted.`)
+    }
+     
     // missing links: beam.pro local getyarn.io clypit pornhub reddit ocreamix soundgasm
     if ((SourceLinksRegexes.YoutubeMusicRegex.test(queryString) || SourceLinksRegexes.YoutubeRegex.test(queryString)) && !node.info?.sourceManagers?.includes("youtube")) {
       throw new Error("Lavalink Node has not 'youtube' enabled");
@@ -462,13 +476,12 @@ export class MiniMap<K, V> extends Map<K, V> {
     });
   }
 }
-
 export type PlayerEvents =
   | TrackStartEvent
   | TrackEndEvent
   | TrackStuckEvent
   | TrackExceptionEvent
-  | WebSocketClosedEvent;
+  | WebSocketClosedEvent | SponsorBlockSegmentEvents;
 
 export type Severity = "COMMON" | "SUSPICIOUS" | "FAULT";
 
@@ -511,6 +524,71 @@ export interface WebSocketClosedEvent extends PlayerEvent {
   byRemote: boolean;
   reason: string;
 }
+
+/**
+ * Types & Events for Sponsorblock-plugin from Lavalink: https://github.com/topi314/Sponsorblock-Plugin#segmentsloaded
+ */
+export type SponsorBlockSegmentEvents = SponsorBlockSegmentSkipped | SponsorBlockSegmentsLoaded | SponsorBlockChapterStarted | SponsorBlockChaptersLoaded;
+
+export type SponsorBlockSegmentEventType = "SegmentSkipped" | "SegmentsLoaded" | "ChaptersLoaded" | "ChapterStarted";
+
+export interface SponsorBlockSegmentsLoaded extends PlayerEvent {
+  type: "SegmentsLoaded";
+  /* The loaded segment(s) */
+  segments: {
+    /* The Category name */
+    category: string;
+    /* In Milliseconds */
+    start: number;
+    /* In Milliseconds */
+    end: number;
+  }[]
+}
+export interface SponsorBlockSegmentSkipped extends PlayerEvent {
+  type: "SegmentSkipped";
+  /* The skipped segment*/
+  segment: {
+    /* The Category name */
+    category: string;
+    /* In Milliseconds */
+    start: number;
+    /* In Milliseconds */
+    end: number;
+  }
+}
+
+export interface SponsorBlockChapterStarted extends PlayerEvent {
+  type: "ChapterStarted";
+  /** The Chapter which started */
+  chapter: {
+    /** The Name of the Chapter */
+    name: string;
+    /* In Milliseconds */
+    start: number; 
+    /* In Milliseconds */
+    end: number;
+    /* In Milliseconds */
+    duration: number; 
+  }
+}
+
+
+export interface SponsorBlockChaptersLoaded extends PlayerEvent {
+  type: "ChaptersLoaded";
+  /** All Chapters loaded */
+  chapters: {
+    /** The Name of the Chapter */
+    name: string;
+    /* In Milliseconds */
+    start: number; 
+    /* In Milliseconds */
+    end: number;
+    /* In Milliseconds */
+    duration: number; 
+  }[]
+}
+
+
 export type LoadTypes =
   | "track"
   | "playlist"
@@ -525,13 +603,12 @@ export type State =
   | "DISCONNECTING"
   | "DESTROYING";
 
-
 export type PlayerEventType =
   | "TrackStartEvent"
   | "TrackEndEvent"
   | "TrackExceptionEvent"
   | "TrackStuckEvent"
-  | "WebSocketClosedEvent";
+  | "WebSocketClosedEvent" | SponsorBlockSegmentEventType;
 
 export type TrackEndReason =
   | "finished"

@@ -3,6 +3,7 @@ import {
 } from "discord.js";
 import { inspect } from "util";
 
+import { SourceLinksRegexes } from "../../src";
 import { Command } from "../types/Client";
 
 export default { 
@@ -16,7 +17,7 @@ export default {
 
         const vcId = (interaction.member as GuildMember)?.voice?.channelId;
         const player = client.lavalink.getPlayer(interaction.guildId);
-
+        const regexes = SourceLinksRegexes;
         let evaled;
         const input = (interaction.options as CommandInteractionOptionResolver).getString("code")!;
         evaled = await eval(input);

@@ -2,6 +2,7 @@ import { fetch } from "undici";
 export const bandCampSearch = async (player, query, requestUser) => {
     let error = null;
     let tracks = [];
+    player.LavalinkManager.utils.validateQueryString(player.node, query);
     try {
         const data = await fetch(`https://bandcamp.com/api/nusearch/2/autocomplete?q=${encodeURIComponent(query)}`, {
             headers: {

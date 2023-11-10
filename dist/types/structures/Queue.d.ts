@@ -18,7 +18,7 @@ export interface QueueStoreManager extends Record<string, any> {
     parse: (value: unknown) => Promise<Partial<StoredQueue>>;
 }
 export interface ManagerQueueOptions {
-    /** Maximum Amount of tracks for the queue.previous array */
+    /** Maximum Amount of tracks for the queue.previous array. Set to 0 to not save previous songs. Defaults to 25 Tracks */
     maxPreviousTracks?: number;
     /** Custom Queue Store option */
     queueStore?: QueueStoreManager;

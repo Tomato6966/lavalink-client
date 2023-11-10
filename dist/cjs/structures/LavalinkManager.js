@@ -37,17 +37,22 @@ class LavalinkManager extends events_1.EventEmitter {
                 requesterTransformer: options?.playerOptions?.requesterTransformer ?? null,
                 useUnresolvedData: options?.playerOptions?.useUnresolvedData ?? false,
             },
+            linksWhitelist: options?.linksWhitelist ?? [],
+            linksBlacklist: options?.linksBlacklist ?? [],
             autoSkip: options?.autoSkip ?? true,
+            emitNewSongsOnly: options?.emitNewSongsOnly ?? false,
             queueOptions: {
                 maxPreviousTracks: options?.queueOptions?.maxPreviousTracks ?? 25,
                 queueChangesWatcher: options?.queueOptions?.queueChangesWatcher ?? null,
                 queueStore: options?.queueOptions?.queueStore ?? new Queue_1.DefaultQueueStore(),
             },
-            debugOptions: {
-                noAudio: options?.debugOptions?.noAudio ?? false,
-                playerDestroy: {
-                    dontThrowError: options?.debugOptions?.playerDestroy?.dontThrowError ?? false,
-                    debugLog: options?.debugOptions?.playerDestroy?.debugLog ?? false,
+            advancedOptions: {
+                debugOptions: {
+                    noAudio: options?.advancedOptions?.debugOptions?.noAudio ?? false,
+                    playerDestroy: {
+                        dontThrowError: options?.advancedOptions?.debugOptions?.playerDestroy?.dontThrowError ?? false,
+                        debugLog: options?.advancedOptions?.debugOptions?.playerDestroy?.debugLog ?? false,
+                    }
                 }
             }
         };
@@ -60,6 +65,8 @@ class LavalinkManager extends events_1.EventEmitter {
         // if(typeof options?.client !== "object" || typeof options?.client.id !== "string") throw new SyntaxError("ManagerOption.client = { id: string, username?:string } was not provided, which is required");
         if (options?.autoSkip && typeof options?.autoSkip !== "boolean")
             throw new SyntaxError("ManagerOption.autoSkip must be either false | true aka boolean");
+        if (options?.emitNewSongsOnly && typeof options?.emitNewSongsOnly !== "boolean")
+            throw new SyntaxError("ManagerOption.emitNewSongsOnly must be either false | true aka boolean");
         if (!options?.nodes || !Array.isArray(options?.nodes) || !options?.nodes.every(node => this.utils.isNodeOptions(node)))
             throw new SyntaxError("ManagerOption.nodes must be an Array of NodeOptions and is required of at least 1 Node");
         /* QUEUE STORE */
@@ -113,7 +120,7 @@ class LavalinkManager extends events_1.EventEmitter {
             return;
         // oldPlayer.connected is operational. you could also do oldPlayer.voice?.token 
         if (oldPlayer.voiceChannelId === "string" && oldPlayer.connected && !oldPlayer.get("internal_destroywithoutdisconnect")) {
-            if (!this.options?.debugOptions?.playerDestroy?.dontThrowError)
+            if (!this.options?.advancedOptions?.debugOptions?.playerDestroy?.dontThrowError)
                 throw new Error(`Use Player#destroy() not LavalinkManager#deletePlayer() to stop the Player ${JSON.stringify(oldPlayer.toJSON?.())}`);
             else
                 console.error("Use Player#destroy() not LavalinkManager#deletePlayer() to stop the Player", oldPlayer.toJSON?.());
@@ -159,12 +166,12 @@ class LavalinkManager extends events_1.EventEmitter {
      */
     async sendRawData(data) {
         if (!this.initiated) {
-            if (this.options?.debugOptions?.noAudio === true)
+            if (this.options?.advancedOptions?.debugOptions?.noAudio === true)
                 console.debug("Lavalink-Client-Debug | NO-AUDIO [::] sendRawData function, manager is not initated yet");
             return;
         }
         if (!("t" in data)) {
-            if (this.options?.debugOptions?.noAudio === true)
+            if (this.options?.advancedOptions?.debugOptions?.noAudio === true)
                 console.debug("Lavalink-Client-Debug | NO-AUDIO [::] sendRawData function, no 't' in payload-data of the raw event:", data);
             return;
         }
@@ -181,23 +188,23 @@ class LavalinkManager extends events_1.EventEmitter {
         if (["VOICE_STATE_UPDATE", "VOICE_SERVER_UPDATE"].includes(data.t)) {
             const update = ("d" in data ? data.d : data);
             if (!update) {
-                if (this.options?.debugOptions?.noAudio === true)
+                if (this.options?.advancedOptions?.debugOptions?.noAudio === true)
                     console.debug("Lavalink-Client-Debug | NO-AUDIO [::] sendRawData function, no update data found in payload:", data);
                 return;
             }
             if (!("token" in update) && !("session_id" in update)) {
-                if (this.options?.debugOptions?.noAudio === true)
+                if (this.options?.advancedOptions?.debugOptions?.noAudio === true)
                     console.debug("Lavalink-Client-Debug | NO-AUDIO [::] sendRawData function, no 'token' nor 'session_id' found in payload:", data);
                 return;
             }
             const player = this.getPlayer(update.guild_id);
             if (!player) {
-                if (this.options?.debugOptions?.noAudio === true)
+                if (this.options?.advancedOptions?.debugOptions?.noAudio === true)
                     console.debug("Lavalink-Client-Debug | NO-AUDIO [::] sendRawData function, No Lavalink Player found via key: 'guild_id' of update-data:", update);
                 return;
             }
             if (player.get("internal_destroystatus") === true) {
-                if (this.options?.debugOptions?.noAudio === true)
+                if (this.options?.advancedOptions?.debugOptions?.noAudio === true)
                     console.debug("Lavalink-Client-Debug | NO-AUDIO [::] sendRawData function, Player is in a destroying state. can't signal the voice states");
                 return;
             }
@@ -214,13 +221,13 @@ class LavalinkManager extends events_1.EventEmitter {
                         }
                     }
                 });
-                if (this.options?.debugOptions?.noAudio === true)
+                if (this.options?.advancedOptions?.debugOptions?.noAudio === true)
                     console.debug("Lavalink-Client-Debug | NO-AUDIO [::] sendRawData function, Sent updatePlayer for voice token session", { voice: { token: update.token, endpoint: update.endpoint, sessionId: player.voice?.sessionId, } });
                 return;
             }
             /* voice state update */
             if (update.user_id !== this.options?.client.id) {
-                if (this.options?.debugOptions?.noAudio === true)
+                if (this.options?.advancedOptions?.debugOptions?.noAudio === true)
                     console.debug("Lavalink-Client-Debug | NO-AUDIO [::] sendRawData function, voice update user is not equal to provided client id of the manageroptions#client#id", "user:", update.user_id, "manager client id:", this.options?.client.id);
                 return;
             }

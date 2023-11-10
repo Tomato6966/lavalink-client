@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.queueTrackEnd = exports.MiniMap = exports.ManagerUtils = exports.NodeSymbol = exports.QueueSymbol = exports.UnresolvedTrackSymbol = exports.TrackSymbol = void 0;
+const types_1 = require("util/types");
 const LavalinkManagerStatics_1 = require("./LavalinkManagerStatics");
 exports.TrackSymbol = Symbol("LC-Track");
 exports.UnresolvedTrackSymbol = Symbol("LC-Track-Unresolved");
@@ -166,6 +167,16 @@ class ManagerUtils {
             throw new Error("No Lavalink Node was provided");
         if (!node.info.sourceManagers?.length)
             throw new Error("Lavalink Node, has no sourceManagers enabled");
+        // checks for blacklisted links / domains / queries
+        if (this.LavalinkManager.options?.linksBlacklist?.length > 0 && this.LavalinkManager.options?.linksBlacklist.some(v => (typeof v === "string" && (queryString.toLowerCase().includes(v.toLowerCase()) || v.toLowerCase().includes(queryString.toLowerCase()))) || (0, types_1.isRegExp)(v) && v.test(queryString))) {
+            throw new Error(`Query string contains a link / word which is blacklisted.`);
+        }
+        if (!/^https?:\/\//.test(queryString))
+            return;
+        // checks for if the query is whitelisted (should only work for links, so it skips the check for no link queries)
+        if (this.LavalinkManager.options?.linksWhitelist?.length > 0 && !this.LavalinkManager.options?.linksWhitelist.some(v => (typeof v === "string" && (queryString.toLowerCase().includes(v.toLowerCase()) || v.toLowerCase().includes(queryString.toLowerCase()))) || (0, types_1.isRegExp)(v) && v.test(queryString))) {
+            throw new Error(`Query string contains a link / word which isn't whitelisted.`);
+        }
         // missing links: beam.pro local getyarn.io clypit pornhub reddit ocreamix soundgasm
         if ((LavalinkManagerStatics_1.SourceLinksRegexes.YoutubeMusicRegex.test(queryString) || LavalinkManagerStatics_1.SourceLinksRegexes.YoutubeRegex.test(queryString)) && !node.info?.sourceManagers?.includes("youtube")) {
             throw new Error("Lavalink Node has not 'youtube' enabled");

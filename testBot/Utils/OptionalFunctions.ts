@@ -16,6 +16,10 @@ export const requesterTransformer = (requester:any):CustomRequester => {
 };
 
 export const autoPlayFunction = async (player, lastPlayedTrack) => {
+    // just do player.set("autoplay_disabled", true) if you want to "disable" autoplay
+    // and do player.set("autoplay_disabled", false) if you want to "enable" it again (it's enabled on default)
+    if(player.get("autoplay_disabled") === true) return;
+
     if(lastPlayedTrack.info.sourceName === "spotify") {
         const filtered = player.queue.previous.filter(v => v.info.sourceName === "spotify").slice(0, 5);
         const ids = filtered.map(v => v.info.identifier || v.info.uri.split("/")?.reverse()?.[0] || v.info.uri.split("/")?.reverse()?.[1]);

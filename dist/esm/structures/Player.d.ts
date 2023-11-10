@@ -1,6 +1,6 @@
 import { EQBand, FilterData, FilterManager, LavalinkFilterData } from "./Filters";
 import { LavalinkManager } from "./LavalinkManager";
-import { LavalinkNode } from "./Node";
+import { LavalinkNode, SponsorBlockSegment } from "./Node";
 import { Queue } from "./Queue";
 import { Track, UnresolvedTrack } from "./Track";
 import { LavalinkPlayerVoiceOptions, LavaSearchQuery, SearchQuery } from "./Utils";
@@ -149,6 +149,9 @@ export declare class Player {
      */
     setVolume(volume: number, ignoreVolumeDecrementer?: boolean): Promise<this>;
     lavaSearch(query: LavaSearchQuery, requestUser: unknown): Promise<import("./Utils").SearchResult | import("./Utils").LavaSearchResponse>;
+    setSponsorBlock(segments?: SponsorBlockSegment[]): Promise<void>;
+    getSponsorBlock(): Promise<SponsorBlockSegment[]>;
+    deleteSponsorBlock(): Promise<void>;
     /**
      *
      * @param query Query for your data
@@ -177,12 +180,22 @@ export declare class Player {
      * Skip the current song, or a specific amount of songs
      * @param amount provide the index of the next track to skip to
      */
-    skip(skipTo?: number): Promise<any>;
+    skip(skipTo?: number, throwError?: boolean): Promise<any>;
+    /**
+     * Clears the queue and stops playing. Does not destroy the Player and not leave the channel
+     * @returns
+     */
+    stopPlaying(): Promise<this>;
     /**
      * Connects the Player to the Voice Channel
      * @returns
      */
     connect(): Promise<this>;
+    changeVoiceState(data: {
+        voiceChannelId?: string;
+        selfDeaf?: boolean;
+        selfMute?: boolean;
+    }): Promise<this>;
     /**
      * Disconnects the Player from the Voice Channel, but keeps the player in the cache
      * @param force If false it throws an error, if player thinks it's already disconnected

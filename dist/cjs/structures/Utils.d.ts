@@ -152,7 +152,7 @@ export declare class MiniMap<K, V> extends Map<K, V> {
     map<T>(fn: (value: V, key: K, miniMap: this) => T): T[];
     map<This, T>(fn: (this: This, value: V, key: K, miniMap: this) => T, thisArg: This): T[];
 }
-export type PlayerEvents = TrackStartEvent | TrackEndEvent | TrackStuckEvent | TrackExceptionEvent | WebSocketClosedEvent;
+export type PlayerEvents = TrackStartEvent | TrackEndEvent | TrackStuckEvent | TrackExceptionEvent | WebSocketClosedEvent | SponsorBlockSegmentEvents;
 export type Severity = "COMMON" | "SUSPICIOUS" | "FAULT";
 export interface Exception {
     severity: Severity;
@@ -188,9 +188,52 @@ export interface WebSocketClosedEvent extends PlayerEvent {
     byRemote: boolean;
     reason: string;
 }
+/**
+ * Types & Events for Sponsorblock-plugin from Lavalink: https://github.com/topi314/Sponsorblock-Plugin#segmentsloaded
+ */
+export type SponsorBlockSegmentEvents = SponsorBlockSegmentSkipped | SponsorBlockSegmentsLoaded | SponsorBlockChapterStarted | SponsorBlockChaptersLoaded;
+export type SponsorBlockSegmentEventType = "SegmentSkipped" | "SegmentsLoaded" | "ChaptersLoaded" | "ChapterStarted";
+export interface SponsorBlockSegmentsLoaded extends PlayerEvent {
+    type: "SegmentsLoaded";
+    segments: {
+        category: string;
+        start: number;
+        end: number;
+    }[];
+}
+export interface SponsorBlockSegmentSkipped extends PlayerEvent {
+    type: "SegmentSkipped";
+    segment: {
+        category: string;
+        start: number;
+        end: number;
+    };
+}
+export interface SponsorBlockChapterStarted extends PlayerEvent {
+    type: "ChapterStarted";
+    /** The Chapter which started */
+    chapter: {
+        /** The Name of the Chapter */
+        name: string;
+        start: number;
+        end: number;
+        duration: number;
+    };
+}
+export interface SponsorBlockChaptersLoaded extends PlayerEvent {
+    type: "ChaptersLoaded";
+    /** All Chapters loaded */
+    chapters: {
+        /** The Name of the Chapter */
+        name: string;
+        start: number;
+        end: number;
+        duration: number;
+    }[];
+}
 export type LoadTypes = "track" | "playlist" | "search" | "error" | "empty";
 export type State = "CONNECTED" | "CONNECTING" | "DISCONNECTED" | "DISCONNECTING" | "DESTROYING";
-export type PlayerEventType = "TrackStartEvent" | "TrackEndEvent" | "TrackExceptionEvent" | "TrackStuckEvent" | "WebSocketClosedEvent";
+export type PlayerEventType = "TrackStartEvent" | "TrackEndEvent" | "TrackExceptionEvent" | "TrackStuckEvent" | "WebSocketClosedEvent" | SponsorBlockSegmentEventType;
 export type TrackEndReason = "finished" | "loadFailed" | "stopped" | "replaced" | "cleanup";
 export interface InvalidLavalinkRestRequest {
     timestamp: number;

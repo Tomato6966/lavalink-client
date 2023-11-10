@@ -5,7 +5,7 @@ import { NodeManager } from "./NodeManager";
 import { DestroyReasonsType, Player, PlayerJson, PlayerOptions } from "./Player";
 import { ManagerQueueOptions } from "./Queue";
 import { Track, UnresolvedTrack } from "./Track";
-import { ChannelDeletePacket, GuildShardPayload, ManagerUtils, MiniMap, SearchPlatform, TrackEndEvent, TrackExceptionEvent, TrackStartEvent, TrackStuckEvent, VoicePacket, VoiceServer, VoiceState, WebSocketClosedEvent } from "./Utils";
+import { ChannelDeletePacket, GuildShardPayload, ManagerUtils, MiniMap, SearchPlatform, SponsorBlockChaptersLoaded, SponsorBlockChapterStarted, SponsorBlockSegmentSkipped, SponsorBlockSegmentsLoaded, TrackEndEvent, TrackExceptionEvent, TrackStartEvent, TrackStuckEvent, VoicePacket, VoiceServer, VoiceState, WebSocketClosedEvent } from "./Utils";
 export interface LavalinkManager {
     nodeManager: NodeManager;
     utils: ManagerUtils;
@@ -33,7 +33,7 @@ export interface ManagerPlayerOptions {
     onDisconnect?: {
         /** Try to reconnect? -> If fails -> Destroy */
         autoReconnect?: boolean;
-        /** Instantly destroy player (overrides autoReconnect) */
+        /** Instantly destroy player (overrides autoReconnect) | Don't provide == disable feature*/
         destroyPlayer?: boolean;
     };
     onEmptyQueue?: {
@@ -56,16 +56,27 @@ export interface ManagerOptions {
     playerOptions?: ManagerPlayerOptions;
     /** If it should skip to the next Track on TrackEnd / TrackError etc. events */
     autoSkip?: boolean;
-    /** optional */
-    debugOptions?: {
-        /** logs for debugging the "no-Audio" playing error */
-        noAudio?: boolean;
-        /** For Logging the Destroy function */
-        playerDestroy?: {
-            /** To show the debug reason at all times. */
-            debugLog?: boolean;
-            /** If you get 'Error: Use Player#destroy("reason") not LavalinkManager#deletePlayer() to stop the Player' put it on true */
-            dontThrowError?: boolean;
+    /** If it should emit only new (unique) songs and not when a looping track (or similar) is plaid, default false */
+    emitNewSongsOnly?: boolean;
+    /** Only allow link requests with links either matching some of that regExp or including some of that string */
+    linksWhitelist?: (RegExp | string)[];
+    /** Never allow link requests with links either matching some of that regExp or including some of that string (doesn't even allow if it's whitelisted) */
+    linksBlacklist?: (RegExp | string)[];
+    /** If links should be allowed or not. If set to false, it will throw an error if a link was provided. */
+    linksAllowed?: boolean;
+    /** Advanced Options for the Library, which may or may not be "library breaking" */
+    advancedOptions?: {
+        /** optional */
+        debugOptions?: {
+            /** logs for debugging the "no-Audio" playing error */
+            noAudio?: boolean;
+            /** For Logging the Destroy function */
+            playerDestroy?: {
+                /** To show the debug reason at all times. */
+                debugLog?: boolean;
+                /** If you get 'Error: Use Player#destroy("reason") not LavalinkManager#deletePlayer() to stop the Player' put it on true */
+                dontThrowError?: boolean;
+            };
         };
     };
 }
@@ -125,6 +136,34 @@ interface LavalinkManagerEvents {
      * @event Manager#playerUpdate
      */
     "playerUpdate": (oldPlayerJson: PlayerJson, newPlayer: Player) => void;
+    /**
+     * SPONSORBLOCK-PLUGIN EVENT
+     * Emitted when Segments are loaded
+     * @link https://github.com/topi314/Sponsorblock-Plugin#segmentsloaded
+     * @event Manager#trackError
+     */
+    "SegmentsLoaded": (player: Player, track: Track | UnresolvedTrack, payload: SponsorBlockSegmentsLoaded) => void;
+    /**
+     * SPONSORBLOCK-PLUGIN EVENT
+     * Emitted when a specific Segment was skipped
+     * @link https://github.com/topi314/Sponsorblock-Plugin#segmentskipped
+     * @event Manager#trackError
+     */
+    "SegmentSkipped": (player: Player, track: Track | UnresolvedTrack, payload: SponsorBlockSegmentSkipped) => void;
+    /**
+     * SPONSORBLOCK-PLUGIN EVENT
+     * Emitted when a specific Chapter starts playing
+     * @link https://github.com/topi314/Sponsorblock-Plugin#chapterstarted
+     * @event Manager#trackError
+     */
+    "ChapterStarted": (player: Player, track: Track | UnresolvedTrack, payload: SponsorBlockChapterStarted) => void;
+    /**
+     * SPONSORBLOCK-PLUGIN EVENT
+     * Emitted when Chapters are loaded
+     * @link https://github.com/topi314/Sponsorblock-Plugin#chaptersloaded
+     * @event Manager#trackError
+     */
+    "ChaptersLoaded": (player: Player, track: Track | UnresolvedTrack, payload: SponsorBlockChaptersLoaded) => void;
 }
 export interface LavalinkManager {
     options: ManagerOptions;

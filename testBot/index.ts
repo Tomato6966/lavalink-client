@@ -63,11 +63,15 @@ client.lavalink = new LavalinkManager({
         queueStore: new myCustomStore(client.redis),
         queueChangesWatcher: new myCustomWatcher(client)
     },
-    debugOptions: {
-        noAudio: false,
-        playerDestroy: {
-            dontThrowError: false,
-            debugLog: false
+    linksBlacklist: [],
+    linksWhitelist: [],
+    advancedOptions: {
+        debugOptions: {
+            noAudio: false,
+            playerDestroy: {
+                dontThrowError: false,
+                debugLog: false
+            }
         }
     }
 });

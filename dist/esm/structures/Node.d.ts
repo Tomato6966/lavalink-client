@@ -2,11 +2,13 @@
 import internal from "stream";
 import { Dispatcher, Pool } from "undici";
 import { NodeManager } from "./NodeManager";
-import { DestroyReasonsType } from "./Player";
+import { DestroyReasonsType, Player } from "./Player";
 import { Track } from "./Track";
 import { Base64, InvalidLavalinkRestRequest, LavalinkPlayer, LavaSearchQuery, LavaSearchResponse, PlayerUpdateInfo, RoutePlanner, SearchQuery, SearchResult, Session } from "./Utils";
 /** Modifies any outgoing REST requests. */
 export type ModifyRequest = (options: Dispatcher.RequestOptions) => void;
+export declare const validSponsorBlocks: string[];
+export type SponsorBlockSegment = "sponsor" | "selfpromo" | "interaction" | "intro" | "outro" | "preview" | "music_offtopic" | "filler";
 export interface LavalinkNodeOptions {
     /** The Lavalink Server-Ip / Domain-URL */
     host: string;
@@ -238,8 +240,15 @@ export declare class LavalinkNode {
     private error;
     private message;
     private handleEvent;
+    private SponsorBlockSegmentLoaded;
+    private SponsorBlockSegmentkipped;
+    private SponsorBlockChaptersLoaded;
+    private SponsorBlockChapterStarted;
     private trackStart;
     private trackEnd;
+    getSponsorBlock(player: Player): Promise<SponsorBlockSegment[]>;
+    setSponsorBlock(player: Player, segments?: SponsorBlockSegment[]): Promise<void>;
+    deleteSponsorBlock(player: Player): Promise<void>;
     private queueEnd;
     private trackStuck;
     private trackError;
