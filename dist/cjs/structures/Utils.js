@@ -1,7 +1,8 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.queueTrackEnd = exports.MiniMap = exports.ManagerUtils = exports.NodeSymbol = exports.QueueSymbol = exports.UnresolvedTrackSymbol = exports.TrackSymbol = void 0;
-const types_1 = require("util/types");
+exports.queueTrackEnd = exports.MiniMap = exports.ManagerUtils = exports.parseLavalinkConnUrl = exports.NodeSymbol = exports.QueueSymbol = exports.UnresolvedTrackSymbol = exports.TrackSymbol = void 0;
+const node_url_1 = require("node:url");
+const types_1 = require("node:util/types");
 const LavalinkManagerStatics_1 = require("./LavalinkManagerStatics");
 exports.TrackSymbol = Symbol("LC-Track");
 exports.UnresolvedTrackSymbol = Symbol("LC-Track-Unresolved");
@@ -9,6 +10,23 @@ exports.QueueSymbol = Symbol("LC-Queue");
 exports.NodeSymbol = Symbol("LC-Node");
 /** @hidden */
 const escapeRegExp = (str) => str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+/**
+ * Parses Node Connection Url: "lavalink://<nodeId>:<nodeAuthorization(Password)>@<NodeHost>:<NodePort>"
+ * @param connectionUrl
+ * @returns
+ */
+function parseLavalinkConnUrl(connectionUrl) {
+    if (!connectionUrl.startsWith("lavalink://"))
+        throw new Error(`ConnectionUrl (${connectionUrl}) must start with 'lavalink://'`);
+    const parsed = (0, node_url_1.parse)(connectionUrl);
+    return {
+        authorization: parsed.auth?.split?.(":", 2)[1],
+        id: parsed.auth?.split?.(":", 2)[0],
+        host: parsed.hostname,
+        port: Number(parsed.port),
+    };
+}
+exports.parseLavalinkConnUrl = parseLavalinkConnUrl;
 class ManagerUtils {
     LavalinkManager = null;
     constructor(LavalinkManager) {

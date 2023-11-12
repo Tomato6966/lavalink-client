@@ -116,4 +116,3 @@ Check out the [Documentation](https://lc4.gitbook.io/lavalink-client) for **Exam
 - Added `ManagerOptions#linksWhitelist` which allows user to specify an array of regExp / strings to match query strings (for links only) and if a match does NOT HAPPEN it doesn't allow the request (whitelist)
 - Added `ManagerOptions#linksAllowed` if set to false, it does not allow requests which are links
 - Moved `ManaagerOptions#debugOptions` to `ManaagerOptions#advancedOptions.debugOptions`
-

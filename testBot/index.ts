@@ -1,7 +1,7 @@
 import { Client, GatewayIntentBits } from "discord.js";
 import { createClient } from "redis";
 
-import { LavalinkManager } from "../src";
+import { LavalinkManager, parseLavalinkConnUrl } from "../src";
 import { envConfig } from "./config";
 import { loadCommands } from "./handler/commandLoader";
 import { loadEvents } from "./handler/eventsLoader";
@@ -25,6 +25,18 @@ client.redis.connect();
 client.redis.on("error", (err) => console.log('Redis Client Error', err));
 
 client.defaultVolume = 100;
+
+/**
+ * ? In case you wanna provide node data via env, you can use the provided util for url parsing: 
+ * * Example for multiple Nodes Secure in ENV.
+ * * URL-Pattern: lavalink://<nodeId>:<nodeAuthorization(Password)>@<NodeHost>:<NodePort> 
+ * !   Important PW + ID must be encoded.
+ * !   "verySpecialPassword#1" -> "verySpecialPassword%231" 
+ *       (   do it in nodejs via: encodeURIComponent("verySpecialPassword#1")   );
+*/
+const LavalinkNodesOfEnv = process.env.LAVALINKNODES?.split(" ").filter(v => v.length).map(url => parseLavalinkConnUrl(url));
+console.log(LavalinkNodesOfEnv); // you can then provide the result of here in LavalinkManagerOptions#nodes, or transform the result for further data.
+
 
 client.lavalink = new LavalinkManager({
     nodes: [

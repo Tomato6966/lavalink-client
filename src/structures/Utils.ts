@@ -1,4 +1,7 @@
-import { isRegExp } from "util/types";
+
+
+import { parse } from "node:url";
+import { isRegExp } from "node:util/types";
 
 import { LavalinkFilterData } from "./Filters";
 import { LavalinkManager } from "./LavalinkManager";
@@ -124,6 +127,21 @@ export interface UnresolvedSearchResult {
   playlist: PlaylistInfo | null,
   tracks: UnresolvedTrack[]
 }
+/**
+ * Parses Node Connection Url: "lavalink://<nodeId>:<nodeAuthorization(Password)>@<NodeHost>:<NodePort>"
+ * @param connectionUrl 
+ * @returns 
+ */
+export function parseLavalinkConnUrl(connectionUrl:string) {
+  if(!connectionUrl.startsWith("lavalink://")) throw new Error(`ConnectionUrl (${connectionUrl}) must start with 'lavalink://'`);
+  const parsed = parse(connectionUrl);
+  return {
+    authorization: parsed.auth?.split?.(":", 2)[1],
+    id: parsed.auth?.split?.(":", 2)[0],
+    host: parsed.hostname,
+    port: Number(parsed.port),
+  }
+}
 
 export class ManagerUtils {
   public LavalinkManager: LavalinkManager | null = null;
@@ -136,7 +154,8 @@ export class ManagerUtils {
       clientData: clientData,
       ...(data.pluginInfo || (data as any).plugin || {})
     }
-  } 
+  }
+
   buildTrack(data:LavalinkTrack | Track, requester:unknown) {
     if (!data?.encoded || typeof data.encoded !== "string") throw new RangeError("Argument 'data.encoded' must be present.");
     if (!data.info) throw new RangeError("Argument 'data.info' must be present.");

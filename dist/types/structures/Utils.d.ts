@@ -51,6 +51,17 @@ export interface UnresolvedSearchResult {
     playlist: PlaylistInfo | null;
     tracks: UnresolvedTrack[];
 }
+/**
+ * Parses Node Connection Url: "lavalink://<nodeId>:<nodeAuthorization(Password)>@<NodeHost>:<NodePort>"
+ * @param connectionUrl
+ * @returns
+ */
+export declare function parseLavalinkConnUrl(connectionUrl: string): {
+    authorization: string;
+    id: string;
+    host: string;
+    port: number;
+};
 export declare class ManagerUtils {
     LavalinkManager: LavalinkManager | null;
     constructor(LavalinkManager?: LavalinkManager);

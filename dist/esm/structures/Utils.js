@@ -1,4 +1,5 @@
-import { isRegExp } from "util/types";
+import { parse } from "node:url";
+import { isRegExp } from "node:util/types";
 import { DefaultSources, LavalinkPlugins, SourceLinksRegexes } from "./LavalinkManagerStatics";
 export const TrackSymbol = Symbol("LC-Track");
 export const UnresolvedTrackSymbol = Symbol("LC-Track-Unresolved");
@@ -6,6 +7,22 @@ export const QueueSymbol = Symbol("LC-Queue");
 export const NodeSymbol = Symbol("LC-Node");
 /** @hidden */
 const escapeRegExp = (str) => str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+/**
+ * Parses Node Connection Url: "lavalink://<nodeId>:<nodeAuthorization(Password)>@<NodeHost>:<NodePort>"
+ * @param connectionUrl
+ * @returns
+ */
+export function parseLavalinkConnUrl(connectionUrl) {
+    if (!connectionUrl.startsWith("lavalink://"))
+        throw new Error(`ConnectionUrl (${connectionUrl}) must start with 'lavalink://'`);
+    const parsed = parse(connectionUrl);
+    return {
+        authorization: parsed.auth?.split?.(":", 2)[1],
+        id: parsed.auth?.split?.(":", 2)[0],
+        host: parsed.hostname,
+        port: Number(parsed.port),
+    };
+}
 export class ManagerUtils {
     LavalinkManager = null;
     constructor(LavalinkManager) {
