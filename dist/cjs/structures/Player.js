@@ -313,10 +313,16 @@ class Player {
      * Clears the queue and stops playing. Does not destroy the Player and not leave the channel
      * @returns
      */
-    async stopPlaying() {
+    async stopPlaying(clearQueue = true, executeAutoplay = false) {
+        // use internal_stopPlaying on true, so that it doesn't utilize current loop states. on trackEnd event
+        this.set("internal_stopPlaying", true);
         // remove tracks from the queue
-        if (this.queue.tracks.length)
+        if (this.queue.tracks.length && clearQueue === true)
             await this.queue.splice(0, this.queue.tracks.length);
+        if (executeAutoplay === false)
+            this.set("internal_autoplayStopPlaying", true);
+        else
+            this.set("internal_autoplayStopPlaying", undefined);
         const now = performance.now();
         // send to lavalink, that it should stop playing
         await this.node.updatePlayer({ guildId: this.guildId, playerOptions: { encodedTrack: null } });

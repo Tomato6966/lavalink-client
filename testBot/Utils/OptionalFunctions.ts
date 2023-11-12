@@ -16,6 +16,7 @@ export const requesterTransformer = (requester:any):CustomRequester => {
 };
 
 export const autoPlayFunction = async (player, lastPlayedTrack) => {
+    console.log("AUTOPLAY")
     // just do player.set("autoplay_disabled", true) if you want to "disable" autoplay
     // and do player.set("autoplay_disabled", false) if you want to "enable" it again (it's enabled on default)
     if(player.get("autoplay_disabled") === true) return;

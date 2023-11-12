@@ -240,17 +240,17 @@ export declare class LavalinkNode {
     private error;
     private message;
     private handleEvent;
+    private trackStart;
+    private trackEnd;
+    private trackStuck;
+    private trackError;
+    private socketClosed;
     private SponsorBlockSegmentLoaded;
     private SponsorBlockSegmentkipped;
     private SponsorBlockChaptersLoaded;
     private SponsorBlockChapterStarted;
-    private trackStart;
-    private trackEnd;
     getSponsorBlock(player: Player): Promise<SponsorBlockSegment[]>;
     setSponsorBlock(player: Player, segments?: SponsorBlockSegment[]): Promise<void>;
     deleteSponsorBlock(player: Player): Promise<void>;
     private queueEnd;
-    private trackStuck;
-    private trackError;
-    private socketClosed;
 }

@@ -185,7 +185,7 @@ export declare class Player {
      * Clears the queue and stops playing. Does not destroy the Player and not leave the channel
      * @returns
      */
-    stopPlaying(): Promise<this>;
+    stopPlaying(clearQueue?: boolean, executeAutoplay?: boolean): Promise<this>;
     /**
      * Connects the Player to the Voice Channel
      * @returns

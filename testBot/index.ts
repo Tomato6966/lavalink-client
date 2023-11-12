@@ -32,7 +32,8 @@ client.defaultVolume = 100;
  * * URL-Pattern: lavalink://<nodeId>:<nodeAuthorization(Password)>@<NodeHost>:<NodePort> 
  * !   Important PW + ID must be encoded.
  * !   "verySpecialPassword#1" -> "verySpecialPassword%231" 
- *       (   do it in nodejs via: encodeURIComponent("verySpecialPassword#1")   );
+ *       (   do it in nodejs via: encodeURIComponent("verySpecialPassword#1")   )
+ *          you can also use this website to encode your password: https://www.url-encode-decode.com/
 */
 const LavalinkNodesOfEnv = process.env.LAVALINKNODES?.split(" ").filter(v => v.length).map(url => parseLavalinkConnUrl(url));
 console.log(LavalinkNodesOfEnv); // you can then provide the result of here in LavalinkManagerOptions#nodes, or transform the result for further data.
