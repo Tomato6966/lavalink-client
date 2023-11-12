@@ -116,3 +116,17 @@ Check out the [Documentation](https://lc4.gitbook.io/lavalink-client) for **Exam
 - Added `ManagerOptions#linksWhitelist` which allows user to specify an array of regExp / strings to match query strings (for links only) and if a match does NOT HAPPEN it doesn't allow the request (whitelist)
 - Added `ManagerOptions#linksAllowed` if set to false, it does not allow requests which are links
 - Moved `ManaagerOptions#debugOptions` to `ManaagerOptions#advancedOptions.debugOptions`
+
+### **Version 1.2.1**
+- Adjusted `player.stopPlaying()`
+  - There are now following parameters. `stopPlaying(clearQueue:boolean = true, executeAutoplay:boolean = false)`.
+    - On Default it now clears the queue and stops playing. Also it does not execute Autoplay on default. IF you want the function to behave differently, you can use the 2 states for that. 
+  - Fixed that it looped the current track if repeatmode === "track" / "queue". (it stops playing and loop stays)
+- Implemented a `parseLavalinkConnUrl(connectionUrl:string)` Util Function.
+  - It allows you to parse Lavalink Connection Data of a Lavalink Connection Url. 
+  Pattern: `lavalink://<nodeId>:<nodeAuthorization(Password)>@<NodeHost>:<NodePort>`
+  - Note that the nodeId and NodeAuthorization must be encoded via encodeURIComponents before you provide it into the function.
+  - The function will return the following: `{ id: string, authorization: string, host: string, port: number }`
+  - Example: `parseLavalinkConnUrl("lavalink://LavalinkNode_1:strong%23password1@localhost:2345")` will give you:
+  `{ id: "LavalinkNode_1", authorization: "strong#password1", host: "localhost", port: 2345 }`
+    - Note that the password "strong#password1" when encoded turns into "strong%23password1". For more information check the example bot
