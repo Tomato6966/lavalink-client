@@ -649,6 +649,7 @@ export class LavalinkNode {
     }
     async trackStuck(player, track, payload) {
         this.NodeManager.LavalinkManager.emit("trackStuck", player, track, payload);
+        return; // trackEnd get's executed too
         // If there are no songs in the queue
         if (!player.queue.tracks.length && (player.repeatMode === "off" || player.get("internal_stopPlaying")))
             return this.queueEnd(player, track, payload);
@@ -662,6 +663,7 @@ export class LavalinkNode {
     }
     async trackError(player, track, payload) {
         this.NodeManager.LavalinkManager.emit("trackError", player, track, payload);
+        return; // trackEnd get's executed too
         // If there are no songs in the queue
         if (!player.queue.tracks.length && (player.repeatMode === "off" || player.get("internal_stopPlaying")))
             return this.queueEnd(player, track, payload);

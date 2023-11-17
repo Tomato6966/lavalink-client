@@ -68,7 +68,7 @@ export function PlayerEvents(client:BotClient) {
         console.log(player.guildId, " :: Got Stuck while Playing :: ", track.info.title, " :: STUCKED DATA :: ", payload)
         
     }).on("queueEnd", (player, track, payload) => {
-        console.log(player.guildId, " :: No more tracks in the queue, after playing :: ", track.info.title)
+        console.log(player.guildId, " :: No more tracks in the queue, after playing :: ", track?.info?.title || track)
         const channel = client.channels.cache.get(player.textChannelId!) as TextChannel;
         if(!channel) return;
         channel.send({
