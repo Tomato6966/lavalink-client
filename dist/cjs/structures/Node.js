@@ -712,10 +712,10 @@ class LavalinkNode {
         if (segments.some(v => !exports.validSponsorBlocks.includes(v.toLowerCase())))
             throw new SyntaxError(`You provided a sponsorblock which isn't valid, valid ones are: ${exports.validSponsorBlocks.map(v => `'${v}'`).join(", ")}`);
         // do the request
-        await this.request(`/sessions/${this.sessionId}/players/${player.guildId}/sponsorblock/categories`, (request) => {
-            request.method = "PUT";
-            request.body = JSON.stringify(segments.map(v => v.toLowerCase()));
-            return request;
+        await this.request(`/sessions/${this.sessionId}/players/${player.guildId}/sponsorblock/categories`, (r) => {
+            r.method = "PUT";
+            r.headers = { Authorization: this.options.authorization, 'Content-Type': 'application/json' };
+            r.body = JSON.stringify(segments.map(v => v.toLowerCase()));
         });
         return;
     }
@@ -724,9 +724,8 @@ class LavalinkNode {
         if (!this.info.plugins.find(v => v.name === "sponsorblock-plugin"))
             throw new RangeError(`there is no sponsorblock-plugin available in the lavalink node: ${this.id}`);
         // do the request
-        await this.request(`/sessions/${this.sessionId}/players/${player.guildId}/sponsorblock/categories`, (request) => {
-            request.method = "DELETE";
-            return request;
+        await this.request(`/sessions/${this.sessionId}/players/${player.guildId}/sponsorblock/categories`, (r) => {
+            r.method = "DELETE";
         });
         return;
     }
