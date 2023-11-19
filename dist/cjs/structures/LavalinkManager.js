@@ -93,7 +93,7 @@ class LavalinkManager extends events_1.EventEmitter {
         this.utils = new Utils_1.ManagerUtils(this);
         // use the validators
         this.applyOptions(options);
-        this.validateOptions(options);
+        this.validateOptions(this.options);
         // create classes
         this.nodeManager = new NodeManager_1.NodeManager(this);
     }

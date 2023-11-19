@@ -226,7 +226,7 @@ export class LavalinkNode {
     public async search(query: SearchQuery, requestUser: unknown) {
         const Query = this.NodeManager.LavalinkManager.utils.transformQuery(query);
         
-        this.NodeManager.LavalinkManager.utils.validateQueryString(this, Query.query);
+        this.NodeManager.LavalinkManager.utils.validateQueryString(this, Query.query, Query.source);
         if(Query.source) this.NodeManager.LavalinkManager.utils.validateSourceString(this, Query.source);
         
         if(["bcsearch", "bandcamp"].includes(Query.source)) {

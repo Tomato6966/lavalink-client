@@ -281,10 +281,11 @@ export class ManagerUtils {
   }
 
 
-  validateQueryString(node: LavalinkNode, queryString: string): void {
+  validateQueryString(node: LavalinkNode, queryString: string, sourceString?: LavalinkSearchPlatform): void {
     if (!node.info) throw new Error("No Lavalink Node was provided");
     if (!node.info.sourceManagers?.length) throw new Error("Lavalink Node, has no sourceManagers enabled");
     
+    if(sourceString === "speak" && queryString.length > 100)
     // checks for blacklisted links / domains / queries
     if(this.LavalinkManager.options?.linksBlacklist?.length > 0 && this.LavalinkManager.options?.linksBlacklist.some(v => (typeof v === "string" && (queryString.toLowerCase().includes(v.toLowerCase()) || v.toLowerCase().includes(queryString.toLowerCase()))) || isRegExp(v) && v.test(queryString))) {
       throw new Error(`Query string contains a link / word which is blacklisted.`)

@@ -100,7 +100,7 @@ export declare class ManagerUtils {
      */
     isUnresolvedTrackQuery(data: UnresolvedQuery | any): boolean;
     getClosestTrack(data: UnresolvedTrack, player: Player): Promise<Track | undefined>;
-    validateQueryString(node: LavalinkNode, queryString: string): void;
+    validateQueryString(node: LavalinkNode, queryString: string, sourceString?: LavalinkSearchPlatform): void;
     transformQuery(query: SearchQuery): {
         query: string;
         source: any;

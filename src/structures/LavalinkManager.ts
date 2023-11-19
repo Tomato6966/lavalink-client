@@ -24,7 +24,7 @@ export interface BotClientOptions {
   /** Bot Client Username */
   username?: string;
   /** So users can pass entire objects / classes */
-  [x: string | number | symbol | undefined]: unknown;
+  [x: string | number | symbol]: unknown;
 }
 
 export interface ManagerPlayerOptions {
@@ -287,7 +287,7 @@ export class LavalinkManager extends EventEmitter {
 
     // use the validators
     this.applyOptions(options);
-    this.validateOptions(options);
+    this.validateOptions(this.options);
 
     // create classes
     this.nodeManager = new NodeManager(this);
