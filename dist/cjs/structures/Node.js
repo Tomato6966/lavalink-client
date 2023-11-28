@@ -95,6 +95,15 @@ class LavalinkNode {
             return;
         if (request.statusCode === 404)
             throw new Error(`Node Request resulted into an error, request-URL: ${url} | headers: ${JSON.stringify(request.headers)}`);
+        
+        if(request.statusCode === 204) return {
+            loadType: "empty",
+            data: [],
+            pluginInfo: {},
+            exception: null,
+            playlist: null,
+        }
+        
         return parseAsText ? await request.body.text() : await request.body.json();
     }
     async search(query, requestUser) {
