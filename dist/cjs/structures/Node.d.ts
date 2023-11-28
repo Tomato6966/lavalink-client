@@ -130,6 +130,7 @@ export declare class LavalinkNode {
      * @param manager
      */
     constructor(options: LavalinkNodeOptions, manager: NodeManager);
+    private rawRequest;
     /**
      * Makes an API call to the Node
      * @param endpoint The endpoint that we will make the call to
@@ -138,7 +139,7 @@ export declare class LavalinkNode {
      */
     request(endpoint: string, modify?: ModifyRequest, parseAsText?: boolean): Promise<unknown>;
     search(query: SearchQuery, requestUser: unknown): Promise<SearchResult>;
-    lavaSearch(query: LavaSearchQuery, requestUser: unknown): Promise<SearchResult | LavaSearchResponse>;
+    lavaSearch(query: LavaSearchQuery, requestUser: unknown, throwOnEmpty?: boolean): Promise<SearchResult | LavaSearchResponse>;
     /**
      * Update the Player State on the Lavalink Server
      * @param data

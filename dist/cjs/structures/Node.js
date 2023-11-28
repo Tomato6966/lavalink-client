@@ -70,13 +70,7 @@ class LavalinkNode {
         this.options.regions = (this.options.regions || []).map(a => a.toLowerCase());
         Object.defineProperty(this, Utils_1.NodeSymbol, { configurable: true, value: true });
     }
-    /**
-     * Makes an API call to the Node
-     * @param endpoint The endpoint that we will make the call to
-     * @param modify Used to modify the request before being sent
-     * @returns The returned data
-     */
-    async request(endpoint, modify, parseAsText = false) {
+    async rawRequest(endpoint, modify) {
         const options = {
             path: `/${this.version}/${endpoint.replace(/^\//gm, "")}`,
             method: "GET",
@@ -91,19 +85,20 @@ class LavalinkNode {
         options.path = url.pathname + url.search;
         const request = await this.rest.request(options);
         this.calls++;
+        return { request, options };
+    }
+    /**
+     * Makes an API call to the Node
+     * @param endpoint The endpoint that we will make the call to
+     * @param modify Used to modify the request before being sent
+     * @returns The returned data
+     */
+    async request(endpoint, modify, parseAsText = false) {
+        const { request, options } = await this.rawRequest(endpoint, modify);
         if (options.method === "DELETE")
             return;
         if (request.statusCode === 404)
-            throw new Error(`Node Request resulted into an error, request-URL: ${url} | headers: ${JSON.stringify(request.headers)}`);
-        
-        if(request.statusCode === 204) return {
-            loadType: "empty",
-            data: [],
-            pluginInfo: {},
-            exception: null,
-            playlist: null,
-        }
-        
+            throw new Error(`Node Request resulted into an error, request-PATH: ${options.path} | headers: ${JSON.stringify(request.headers)}`);
         return parseAsText ? await request.body.text() : await request.body.json();
     }
     async search(query, requestUser) {
@@ -139,7 +134,7 @@ class LavalinkNode {
             tracks: (resTracks.length ? resTracks.map(t => this.NodeManager.LavalinkManager.utils.buildTrack(t, requestUser)) : [])
         };
     }
-    async lavaSearch(query, requestUser) {
+    async lavaSearch(query, requestUser, throwOnEmpty = false) {
         const Query = this.NodeManager.LavalinkManager.utils.transformLavaSearchQuery(query);
         if (Query.source)
             this.NodeManager.LavalinkManager.utils.validateSourceString(this, Query.source);
@@ -151,7 +146,10 @@ class LavalinkNode {
             throw new RangeError(`there is no lavasearch-plugin available in the lavalink node: ${this.id}`);
         if (!this.info.plugins.find(v => v.name === "lavasrc-plugin"))
             throw new RangeError(`there is no lavasrc-plugin available in the lavalink node: ${this.id}`);
-        const res = await this.request(`/loadsearch?query=${Query.source ? `${Query.source}:` : ""}${encodeURIComponent(Query.query)}${Query.types?.length ? `&types=${Query.types.join(",")}` : ""}`);
+        const { request } = await this.rawRequest(`/loadsearch?query=${Query.source ? `${Query.source}:` : ""}${encodeURIComponent(Query.query)}${Query.types?.length ? `&types=${Query.types.join(",")}` : ""}`);
+        if (throwOnEmpty === true)
+            throw new Error("Nothing found");
+        const res = (request.statusCode === 204 ? {} : await request.body.json());
         return {
             tracks: res.tracks?.map(v => this.NodeManager.LavalinkManager.utils.buildTrack(v, requestUser)) || [],
             albums: res.albums?.map(v => ({ info: v.info, pluginInfo: v?.plugin || v.pluginInfo, tracks: v.tracks.map(v => this.NodeManager.LavalinkManager.utils.buildTrack(v, requestUser)) })) || [],
