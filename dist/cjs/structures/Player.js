@@ -122,15 +122,38 @@ class Player {
      * Play the next track from the queue / a specific track, with playoptions for Lavalink
      * @param options
      */
-    async play(options) {
+    async play(options = {}) {
         if (this.get("internal_queueempty")) {
             clearTimeout(this.get("internal_queueempty"));
             this.set("internal_queueempty", undefined);
         }
-        if (options?.track && (this.LavalinkManager.utils.isTrack(options?.track) || this.LavalinkManager.utils.isUnresolvedTrack(options.track))) {
-            if (this.LavalinkManager.utils.isUnresolvedTrack(options.track))
-                await options.track.resolve(this);
-            await this.queue.add(options?.track, 0);
+        // if clientTrack provided, play it
+        if (options?.clientTrack && (this.LavalinkManager.utils.isTrack(options?.clientTrack) || this.LavalinkManager.utils.isUnresolvedTrack(options.clientTrack))) {
+            if (this.LavalinkManager.utils.isUnresolvedTrack(options.clientTrack))
+                await options.clientTrack.resolve(this);
+            if (typeof options.track.userData === "object")
+                options.clientTrack.userData = { ...(options?.clientTrack.userData || {}), ...(options.track.userData || {}) };
+            await this.queue.add(options?.clientTrack, 0);
+            await (0, Utils_1.queueTrackEnd)(this);
+        }
+        else if (options?.track?.encoded) {
+            // handle play encoded options manually // TODO let it resolve by lavalink!
+            const track = await this.node.decode.singleTrack(options.track?.encoded, options.track?.requester || this.queue?.current?.requester || this.queue.previous?.[0]?.requester || this.queue.tracks?.[0]?.requester || this.LavalinkManager.options.client);
+            if (typeof options.track.userData === "object")
+                track.userData = { ...(track.userData || {}), ...(options.track.userData || {}) };
+            if (track)
+                this.queue.add(track, 0);
+            await (0, Utils_1.queueTrackEnd)(this);
+        }
+        else if (options?.track?.identifier) {
+            // handle play identifier options manually // TODO let it resolve by lavalink!
+            const res = await this.search({
+                query: options?.track?.identifier
+            }, options?.track?.identifier || this.queue?.current?.requester || this.queue.previous?.[0]?.requester || this.queue.tracks?.[0]?.requester || this.LavalinkManager.options.client);
+            if (typeof options.track.userData === "object")
+                res.tracks[0].userData = { ...(res.tracks[0].userData || {}), ...(options.track.userData || {}) };
+            if (res.tracks[0])
+                this.queue.add(res.tracks[0], 0);
             await (0, Utils_1.queueTrackEnd)(this);
         }
         if (!this.queue.current && this.queue.tracks.length)
@@ -139,20 +162,22 @@ class Player {
             try {
                 // resolve the unresolved track
                 await this.queue.current.resolve(this);
+                if (typeof options.track.userData === "object")
+                    this.queue.current.userData = { ...(this.queue.current.userData || {}), ...(options.track.userData || {}) };
             }
             catch (error) {
                 this.LavalinkManager.emit("trackError", this, this.queue.current, error);
+                if (options && "clientTrack" in options)
+                    delete options.clientTrack;
                 if (options && "track" in options)
                     delete options.track;
-                if (options && "encodedTrack" in options)
-                    delete options.encodedTrack;
-                if (this.queue.tracks[0])
+                // try to play the next track if possible
+                if (this.LavalinkManager.options?.autoSkipOnResolveError === true && this.queue.tracks[0])
                     return this.play(options);
                 return this;
             }
         }
-        const track = this.queue.current;
-        if (!track)
+        if (!this.queue.current)
             throw new Error(`There is no Track in the Queue, nor provided in the PlayOptions`);
         if (typeof options?.volume === "number" && !isNaN(options?.volume)) {
             this.volume = Math.max(Math.min(options?.volume, 500), 0);
@@ -162,24 +187,27 @@ class Player {
             this.lavalinkVolume = Math.round(vol);
             options.volume = this.lavalinkVolume;
         }
-        const finalOptions = {
-            encodedTrack: track.encoded,
+        const finalOptions = Object.fromEntries(Object.entries({
+            track: {
+                encoded: this.queue.current?.encoded || null,
+                // identifier: options.identifier,
+                userData: options?.track?.userData || {},
+            },
             volume: this.lavalinkVolume,
-            position: 0,
-            ...options,
-        };
-        if ("track" in finalOptions)
-            delete finalOptions.track;
-        if ((typeof finalOptions.position !== "undefined" && isNaN(finalOptions.position)) || (typeof finalOptions.position === "number" && (finalOptions.position < 0 || finalOptions.position >= track.info.duration)))
+            position: options?.position ?? 0,
+            endTime: options?.endTime ?? undefined,
+            filters: options?.filters ?? undefined,
+            paused: options?.paused ?? undefined,
+            voice: options?.voice ?? undefined
+        }).filter(v => typeof v[1] !== "undefined"));
+        if ((typeof finalOptions.position !== "undefined" && isNaN(finalOptions.position)) || (typeof finalOptions.position === "number" && (finalOptions.position < 0 || finalOptions.position >= this.queue.current.info.duration)))
             throw new Error("PlayerOption#position must be a positive number, less than track's duration");
         if ((typeof finalOptions.volume !== "undefined" && isNaN(finalOptions.volume) || (typeof finalOptions.volume === "number" && finalOptions.volume < 0)))
             throw new Error("PlayerOption#volume must be a positive number");
-        if ((typeof finalOptions.endTime !== "undefined" && isNaN(finalOptions.endTime)) || (typeof finalOptions.endTime === "number" && (finalOptions.endTime < 0 || finalOptions.endTime >= track.info.duration)))
+        if ((typeof finalOptions.endTime !== "undefined" && isNaN(finalOptions.endTime)) || (typeof finalOptions.endTime === "number" && (finalOptions.endTime < 0 || finalOptions.endTime >= this.queue.current.info.duration)))
             throw new Error("PlayerOption#endTime must be a positive number, less than track's duration");
         if (typeof finalOptions.position === "number" && typeof finalOptions.endTime === "number" && finalOptions.endTime < finalOptions.position)
             throw new Error("PlayerOption#endTime must be bigger than PlayerOption#position");
-        if ("noReplace" in finalOptions)
-            delete finalOptions.noReplace;
         const now = performance.now();
         await this.node.updatePlayer({
             guildId: this.guildId,
@@ -305,7 +333,7 @@ class Player {
         if (!this.playing)
             return await this.play();
         const now = performance.now();
-        await this.node.updatePlayer({ guildId: this.guildId, playerOptions: { encodedTrack: null } });
+        await this.node.updatePlayer({ guildId: this.guildId, playerOptions: { track: { encoded: null } } });
         this.ping.lavalink = Math.round((performance.now() - now) / 10) / 100;
         return this;
     }
@@ -325,7 +353,7 @@ class Player {
             this.set("internal_autoplayStopPlaying", undefined);
         const now = performance.now();
         // send to lavalink, that it should stop playing
-        await this.node.updatePlayer({ guildId: this.guildId, playerOptions: { encodedTrack: null } });
+        await this.node.updatePlayer({ guildId: this.guildId, playerOptions: { track: { encoded: null } } });
         this.ping.lavalink = Math.round((performance.now() - now) / 10) / 100;
         return this;
     }

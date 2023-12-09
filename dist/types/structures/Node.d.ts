@@ -78,29 +78,49 @@ export interface NodeStats extends BaseNodeStats {
     frameStats: FrameStats;
 }
 export interface LavalinkInfo {
+    /** The version of this Lavalink server */
     version: VersionObject;
+    /** The millisecond unix timestamp when this Lavalink jar was built */
     buildTime: number;
+    /** The git information of this Lavalink server */
     git: GitObject;
+    /** The JVM version this Lavalink server runs on */
     jvm: string;
+    /** The Lavaplayer version being used by this server */
     lavaplayer: string;
+    /** The enabled source managers for this server */
     sourceManagers: string[];
+    /** The enabled filters for this server */
     filters: string[];
+    /** The enabled plugins for this server */
     plugins: PluginObject[];
 }
 export interface VersionObject {
+    /** The full version string of this Lavalink server */
     semver: string;
+    /** The major version of this Lavalink server */
     major: number;
+    /** The minor version of this Lavalink server */
     minor: number;
+    /** The patch version of this Lavalink server */
     patch: internal;
+    /** The pre-release version according to semver as a . separated list of identifiers */
     preRelease?: string;
+    /** The build metadata according to semver as a . separated list of identifiers */
+    build?: string;
 }
 export interface GitObject {
+    /** The branch this Lavalink server was built on */
     branch: string;
+    /** The commit this Lavalink server was built on */
     commit: string;
+    /** The millisecond unix timestamp for when the commit was created */
     commitTime: string;
 }
 export interface PluginObject {
+    /** The name of the plugin */
     name: string;
+    /** The version of the plugin */
     version: string;
 }
 export declare class LavalinkNode {
@@ -110,6 +130,11 @@ export declare class LavalinkNode {
     calls: number;
     stats: NodeStats;
     sessionId?: string | null;
+    /** Wether the node resuming is enabled or not */
+    resuming: {
+        enabled: boolean;
+        timeout: number | null;
+    };
     /** Actual Lavalink Information of the Node */
     info: LavalinkInfo | null;
     /** The Node Manager of this Node */
@@ -126,10 +151,16 @@ export declare class LavalinkNode {
     private version;
     /**
      * Create a new Node
-     * @param options
-     * @param manager
+     * @param options Lavalink Node Options
+     * @param manager Node Manager
      */
     constructor(options: LavalinkNodeOptions, manager: NodeManager);
+    /**
+     * Raw Request util function
+     * @param endpoint endpoint string
+     * @param modify modify the request
+     * @returns
+     */
     private rawRequest;
     /**
      * Makes an API call to the Node
@@ -138,6 +169,12 @@ export declare class LavalinkNode {
      * @returns The returned data
      */
     request(endpoint: string, modify?: ModifyRequest, parseAsText?: boolean): Promise<unknown>;
+    /**
+     * Search something raw on the node, please note only add tracks to players of that node
+     * @param query SearchQuery Object
+     * @param requestUser Request User for creating the player(s)
+     * @returns Searchresult
+     */
     search(query: SearchQuery, requestUser: unknown): Promise<SearchResult>;
     lavaSearch(query: LavaSearchQuery, requestUser: unknown, throwOnEmpty?: boolean): Promise<SearchResult | LavaSearchResponse>;
     /**
@@ -180,7 +217,7 @@ export declare class LavalinkNode {
      * @param resuming Whether resuming is enabled for this session or not
      * @param timeout The timeout in seconds (default is 60s)
      */
-    updateSession(resuming?: boolean, timeout?: number): Promise<Session>;
+    updateSession(resuming?: boolean, timeout?: number): Promise<InvalidLavalinkRestRequest | Session>;
     /**
      * Decode Track or Tracks
      */

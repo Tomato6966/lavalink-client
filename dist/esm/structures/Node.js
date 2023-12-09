@@ -31,6 +31,8 @@ export class LavalinkNode {
         }
     };
     sessionId = null;
+    /** Wether the node resuming is enabled or not */
+    resuming = { enabled: true, timeout: null };
     /** Actual Lavalink Information of the Node */
     info = null;
     /** The Node Manager of this Node */
@@ -47,8 +49,8 @@ export class LavalinkNode {
     version = "v4";
     /**
      * Create a new Node
-     * @param options
-     * @param manager
+     * @param options Lavalink Node Options
+     * @param manager Node Manager
      */
     constructor(options, manager) {
         this.options = {
@@ -66,6 +68,12 @@ export class LavalinkNode {
         this.options.regions = (this.options.regions || []).map(a => a.toLowerCase());
         Object.defineProperty(this, NodeSymbol, { configurable: true, value: true });
     }
+    /**
+     * Raw Request util function
+     * @param endpoint endpoint string
+     * @param modify modify the request
+     * @returns
+     */
     async rawRequest(endpoint, modify) {
         const options = {
             path: `/${this.version}/${endpoint.replace(/^\//gm, "")}`,
@@ -97,6 +105,12 @@ export class LavalinkNode {
             throw new Error(`Node Request resulted into an error, request-PATH: ${options.path} | headers: ${JSON.stringify(request.headers)}`);
         return parseAsText ? await request.body.text() : await request.body.json();
     }
+    /**
+     * Search something raw on the node, please note only add tracks to players of that node
+     * @param query SearchQuery Object
+     * @param requestUser Request User for creating the player(s)
+     * @returns Searchresult
+     */
     async search(query, requestUser) {
         const Query = this.NodeManager.LavalinkManager.utils.transformQuery(query);
         this.NodeManager.LavalinkManager.utils.validateQueryString(this, Query.query, Query.source);
@@ -113,7 +127,7 @@ export class LavalinkNode {
         else
             uri += encodeURIComponent(decodeURIComponent(Query.query));
         const res = await this.request(uri);
-        // transform the data which can be Error, Track or Track[] to enfore [Track] 
+        // transform the data which can be Error, Track or Track[] to enfore [Track]
         const resTracks = res.loadType === "playlist" ? res.data?.tracks : res.loadType === "track" ? [res.data] : res.loadType === "search" ? Array.isArray(res.data) ? res.data : [res.data] : [];
         return {
             loadType: res.loadType,
@@ -168,12 +182,10 @@ export class LavalinkNode {
             r.method = "PATCH";
             // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             r.headers["Content-Type"] = "application/json";
-            if (data.playerOptions.track)
-                delete data.playerOptions.track;
             r.body = JSON.stringify(data.playerOptions);
             if (data.noReplace) {
                 const url = new URL(`${this.poolAddress}${r.path}`);
-                url.searchParams.append("noReplace", data.noReplace?.toString() || "false");
+                url.searchParams.append("noReplace", data.noReplace === true && typeof data.noReplace === "boolean" ? "true" : "false");
                 r.path = url.pathname + url.search;
             }
         });
@@ -279,6 +291,10 @@ export class LavalinkNode {
             data.resuming = resuming;
         if (typeof timeout === "number" && timeout > 0)
             data.timeout = timeout;
+        this.resuming = {
+            enabled: typeof resuming === "boolean" ? resuming : false,
+            timeout: typeof resuming === "boolean" && resuming === true ? timeout : null,
+        };
         return await this.request(`/sessions/${this.sessionId}`, r => {
             r.method = "PATCH";
             r.headers = { Authorization: this.options.authorization, 'Content-Type': 'application/json' };
@@ -329,6 +345,7 @@ export class LavalinkNode {
      * @returns
      */
     async fetchVersion() {
+        // need to adjust path for no-prefix version info
         return await this.request(`/version`, r => { r.path = "/version"; }, true);
     }
     /**
@@ -563,6 +580,10 @@ export class LavalinkNode {
                 break;
             case "ready": // payload: { resumed: false, sessionId: 'ytva350aevn6n9n8', op: 'ready' }
                 this.sessionId = payload.sessionId;
+                this.resuming.enabled = payload.resumed;
+                if (payload.resumed === true) {
+                    this.NodeManager.emit("resumed", this, payload, await this.fetchAllPlayers());
+                }
                 break;
             default:
                 this.NodeManager.emit("error", this, new Error(`Unexpected op "${payload.op}" with data`), payload);

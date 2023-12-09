@@ -3,7 +3,7 @@ import { LavalinkManager } from "./LavalinkManager";
 import { LavalinkNode, SponsorBlockSegment } from "./Node";
 import { Queue } from "./Queue";
 import { Track, UnresolvedTrack } from "./Track";
-import { LavalinkPlayerVoiceOptions, LavaSearchQuery, SearchQuery } from "./Utils";
+import { Base64, LavalinkPlayerVoiceOptions, LavaSearchQuery, SearchQuery } from "./Utils";
 type PlayerDestroyReasons = "QueueEmpty" | "NodeDestroy" | "NodeDeleted" | "LavalinkNoVoice" | "NodeReconnectFail" | "PlayerReconnectFail" | "Disconnected" | "ChannelDeleted" | "ReconnectAllNodes" | "DisconnectAllNodes";
 export type DestroyReasonsType = PlayerDestroyReasons | string;
 export declare const DestroyReasons: Record<PlayerDestroyReasons, PlayerDestroyReasons>;
@@ -51,26 +51,41 @@ export interface PlayerOptions {
     /** If a volume should be applied via filters instead of lavalink-volume */
     applyVolumeAsFilter?: boolean;
 }
-export interface PlayOptions {
-    /** Which Track to play | don't provide, if it should pick from the Queue */
-    track?: Track | UnresolvedTrack;
-    /** Encoded Track to use, instead of the queue system... */
-    encodedTrack?: string | null;
-    /** Encoded Track to use&search, instead of the queue system (yt only)... */
-    identifier?: string;
+export type anyObject = {
+    [key: string | number]: string | number | null | anyObject;
+};
+export interface BasePlayOptions {
     /** The position to start the track. */
     position?: number;
     /** The position to end the track. */
     endTime?: number;
-    /** Whether to not replace the track if a play payload is sent. */
-    noReplace?: boolean;
     /** If to start "paused" */
     paused?: boolean;
     /** The Volume to start with */
     volume?: number;
     /** The Lavalink Filters to use | only with the new REST API */
     filters?: Partial<LavalinkFilterData>;
+    /** Voice Update for Lavalink */
     voice?: LavalinkPlayerVoiceOptions;
+}
+export interface LavalinkPlayOptions extends BasePlayOptions {
+    /** Which Track to play | don't provide, if it should pick from the Queue */
+    track?: {
+        /** The track encoded base64 string to use instead of the one from the queue system */
+        encoded?: Base64 | null;
+        /** The identifier of the track to use */
+        identifier?: string;
+        /** Custom User Data for the track to provide, will then be on the userData object from the track */
+        userData?: anyObject;
+        /** The Track requester for when u provide encodedTrack / identifer */
+        requester?: unknown;
+    };
+}
+export interface PlayOptions extends LavalinkPlayOptions {
+    /** Whether to not replace the track if a play payload is sent. */
+    noReplace?: boolean;
+    /** Which Track to play | don't provide, if it should pick from the Queue */
+    clientTrack?: Track | UnresolvedTrack;
 }
 export interface Player {
     filterManager: FilterManager;

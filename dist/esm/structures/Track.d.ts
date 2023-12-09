@@ -1,4 +1,4 @@
-import { Player } from "./Player";
+import { anyObject, Player } from "./Player";
 import { Base64 } from "./Utils";
 /** Sourcenames provided by lavalink server */
 export type LavalinkSourceNames = "youtube" | "youtubemusic" | "soundcloud" | "bandcamp" | "twitch";
@@ -89,6 +89,8 @@ export interface LavalinkTrack {
     info: LavalinkTrackInfo;
     /** Plugin Information from Lavalink */
     pluginInfo: Partial<PluginInfo>;
+    /** The userData Object from when you provide to the lavalink request */
+    userData?: anyObject;
 }
 export interface Track {
     /** The Base 64 encoded String */
@@ -99,6 +101,8 @@ export interface Track {
     pluginInfo: Partial<PluginInfo>;
     /** The Track's Requester */
     requester?: unknown;
+    /** The userData Object from when you provide to the lavalink request */
+    userData?: anyObject;
 }
 export interface UnresolvedTrackInfo extends Partial<TrackInfo> {
     /** Required */
@@ -117,6 +121,8 @@ export interface UnresolvedTrack {
     info: UnresolvedTrackInfo;
     /** Plugin Information from Lavalink */
     pluginInfo: Partial<PluginInfo>;
+    /** The userData Object from when you provide to the lavalink request */
+    userData?: anyObject;
     /** The Track's Requester */
     requester?: unknown;
 }

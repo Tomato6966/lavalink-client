@@ -37,6 +37,7 @@ export class LavalinkManager extends EventEmitter {
             linksWhitelist: options?.linksWhitelist ?? [],
             linksBlacklist: options?.linksBlacklist ?? [],
             autoSkip: options?.autoSkip ?? true,
+            autoSkipOnResolveError: options?.autoSkipOnResolveError ?? true,
             emitNewSongsOnly: options?.emitNewSongsOnly ?? false,
             queueOptions: {
                 maxPreviousTracks: options?.queueOptions?.maxPreviousTracks ?? 25,
@@ -62,6 +63,8 @@ export class LavalinkManager extends EventEmitter {
         // if(typeof options?.client !== "object" || typeof options?.client.id !== "string") throw new SyntaxError("ManagerOption.client = { id: string, username?:string } was not provided, which is required");
         if (options?.autoSkip && typeof options?.autoSkip !== "boolean")
             throw new SyntaxError("ManagerOption.autoSkip must be either false | true aka boolean");
+        if (options?.autoSkipOnResolveError && typeof options?.autoSkipOnResolveError !== "boolean")
+            throw new SyntaxError("ManagerOption.autoSkipOnResolveError must be either false | true aka boolean");
         if (options?.emitNewSongsOnly && typeof options?.emitNewSongsOnly !== "boolean")
             throw new SyntaxError("ManagerOption.emitNewSongsOnly must be either false | true aka boolean");
         if (!options?.nodes || !Array.isArray(options?.nodes) || !options?.nodes.every(node => this.utils.isNodeOptions(node)))

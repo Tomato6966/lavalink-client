@@ -1,7 +1,7 @@
 import { EventEmitter } from "stream";
 import { LavalinkNode } from "./Node";
-import { MiniMap } from "./Utils";
 import { DestroyReasons } from "./Player";
+import { MiniMap } from "./Utils";
 export class NodeManager extends EventEmitter {
     nodes = new MiniMap();
     constructor(LavalinkManager) {

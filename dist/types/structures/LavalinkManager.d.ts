@@ -56,6 +56,8 @@ export interface ManagerOptions {
     playerOptions?: ManagerPlayerOptions;
     /** If it should skip to the next Track on TrackEnd / TrackError etc. events */
     autoSkip?: boolean;
+    /** If it should skip to the next Track if track.resolve errors while trying to play a track. */
+    autoSkipOnResolveError?: boolean;
     /** If it should emit only new (unique) songs and not when a looping track (or similar) is plaid, default false */
     emitNewSongsOnly?: boolean;
     /** Only allow link requests with links either matching some of that regExp or including some of that string */
