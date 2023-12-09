@@ -1,11 +1,15 @@
 import { RedisClientType } from "redis";
-import { QueueChangesWatcher, QueueStoreManager, StoredQueue } from "../../src";
+
+import { MiniMap, QueueChangesWatcher, QueueStoreManager, StoredQueue } from "../../src";
 import { BotClient } from "../types/Client";
 
 export class myCustomStore implements QueueStoreManager {
-    private redis:RedisClientType;
-    constructor(redisClient:RedisClientType) {
+    private redis:RedisClientType|MiniMap<string, string>;
+    private test: MiniMap<any, any>;
+    constructor(redisClient:RedisClientType|MiniMap<string, string>) {
         this.redis = redisClient;
+        this.test = new MiniMap();
+        this.test.delete
     }
     async get(guildId): Promise<any> {
         return await this.redis.get(this.id(guildId));
@@ -15,6 +19,7 @@ export class myCustomStore implements QueueStoreManager {
         return await this.redis.set(this.id(guildId), stringifiedQueueData);
     }
     async delete(guildId): Promise<any> {
+        if("delete" in this.redis) return await this.redis.delete(this.id(guildId));
         return await this.redis.del(this.id(guildId));
     }
     async parse(stringifiedQueueData): Promise<Partial<StoredQueue>> {

@@ -1,7 +1,7 @@
 import { Client, GatewayIntentBits } from "discord.js";
 import { createClient } from "redis";
 
-import { LavalinkManager, parseLavalinkConnUrl } from "../src";
+import { LavalinkManager, MiniMap, parseLavalinkConnUrl } from "../src";
 import { envConfig } from "./config";
 import { loadCommands } from "./handler/commandLoader";
 import { loadEvents } from "./handler/eventsLoader";
@@ -19,10 +19,11 @@ const client = new Client({
     ]
 }) as BotClient;
 
-
-client.redis = createClient({ url: envConfig.redis.url, password: envConfig.redis.password });
-client.redis.connect();
-client.redis.on("error", (err) => console.log('Redis Client Error', err));
+if(envConfig.redis.url && 1 < 0) {
+    client.redis = createClient({ url: envConfig.redis.url, password: envConfig.redis.password });
+    client.redis.connect();
+    client.redis.on("error", (err) => console.log('Redis Client Error', err));
+} else client.redis = new MiniMap<string, string>();
 
 client.defaultVolume = 100;
 
@@ -46,6 +47,7 @@ client.lavalink = new LavalinkManager({
             host: "localhost",
             port: 2333,
             id: "testnode",
+            // sessionId: "lsvunq8h8bxx0m9w", // add the sessionId in order to resume the session for the node, and then to recover the players listen to nodeManager#resumed.
             requestTimeout: 10000,
         }
     ],

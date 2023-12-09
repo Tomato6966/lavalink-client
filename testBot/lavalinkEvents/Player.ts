@@ -37,6 +37,7 @@ export function PlayerEvents(client:BotClient) {
         console.log(player.guildId, " :: Started Playing :: ", track.info.title, "QUEUE:", player.queue.tracks.map(v => v.info.title));
         const channel = client.channels.cache.get(player.textChannelId!) as TextChannel;
         if(!channel) return;
+   
         channel.send({
             embeds: [ 
                 new EmbedBuilder()
@@ -54,8 +55,8 @@ export function PlayerEvents(client:BotClient) {
                         ].filter(v => typeof v === "string" && v.length).join("\n").substring(0, 4096)
                     )
                     .setFooter({
-                        text: `Requested by ${(track.requester as CustomRequester).username}`,
-                        iconURL: (track.requester as CustomRequester).avatar || undefined
+                        text: `Requested by ${(track.requester as CustomRequester)?.username}`,
+                        iconURL: (track?.requester as CustomRequester)?.avatar || undefined
                     })
                     .setTimestamp()
             ]

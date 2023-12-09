@@ -1,4 +1,7 @@
-import { CommandInteractionOptionResolver, Events, Interaction } from "discord.js";
+import {
+	ChatInputCommandInteraction, CommandInteractionOptionResolver, Events, Interaction
+} from "discord.js";
+
 import { Command, Event, SubCommand } from "../types/Client";
 
 export default {
@@ -13,10 +16,10 @@ export default {
                 if(subCommand) {
                     if(typeof (command as SubCommand).execute[subCommand] !== "function") return console.error(`[Command-Error] Sub-Command is missing property "execute#${subCommand}".`);
                     // execute subcommand
-                    return await (command as SubCommand).execute[subCommand](client, interaction);
+                    return await (command as SubCommand).execute[subCommand](client, interaction as ChatInputCommandInteraction<"cached">);
                 }
                 // execute command
-                return await (command as Command).execute(client, interaction);
+                return await (command as Command).execute(client, interaction as ChatInputCommandInteraction<"cached">);
             }
             if(interaction.isAutocomplete()) {
                 if(subCommand) {
