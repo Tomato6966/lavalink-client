@@ -99,7 +99,7 @@ export class LavalinkNode {
      */
     async request(endpoint, modify, parseAsText = false) {
         const { request, options } = await this.rawRequest(endpoint, modify);
-        if (options.method === "DELETE")
+        if (["DELETE", "PUT"].includes(options.method))
             return;
         if (request.statusCode === 404)
             throw new Error(`Node Request resulted into an error, request-PATH: ${options.path} | headers: ${JSON.stringify(request.headers)}`);
