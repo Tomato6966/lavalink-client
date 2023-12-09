@@ -1,8 +1,9 @@
 import { EventEmitter } from "stream";
-import { LavalinkNode, LavalinkNodeOptions } from "./Node";
+
 import { LavalinkManager } from "./LavalinkManager";
-import { MiniMap } from "./Utils";
+import { LavalinkNode, LavalinkNodeOptions } from "./Node";
 import { DestroyReasons, DestroyReasonsType } from "./Player";
+import { LavalinkPlayer, MiniMap } from "./Utils";
 
 type LavalinkNodeIdentifier = string;
 
@@ -48,6 +49,13 @@ interface NodeManagerEvents {
      * @event Manager.nodeManager#raw
     */
     "raw": (node: LavalinkNode, payload: unknown) => void;
+
+    /**
+     * Emits when the node connects resumed. You then need to create all players within this event for your usecase.
+     * Aka for that you need to be able to save player data like vc channel + text channel in a db and then sync it again
+     * @event Manager.nodeManager#nodeResumed
+     */
+    "resumed": (node:LavalinkNode, paylaod: { resumed: true, sessionId: string, op: "ready" }, players:LavalinkPlayer[])  => void;
 }
 
 export declare interface NodeManager {

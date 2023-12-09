@@ -69,6 +69,8 @@ export interface ManagerOptions {
   playerOptions?: ManagerPlayerOptions;
   /** If it should skip to the next Track on TrackEnd / TrackError etc. events */
   autoSkip?: boolean;
+  /** If it should skip to the next Track if track.resolve errors while trying to play a track. */
+  autoSkipOnResolveError?: boolean;
   /** If it should emit only new (unique) songs and not when a looping track (or similar) is plaid, default false */
   emitNewSongsOnly?: boolean;
   /** Only allow link requests with links either matching some of that regExp or including some of that string */
@@ -231,6 +233,7 @@ export class LavalinkManager extends EventEmitter {
       linksWhitelist: options?.linksWhitelist ?? [],
       linksBlacklist: options?.linksBlacklist ?? [],
       autoSkip: options?.autoSkip ?? true,
+      autoSkipOnResolveError: options?.autoSkipOnResolveError ?? true,
       emitNewSongsOnly: options?.emitNewSongsOnly ?? false,
       queueOptions: {
         maxPreviousTracks: options?.queueOptions?.maxPreviousTracks ?? 25,
@@ -255,6 +258,8 @@ export class LavalinkManager extends EventEmitter {
     // if(typeof options?.client !== "object" || typeof options?.client.id !== "string") throw new SyntaxError("ManagerOption.client = { id: string, username?:string } was not provided, which is required");
 
     if (options?.autoSkip && typeof options?.autoSkip !== "boolean") throw new SyntaxError("ManagerOption.autoSkip must be either false | true aka boolean");
+
+    if (options?.autoSkipOnResolveError && typeof options?.autoSkipOnResolveError !== "boolean") throw new SyntaxError("ManagerOption.autoSkipOnResolveError must be either false | true aka boolean");
 
     if (options?.emitNewSongsOnly && typeof options?.emitNewSongsOnly !== "boolean") throw new SyntaxError("ManagerOption.emitNewSongsOnly must be either false | true aka boolean");
 

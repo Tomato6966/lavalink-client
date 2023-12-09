@@ -7,7 +7,7 @@ import { LavalinkFilterData } from "./Filters";
 import { LavalinkManager } from "./LavalinkManager";
 import { DefaultSources, LavalinkPlugins, SourceLinksRegexes } from "./LavalinkManagerStatics";
 import { LavalinkNode, LavalinkNodeOptions, NodeStats } from "./Node";
-import { Player, PlayOptions } from "./Player";
+import { LavalinkPlayOptions, Player } from "./Player";
 import { LavalinkTrack, PluginInfo, Track, UnresolvedQuery, UnresolvedTrack } from "./Track";
 
 export const TrackSymbol = Symbol("LC-Track");
@@ -639,17 +639,29 @@ export type TrackEndReason =
   | "cleanup";
 
 export interface InvalidLavalinkRestRequest {
+  /** Rest Request Data for when it was made */
   timestamp: number;
+  /** Status of the request */
   status: number;
+  /** Specific Errro which was sent */
   error: string;
+  /** Specific Message which was created */
   message?: string;
+  /** The specific error trace from the request */
+  trace?: unknown;
+  /** Path of where it's from */
   path: string;
 }
 export interface LavalinkPlayerVoice {
+  /** The Voice Token */
   token: string;
+  /** The Voice Server Endpoint  */
   endpoint: string;
+  /** The Voice SessionId */
   sessionId: string;
+  /** Wether or not the player is connected */
   connected?: boolean;
+  /** The Ping to the voice server */
   ping?: number
 }
 export interface LavalinkPlayerVoiceOptions extends Omit<LavalinkPlayerVoice, 'connected' | 'ping'> { }
@@ -691,90 +703,119 @@ export interface RoutePlanner {
 }
 
 export interface Session {
+  /** Wether or not session is resuming or not */
   resuming: boolean;
+  /** For how long a session is lasting while not connected */
   timeout: number;
 }
 
 export interface GuildShardPayload {
   /** The OP code */
   op: number;
+  /** Data to send  */
   d: {
+    /** Guild id to apply voice settings */
     guild_id: string;
+    /** channel to move/connect to, or null to leave it */
     channel_id: string | null;
+    /** wether or not mute yourself */
     self_mute: boolean;
+    /** wether or not deafen yourself */
     self_deaf: boolean;
   };
 }
 
 
 export interface PlayerUpdateInfo {
+  /** guild id of the player */
   guildId: string;
-  playerOptions: PlayOptions;
+  /** Player options to provide to lavalink */
+  playerOptions: LavalinkPlayOptions;
+  /** Whether or not replace the current track with the new one (true is recommended) */
   noReplace?: boolean;
 }
 export interface LavalinkPlayer {
+  /** Guild Id of the player */
   guildId: string;
-  track?: {
-    encoded?: string;
-    info: {
-      identifier: string;
-
-      title: string;
-      author: string;
-      length: number;
-      artworkUrl: string | null;
-
-      uri: string;
-      sourceName: string;
-
-
-      isSeekable: boolean;
-      isStream: boolean;
-      isrc: string | null;
-      position?: number;
-    };
-  };
+  /** IF playing a track, all of the track information */
+  track?: LavalinkTrack;
+  /** Lavalink volume (mind volumedecrementer) */
   volume: number;
+  /** Wether it's paused or not */
   paused: boolean;
+  /** Voice Endpoint data */
   voice: LavalinkPlayerVoice;
+  /** All Audio Filters */
   filters: Partial<LavalinkFilterData>;
+  /** Lavalink-Voice-State Variables */
+  state: {
+    /** Time since connection established */
+    time: number;
+    /** Position of the track */
+    position: number;
+    /** COnnected or not */
+    connected: boolean;
+    /** Ping to voice server */
+    ping: number;
+  }
 }
 
 
 export interface ChannelDeletePacket {
+  /** Packet key for channel delete */
   t: "CHANNEL_DELETE",
+  /** data which is sent and relevant */
   d: {
+    /** guild id */
     guild_id: string;
+    /** Channel id */
     id: string;
   }
 }
 export interface VoiceState {
+  /** OP key from lavalink */
   op: "voiceUpdate";
+  /** GuildId provided by lavalink */
   guildId: string;
+  /** Event data */
   event: VoiceServer;
+  /** Session Id of the voice connection */
   sessionId?: string;
+  /** guild id of the voice channel */
   guild_id: string;
+  /** user id from the voice connection */
   user_id: string;
+  /** Session Id of the voice connection */
   session_id: string;
+  /** Voice Channel Id */
   channel_id: string;
 }
 
+/** The Base64 decodes tring by lavalink */
 export type Base64 = string;
 
 export interface VoiceServer {
+  /** Voice Token */
   token: string;
+  /** Guild Id of the voice server connection */
   guild_id: string;
+  /** Server Endpoint */
   endpoint: string;
 }
 
 export interface VoicePacket {
+  /** Voice Packet Keys to send */
   t?: "VOICE_SERVER_UPDATE" | "VOICE_STATE_UPDATE";
+  /** Voice Packets to send */
   d: VoiceState | VoiceServer;
 }
 
 export interface NodeMessage extends NodeStats {
+  /** The type of the event */
   type: PlayerEventType;
+  /** what ops are applying to that event */
   op: "stats" | "playerUpdate" | "event";
+  /** The specific guild id for that message */
   guildId: string;
 }
 
@@ -850,11 +891,15 @@ async function getClosestTrack(data:UnresolvedTrack, player:Player): Promise<Tra
   });
 }
 
+/** Specific types to filter for lavasearch, will be filtered to correct types */
 export type LavaSearchType = "track" | "album" | "artist" | "playlist" | "text" | "tracks" | "albums" | "artists" | "playlists" | "texts";
 
 export interface LavaSearchFilteredResponse {
+  /** The Information of a playlist provided by lavasearch */
   info: PlaylistInfo,
+  /** additional plugin information */
   pluginInfo: PluginInfo,
+  /** List of tracks  */
   tracks: Track[]
 }
 
@@ -876,6 +921,18 @@ export interface LavaSearchResponse {
   pluginInfo: PluginInfo
 }
 
-
-export type SearchQuery = { query: string, source?: SearchPlatform } | string;
-export type LavaSearchQuery = { query: string, source: LavaSrcSearchPlatformBase, types?: LavaSearchType[] };
+/** SearchQuery Object for raw lavalink requests */
+export type SearchQuery = { 
+  /** lavalink search Query / identifier string */
+  query: string, 
+  /** Source to append to the search query string */
+  source?: SearchPlatform } | /** Our just the search query / identifier string */ string;
+/** SearchQuery Object for Lavalink LavaSearch Plugin requests */
+export type LavaSearchQuery = { 
+  /** lavalink search Query / identifier string */
+  query: string, 
+  /** Source to append to the search query string */
+  source: LavaSrcSearchPlatformBase, 
+  /** The Types to filter the search to */
+  types?: LavaSearchType[]
+};
