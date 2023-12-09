@@ -130,3 +130,54 @@ Check out the [Documentation](https://lc4.gitbook.io/lavalink-client) for **Exam
   - Example: `parseLavalinkConnUrl("lavalink://LavalinkNode_1:strong%23password1@localhost:2345")` will give you:
   `{ id: "LavalinkNode_1", authorization: "strong#password1", host: "localhost", port: 2345 }`
     - Note that the password "strong#password1" when encoded turns into "strong%23password1". For more information check the example bot
+
+### **Version 2.0.0**
+- Lavalink v4 released, adjusted all features from the stable release, to support it in this client!
+```diff
+
+# How to load tracks / stop playing has changed for the node.updatePlayer rest endpoint the Client handles it automatically
+- await player.node.updatePlayer({ encodedTrack?: Base64|null, track?: Track|UnresolvedTrack, identifer?: string });
++ await player.node.updatePlayer({ track: { encoded?: Base64|null, identifier?: string }, clientTrack?: Track|UnresolvedTrack });
+
+# To satisfy the changes from lavalink updatePlayer endpoint, player play also got adjusted for that (Most users won't need this feature!)
+- await player.play({ encodedTrack?: Base64|null, track?: Track|UnresolvedTrack, identifer?: string });
++ await player.play({ track: { encoded?: Base64|null, identifier?: string }, clientTrack?: Track|UnresolvedTrack });
+# However it' still recommended to do it like that:
+# first add tracks to the queue
++ await player.queue.add(Track: Track|UnresolvedTrack|(Track|UnresolvedTrack)[]);
+# then play the next track from the queue
++ await player.play();
+
+# Node Resuming got supported
+# First enable it by doing:
++ await player.node.updateResuming(true, 360_000);
+# then when reconnecting to the node add to the node.createeOptions the sessionId: "" of the previous session
+# and after  connecting the nodeManager.on("resumed", (node, payload, players) => {}) will be executed, where you can sync the players!
+
+# Node Options got adjusted # It's a property not a method should be treated readonly
++ node.resuming: { enabled: boolean, timeout: number | null }; 
+
+# Player function got added to stop playing without disconnecting
++ player.stopPlaying(clearQueue:boolean = true, executeAutoplay:boolean = false); 
+
+# Node functions for sponsorBlock Plugin (https://github.com/topi314/Sponsorblock-Plugin) got added
++ deleteSponsorBlock(player:Player)
++ setSponsorBlock(player:Player, segments: ["sponsor", "selfpromo", "interaction", "intro", "outro", "preview", "music_offtopic", "filler"])
+# only works if you ever set the sponsor blocks once before
++ getSponsorBlock(player:Player)
+# Corresponding nodeManager events got added:
++ nodeManager.on("ChapterStarted");
++ nodeManager.on("ChaptersLoaded");
++ nodeManager.on("SegmentsLoaded");
++ nodeManager.on("SegmentSkipped");
+# Filters sending got supported for filters.pluginFilters key from lavalink api: https://lavalink.dev/api/rest.html#plugin-filters
+# Native implementation for lavaSearch plugin officially updated https://github.com/topi314/LavaSearch
+# Native implementation for lavaSrc plugin officially updated https://github.com/topi314/LavaSrc including floweryTTS
+# couple other changes, which aren't noticeable by you.
+
+# Lavalink track.userData got added (basically same feature as my custom pluginInfo.clientData system)
+# You only get the track.userData data through playerUpdate object
+```
+In one of the next updates, there will be more queueWatcher options and more custom nodeevents to trace 
+
+Most features of this update got tested, but if you encounter any bugs feel free to open an issue!
