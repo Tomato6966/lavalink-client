@@ -808,12 +808,13 @@ export class LavalinkNode {
             return this.NodeManager.LavalinkManager.options.autoSkip && player.play({ noReplace: true });
         }
         // remove tracks from the queue
-        if (player.repeatMode !== "track") await queueTrackEnd(player);
+        if (player.repeatMode !== "track" || player.get("internal_skipped")) await queueTrackEnd(player);
         else if (player.queue.current) { // If there was a current Track already and repeatmode === true, add it to the queue.
             player.queue.previous.unshift(player.queue.current as Track);
             if (player.queue.previous.length > player.queue.options.maxPreviousTracks) player.queue.previous.splice(player.queue.options.maxPreviousTracks, player.queue.previous.length);
             await player.queue.utils.save();
         }
+        player.set("internal_skipped", false);
         // if no track available, end queue
         if (!player.queue.current) return this.queueEnd(player, track, payload);
         // fire event

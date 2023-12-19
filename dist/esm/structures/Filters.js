@@ -12,13 +12,21 @@ export class FilterManager {
         vaporwave: false,
         custom: false,
         nightcore: false,
-        echo: false,
-        reverb: false,
         rotation: false,
         karaoke: false,
         tremolo: false,
         vibrato: false,
         lowPass: false,
+        lavalinkFilterPlugin: {
+            echo: false,
+            reverb: false,
+        },
+        lavalinkLavaDspxPlugin: {
+            lowPass: false,
+            highPass: false,
+            normalization: false,
+            echo: false,
+        },
         audioOutput: "stereo",
     };
     /** The Filter Data sent to Lavalink, only if the filter is enabled (ofc.) */
@@ -58,7 +66,23 @@ export class FilterManager {
                     delays: [],
                     gains: [] // [0.84, 0.83, 0.82, 0.81]
                 }
-            }
+            },
+            "high-pass": { // Cuts off frequencies lower than the specified {cutoffFrequency}.
+            // "cutoffFrequency": 1475, // Integer, higher than zero, in Hz.
+            // "boostFactor": 1.0    // Float, higher than 0.0. This alters volume output. A value of 1.0 means no volume change.
+            },
+            "low-pass": { // Cuts off frequencies higher than the specified {cutoffFrequency}.
+            // "cutoffFrequency": 284, // Integer, higher than zero, in Hz.
+            // "boostFactor": 1.24389    // Float, higher than 0.0. This alters volume output. A value of 1.0 means no volume change.
+            },
+            "normalization": { // Attenuates peaking where peaks are defined as having a higher value than {maxAmplitude}. 
+            // "maxAmplitude": 0.6327, // Float, within the range of 0.0 - 1.0. A value of 0.0 mutes the output.
+            // "adaptive": true    // false 
+            },
+            "echo": { // Self-explanatory; provides an echo effect.
+            // "echoLength": 0.5649, // Float, higher than 0.0, in seconds (1.0 = 1 second).
+            // "decay": 0.4649       // Float, within the range of 0.0 - 1.0. A value of 1.0 means no decay, and a value of 0.0 means
+            },
         },
         channelMix: audioOutputsData.stereo,
         /*distortion: {
@@ -91,10 +115,18 @@ export class FilterManager {
             delete sendData.tremolo;
         if (!this.filters.vibrato)
             delete sendData.vibrato;
-        if (!this.filters.echo)
+        if (!this.filters.lavalinkFilterPlugin.echo)
             delete sendData.pluginFilters?.["lavalink-filter-plugin"]?.echo;
-        if (!this.filters.reverb)
+        if (!this.filters.lavalinkFilterPlugin.reverb)
             delete sendData.pluginFilters?.["lavalink-filter-plugin"]?.reverb;
+        if (!this.filters.lavalinkLavaDspxPlugin.echo)
+            delete sendData.pluginFilters?.echo;
+        if (!this.filters.lavalinkLavaDspxPlugin.normalization)
+            delete sendData.pluginFilters?.normalization;
+        if (!this.filters.lavalinkLavaDspxPlugin.highPass)
+            delete sendData.pluginFilters?.["high-pass"];
+        if (!this.filters.lavalinkLavaDspxPlugin.lowPass)
+            delete sendData.pluginFilters?.["low-pass"];
         if (sendData.pluginFilters?.["lavalink-filter-plugin"] && Object.values(sendData.pluginFilters?.["lavalink-filter-plugin"]).length === 0)
             delete sendData.pluginFilters["lavalink-filter-plugin"];
         if (sendData.pluginFilters && Object.values(sendData.pluginFilters).length === 0)
@@ -118,7 +150,7 @@ export class FilterManager {
             // delete disabled filters
             if (key === "pluginFilters") {
                 // for(const key of [...Object.keys(sendData.pluginFilters)]) {
-                // if (this.player.node.info && !this.player.node.info?.plugins?.find?.(v => v.name === key)) delete sendData[key];
+                //     // if (this.player.node.info && !this.player.node.info?.plugins?.find?.(v => v.name === key)) delete sendData[key];
                 // }
             }
             else if (this.player.node.info && !this.player.node.info?.filters?.includes?.(key))
@@ -145,9 +177,13 @@ export class FilterManager {
         this.filters.rotation = this.data.rotation.rotationHz !== 0;
         this.filters.vibrato = this.data.vibrato.frequency !== 0 || this.data.vibrato.depth !== 0;
         this.filters.tremolo = this.data.tremolo.frequency !== 0 || this.data.tremolo.depth !== 0;
-        const lavalinkFilterData = (this.data.pluginFilters?.["lavalink-filter-plugin"] || { echo: { decay: 0, delay: 0 }, reverb: { gains: [], delays: [] } });
-        this.filters.echo = lavalinkFilterData.echo.decay !== 0 || lavalinkFilterData.echo.delay !== 0;
-        this.filters.reverb = lavalinkFilterData.reverb?.delays?.length !== 0 || lavalinkFilterData.reverb?.gains?.length !== 0;
+        const lavalinkFilterData = (this.data.pluginFilters?.["lavalink-filter-plugin"] || { echo: { decay: this.data.pluginFilters?.echo?.decay && !this.data.pluginFilters?.echo?.echoLength ? this.data.pluginFilters.echo.decay : 0, delay: this.data.pluginFilters?.echo?.delay || 0 }, reverb: { gains: [], delays: [], ...((this.data.pluginFilters.reverb) || {}) } });
+        this.filters.lavalinkFilterPlugin.echo = lavalinkFilterData.echo.decay !== 0 || lavalinkFilterData.echo.delay !== 0;
+        this.filters.lavalinkFilterPlugin.reverb = lavalinkFilterData.reverb?.delays?.length !== 0 || lavalinkFilterData.reverb?.gains?.length !== 0;
+        this.filters.lavalinkLavaDspxPlugin.highPass = Object.values(this.data.pluginFilters["high-pass"] || {}).length > 0;
+        this.filters.lavalinkLavaDspxPlugin.lowPass = Object.values(this.data.pluginFilters["low-pass"] || {}).length > 0;
+        this.filters.lavalinkLavaDspxPlugin.normalization = Object.values(this.data.pluginFilters.normalization || {}).length > 0;
+        this.filters.lavalinkLavaDspxPlugin.echo = Object.values(this.data.pluginFilters.echo || {}).length > 0 && typeof this.data.pluginFilters?.echo?.delay === "undefined";
         this.filters.lowPass = this.data.lowPass.smoothing !== 0;
         this.filters.karaoke = Object.values(this.data.karaoke).some(v => v !== 0);
         if ((this.filters.nightcore || this.filters.vaporwave) && oldFilterTimescale) {
@@ -163,8 +199,12 @@ export class FilterManager {
      * Reset all Filters
      */
     async resetFilters() {
-        this.filters.echo = false;
-        this.filters.reverb = false;
+        this.filters.lavalinkLavaDspxPlugin.echo = false;
+        this.filters.lavalinkLavaDspxPlugin.normalization = false;
+        this.filters.lavalinkLavaDspxPlugin.highPass = false;
+        this.filters.lavalinkLavaDspxPlugin.lowPass = false;
+        this.filters.lavalinkFilterPlugin.echo = false;
+        this.filters.lavalinkFilterPlugin.reverb = false;
         this.filters.nightcore = false;
         this.filters.lowPass = false;
         this.filters.rotation = false;
@@ -194,14 +234,30 @@ export class FilterManager {
             pluginFilters: {
                 "lavalink-filter-plugin": {
                     echo: {
-                        delay: 0,
-                        decay: 0
+                    // delay: 0, // in seconds
+                    // decay: 0 // 0 < 1
                     },
                     reverb: {
-                        delays: [],
-                        gains: []
-                    },
-                }
+                    // delays: [], // [0.037, 0.042, 0.048, 0.053]
+                    // gains: [] // [0.84, 0.83, 0.82, 0.81]
+                    }
+                },
+                "high-pass": { // Cuts off frequencies lower than the specified {cutoffFrequency}.
+                // "cutoffFrequency": 1475, // Integer, higher than zero, in Hz.
+                // "boostFactor": 1.0    // Float, higher than 0.0. This alters volume output. A value of 1.0 means no volume change.
+                },
+                "low-pass": { // Cuts off frequencies higher than the specified {cutoffFrequency}.
+                // "cutoffFrequency": 284, // Integer, higher than zero, in Hz.
+                // "boostFactor": 1.24389    // Float, higher than 0.0. This alters volume output. A value of 1.0 means no volume change.
+                },
+                "normalization": { // Attenuates peaking where peaks are defined as having a higher value than {maxAmplitude}. 
+                // "maxAmplitude": 0.6327, // Float, within the range of 0.0 - 1.0. A value of 0.0 mutes the output.
+                // "adaptive": true    // false 
+                },
+                "echo": { // Self-explanatory; provides an echo effect.
+                // "echoLength": 0.5649, // Float, higher than 0.0, in seconds (1.0 = 1 second).
+                // "decay": 0.4649       // Float, within the range of 0.0 - 1.0. A value of 1.0 means no decay, and a value of 0.0 means
+                },
             },
             rotation: {
                 rotationHz: 0
@@ -369,52 +425,156 @@ export class FilterManager {
         await this.applyPlayerFilters();
         return this.filters.lowPass;
     }
-    /**
-     * Enabels / Disables the Echo effect, IMPORTANT! Only works with the correct Lavalink Plugin installed. (Optional: provide your Own Data)
-     * @param delay
-     * @param decay
-     * @returns
-     */
-    async toggleEcho(delay = 4, decay = 0.8) {
-        if (this.player.node.info && !this.player.node.info?.filters?.includes("echo"))
-            throw new Error("Node#Info#filters does not include the 'echo' Filter (Node has it not enable aka not installed!)");
-        if (!this.data)
-            this.data = {};
-        if (!this.data.pluginFilters)
-            this.data.pluginFilters = {};
-        if (!this.data.pluginFilters["lavalink-filter-plugin"])
-            this.data.pluginFilters["lavalink-filter-plugin"] = { echo: { decay: 0, delay: 0 }, reverb: { delays: [], gains: [] } };
-        if (!this.data.pluginFilters["lavalink-filter-plugin"].echo)
-            this.data.pluginFilters["lavalink-filter-plugin"].echo = { decay: 0, delay: 0 };
-        this.data.pluginFilters["lavalink-filter-plugin"].echo.delay = this.filters.echo ? 0 : delay;
-        this.data.pluginFilters["lavalink-filter-plugin"].echo.decay = this.filters.echo ? 0 : decay;
-        this.filters.echo = !this.filters.echo;
-        await this.applyPlayerFilters();
-        return this.filters.echo;
-    }
-    /**
-     * Enabels / Disables the Echo effect, IMPORTANT! Only works with the correct Lavalink Plugin installed. (Optional: provide your Own Data)
-     * @param delays
-     * @param gains
-     * @returns
-     */
-    async toggleReverb(delays = [0.037, 0.042, 0.048, 0.053], gains = [0.84, 0.83, 0.82, 0.81]) {
-        if (this.player.node.info && !this.player.node.info?.filters?.includes("reverb"))
-            throw new Error("Node#Info#filters does not include the 'reverb' Filter (Node has it not enable aka not installed!)");
-        if (!this.data)
-            this.data = {};
-        if (!this.data.pluginFilters)
-            this.data.pluginFilters = {};
-        if (!this.data.pluginFilters["lavalink-filter-plugin"])
-            this.data.pluginFilters["lavalink-filter-plugin"] = { echo: { decay: 0, delay: 0 }, reverb: { delays: [], gains: [] } };
-        if (!this.data.pluginFilters["lavalink-filter-plugin"].reverb)
-            this.data.pluginFilters["lavalink-filter-plugin"].reverb = { delays: [], gains: [] };
-        this.data.pluginFilters["lavalink-filter-plugin"].reverb.delays = this.filters.reverb ? [] : delays;
-        this.data.pluginFilters["lavalink-filter-plugin"].reverb.gains = this.filters.reverb ? [] : gains;
-        this.filters.reverb = !this.filters.reverb;
-        await this.applyPlayerFilters();
-        return this.filters.reverb;
-    }
+    lavalinkLavaDspxPlugin = {
+        toggleLowPass: async (boostFactor = 1.0, cutoffFrequency = 80) => {
+            if (this.player.node.info && !this.player.node.info?.plugins?.find(v => v.name === "lavadspx-plugin"))
+                throw new Error("Node#Info#plugins does not include the lavadspx plugin");
+            if (this.player.node.info && !this.player.node.info?.filters?.includes("low-pass"))
+                throw new Error("Node#Info#filters does not include the 'low-pass' Filter (Node has it not enable)");
+            if (!this.data)
+                this.data = {};
+            if (!this.data.pluginFilters)
+                this.data.pluginFilters = {};
+            if (!this.data.pluginFilters["low-pass"])
+                this.data.pluginFilters["low-pass"] = {};
+            if (this.filters.lavalinkLavaDspxPlugin.lowPass) {
+                delete this.data.pluginFilters["low-pass"];
+            }
+            else {
+                this.data.pluginFilters["low-pass"] = {
+                    boostFactor: boostFactor,
+                    cutoffFrequency: cutoffFrequency
+                };
+            }
+            this.filters.lavalinkLavaDspxPlugin.lowPass = !this.filters.lavalinkLavaDspxPlugin.lowPass;
+            await this.applyPlayerFilters();
+            return this.filters.lavalinkLavaDspxPlugin.lowPass;
+        },
+        toggleHighPass: async (boostFactor = 1.0, cutoffFrequency = 80) => {
+            if (this.player.node.info && !this.player.node.info?.plugins?.find(v => v.name === "lavadspx-plugin"))
+                throw new Error("Node#Info#plugins does not include the lavadspx plugin");
+            if (this.player.node.info && !this.player.node.info?.filters?.includes("high-pass"))
+                throw new Error("Node#Info#filters does not include the 'high-pass' Filter (Node has it not enable)");
+            if (!this.data)
+                this.data = {};
+            if (!this.data.pluginFilters)
+                this.data.pluginFilters = {};
+            if (!this.data.pluginFilters["high-pass"])
+                this.data.pluginFilters["high-pass"] = {};
+            if (this.filters.lavalinkLavaDspxPlugin.highPass) {
+                delete this.data.pluginFilters["high-pass"];
+            }
+            else {
+                this.data.pluginFilters["high-pass"] = {
+                    boostFactor: boostFactor,
+                    cutoffFrequency: cutoffFrequency
+                };
+            }
+            this.filters.lavalinkLavaDspxPlugin.highPass = !this.filters.lavalinkLavaDspxPlugin.highPass;
+            await this.applyPlayerFilters();
+            return this.filters.lavalinkLavaDspxPlugin.highPass;
+        },
+        toggleNormalization: async (maxAmplitude = 0.75, adaptive = true) => {
+            if (this.player.node.info && !this.player.node.info?.plugins?.find(v => v.name === "lavadspx-plugin"))
+                throw new Error("Node#Info#plugins does not include the lavadspx plugin");
+            if (this.player.node.info && !this.player.node.info?.filters?.includes("normalization"))
+                throw new Error("Node#Info#filters does not include the 'normalization' Filter (Node has it not enable)");
+            if (!this.data)
+                this.data = {};
+            if (!this.data.pluginFilters)
+                this.data.pluginFilters = {};
+            if (!this.data.pluginFilters.normalization)
+                this.data.pluginFilters.normalization = {};
+            if (this.filters.lavalinkLavaDspxPlugin.normalization) {
+                delete this.data.pluginFilters.normalization;
+            }
+            else {
+                this.data.pluginFilters.normalization = {
+                    adaptive: adaptive,
+                    maxAmplitude: maxAmplitude
+                };
+            }
+            this.filters.lavalinkLavaDspxPlugin.normalization = !this.filters.lavalinkLavaDspxPlugin.normalization;
+            await this.applyPlayerFilters();
+            return this.filters.lavalinkLavaDspxPlugin.normalization;
+        },
+        toggleEcho: async (decay = 0.5, echoLength = 0.5) => {
+            if (this.player.node.info && !this.player.node.info?.plugins?.find(v => v.name === "lavadspx-plugin"))
+                throw new Error("Node#Info#plugins does not include the lavadspx plugin");
+            if (this.player.node.info && !this.player.node.info?.filters?.includes("echo"))
+                throw new Error("Node#Info#filters does not include the 'echo' Filter (Node has it not enable)");
+            if (!this.data)
+                this.data = {};
+            if (!this.data.pluginFilters)
+                this.data.pluginFilters = {};
+            if (!this.data.pluginFilters.echo)
+                this.data.pluginFilters.echo = {};
+            if (this.filters.lavalinkLavaDspxPlugin.echo) {
+                delete this.data.pluginFilters.echo;
+            }
+            else {
+                this.data.pluginFilters.echo = {
+                    decay: decay,
+                    echoLength: echoLength
+                };
+            }
+            this.filters.lavalinkLavaDspxPlugin.echo = !this.filters.lavalinkLavaDspxPlugin.echo;
+            await this.applyPlayerFilters();
+            return this.filters.lavalinkLavaDspxPlugin.echo;
+        }
+    };
+    lavalinkFilterPlugin = {
+        /**
+         * Enabels / Disables the Echo effect, IMPORTANT! Only works with the correct Lavalink Plugin installed. (Optional: provide your Own Data)
+         * @param delay
+         * @param decay
+         * @returns
+         */
+        toggleEcho: async (delay = 4, decay = 0.8) => {
+            if (this.player.node.info && !this.player.node.info?.plugins?.find(v => v.name === "lavalink-filter-plugin"))
+                throw new Error("Node#Info#plugins does not include the lavalink-filter-plugin plugin");
+            if (this.player.node.info && !this.player.node.info?.filters?.includes("echo"))
+                throw new Error("Node#Info#filters does not include the 'echo' Filter (Node has it not enable aka not installed!)");
+            if (!this.data)
+                this.data = {};
+            if (!this.data.pluginFilters)
+                this.data.pluginFilters = {};
+            if (!this.data.pluginFilters["lavalink-filter-plugin"])
+                this.data.pluginFilters["lavalink-filter-plugin"] = { echo: { decay: 0, delay: 0 }, reverb: { delays: [], gains: [] } };
+            if (!this.data.pluginFilters["lavalink-filter-plugin"].echo)
+                this.data.pluginFilters["lavalink-filter-plugin"].echo = { decay: 0, delay: 0 };
+            this.data.pluginFilters["lavalink-filter-plugin"].echo.delay = this.filters.lavalinkFilterPlugin.echo ? 0 : delay;
+            this.data.pluginFilters["lavalink-filter-plugin"].echo.decay = this.filters.lavalinkFilterPlugin.echo ? 0 : decay;
+            this.filters.lavalinkFilterPlugin.echo = !this.filters.lavalinkFilterPlugin.echo;
+            await this.applyPlayerFilters();
+            return this.filters.lavalinkFilterPlugin.echo;
+        },
+        /**
+         * Enabels / Disables the Echo effect, IMPORTANT! Only works with the correct Lavalink Plugin installed. (Optional: provide your Own Data)
+         * @param delays
+         * @param gains
+         * @returns
+         */
+        toggleReverb: async (delays = [0.037, 0.042, 0.048, 0.053], gains = [0.84, 0.83, 0.82, 0.81]) => {
+            if (this.player.node.info && !this.player.node.info?.plugins?.find(v => v.name === "lavalink-filter-plugin"))
+                throw new Error("Node#Info#plugins does not include the lavalink-filter-plugin plugin");
+            if (this.player.node.info && !this.player.node.info?.filters?.includes("reverb"))
+                throw new Error("Node#Info#filters does not include the 'reverb' Filter (Node has it not enable aka not installed!)");
+            if (!this.data)
+                this.data = {};
+            if (!this.data.pluginFilters)
+                this.data.pluginFilters = {};
+            if (!this.data.pluginFilters["lavalink-filter-plugin"])
+                this.data.pluginFilters["lavalink-filter-plugin"] = { echo: { decay: 0, delay: 0 }, reverb: { delays: [], gains: [] } };
+            if (!this.data.pluginFilters["lavalink-filter-plugin"].reverb)
+                this.data.pluginFilters["lavalink-filter-plugin"].reverb = { delays: [], gains: [] };
+            this.data.pluginFilters["lavalink-filter-plugin"].reverb.delays = this.filters.lavalinkFilterPlugin.reverb ? [] : delays;
+            this.data.pluginFilters["lavalink-filter-plugin"].reverb.gains = this.filters.lavalinkFilterPlugin.reverb ? [] : gains;
+            this.filters.lavalinkFilterPlugin.reverb = !this.filters.lavalinkFilterPlugin.reverb;
+            await this.applyPlayerFilters();
+            return this.filters.lavalinkFilterPlugin.reverb;
+        }
+    };
     /**
      * Enables / Disabels a Nightcore-like filter Effect. Disables/Overwrides both: custom and Vaporwave Filter
      * @param speed

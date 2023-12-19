@@ -181,3 +181,25 @@ Check out the [Documentation](https://lc4.gitbook.io/lavalink-client) for **Exam
 In one of the next updates, there will be more queueWatcher options and more custom nodeevents to trace 
 
 Most features of this update got tested, but if you encounter any bugs feel free to open an issue!
+
+## **Version 2.1.0**
+- Fixed that, if you skip and have trackloop enabled, it doesn't skip the track
+  - I fixed that in the past, but for some reason i removed the fix on accident ig.
+- Reworked the Filter Manager for custom filters via [LavalinkFilterPlugin](https://github.com/rohank05/lavalink-filter-plugin) / [LavalinkLavaDSPX-Plugin](https://github.com/devoxin/LavaDSPX-Plugin/)
+- Note that the [LavalinkLavaDSPX-Plugin](https://github.com/devoxin/LavaDSPX-Plugin/) is by a Community Member of Lavalink and UNOFFICIAL
+  - They now have individual state-variabels (booleans): `player.filterManager.filters.lavalinkLavaDspxPlugin`
+    - `player.filterManager.filters.lavalinkLavaDspxPlugin.echo`
+    - `player.filterManager.filters.lavalinkLavaDspxPlugin.normalization`
+    - `player.filterManager.filters.lavalinkLavaDspxPlugin.highPass`
+    - `player.filterManager.filters.lavalinkLavaDspxPlugin.lowPass`
+  - and for: `player.filterManager.filters.lavalinkFilterPlugin` (this plugins seems to not work on v4 at the moment)
+    - `player.filterManager.filters.lavalinkLavaDspxPlugin.echo`
+    - `player.filterManager.filters.lavalinkLavaDspxPlugin.reverb`
+  - They also now have individual state-changing-methods: `player.filterManager.lavalinkLavaDspxPlugin`
+    - `player.filterManager.lavalinkLavaDspxPlugin.toggleEcho(decay:number, echoLength:number)`
+    - `player.filterManager.lavalinkLavaDspxPlugin.toggleNormalization(maxAmplitude:number, adaptive:boolean)`
+    - `player.filterManager.lavalinkLavaDspxPlugin.toggleHighPass(boostFactor:number, cutoffFrequency:number)`
+    - `player.filterManager.lavalinkLavaDspxPlugin.toggleLowPass(boostFactor:number, cutoffFrequency:number)`
+  - and for: `player.filterManager.lavalinkFilterPlugin`
+    - `player.filterManager.lavalinkFilterPlugin.toggleEcho(delay:number, decay:number)`
+    - `player.filterManager.lavalinkFilterPlugin.toggleReverb(delays:number[], gains:number[])`

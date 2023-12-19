@@ -333,6 +333,7 @@ class Player {
         if (!this.playing)
             return await this.play();
         const now = performance.now();
+        this.set("internal_skipped", true);
         await this.node.updatePlayer({ guildId: this.guildId, playerOptions: { track: { encoded: null } } });
         this.ping.lavalink = Math.round((performance.now() - now) / 10) / 100;
         return this;

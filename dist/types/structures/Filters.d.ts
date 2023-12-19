@@ -86,20 +86,28 @@ export declare class FilterManager {
      * @returns
      */
     toggleLowPass(smoothing?: number): Promise<boolean>;
-    /**
-     * Enabels / Disables the Echo effect, IMPORTANT! Only works with the correct Lavalink Plugin installed. (Optional: provide your Own Data)
-     * @param delay
-     * @param decay
-     * @returns
-     */
-    toggleEcho(delay?: number, decay?: number): Promise<boolean>;
-    /**
-     * Enabels / Disables the Echo effect, IMPORTANT! Only works with the correct Lavalink Plugin installed. (Optional: provide your Own Data)
-     * @param delays
-     * @param gains
-     * @returns
-     */
-    toggleReverb(delays?: number[], gains?: number[]): Promise<boolean>;
+    lavalinkLavaDspxPlugin: {
+        toggleLowPass: (boostFactor?: number, cutoffFrequency?: number) => Promise<boolean>;
+        toggleHighPass: (boostFactor?: number, cutoffFrequency?: number) => Promise<boolean>;
+        toggleNormalization: (maxAmplitude?: number, adaptive?: boolean) => Promise<boolean>;
+        toggleEcho: (decay?: number, echoLength?: number) => Promise<boolean>;
+    };
+    lavalinkFilterPlugin: {
+        /**
+         * Enabels / Disables the Echo effect, IMPORTANT! Only works with the correct Lavalink Plugin installed. (Optional: provide your Own Data)
+         * @param delay
+         * @param decay
+         * @returns
+         */
+        toggleEcho: (delay?: number, decay?: number) => Promise<boolean>;
+        /**
+         * Enabels / Disables the Echo effect, IMPORTANT! Only works with the correct Lavalink Plugin installed. (Optional: provide your Own Data)
+         * @param delays
+         * @param gains
+         * @returns
+         */
+        toggleReverb: (delays?: number[], gains?: number[]) => Promise<boolean>;
+    };
     /**
      * Enables / Disabels a Nightcore-like filter Effect. Disables/Overwrides both: custom and Vaporwave Filter
      * @param speed
@@ -160,10 +168,23 @@ export interface PlayerFilters {
     audioOutput: AudioOutputs;
     /** Lavalink Volume FILTER (not player Volume, think of it as a gain booster) */
     volume: boolean;
-    /** only with the custom lavalink filter plugin */
-    echo: boolean;
-    /** only with the custom lavalink filter plugin */
-    reverb: boolean;
+    /** Filters for the Lavalink Filter Plugin */
+    lavalinkFilterPlugin: {
+        /** if echo filter is enabled / not */
+        echo: boolean;
+        /** if reverb filter is enabled / not */
+        reverb: boolean;
+    };
+    lavalinkLavaDspxPlugin: {
+        /** if lowPass filter is enabled / not */
+        lowPass: boolean;
+        /** if highPass filter is enabled / not */
+        highPass: boolean;
+        /** if normalization filter is enabled / not */
+        normalization: boolean;
+        /** if echo filter is enabled / not */
+        echo: boolean;
+    };
 }
 /**
  * There are 15 bands (0-14) that can be changed.
@@ -174,9 +195,9 @@ export interface PlayerFilters {
  */
 export interface EQBand {
     /** On what band position (0-14) it should work */
-    band: IntegerNumber;
+    band: IntegerNumber | number;
     /** The gain (-0.25 to 1.0) */
-    gain: FloatNumber;
+    gain: FloatNumber | number;
 }
 /**
  * Uses equalization to eliminate part of a band, usually targeting vocals.
@@ -266,20 +287,6 @@ export interface LowPassFilter {
     smoothing?: number;
 }
 /**
- * A Plugin Filter
- */
-export interface EchoFilter {
-    delay: number;
-    decay: number;
-}
-/**
- * A Plugin Filter
- */
-export interface ReverbFilter {
-    delays: number[];
-    gains: number[];
-}
-/**
  * Filter Data stored in the Client and partially sent to Lavalink
  */
 export interface FilterData {
@@ -292,15 +299,34 @@ export interface FilterData {
     distortion?: DistortionFilter;
     channelMix?: ChannelMixFilter;
     lowPass?: LowPassFilter;
-    pluginFilters?: Record<PluginFiltersKey, PluginFiltersValues>;
-}
-export type PluginFiltersKey = "lavalink-filter-plugin" | string;
-export interface PluginFiltersValues extends LavalinkFiltersPlugin {
-    [key: string]: string | number | string[] | number[] | EchoFilter | ReverbFilter;
-}
-export interface LavalinkFiltersPlugin {
-    "echo": EchoFilter;
-    "reverb": ReverbFilter;
+    pluginFilters?: {
+        "lavalink-filter-plugin"?: {
+            "echo"?: {
+                delay?: number;
+                decay?: number;
+            };
+            "reverb"?: {
+                delays?: number[];
+                gains?: number[];
+            };
+        };
+        "high-pass"?: {
+            cutoffFrequency?: number;
+            boostFactor?: number;
+        };
+        "low-pass"?: {
+            cutoffFrequency?: number;
+            boostFactor?: number;
+        };
+        normalization?: {
+            maxAmplitude?: number;
+            adaptive?: boolean;
+        };
+        echo?: {
+            echoLength?: number;
+            decay?: number;
+        };
+    };
 }
 /**
  * Actual Filter Data sent to Lavalink
