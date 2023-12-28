@@ -24,7 +24,7 @@ Easy, flexible and feature-rich lavalink@v4 Client. Both for Beginners and Profi
 
 # Install
 
-Latest stable Version: (currently, unreleased)
+Latest stable Version: **`v2.1.3`**
 
 <details><summary>👉 via NPM</summary>
 
@@ -57,7 +57,7 @@ yarn add tomato6966/lavalink-client
 
 # Documentation
 
-Check out the [Documentation](https://lc4.gitbook.io/lavalink-client) for **Examples**, and **__detailled__ Docs**, and to figure out **how to get started**. *note: it's not fully done yet (see the docs)*
+Check out the [Documentation](https://lc4.gitbook.io/lavalink-client) | or the [TSDocumentation](https://tomato6966.github.io/lavalink-client/) for **Examples**, and **__detailled__ Docs**, and to figure out **how to get started**. *note: it's not fully done yet (see the docs)*
 
 # Features
 
