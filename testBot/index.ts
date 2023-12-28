@@ -45,7 +45,7 @@ client.lavalink = new LavalinkManager({
         {
             authorization: "yourverystrongpassword",
             host: "localhost",
-            port: 2023,
+            port: 2333,
             id: "testnode",
             // sessionId: "lsvunq8h8bxx0m9w", // add the sessionId in order to resume the session for the node, and then to recover the players listen to nodeManager#resumed.
             requestTimeout: 10000,
