@@ -349,7 +349,8 @@ export class ManagerUtils {
       source: DefaultSources[(typeof query === "string" ? undefined : query.source?.trim?.()?.toLowerCase?.()) ?? this.LavalinkManager?.options?.playerOptions?.defaultSearchPlatform?.toLowerCase?.()] ?? (typeof query === "string" ? undefined : query.source?.trim?.()?.toLowerCase?.()) ?? this.LavalinkManager?.options?.playerOptions?.defaultSearchPlatform?.toLowerCase?.() 
     }
     const foundSource = Object.keys(DefaultSources).find(source => Query.query?.toLowerCase?.()?.startsWith(`${source}:`.toLowerCase()))?.trim?.()?.toLowerCase?.() as SearchPlatform | undefined;
-    if(foundSource && DefaultSources[foundSource]){
+    // ignore links...
+    if(foundSource && !["https", "http"].includes(foundSource) && DefaultSources[foundSource]){
         Query.source = DefaultSources[foundSource]; // set the source to ytsearch:
         Query.query = Query.query.slice(`${foundSource}:`.length, Query.query.length); // remove ytsearch: from the query
     }

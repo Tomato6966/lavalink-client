@@ -1,4 +1,5 @@
 import { CommandInteractionOptionResolver, GuildMember, SlashCommandBuilder } from "discord.js";
+
 import { Command } from "../types/Client";
 
 export default { 
@@ -35,9 +36,15 @@ export default {
             case "rotation": await player.filterManager.toggleRotation(); string = player.filterManager.filters.rotation ? "Applied Rotation Filter-Effect" : "Disabled Rotation Filter-Effect"; break;
             case "tremolo": await player.filterManager.toggleTremolo(); string = player.filterManager.filters.tremolo ? "Applied Tremolo Filter-Effect" : "Disabled Tremolo Filter-Effect"; break;
             case "vibrato": await player.filterManager.toggleVibrato(); string = player.filterManager.filters.vibrato ? "Applied Vibrato Filter-Effect" : "Disabled Vibrato Filter-Effect"; break;
-            // available in lavalink-filters lavalink-plugin (currently not working in lavalink-v4)
-            case "echo": await player.filterManager.toggleEcho(); string = player.filterManager.filters.echo ? "Applied Echo Filter-Effect" : "Disabled Echo Filter-Effect"; break;
-            case "reverb": await player.filterManager.toggleReverb(); string = player.filterManager.filters.reverb ? "Applied Reverb Filter-Effect" : "Disabled Reverb Filter-Effect"; break;
+            // you could also use the lavalinKFilter plugin instead, however it does not work currently (12.2023)
+            // case "echo": await player.filterManager.lavalinkFilterPlugin.toggleEcho(); string = player.filterManager.filters.lavalinkFilterPlugin.echo ? "Applied Echo Filter-Effect" : "Disabled Echo Filter-Effect"; break;
+            // Following filters are available if you install them via https://github.com/devoxin/LavaDSPX-Plugin or in lavalink:
+    //         - dependency: "com.github.devoxin:lavadspx-plugin:0.0.3"
+    //           repository: "https://jitpack.io"
+            case "echo": await player.filterManager.lavalinkLavaDspxPlugin.toggleEcho(); string = player.filterManager.filters.lavalinkLavaDspxPlugin.echo ? "Applied Echo Filter-Effect" : "Disabled Echo Filter-Effect"; break;
+            case "highPass": await player.filterManager.lavalinkLavaDspxPlugin.toggleHighPass(); string = player.filterManager.filters.lavalinkLavaDspxPlugin.highPass ? "Applied HighPass Filter-Effect" : "Disabled HighPass Filter-Effect"; break;
+            case "lowPass": await player.filterManager.lavalinkLavaDspxPlugin.toggleLowPass(); string = player.filterManager.filters.lavalinkLavaDspxPlugin.lowPass ? "Applied LowPass Filter-Effect" : "Disabled LowPass Filter-Effect"; break;
+            case "normalization": await player.filterManager.lavalinkLavaDspxPlugin.toggleNormalization(); string = player.filterManager.filters.lavalinkLavaDspxPlugin.normalization ? "Applied Normalization Filter-Effect" : "Disabled Normalization Filter-Effect"; break;
         }
         await interaction.reply({
             content: `✅ ${string}`

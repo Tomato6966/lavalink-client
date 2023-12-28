@@ -1,4 +1,7 @@
-import { CommandInteractionOptionResolver, GuildMember, SlashCommandBuilder, VoiceChannel } from "discord.js";
+import {
+	CommandInteractionOptionResolver, GuildMember, SlashCommandBuilder, VoiceChannel
+} from "discord.js";
+
 import { Command } from "../types/Client";
 
 export default {
@@ -32,8 +35,12 @@ export default {
         if(!connected) await player.connect();
         if(player.voiceChannelId !== vcId) return interaction.reply({ ephemeral: true, content: "You need to be in my Voice Channel" });
         
+        const query = (interaction.options as CommandInteractionOptionResolver ).getString("text")!;
+        const voice = (interaction.options as CommandInteractionOptionResolver ).getString("voice")!
         
-        const response = await player.search({ query: (interaction.options as CommandInteractionOptionResolver ).getString("text")!, source: "ftts" }, interaction.user);
+        const response = await player.search({ query: 
+            `${query}${voice ? `?voice=${voice}` : ""}`
+        , source: "ftts" }, interaction.user);
        
         if(!response || !response.tracks?.length) return interaction.reply({ content: `No Tracks found`, ephemeral: true });
 
