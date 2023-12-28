@@ -243,7 +243,8 @@ class ManagerUtils {
             source: LavalinkManagerStatics_1.DefaultSources[(typeof query === "string" ? undefined : query.source?.trim?.()?.toLowerCase?.()) ?? this.LavalinkManager?.options?.playerOptions?.defaultSearchPlatform?.toLowerCase?.()] ?? (typeof query === "string" ? undefined : query.source?.trim?.()?.toLowerCase?.()) ?? this.LavalinkManager?.options?.playerOptions?.defaultSearchPlatform?.toLowerCase?.()
         };
         const foundSource = Object.keys(LavalinkManagerStatics_1.DefaultSources).find(source => Query.query?.toLowerCase?.()?.startsWith(`${source}:`.toLowerCase()))?.trim?.()?.toLowerCase?.();
-        if (foundSource && LavalinkManagerStatics_1.DefaultSources[foundSource]) {
+        // ignore links...
+        if (foundSource && !["https", "http"].includes(foundSource) && LavalinkManagerStatics_1.DefaultSources[foundSource]) {
             Query.source = LavalinkManagerStatics_1.DefaultSources[foundSource]; // set the source to ytsearch:
             Query.query = Query.query.slice(`${foundSource}:`.length, Query.query.length); // remove ytsearch: from the query
         }
