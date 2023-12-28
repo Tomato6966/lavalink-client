@@ -272,10 +272,14 @@ export class LavalinkNode {
         }
 
         let uri = `/loadtracks?identifier=`;
-        if(!/^https?:\/\//.test(Query.query)) uri += `${Query.source}:`;
-        if(Query.source === "ftts") uri += `//${encodeURIComponent(encodeURI(decodeURIComponent(Query.query)))}`;
-        else uri += encodeURIComponent(decodeURIComponent(Query.query));
-
+        if(/^https?:\/\//.test(Query.query)) {
+            // if it's a link simply encode it
+            uri += encodeURIComponent(decodeURIComponent(Query.query));
+        } else {
+            uri += `${Query.source}:`;
+            if(Query.source === "ftts") uri += `//${encodeURIComponent(encodeURI(decodeURIComponent(Query.query)))}`;
+            else uri += encodeURIComponent(decodeURIComponent(Query.query));
+        }
         const res = await this.request(uri) as {
             loadType: LoadTypes,
             data: any,
