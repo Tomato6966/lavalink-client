@@ -3,7 +3,7 @@
     "entryPoints": [
         "src/structures/**/*.ts"
     ],
-    "out": "docs2",
+    "out": "tsDocs",
     "entryPointStrategy": "expand",
     "plugin": ["typedoc-theme-hierarchy"],
     "theme": "hierarchy",

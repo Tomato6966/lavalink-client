@@ -14,7 +14,8 @@
     "lint": "eslint .",
     "lint:fix": "eslint --fix 'src/**/*.{ts}'",
     "format": "prettier --write src/**/*.ts --config ./.prettierrc.js",
-    "test": "node -v"
+    "test": "node -v",
+    "docs": "npx typedoc"
   },
   "publishConfig": {
     "access": "public"
