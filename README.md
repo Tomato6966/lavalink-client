@@ -203,3 +203,8 @@ Most features of this update got tested, but if you encounter any bugs feel free
   - and for: `player.filterManager.lavalinkFilterPlugin`
     - `player.filterManager.lavalinkFilterPlugin.toggleEcho(delay:number, decay:number)`
     - `player.filterManager.lavalinkFilterPlugin.toggleReverb(delays:number[], gains:number[])`
+
+## **Version 2.1.1**
+- Enforce link searches for users with following searchPlatform Options: "http" | "https" | "link" | "uri"
+  - Additionally strongend the code behind that
+- Added searchPlatform for local tracks (aka files on the lavalink server...): "local"
