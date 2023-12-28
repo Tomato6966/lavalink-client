@@ -49,13 +49,15 @@ export type LavalinkSearchPlatform = "ytsearch" |
     LavalinkClientSearchPlatform;
   
 export type ClientSearchPlatform =
+    "local" | // for file requests
     "youtube" | "yt" | 
     "youtube music" | "youtubemusic" | "ytm" | "musicyoutube" | "music youtube" |
     "soundcloud" | "sc" |
     "am" | "apple music" | "applemusic" | "apple" | "musicapple" | "music apple" |
     "sp" | "spsuggestion" | "spotify" | "spotify.com" | "spotifycom" |
     "dz" | "deezer" |
-    "yandex" | "yandex music" |"yandexmusic" | LavalinkClientSearchPlatformResolve | LavalinkClientSearchPlatform;
+    "yandex" | "yandex music" |"yandexmusic" |
+    "flowerytts" | "flowery" | "flowery.tts" | LavalinkClientSearchPlatformResolve | LavalinkClientSearchPlatform;
   
 export type SearchPlatform = LavalinkSearchPlatform | ClientSearchPlatform;
   

@@ -272,11 +272,10 @@ export class LavalinkNode {
         }
 
         let uri = `/loadtracks?identifier=`;
-        if(/^https?:\/\//.test(Query.query)) {
-            // if it's a link simply encode it
+        if(/^https?:\/\//.test(Query.query) || ["http", "https", "link", "uri"].includes(Query.source)) { // if it's a link simply encode it
             uri += encodeURIComponent(decodeURIComponent(Query.query));
-        } else {
-            uri += `${Query.source}:`;
+        } else { // if not make a query out of it
+            if(Query.source !== "local") uri += `${Query.source}:`; // only add the query source string if it's not a local track
             if(Query.source === "ftts") uri += `//${encodeURIComponent(encodeURI(decodeURIComponent(Query.query)))}`;
             else uri += encodeURIComponent(decodeURIComponent(Query.query));
         }
