@@ -1,0 +1,16 @@
+{
+    // Comments are supported, like tsconfig.json
+    "entryPoints": [
+        "src/structures/**/*.ts"
+    ],
+    "out": "docs2",
+    "entryPointStrategy": "expand",
+    "plugin": ["typedoc-theme-hierarchy"],
+    "theme": "hierarchy",
+    "tsconfig": "./tsconfig.json",
+    "navigationLinks": {
+        "Github": "https://github.com/tomato6966/lavalink-client",
+        "NPM": "https://npmjs.com/lavalink-client",
+        "Example Bot": "https://github.com/Tomato6966/lavalink-client/tree/main/testBot"
+    }
+}

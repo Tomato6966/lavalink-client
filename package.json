@@ -54,6 +54,8 @@
     "eslint": "^8.47.0",
     "ts-loader": "^9.4.4",
     "tslib": "^2.6.1",
+    "typedoc": "^0.25.4",
+    "typedoc-theme-hierarchy": "^4.1.2",
     "typescript": "^5.1.6"
   },
   "dependencies": {
