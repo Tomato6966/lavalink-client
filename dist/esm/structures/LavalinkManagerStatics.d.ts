@@ -1,5 +1,5 @@
-import { LavalinkSearchPlatform, SearchPlatform, SourcesRegex } from "./Utils";
-export declare const DefaultSources: Record<SearchPlatform, LavalinkSearchPlatform>;
+import { ClientCustomSearchPlatformUtils, LavalinkSearchPlatform, SearchPlatform, SourcesRegex } from "./Utils";
+export declare const DefaultSources: Record<SearchPlatform, LavalinkSearchPlatform | ClientCustomSearchPlatformUtils>;
 export declare const LavalinkPlugins: {
     DuncteBot_Plugin: string;
     LavaSrc: string;

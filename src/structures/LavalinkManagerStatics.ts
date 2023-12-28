@@ -1,6 +1,8 @@
-import { LavalinkSearchPlatform, SearchPlatform, SourcesRegex } from "./Utils";
+import {
+	ClientCustomSearchPlatformUtils, LavalinkSearchPlatform, SearchPlatform, SourcesRegex
+} from "./Utils";
 
-export const DefaultSources: Record<SearchPlatform, LavalinkSearchPlatform> = {
+export const DefaultSources: Record<SearchPlatform, LavalinkSearchPlatform|ClientCustomSearchPlatformUtils> = {
     // youtubemusic
     "youtube music": "ytmsearch",
     "youtubemusic": "ytmsearch",
@@ -46,10 +48,20 @@ export const DefaultSources: Record<SearchPlatform, LavalinkSearchPlatform> = {
     "speak": "speak",
     "tts": "tts",
     "ftts": "ftts",
+    "flowery": "ftts",
+    "flowery.tts": "ftts",
+    "flowerytts": "ftts",
     // Client sided search platforms
     "bandcamp": "bcsearch",
     "bc": "bcsearch",
     "bcsearch": "bcsearch",
+    // local files
+    "local": "local",
+    // http requests
+    "http": "http",
+    "https": "https",
+    "link": "link",
+    "uri": "uri"
 }
 
 export const LavalinkPlugins = {

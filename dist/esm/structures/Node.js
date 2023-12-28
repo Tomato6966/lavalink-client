@@ -120,12 +120,17 @@ export class LavalinkNode {
             throw new Error("Bandcamp Search only works on the player!");
         }
         let uri = `/loadtracks?identifier=`;
-        if (!/^https?:\/\//.test(Query.query))
-            uri += `${Query.source}:`;
-        if (Query.source === "ftts")
-            uri += `//${encodeURIComponent(encodeURI(decodeURIComponent(Query.query)))}`;
-        else
+        if (/^https?:\/\//.test(Query.query) || ["http", "https", "link", "uri"].includes(Query.source)) { // if it's a link simply encode it
             uri += encodeURIComponent(decodeURIComponent(Query.query));
+        }
+        else { // if not make a query out of it
+            if (Query.source !== "local")
+                uri += `${Query.source}:`; // only add the query source string if it's not a local track
+            if (Query.source === "ftts")
+                uri += `//${encodeURIComponent(encodeURI(decodeURIComponent(Query.query)))}`;
+            else
+                uri += encodeURIComponent(decodeURIComponent(Query.query));
+        }
         const res = await this.request(uri);
         // transform the data which can be Error, Track or Track[] to enfore [Track]
         const resTracks = res.loadType === "playlist" ? res.data?.tracks : res.loadType === "track" ? [res.data] : res.loadType === "search" ? Array.isArray(res.data) ? res.data : [res.data] : [];

@@ -47,10 +47,20 @@ exports.DefaultSources = {
     "speak": "speak",
     "tts": "tts",
     "ftts": "ftts",
+    "flowery": "ftts",
+    "flowery.tts": "ftts",
+    "flowerytts": "ftts",
     // Client sided search platforms
     "bandcamp": "bcsearch",
     "bc": "bcsearch",
     "bcsearch": "bcsearch",
+    // local files
+    "local": "local",
+    // http requests
+    "http": "http",
+    "https": "https",
+    "link": "link",
+    "uri": "uri"
 };
 exports.LavalinkPlugins = {
     DuncteBot_Plugin: "DuncteBot-plugin",

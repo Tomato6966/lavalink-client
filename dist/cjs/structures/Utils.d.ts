@@ -18,7 +18,8 @@ export type DuncteSearchPlatform = "speak" | "tts";
 export type LavalinkClientSearchPlatform = "bcsearch";
 export type LavalinkClientSearchPlatformResolve = "bandcamp" | "bc";
 export type LavalinkSearchPlatform = "ytsearch" | "ytmsearch" | "scsearch" | LavaSrcSearchPlatform | DuncteSearchPlatform | LavalinkClientSearchPlatform;
-export type ClientSearchPlatform = "local" | // for file requests
+export type ClientCustomSearchPlatformUtils = "local" | "http" | "https" | "link" | "uri";
+export type ClientSearchPlatform = ClientCustomSearchPlatformUtils | // for file/link requests
 "youtube" | "yt" | "youtube music" | "youtubemusic" | "ytm" | "musicyoutube" | "music youtube" | "soundcloud" | "sc" | "am" | "apple music" | "applemusic" | "apple" | "musicapple" | "music apple" | "sp" | "spsuggestion" | "spotify" | "spotify.com" | "spotifycom" | "dz" | "deezer" | "yandex" | "yandex music" | "yandexmusic" | "flowerytts" | "flowery" | "flowery.tts" | LavalinkClientSearchPlatformResolve | LavalinkClientSearchPlatform;
 export type SearchPlatform = LavalinkSearchPlatform | ClientSearchPlatform;
 export type SourcesRegex = "YoutubeRegex" | "YoutubeMusicRegex" | "SoundCloudRegex" | "SoundCloudMobileRegex" | "DeezerTrackRegex" | "DeezerArtistRegex" | "DeezerEpisodeRegex" | "DeezerMixesRegex" | "DeezerPageLinkRegex" | "DeezerPlaylistRegex" | "DeezerAlbumRegex" | "AllDeezerRegex" | "AllDeezerRegexWithoutPageLink" | "SpotifySongRegex" | "SpotifyPlaylistRegex" | "SpotifyArtistRegex" | "SpotifyEpisodeRegex" | "SpotifyShowRegex" | "SpotifyAlbumRegex" | "AllSpotifyRegex" | "mp3Url" | "m3uUrl" | "m3u8Url" | "mp4Url" | "m4aUrl" | "wavUrl" | "aacpUrl" | "tiktok" | "mixcloud" | "musicYandex" | "radiohost" | "bandcamp" | "appleMusic" | "TwitchTv" | "vimeo";

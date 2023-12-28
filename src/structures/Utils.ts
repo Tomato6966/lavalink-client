@@ -48,8 +48,10 @@ export type LavalinkSearchPlatform = "ytsearch" |
     DuncteSearchPlatform | 
     LavalinkClientSearchPlatform;
   
+export type ClientCustomSearchPlatformUtils = "local" | "http" | "https" | "link" | "uri";
+  
 export type ClientSearchPlatform =
-    "local" | // for file requests
+    ClientCustomSearchPlatformUtils | // for file/link requests
     "youtube" | "yt" | 
     "youtube music" | "youtubemusic" | "ytm" | "musicyoutube" | "music youtube" |
     "soundcloud" | "sc" |
