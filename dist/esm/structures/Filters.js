@@ -371,7 +371,7 @@ export class FilterManager {
         return this.filters.custom;
     }
     /**
-     * Enabels / Disables the rotation effect, (Optional: provide your Own Data)
+     * Enables / Disables the rotation effect, (Optional: provide your Own Data)
      * @param rotationHz
      * @returns
      */
@@ -383,7 +383,7 @@ export class FilterManager {
         return await this.applyPlayerFilters(), this.filters.rotation;
     }
     /**
-     * Enabels / Disables the Vibrato effect, (Optional: provide your Own Data)
+     * Enables / Disables the Vibrato effect, (Optional: provide your Own Data)
      * @param frequency
      * @param depth
      * @returns
@@ -398,7 +398,7 @@ export class FilterManager {
         return this.filters.vibrato;
     }
     /**
-     * Enabels / Disables the Tremolo effect, (Optional: provide your Own Data)
+     * Enables / Disables the Tremolo effect, (Optional: provide your Own Data)
      * @param frequency
      * @param depth
      * @returns
@@ -413,7 +413,7 @@ export class FilterManager {
         return this.filters.tremolo;
     }
     /**
-     * Enabels / Disables the LowPass effect, (Optional: provide your Own Data)
+     * Enables / Disables the LowPass effect, (Optional: provide your Own Data)
      * @param smoothing
      * @returns
      */
@@ -525,7 +525,7 @@ export class FilterManager {
     };
     lavalinkFilterPlugin = {
         /**
-         * Enabels / Disables the Echo effect, IMPORTANT! Only works with the correct Lavalink Plugin installed. (Optional: provide your Own Data)
+         * Enables / Disables the Echo effect, IMPORTANT! Only works with the correct Lavalink Plugin installed. (Optional: provide your Own Data)
          * @param delay
          * @param decay
          * @returns
@@ -550,7 +550,7 @@ export class FilterManager {
             return this.filters.lavalinkFilterPlugin.echo;
         },
         /**
-         * Enabels / Disables the Echo effect, IMPORTANT! Only works with the correct Lavalink Plugin installed. (Optional: provide your Own Data)
+         * Enables / Disables the Echo effect, IMPORTANT! Only works with the correct Lavalink Plugin installed. (Optional: provide your Own Data)
          * @param delays
          * @param gains
          * @returns
@@ -576,7 +576,7 @@ export class FilterManager {
         }
     };
     /**
-     * Enables / Disabels a Nightcore-like filter Effect. Disables/Overwrides both: custom and Vaporwave Filter
+     * Enables / Disables a Nightcore-like filter Effect. Disables/Overrides both: custom and Vaporwave Filter
      * @param speed
      * @param pitch
      * @param rate
@@ -595,7 +595,7 @@ export class FilterManager {
         return this.filters.nightcore;
     }
     /**
-     * Enables / Disabels a Vaporwave-like filter Effect. Disables/Overwrides both: custom and nightcore Filter
+     * Enables / Disables a Vaporwave-like filter Effect. Disables/Overrides both: custom and nightcore Filter
      * @param speed
      * @param pitch
      * @param rate
