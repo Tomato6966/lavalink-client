@@ -103,20 +103,20 @@ Check out the [Documentation](https://lc4.gitbook.io/lavalink-client) | or the [
 
 ## On **Lavalink-Manager**:
 > *Player related logs*
-- `playerCreate` :arrow~5: `(player) => {}`
-- `playerDestroy` :arrow~5: `(player, reason) => {}`
-- `playerDisconnect` :arrow~5: `(player, voiceChannelId) => {}`
-- `playerMove` :arrow~5: `(player, oldChannelId, newChannelId) => {}`
+- `playerCreate` ➡️ `(player) => {}`
+- `playerDestroy` ➡️ `(player, reason) => {}`
+- `playerDisconnect` ➡️ `(player, voiceChannelId) => {}`
+- `playerMove` ➡️ `(player, oldChannelId, newChannelId) => {}`
   - Updating the voice channel is handled by the client automatically
-- `playerSocketClosed` :arrow~5: `(player, payload) => {}`
+- `playerSocketClosed` ➡️ `(player, payload) => {}`
 
 > *Track / Manager related logs*
-- `trackStart` :arrow~5: `(player, track, payload) => {}`
-- `trackStuck` :arrow~5: `(player, track, payload) => {}`
-- `trackError` :arrow~5: `(player, track, payload) => {}`
-- `trackEnd` :arrow~5: `(player, track, payload) => {}`
-- `queueEnd` :arrow~5: `(player, track, payload) => {}`
-- `playerUpdate` :arrow~5: `(player) => {}`
+- `trackStart` ➡️ `(player, track, payload) => {}`
+- `trackStuck` ➡️ `(player, track, payload) => {}`
+- `trackError` ➡️ `(player, track, payload) => {}`
+- `trackEnd` ➡️ `(player, track, payload) => {}`
+- `queueEnd` ➡️ `(player, track, payload) => {}`
+- `playerUpdate` ➡️ `(player) => {}`
 
 ```js
 client.lavalink.on("create", (node, payload) => {
@@ -130,14 +130,14 @@ client.lavalink.on("error", (node, error, payload) => {
 ```
 
 ## On **Node-Manager**:
-- `raw` :arrow~5: `(node, payload) => {}`
-- `disconnect` :arrow~5: `(node, reason) => {}`
-- `connect` :arrow~5: `(node) => {}`
-- `reconnecting` :arrow~5: `(node) => {}`
-- `create` :arrow~5: `(node) => {}`
-- `destroy` :arrow~5: `(node) => {}`
-- `error` :arrow~5: `(node, error, payload) => {}`
-- `resumed` :arrow~5: `(node, payload, players) => {}`
+- `raw` ➡️ `(node, payload) => {}`
+- `disconnect` ➡️ `(node, reason) => {}`
+- `connect` ➡️ `(node) => {}`
+- `reconnecting` ➡️ `(node) => {}`
+- `create` ➡️ `(node) => {}`
+- `destroy` ➡️ `(node) => {}`
+- `error` ➡️ `(node, error, payload) => {}`
+- `resumed` ➡️ `(node, payload, players) => {}`
   - Resuming needs to be handled manually by you *(aka add the players to the manager)*
 - e.g.:
 ```js
