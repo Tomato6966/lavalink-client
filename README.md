@@ -102,6 +102,91 @@ Check out the [Documentation](https://lc4.gitbook.io/lavalink-client) | or the [
 
 - 😁 Much much more!
 
+*** 
+
+# All Events:
+
+## On **Lavalink-Manager**:
+> *Player related logs*
+- `playerCreate` ➡️ `(player) => {}`
+- `playerDestroy` ➡️ `(player, reason) => {}`
+- `playerDisconnect` ➡️ `(player, voiceChannelId) => {}`
+- `playerMove` ➡️ `(player, oldChannelId, newChannelId) => {}`
+  - Updating the voice channel is handled by the client automatically
+- `playerSocketClosed` ➡️ `(player, payload) => {}`
+
+> *Track / Manager related logs*
+- `trackStart` ➡️ `(player, track, payload) => {}`
+- `trackStuck` ➡️ `(player, track, payload) => {}`
+- `trackError` ➡️ `(player, track, payload) => {}`
+- `trackEnd` ➡️ `(player, track, payload) => {}`
+- `queueEnd` ➡️ `(player, track, payload) => {}`
+- `playerUpdate` ➡️ `(player) => {}`
+
+```js
+client.lavalink.on("create", (node, payload) => {
+  console.log(`The Lavalink Node #${node.id} connected`);
+});
+// for all node based errors:
+client.lavalink.on("error", (node, error, payload) => {
+  console.error(`The Lavalink Node #${node.id} errored: `, error);
+  console.error(`Error-Payload: `, payload)
+});
+```
+
+## On **Node-Manager**:
+- `raw` ➡️ `(node, payload) => {}`
+- `disconnect` ➡️ `(node, reason) => {}`
+- `connect` ➡️ `(node) => {}`
+- `reconnecting` ➡️ `(node) => {}`
+- `create` ➡️ `(node) => {}`
+- `destroy` ➡️ `(node) => {}`
+- `error` ➡️ `(node, error, payload) => {}`
+- `resumed` ➡️ `(node, payload, players) => {}`
+  - Resuming needs to be handled manually by you *(aka add the players to the manager)*
+- e.g.:
+```js
+client.lavalink.nodeManager.on("create", (node, payload) => {
+  console.log(`The Lavalink Node #${node.id} connected`);
+});
+// for all node based errors:
+client.lavalink.nodeManager.on("error", (node, error, payload) => {
+  console.error(`The Lavalink Node #${node.id} errored: `, error);
+  console.error(`Error-Payload: `, payload)
+});
+```
+
+## How to log queue logs?
+> When creating the manager, add the option: `queueOptions.queueChangesWatcher: new myCustomWatcher(botClient)`
+> E.g:
+```js
+import { QueueChangesWatcher, LavalinkManager } from "lavalink-client";
+
+class myCustomWatcher implements QueueChangesWatcher {
+    constructor(client) {
+        this.client = client;
+    }
+    shuffled(guildId, oldStoredQueue, newStoredQueue) {
+        console.log(`${this.client.guilds.cache.get(guildId)?.name || guildId}: Queue got shuffled`)    
+    }
+    tracksAdd(guildId, tracks, position, oldStoredQueue, newStoredQueue) {
+        console.log(`${this.client.guilds.cache.get(guildId)?.name || guildId}: ${tracks.length} Tracks got added into the Queue at position #${position}`);    
+    }
+    tracksRemoved(guildId, tracks, position, oldStoredQueue, newStoredQueue) {
+        console.log(`${this.client.guilds.cache.get(guildId)?.name || guildId}: ${tracks.length} Tracks got removed from the Queue at position #${position}`);
+    }
+}
+
+client.lavalink = new LavalinkManager({
+  // ... other options
+  queueOptions: {
+    queueChangesWatcher: new myCustomWatcher(client)
+  }
+})
+```
+
+***
+
 # UpdateLog
 
 ## **Version 1.2.0**
