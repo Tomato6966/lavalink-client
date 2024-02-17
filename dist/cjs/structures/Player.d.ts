@@ -172,7 +172,7 @@ export declare class Player {
      * @param query Query for your data
      * @param requestUser
      */
-    search(query: SearchQuery, requestUser: unknown): Promise<import("./Utils").UnresolvedSearchResult | import("./Utils").SearchResult>;
+    search(query: SearchQuery, requestUser: unknown): Promise<import("./Utils").SearchResult | import("./Utils").UnresolvedSearchResult>;
     /**
      * Pause the player
      */

@@ -59,6 +59,11 @@ yarn add tomato6966/lavalink-client
 
 Check out the [Documentation](https://lc4.gitbook.io/lavalink-client) | or the [TSDocumentation](https://tomato6966.github.io/lavalink-client/) for **Examples**, and **__detailled__ Docs**, and to figure out **how to get started**. *note: it's not fully done yet (see the docs)*
 
+# Used in:
+
+- [Betty](https://betty.cx/)
+- [Mivator](https://discord.gg/5dUb7M2qCj)
+
 # Features
 
 - 💯 Lavalink v4 Supported only (with Lavalink Plugins)
