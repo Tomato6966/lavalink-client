@@ -127,6 +127,7 @@ class Player {
             clearTimeout(this.get("internal_queueempty"));
             this.set("internal_queueempty", undefined);
         }
+        let replaced = false;
         // if clientTrack provided, play it
         if (options?.clientTrack && (this.LavalinkManager.utils.isTrack(options?.clientTrack) || this.LavalinkManager.utils.isUnresolvedTrack(options.clientTrack))) {
             if (this.LavalinkManager.utils.isUnresolvedTrack(options.clientTrack))
@@ -134,16 +135,18 @@ class Player {
             if (typeof options.track.userData === "object")
                 options.clientTrack.userData = { ...(options?.clientTrack.userData || {}), ...(options.track.userData || {}) };
             await this.queue.add(options?.clientTrack, 0);
-            await (0, Utils_1.queueTrackEnd)(this);
+            return await this.skip();
         }
         else if (options?.track?.encoded) {
             // handle play encoded options manually // TODO let it resolve by lavalink!
             const track = await this.node.decode.singleTrack(options.track?.encoded, options.track?.requester || this.queue?.current?.requester || this.queue.previous?.[0]?.requester || this.queue.tracks?.[0]?.requester || this.LavalinkManager.options.client);
             if (typeof options.track.userData === "object")
                 track.userData = { ...(track.userData || {}), ...(options.track.userData || {}) };
-            if (track)
+            if (track) {
+                replaced = true;
                 this.queue.add(track, 0);
-            await (0, Utils_1.queueTrackEnd)(this);
+                await (0, Utils_1.queueTrackEnd)(this);
+            }
         }
         else if (options?.track?.identifier) {
             // handle play identifier options manually // TODO let it resolve by lavalink!
@@ -152,9 +155,11 @@ class Player {
             }, options?.track?.identifier || this.queue?.current?.requester || this.queue.previous?.[0]?.requester || this.queue.tracks?.[0]?.requester || this.LavalinkManager.options.client);
             if (typeof options.track.userData === "object")
                 res.tracks[0].userData = { ...(res.tracks[0].userData || {}), ...(options.track.userData || {}) };
-            if (res.tracks[0])
+            if (res.tracks[0]) {
+                replaced = true;
                 this.queue.add(res.tracks[0], 0);
-            await (0, Utils_1.queueTrackEnd)(this);
+                await (0, Utils_1.queueTrackEnd)(this);
+            }
         }
         if (!this.queue.current && this.queue.tracks.length)
             await (0, Utils_1.queueTrackEnd)(this);
@@ -211,7 +216,7 @@ class Player {
         const now = performance.now();
         await this.node.updatePlayer({
             guildId: this.guildId,
-            noReplace: options?.noReplace ?? false,
+            noReplace: replaced ? replaced : (options?.noReplace ?? false),
             playerOptions: finalOptions,
         });
         this.ping.lavalink = Math.round((performance.now() - now) / 10) / 100;
@@ -467,6 +472,7 @@ class Player {
                 paused: data.paused,
                 filters: { ...data.filters, equalizer: data.equalizer },
                 voice: this.voice,
+                track: this.queue.current ?? undefined
                 // track: this.queue.current,
             },
         });

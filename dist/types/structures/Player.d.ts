@@ -84,7 +84,7 @@ export interface LavalinkPlayOptions extends BasePlayOptions {
 export interface PlayOptions extends LavalinkPlayOptions {
     /** Whether to not replace the track if a play payload is sent. */
     noReplace?: boolean;
-    /** Which Track to play | don't provide, if it should pick from the Queue */
+    /** Adds track on queue and skips to it */
     clientTrack?: Track | UnresolvedTrack;
 }
 export interface Player {
@@ -195,7 +195,7 @@ export declare class Player {
      * Skip the current song, or a specific amount of songs
      * @param amount provide the index of the next track to skip to
      */
-    skip(skipTo?: number, throwError?: boolean): Promise<any>;
+    skip(skipTo?: number, throwError?: boolean): any;
     /**
      * Clears the queue and stops playing. Does not destroy the Player and not leave the channel
      * @returns
