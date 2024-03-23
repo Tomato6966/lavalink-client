@@ -61,6 +61,8 @@ export interface PluginInfo {
     type?: "album" | "playlist" | "artist" | "recommendations" | string;
     /** The Identifier provided by a plugin */
     albumName?: string;
+    /** The url of the album */
+    albumUrl?: string;
     /** The url of the album art */
     albumArtUrl?: string;
     /** The url of the artist */

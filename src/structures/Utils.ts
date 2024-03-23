@@ -512,8 +512,13 @@ export type PlayerEvents =
 export type Severity = "COMMON" | "SUSPICIOUS" | "FAULT";
 
 export interface Exception {
+  /** Severity of the error */
   severity: Severity;
+  /** Nodejs Error */
+  error?: Error;
+  /** Message by lavalink */
   message: string;
+  /** Cause by lavalink */
   cause: string;
 }
 

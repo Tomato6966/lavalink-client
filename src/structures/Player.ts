@@ -268,7 +268,7 @@ export class Player {
             // handle play identifier options manually // TODO let it resolve by lavalink!
             const res = await this.search({
                 query: options?.track?.identifier
-            }, options?.track?.identifier || this.queue?.current?.requester || this.queue.previous?.[0]?.requester || this.queue.tracks?.[0]?.requester || this.LavalinkManager.options.client);
+            }, options?.track?.requester || this.queue?.current?.requester || this.queue.previous?.[0]?.requester || this.queue.tracks?.[0]?.requester || this.LavalinkManager.options.client);
             
             if(typeof options.track.userData === "object") res.tracks[0].userData = { ...(res.tracks[0].userData||{}), ...(options.track.userData||{}) };
             if(res.tracks[0]) {

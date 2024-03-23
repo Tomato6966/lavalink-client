@@ -704,7 +704,7 @@ export class LavalinkNode {
                 delete payload.op;
                 this.stats = ({ ...payload } as unknown) as NodeStats;
                 break;
-            case "playerUpdate":
+            case "playerUpdate": {
                 const player = this.NodeManager.LavalinkManager.getPlayer(payload.guildId);
                 if (!player) return;
 
@@ -747,7 +747,7 @@ export class LavalinkNode {
                 }
 
                 this.NodeManager.LavalinkManager.emit("playerUpdate", oldPlayer, player);
-                break;
+            } break;
             case "event":
                 this.handleEvent(payload);
                 break;
