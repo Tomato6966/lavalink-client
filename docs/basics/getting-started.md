@@ -73,7 +73,8 @@ yarn add tomato6966/lavalink-client
     sendToShard: (guildId, payload) =>
         client.guilds.cache.get(guildId)?.shard?.send(payload),
     client: {
-        id: process.env.CLIENT_ID, username: "TESTBOT",
+        id: process.env.CLIENT_ID,
+        username: "TESTBOT",
     },
     // everything down below is optional
     autoSkip: true,
@@ -125,7 +126,8 @@ client.lavalink = new LavalinkManager({
     sendToShard: (guildId, payload) =>
         client.guilds.cache.get(guildId)?.shard?.send(payload),
     client: {
-        id: process.env.CLIENT_ID, username: "TESTBOT",
+        id: process.env.CLIENT_ID,
+        username: "TESTBOT",
     },
     // everything down below is optional
     autoSkip: true,
@@ -172,7 +174,7 @@ client.lavalink = new LavalinkManager({
 client.on("raw", d => client.lavalink.sendRawData(d));
 client.on("ready", async () => {
     console.log("Discord Bot is ready to be Used!");
-    await client.lavalink.init({ ...client.user! }); 
+    await client.lavalink.init({ ...client.user }); 
 });
 ```
 {% endcode %}
@@ -201,14 +203,15 @@ await player.connect();
 
 // search a query (query-search, url search, identifier search, etc.)
 const res = await player.search({
-    query: `Elton John`, // source: `soundcloud`,
+    query: `Elton John`,
+    // source: `soundcloud`,
 }, interaction.user); 
 
 // add the first result
 await player.queue.add(res.tracks[0]); 
 
 // only play if the player isn't playing something, 
-if(!player.playing) await player.play(); // you can provide specific track, or let the manager choose the track from the queue!
+if(!player.playing) await player.play(); // you can provide a specific track, or let the manager choose the track from the queue!
 ```
 {% endcode %}
 {% endtab %}
@@ -232,14 +235,15 @@ await player.connect();
 
 // search a query (query-search, url search, identifier search, etc.)
 const res = await player.search({
-    query: `Elton John`, // source: `soundcloud`,
+    query: `Elton John`,
+    // source: `soundcloud`,
 }, interaction.user); 
 
 // add the first result
 await player.queue.add(res.tracks[0]); 
 
 // only play if the player isn't playing something, 
-if(!player.playing) await player.play(); // you can provide specific track, or let the manager choose the track from the queue!
+if(!player.playing) await player.play(); // you can provide a specific track, or let the manager choose the track from the queue!
 ```
 {% endcode %}
 {% endtab %}
@@ -247,6 +251,6 @@ if(!player.playing) await player.play(); // you can provide specific track, or l
 
 ## How to add more features?
 
-If you wanna display things like "started playing a track", "queue ended", check out all possible Events!
+If you want to display things like "started playing a track", "queue ended", check out all possible events!
 
 Important! Before creating a player, make sure that at least 1 node is connected to the lavalink node

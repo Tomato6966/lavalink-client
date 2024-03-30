@@ -223,7 +223,7 @@ client.lavalink.on("queueEnd", (player, track, payload) => { });
 
 ### <mark style="color:red;">playerCreate</mark>
 
-> Emitted whenver a Player get's created
+> Emitted whenver a Player gets created
 
 <table><thead><tr><th width="145.33333333333331">Parameter</th><th width="187">Type</th><th>Description</th></tr></thead><tbody><tr><td>player</td><td><a href="../player/">Player</a></td><td>The created Player</td></tr></tbody></table>
 
@@ -233,7 +233,7 @@ client.lavalink.on("playerCreate", (player) => { });
 
 ### <mark style="color:red;">playerMove</mark>
 
-> Emitted whenever a Player get's moved between Voice Channels&#x20;
+> Emitted whenever a Player gets moved between Voice Channels&#x20;
 
 <table><thead><tr><th width="201.33333333333331">Parameter</th><th width="187">Type</th><th>Description</th></tr></thead><tbody><tr><td>player</td><td><a href="../player/">Player</a></td><td>The Player for this Event</td></tr><tr><td>oldVoiceChannelId</td><td><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></td><td>old Voice Channel Id</td></tr><tr><td>newVoiceChannelId</td><td><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></td><td>new Voice Channel Id</td></tr></tbody></table>
 
@@ -273,7 +273,7 @@ client.lavalink.on("playerDestroy", (player, destroyReason) => { });
 
 ### <mark style="color:red;">playerUpdate</mark>
 
-> Emitted whenever a Player get's update from Lavalink's playerUpdate Event&#x20;
+> Emitted whenever a Player gets an update from Lavalink's playerUpdate Event&#x20;
 
 <table><thead><tr><th width="160">Parameter</th><th width="186.33333333333331">Type</th><th>Description</th></tr></thead><tbody><tr><td>oldPlayerJson</td><td><a href="../player/playertypes/playerjson.md">PlayerJson</a></td><td>Player Data before it was udpated</td></tr><tr><td>newPlayer</td><td><a href="../player/">Player</a></td><td>Afterwards the Player got updated</td></tr></tbody></table>
 
@@ -322,7 +322,7 @@ const client = new Client({
         defaultSearchPlatform: "ytmsearch",
         volumeDecrementer: 0.75, // on client 100% == on lavalink 75%
         onDisconnect: {
-            autoReconnect: true, // automatically attempts a reconnect, if the bot disconnects from the voice channel, if it fails, it get's destroyed
+            autoReconnect: true, // automatically attempts a reconnect, if the bot disconnects from the voice channel, if it fails, it gets destroyed
             destroyPlayer: false // overrides autoReconnect and directly destroys the player if the bot disconnects from the vc
         },
         onEmptyQueue: {
@@ -405,7 +405,7 @@ client.lavalink = new LavalinkManager({
         volumeDecrementer: 0.75, // on client 100% == on lavalink 75%
         requesterTransformer: requesterTransformer,
         onDisconnect: {
-            autoReconnect: true, // automatically attempts a reconnect, if the bot disconnects from the voice channel, if it fails, it get's destroyed
+            autoReconnect: true, // automatically attempts a reconnect, if the bot disconnects from the voice channel, if it fails, it gets destroyed
             destroyPlayer: false // overrides autoReconnect and directly destroys the player if the bot disconnects from the vc
         },
         onEmptyQueue: {
@@ -474,7 +474,7 @@ export class myCustomWatcher implements QueueChangesWatcher {
 }
 ```
 
-Custom Autoplay function, which get's executed, before the "queueEnd" Event fires, and if there is a new track added in the queue, then it plays it. else "queueEnd" will fire
+Custom Autoplay function, which gets executed, before the "queueEnd" Event fires, and if there is a new track added in the queue, then it plays it. else "queueEnd" will fire
 
 ```typescript
 export const autoPlayFunction = async (player, lastPlayedTrack) => {
