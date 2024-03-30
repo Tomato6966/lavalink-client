@@ -172,7 +172,7 @@ client.lavalink = new LavalinkManager({
 client.on("raw", d => client.lavalink.sendRawData(d));
 client.on("ready", async () => {
     console.log("Discord Bot is ready to be Used!");
-    await client.lavalink.init({ ...client.user! }); 
+    await client.lavalink.init({ ...client.user }); 
 });
 ```
 {% endcode %}
@@ -232,7 +232,8 @@ await player.connect();
 
 // search a query (query-search, url search, identifier search, etc.)
 const res = await player.search({
-    query: `Elton John`, // source: `soundcloud`,
+    query: `Elton John`,
+    // source: `soundcloud`,
 }, interaction.user); 
 
 // add the first result
