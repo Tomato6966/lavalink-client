@@ -10,7 +10,7 @@
 const manager = new LavalinkManager({ nodes: [...], sendToShard: (guildId, payload) => client.guilds.cache.get(guildId)?.shard?.send(payload), });
 ```
 
-TIPP: I'd recommend to assing the manager to the client, like: `client.manager = new Lava...`
+TIP: I'd recommend adding the manager to the client, like this: `client.manager = new LavalinkManager...`
 
 2. Create a player:&#x20;
 
