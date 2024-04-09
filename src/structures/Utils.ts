@@ -100,13 +100,13 @@ export type SourcesRegex = "YoutubeRegex" |
   "vimeo";
 
 export interface PlaylistInfo {
-  /** The playlist title. */
-  title: string;
-  /** The playlist name (if provided instead of title) */
+  /** The playlist name */
   name: string; 
-  /** The Playlist Author */
+  /** The playlist title (same as name) */
+  title: string;
+  /** The playlist Author */
   author?: string;
-  /** The Playlist Thumbnail */
+  /** The playlist Thumbnail */
   thumbnail?: string;
   /** A Uri to the playlist */
   uri?: string;
