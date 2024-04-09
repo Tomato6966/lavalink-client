@@ -139,12 +139,13 @@ export class LavalinkNode {
             exception: res.loadType === "error" ? res.data : null,
             pluginInfo: res.pluginInfo || {},
             playlist: res.loadType === "playlist" ? {
+                name: res.data.info?.name || res.data.pluginInfo?.name || null,
                 title: res.data.info?.name || res.data.pluginInfo?.name || null,
                 author: res.data.info?.author || res.data.pluginInfo?.author || null,
                 thumbnail: (res.data.info?.artworkUrl) || (res.data.pluginInfo?.artworkUrl) || ((typeof res.data?.info?.selectedTrack !== "number" || res.data?.info?.selectedTrack === -1) ? null : resTracks[res.data?.info?.selectedTrack] ? (resTracks[res.data?.info?.selectedTrack]?.info?.artworkUrl || resTracks[res.data?.info?.selectedTrack]?.info?.pluginInfo?.artworkUrl) : null) || null,
                 uri: res.data.info?.url || res.data.info?.uri || res.data.info?.link || res.data.pluginInfo?.url || res.data.pluginInfo?.uri || res.data.pluginInfo?.link || null,
                 selectedTrack: typeof res.data?.info?.selectedTrack !== "number" || res.data?.info?.selectedTrack === -1 ? null : resTracks[res.data?.info?.selectedTrack] ? this.NodeManager.LavalinkManager.utils.buildTrack(resTracks[res.data?.info?.selectedTrack], requestUser) : null,
-                duration: resTracks.length ? resTracks.reduce((acc, cur) => acc + (cur?.info?.duration || 0), 0) : 0,
+                duration: resTracks.length ? resTracks.reduce((acc, cur) => acc + (cur?.info?.length || 0), 0) : 0,
             } : null,
             tracks: (resTracks.length ? resTracks.map(t => this.NodeManager.LavalinkManager.utils.buildTrack(t, requestUser)) : [])
         };
@@ -537,48 +538,50 @@ export class LavalinkNode {
                 this.stats = { ...payload };
                 break;
             case "playerUpdate":
-                const player = this.NodeManager.LavalinkManager.getPlayer(payload.guildId);
-                if (!player)
-                    return;
-                const oldPlayer = player?.toJSON();
-                if (player.get("internal_updateInterval"))
-                    clearInterval(player.get("internal_updateInterval"));
-                // override the position
-                player.position = payload.state.position || 0;
-                player.lastPosition = payload.state.position || 0;
-                player.connected = payload.state.connected;
-                player.ping.ws = payload.state.ping >= 0 ? payload.state.ping : player.ping.ws <= 0 && player.connected ? null : player.ping.ws || 0;
-                if (!player.createdTimeStamp && payload.state.time)
-                    player.createdTimeStamp = payload.state.time;
-                if (typeof this.NodeManager.LavalinkManager.options.playerOptions.clientBasedPositionUpdateInterval === "number" && this.NodeManager.LavalinkManager.options.playerOptions.clientBasedPositionUpdateInterval >= 10) {
-                    player.set("internal_updateInterval", setInterval(() => {
-                        player.position += this.NodeManager.LavalinkManager.options.playerOptions.clientBasedPositionUpdateInterval || 250;
-                        if (player.filterManager.filterUpdatedState >= 1) {
-                            player.filterManager.filterUpdatedState++;
-                            const maxMins = 8;
-                            const currentDuration = player.queue.current?.info?.duration || 0;
-                            if (currentDuration <= maxMins * 6e4 || isAbsolute(player.queue.current?.info?.uri)) {
-                                if (player.filterManager.filterUpdatedState >= ((this.NodeManager.LavalinkManager.options.playerOptions.clientBasedPositionUpdateInterval || 250) > 400 ? 2 : 3)) {
+                {
+                    const player = this.NodeManager.LavalinkManager.getPlayer(payload.guildId);
+                    if (!player)
+                        return;
+                    const oldPlayer = player?.toJSON();
+                    if (player.get("internal_updateInterval"))
+                        clearInterval(player.get("internal_updateInterval"));
+                    // override the position
+                    player.position = payload.state.position || 0;
+                    player.lastPosition = payload.state.position || 0;
+                    player.connected = payload.state.connected;
+                    player.ping.ws = payload.state.ping >= 0 ? payload.state.ping : player.ping.ws <= 0 && player.connected ? null : player.ping.ws || 0;
+                    if (!player.createdTimeStamp && payload.state.time)
+                        player.createdTimeStamp = payload.state.time;
+                    if (typeof this.NodeManager.LavalinkManager.options.playerOptions.clientBasedPositionUpdateInterval === "number" && this.NodeManager.LavalinkManager.options.playerOptions.clientBasedPositionUpdateInterval >= 10) {
+                        player.set("internal_updateInterval", setInterval(() => {
+                            player.position += this.NodeManager.LavalinkManager.options.playerOptions.clientBasedPositionUpdateInterval || 250;
+                            if (player.filterManager.filterUpdatedState >= 1) {
+                                player.filterManager.filterUpdatedState++;
+                                const maxMins = 8;
+                                const currentDuration = player.queue.current?.info?.duration || 0;
+                                if (currentDuration <= maxMins * 6e4 || isAbsolute(player.queue.current?.info?.uri)) {
+                                    if (player.filterManager.filterUpdatedState >= ((this.NodeManager.LavalinkManager.options.playerOptions.clientBasedPositionUpdateInterval || 250) > 400 ? 2 : 3)) {
+                                        player.filterManager.filterUpdatedState = 0;
+                                        player.seek(player.position);
+                                    }
+                                }
+                                else {
                                     player.filterManager.filterUpdatedState = 0;
-                                    player.seek(player.position);
                                 }
                             }
-                            else {
-                                player.filterManager.filterUpdatedState = 0;
-                            }
-                        }
-                    }, this.NodeManager.LavalinkManager.options.playerOptions.clientBasedPositionUpdateInterval || 250));
-                }
-                else {
-                    if (player.filterManager.filterUpdatedState >= 1) { // if no interval but instafix available, findable via the "filterUpdatedState" property
-                        const maxMins = 8;
-                        const currentDuration = player.queue.current?.info?.duration || 0;
-                        if (currentDuration <= maxMins * 6e4 || isAbsolute(player.queue.current?.info?.uri))
-                            player.seek(player.position);
-                        player.filterManager.filterUpdatedState = 0;
+                        }, this.NodeManager.LavalinkManager.options.playerOptions.clientBasedPositionUpdateInterval || 250));
                     }
+                    else {
+                        if (player.filterManager.filterUpdatedState >= 1) { // if no interval but instafix available, findable via the "filterUpdatedState" property
+                            const maxMins = 8;
+                            const currentDuration = player.queue.current?.info?.duration || 0;
+                            if (currentDuration <= maxMins * 6e4 || isAbsolute(player.queue.current?.info?.uri))
+                                player.seek(player.position);
+                            player.filterManager.filterUpdatedState = 0;
+                        }
+                    }
+                    this.NodeManager.LavalinkManager.emit("playerUpdate", oldPlayer, player);
                 }
-                this.NodeManager.LavalinkManager.emit("playerUpdate", oldPlayer, player);
                 break;
             case "event":
                 this.handleEvent(payload);

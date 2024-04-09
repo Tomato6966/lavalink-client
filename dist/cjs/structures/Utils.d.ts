@@ -24,13 +24,13 @@ export type ClientSearchPlatform = ClientCustomSearchPlatformUtils | // for file
 export type SearchPlatform = LavalinkSearchPlatform | ClientSearchPlatform;
 export type SourcesRegex = "YoutubeRegex" | "YoutubeMusicRegex" | "SoundCloudRegex" | "SoundCloudMobileRegex" | "DeezerTrackRegex" | "DeezerArtistRegex" | "DeezerEpisodeRegex" | "DeezerMixesRegex" | "DeezerPageLinkRegex" | "DeezerPlaylistRegex" | "DeezerAlbumRegex" | "AllDeezerRegex" | "AllDeezerRegexWithoutPageLink" | "SpotifySongRegex" | "SpotifyPlaylistRegex" | "SpotifyArtistRegex" | "SpotifyEpisodeRegex" | "SpotifyShowRegex" | "SpotifyAlbumRegex" | "AllSpotifyRegex" | "mp3Url" | "m3uUrl" | "m3u8Url" | "mp4Url" | "m4aUrl" | "wavUrl" | "aacpUrl" | "tiktok" | "mixcloud" | "musicYandex" | "radiohost" | "bandcamp" | "appleMusic" | "TwitchTv" | "vimeo";
 export interface PlaylistInfo {
-    /** The playlist title. */
-    title: string;
-    /** The playlist name (if provided instead of title) */
+    /** The playlist name */
     name: string;
-    /** The Playlist Author */
+    /** The playlist title (same as name) */
+    title: string;
+    /** The playlist Author */
     author?: string;
-    /** The Playlist Thumbnail */
+    /** The playlist Thumbnail */
     thumbnail?: string;
     /** A Uri to the playlist */
     uri?: string;
@@ -168,8 +168,13 @@ export declare class MiniMap<K, V> extends Map<K, V> {
 export type PlayerEvents = TrackStartEvent | TrackEndEvent | TrackStuckEvent | TrackExceptionEvent | WebSocketClosedEvent | SponsorBlockSegmentEvents;
 export type Severity = "COMMON" | "SUSPICIOUS" | "FAULT";
 export interface Exception {
+    /** Severity of the error */
     severity: Severity;
+    /** Nodejs Error */
+    error?: Error;
+    /** Message by lavalink */
     message: string;
+    /** Cause by lavalink */
     cause: string;
 }
 export interface PlayerEvent {
