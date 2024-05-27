@@ -553,6 +553,8 @@ export class LavalinkManager extends EventEmitter {
       }
 
       if ("token" in update) {
+        player.voice.token = update.token;
+        player.voice.endpoint = update.endpoint;
         if (!player.node?.sessionId) throw new Error("Lavalink Node is either not ready or not up to date");
         await player.node.updatePlayer({
           guildId: player.guildId,
