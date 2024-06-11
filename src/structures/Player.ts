@@ -299,7 +299,7 @@ export class Player {
             }
         }
 
-        if(!this.queue.current) throw new Error(`There is no Track in the Queue, nor provided in the PlayOptions`);
+        if(!this.queue.current) throw new Error(`There is no Track in the Queue, or provided in the PlayOptions`);
         
         if (typeof options?.volume === "number" && !isNaN(options?.volume)) {
             this.volume = Math.max(Math.min(options?.volume, 500), 0);
