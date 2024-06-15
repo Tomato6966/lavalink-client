@@ -3,3 +3,4 @@ node_modules
 testBot/.env
 testBot/node_modules
 testBot/src
+.vscode
