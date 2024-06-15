@@ -389,7 +389,7 @@ export class Player {
     async search(query: SearchQuery, requestUser: unknown) {
         const Query = this.LavalinkManager.utils.transformQuery(query);
         
-        if(["bcsearch", "bandcamp"].includes(Query.source)) return await bandCampSearch(this, Query.query, requestUser);
+        if(["bcsearch", "bandcamp"].includes(Query.source) && !this.node.info.sourceManagers.includes("bandcamp")) return await bandCampSearch(this, Query.query, requestUser);
 
         return this.node.search(Query, requestUser);
     }
