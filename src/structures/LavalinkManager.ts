@@ -77,6 +77,8 @@ export interface ManagerOptions {
   advancedOptions?: {
     /** optional */
     debugOptions?: {
+      /** For logging custom searches */
+      logCustomSearches?: boolean;
       /** logs for debugging the "no-Audio" playing error */
       noAudio?: boolean;
       /** For Logging the Destroy function */
@@ -105,12 +107,12 @@ export interface LavalinkManagerEvents {
    * Emitted when a Track got stuck while playing.
    * @event Manager#trackStuck
    */
-  "trackStuck": (player: Player, track: Track, payload: TrackStuckEvent) => void;
+  "trackStuck": (player: Player, track: Track | null, payload: TrackStuckEvent) => void;
   /**
    * Emitted when a Track errored.
    * @event Manager#trackError
    */
-  "trackError": (player: Player, track: Track | UnresolvedTrack, payload: TrackExceptionEvent) => void;
+  "trackError": (player: Player, track: Track | UnresolvedTrack | null, payload: TrackExceptionEvent) => void;
   /**
    * Emitted when the Playing finished and no more tracks in the queue.
    * @event Manager#queueEnd
@@ -243,6 +245,7 @@ export class LavalinkManager extends EventEmitter {
       },
       advancedOptions: {
         debugOptions: {
+          logCustomSearches: options?.advancedOptions?.debugOptions?.logCustomSearches ?? false,
           noAudio: options?.advancedOptions?.debugOptions?.noAudio ?? false,
           playerDestroy: {
             dontThrowError: options?.advancedOptions?.debugOptions?.playerDestroy?.dontThrowError ?? false,
