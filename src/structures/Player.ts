@@ -246,7 +246,7 @@ export class Player {
         if(options?.clientTrack && (this.LavalinkManager.utils.isTrack(options?.clientTrack) || this.LavalinkManager.utils.isUnresolvedTrack(options.clientTrack))) {
             if(this.LavalinkManager.utils.isUnresolvedTrack(options.clientTrack)) await (options.clientTrack as UnresolvedTrack).resolve(this);
            
-            if(typeof options.track.userData === "object") options.clientTrack.userData = { ...(options?.clientTrack.userData||{}), ...(options.track.userData||{}) };
+            if((typeof options.track?.userData === "object" || typeof options.clientTrack?.userData === "object") && options.clientTrack) options.clientTrack.userData = { ...(options?.clientTrack.userData||{}), ...(options.track?.userData||{}) };
             
             await this.queue.add(options?.clientTrack, 0);
            
@@ -256,9 +256,8 @@ export class Player {
             // handle play encoded options manually // TODO let it resolve by lavalink!
             const track = await this.node.decode.singleTrack(options.track?.encoded, options.track?.requester || this.queue?.current?.requester || this.queue.previous?.[0]?.requester || this.queue.tracks?.[0]?.requester || this.LavalinkManager.options.client);
            
-            if(typeof options.track.userData === "object") track.userData = { ...(track.userData||{}), ...(options.track.userData||{}) };
-            
             if(track) {
+                if(typeof options.track?.userData === "object") track.userData = { ...(track.userData||{}), ...(options.track.userData||{}) };
                 replaced = true;
                 this.queue.add(track, 0);
                 await queueTrackEnd(this);
@@ -270,8 +269,8 @@ export class Player {
                 query: options?.track?.identifier
             }, options?.track?.requester || this.queue?.current?.requester || this.queue.previous?.[0]?.requester || this.queue.tracks?.[0]?.requester || this.LavalinkManager.options.client);
             
-            if(typeof options.track.userData === "object") res.tracks[0].userData = { ...(res.tracks[0].userData||{}), ...(options.track.userData||{}) };
             if(res.tracks[0]) {
+                if(typeof options.track?.userData === "object") res.tracks[0].userData = { ...(res.tracks[0].userData||{}), ...(options.track.userData||{}) };
                 replaced = true;
                 this.queue.add(res.tracks[0], 0);
                 await queueTrackEnd(this);
@@ -285,7 +284,7 @@ export class Player {
                 // resolve the unresolved track
                 await (this.queue.current as unknown as UnresolvedTrack).resolve(this);
                 
-                if(typeof options.track.userData === "object") this.queue.current.userData = { ...(this.queue.current.userData||{}), ...(options.track.userData||{}) };
+                if(typeof options.track?.userData === "object" && this.queue.current) this.queue.current.userData = { ...(this.queue.current?.userData||{}), ...(options.track?.userData||{}) };
             } catch (error) {
                 this.LavalinkManager.emit("trackError", this, this.queue.current, error);
 
