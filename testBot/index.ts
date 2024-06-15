@@ -19,7 +19,7 @@ const client = new Client({
     ]
 }) as BotClient;
 
-if(envConfig.redis.url && 1 < 0) {
+if(envConfig.redis.url && 1 < 0) { // little invalid if statement so the redis doesn't happen for testing purposes
     client.redis = createClient({ url: envConfig.redis.url, password: envConfig.redis.password });
     client.redis.connect();
     client.redis.on("error", (err) => console.log('Redis Client Error', err));
@@ -39,7 +39,6 @@ client.defaultVolume = 100;
 const LavalinkNodesOfEnv = process.env.LAVALINKNODES?.split(" ").filter(v => v.length).map(url => parseLavalinkConnUrl(url));
 console.log(LavalinkNodesOfEnv); // you can then provide the result of here in LavalinkManagerOptions#nodes, or transform the result for further data.
 
-
 client.lavalink = new LavalinkManager({
     nodes: [
         {
@@ -48,7 +47,7 @@ client.lavalink = new LavalinkManager({
             port: 2333,
             id: "testnode",
             // sessionId: "lsvunq8h8bxx0m9w", // add the sessionId in order to resume the session for the node, and then to recover the players listen to nodeManager#resumed.
-            requestTimeout: 10000,
+            requestSignalTimeoutMS: 3000,
         }
     ],
     sendToShard: (guildId, payload) => client.guilds.cache.get(guildId)?.shard?.send(payload),

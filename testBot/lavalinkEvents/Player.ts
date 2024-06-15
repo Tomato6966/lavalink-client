@@ -65,9 +65,9 @@ export function PlayerEvents(client:BotClient) {
     }).on("trackEnd", (player, track, payload) => {
         console.log(player.guildId, " :: Finished Playing :: ", track.info.title)
     }).on("trackError", (player, track, payload) => {
-        console.log(player.guildId, " :: Errored while Playing :: ", track.info.title, " :: ERROR DATA :: ", payload)
+        console.log(player.guildId, " :: Errored while Playing :: ", track?.info?.title, " :: ERROR DATA :: ", payload)
     }).on("trackStuck", (player, track, payload) => {
-        console.log(player.guildId, " :: Got Stuck while Playing :: ", track.info.title, " :: STUCKED DATA :: ", payload)
+        console.log(player.guildId, " :: Got Stuck while Playing :: ", track?.info?.title, " :: STUCKED DATA :: ", payload)
         
     }).on("queueEnd", (player, track, payload) => {
         console.log(player.guildId, " :: No more tracks in the queue, after playing :: ", track?.info?.title || track)

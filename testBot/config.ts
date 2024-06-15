@@ -9,7 +9,7 @@ export const envConfig = {
         url: process.env.REDIS_URL as string,
         password: process.env.REDIS_PASSWORD as string
     },
-    devGuild: "1015301715886624778",
-    voiceChannelId: "1070626568260562958", 
-    textChannelId: "1070645885236695090"
+    devGuild: "1180208273958375524",
+    voiceChannelId: "1180208281407463448", 
+    textChannelId: "1192771980513005598"
 }

@@ -1,7 +1,10 @@
-import { CommandInteractionOptionResolver, GuildMember, SlashCommandBuilder, VoiceChannel } from "discord.js";
-import {  Command } from "../types/Client";
+import {
+	CommandInteractionOptionResolver, GuildMember, SlashCommandBuilder, VoiceChannel
+} from "discord.js";
+
+import { SearchPlatform, SearchResult, Track } from "../../src";
+import { Command } from "../types/Client";
 import { formatMS_HHMMSS } from "../Utils/Time";
-import { SearchPlatform, SearchResult, Track, UnresolvedTrack } from "../../src";
 
 const autocompleteMap = new Map();
 
@@ -9,15 +12,17 @@ export default {
     data: new SlashCommandBuilder()
         .setName("play")
         .setDescription("Play Music")
-        .addStringOption(o => o.setName("query").setDescription("What to play?").setAutocomplete(true).setRequired(true))
-        .addStringOption(o => o.setName("source").setDescription("From which Source you want to play?").setRequired(false).setChoices(
-            { name: "Youtube", value: "ytsearch" },
-            { name: "Youtube Music", value: "ytmsearch" },
+        .addStringOption(o => o.setName("source").setDescription("From which Source you want to play?").setRequired(true).setChoices(
+            { name: "Youtube", value: "ytsearch" }, // Requires plugin on lavalink: https://github.com/lavalink-devs/youtube-source
+            { name: "Youtube Music", value: "ytmsearch" }, // Requires plugin on lavalink: https://github.com/lavalink-devs/youtube-source
             { name: "Soundcloud", value: "scsearch" },
-            { name: "Deezer", value: "dzsearch" },
-            { name: "Spotify", value: "spsearch" },
-            { name: "Apple Music", value: "amsearch" },
-        )),
+            { name: "Deezer", value: "dzsearch" }, // Requires plugin on lavalink: https://github.com/topi314/LavaSrc
+            { name: "Spotify", value: "spsearch" }, // Requires plugin on lavalink: https://github.com/topi314/LavaSrc
+            { name: "Apple Music", value: "amsearch" }, // Requires plugin on lavalink: https://github.com/topi314/LavaSrc
+            { name: "Bandcamp", value: "bcsearch" },
+            { name: "Cornhub", value: "phsearch" },
+        ))
+        .addStringOption(o => o.setName("query").setDescription("What to play?").setAutocomplete(true).setRequired(true)),
     execute: async (client, interaction) => {
         if(!interaction.guildId) return;
         
