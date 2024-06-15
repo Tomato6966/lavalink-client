@@ -90,7 +90,7 @@ export interface ManagerOptions {
   }
 }
 
-interface LavalinkManagerEvents {
+export interface LavalinkManagerEvents {
   /**
    * Emitted when a Track started playing.
    * @event Manager#trackStart
