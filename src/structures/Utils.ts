@@ -36,6 +36,9 @@ export type LavaSrcSearchPlatform = LavaSrcSearchPlatformBase | "ftts";
 
 export type DuncteSearchPlatform = 
   "speak" | 
+  "phsearch" |
+  "pornhub" |
+  "porn" |
   "tts";
 
 export type LavalinkClientSearchPlatform = "bcsearch";
@@ -43,7 +46,8 @@ export type LavalinkClientSearchPlatformResolve = "bandcamp" | "bc";
   
 export type LavalinkSearchPlatform = "ytsearch" | 
     "ytmsearch" | 
-    "scsearch" |  
+    "scsearch" |
+    "bcsearch" |
     LavaSrcSearchPlatform | 
     DuncteSearchPlatform | 
     LavalinkClientSearchPlatform;
@@ -170,7 +174,7 @@ export class ManagerUtils {
           identifier: data.info.identifier,
           title: data.info.title,
           author: data.info.author,
-          duration: (data as LavalinkTrack).info.length || (data as Track).info.duration,
+          duration: (data as Track).info.duration || (data as LavalinkTrack).info.length,
           artworkUrl: data.info.artworkUrl || data.pluginInfo?.artworkUrl || (data as any).plugin?.artworkUrl,
           uri: data.info.uri,
           sourceName: data.info.sourceName,
@@ -311,7 +315,7 @@ export class ManagerUtils {
       throw new Error("Lavalink Node has not 'soundcloud' enabled");
     }
     if (SourceLinksRegexes.bandcamp.test(queryString) && !node.info?.sourceManagers?.includes("bandcamp")) {
-      throw new Error("Lavalink Node has not 'bandcamp' enabled");
+      throw new Error("Lavalink Node has not 'bandcamp' enabled (introduced with lavaplayer 2.2.0 or lavalink 4.0.6)");
     }
     if (SourceLinksRegexes.TwitchTv.test(queryString) && !node.info?.sourceManagers?.includes("twitch")) {
       throw new Error("Lavalink Node has not 'twitch' enabled");

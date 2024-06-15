@@ -14,10 +14,10 @@ export type IntegerNumber = Opaque<number, 'Int'>;
 export type FloatNumber = Opaque<number, 'Float'>;
 export type LavaSrcSearchPlatformBase = "spsearch" | "sprec" | "amsearch" | "dzsearch" | "dzisrc" | "ymsearch";
 export type LavaSrcSearchPlatform = LavaSrcSearchPlatformBase | "ftts";
-export type DuncteSearchPlatform = "speak" | "tts";
+export type DuncteSearchPlatform = "speak" | "phsearch" | "pornhub" | "porn" | "tts";
 export type LavalinkClientSearchPlatform = "bcsearch";
 export type LavalinkClientSearchPlatformResolve = "bandcamp" | "bc";
-export type LavalinkSearchPlatform = "ytsearch" | "ytmsearch" | "scsearch" | LavaSrcSearchPlatform | DuncteSearchPlatform | LavalinkClientSearchPlatform;
+export type LavalinkSearchPlatform = "ytsearch" | "ytmsearch" | "scsearch" | "bcsearch" | LavaSrcSearchPlatform | DuncteSearchPlatform | LavalinkClientSearchPlatform;
 export type ClientCustomSearchPlatformUtils = "local" | "http" | "https" | "link" | "uri";
 export type ClientSearchPlatform = ClientCustomSearchPlatformUtils | // for file/link requests
 "youtube" | "yt" | "youtube music" | "youtubemusic" | "ytm" | "musicyoutube" | "music youtube" | "soundcloud" | "sc" | "am" | "apple music" | "applemusic" | "apple" | "musicapple" | "music apple" | "sp" | "spsuggestion" | "spotify" | "spotify.com" | "spotifycom" | "dz" | "deezer" | "yandex" | "yandex music" | "yandexmusic" | "flowerytts" | "flowery" | "flowery.tts" | LavalinkClientSearchPlatformResolve | LavalinkClientSearchPlatform;

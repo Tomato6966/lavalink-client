@@ -189,6 +189,17 @@ client.lavalink = new LavalinkManager({
 
 # UpdateLog
 
+## **Version 1.3.0**
+- Changed console.error to throw error on queue.utils.sync if no data was provided/found
+- Changed undici.fetch to native fetch, but requires nodejs v18+ to support other runtimes, e.g. bun
+- Added sourceNames for `bandcamp` (from native lavalink) if it's supported it will use lavalink'S search, else the client search on player.search({ source: "bandcamp" }) (you can also use bcsearch or bc)
+- Added sourceName for `phsearch` from the dunktebot plugin, released in v.1.7.0
+- Support for youtube still going via the youtube-source plugin (disable youtube for lavalink, and use the plugin instead)
+- Exporting events
+- Added new debugOption: logCustomSearches
+- *(Next version update i will remove the internal interval for position update, to calculations)*
+
+
 ## **Version 1.2.0**
 - Added `player.stopPlaying()`: When executed it **clears the Queue** and **stops playing**, **without destroying the Player**
 - Adjusted `Player.skip()`

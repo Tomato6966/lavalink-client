@@ -1,5 +1,4 @@
 import { isAbsolute } from "path";
-import { Pool } from "undici";
 import WebSocket from "ws";
 import { DestroyReasons } from "./Player";
 import { NodeSymbol, queueTrackEnd } from "./Utils";
@@ -43,8 +42,6 @@ export class LavalinkNode {
     reconnectAttempts = 1;
     /** The Socket of the Lavalink */
     socket = null;
-    /** The Rest Server for this Lavalink */
-    rest;
     /** Version of what the Lavalink Server should be */
     version = "v4";
     /**
@@ -57,14 +54,13 @@ export class LavalinkNode {
             secure: false,
             retryAmount: 5,
             retryDelay: 30e3,
-            requestTimeout: 10e3,
+            requestSignalTimeoutMS: 10000,
             ...options
         };
         this.NodeManager = manager;
         this.validate();
         if (this.options.secure && this.options.port !== 443)
             throw new SyntaxError("If secure is true, then the port must be 443");
-        this.rest = new Pool(this.poolAddress, this.options.poolOptions);
         this.options.regions = (this.options.regions || []).map(a => a.toLowerCase());
         Object.defineProperty(this, NodeSymbol, { configurable: true, value: true });
     }
@@ -79,15 +75,15 @@ export class LavalinkNode {
             path: `/${this.version}/${endpoint.replace(/^\//gm, "")}`,
             method: "GET",
             headers: {
-                Authorization: this.options.authorization
+                "Authorization": this.options.authorization
             },
-            headersTimeout: this.options.requestTimeout,
+            signal: this.options.requestSignalTimeoutMS && this.options.requestSignalTimeoutMS > 0 ? AbortSignal.timeout(this.options.requestSignalTimeoutMS) : undefined,
         };
         modify?.(options);
-        const url = new URL(`${this.poolAddress}${options.path}`);
+        const url = new URL(`${this.restAddress}${options.path}`);
         url.searchParams.append("trace", "true");
-        options.path = url.pathname + url.search;
-        const request = await this.rest.request(options);
+        delete options.path;
+        const request = await fetch(url.href, options);
         this.calls++;
         return { request, options };
     }
@@ -101,9 +97,9 @@ export class LavalinkNode {
         const { request, options } = await this.rawRequest(endpoint, modify);
         if (["DELETE", "PUT"].includes(options.method))
             return;
-        if (request.statusCode === 404)
+        if (request.status === 404)
             throw new Error(`Node Request resulted into an error, request-PATH: ${options.path} | headers: ${JSON.stringify(request.headers)}`);
-        return parseAsText ? await request.body.text() : await request.body.json();
+        return parseAsText ? await request.text() : await request.json();
     }
     /**
      * Search something raw on the node, please note only add tracks to players of that node
@@ -116,8 +112,8 @@ export class LavalinkNode {
         this.NodeManager.LavalinkManager.utils.validateQueryString(this, Query.query, Query.source);
         if (Query.source)
             this.NodeManager.LavalinkManager.utils.validateSourceString(this, Query.source);
-        if (["bcsearch", "bandcamp"].includes(Query.source)) {
-            throw new Error("Bandcamp Search only works on the player!");
+        if (["bcsearch", "bandcamp"].includes(Query.source) && !this.info.sourceManagers.includes("bandcamp")) {
+            throw new Error("Bandcamp Search only works on the player (lavaplayer version < 2.2.0!");
         }
         let uri = `/loadtracks?identifier=`;
         if (/^https?:\/\//.test(Query.query) || ["http", "https", "link", "uri"].includes(Query.source)) { // if it's a link simply encode it
@@ -165,7 +161,7 @@ export class LavalinkNode {
         const { request } = await this.rawRequest(`/loadsearch?query=${Query.source ? `${Query.source}:` : ""}${encodeURIComponent(Query.query)}${Query.types?.length ? `&types=${Query.types.join(",")}` : ""}`);
         if (throwOnEmpty === true)
             throw new Error("Nothing found");
-        const res = (request.statusCode === 204 ? {} : await request.body.json());
+        const res = (request.status === 204 ? {} : await request.json());
         return {
             tracks: res.tracks?.map(v => this.NodeManager.LavalinkManager.utils.buildTrack(v, requestUser)) || [],
             albums: res.albums?.map(v => ({ info: v.info, pluginInfo: v?.plugin || v.pluginInfo, tracks: v.tracks.map(v => this.NodeManager.LavalinkManager.utils.buildTrack(v, requestUser)) })) || [],
@@ -190,7 +186,7 @@ export class LavalinkNode {
             r.headers["Content-Type"] = "application/json";
             r.body = JSON.stringify(data.playerOptions);
             if (data.noReplace) {
-                const url = new URL(`${this.poolAddress}${r.path}`);
+                const url = new URL(`${this.restAddress}${r.path}`);
                 url.searchParams.append("noReplace", data.noReplace === true && typeof data.noReplace === "boolean" ? "true" : "false");
                 r.path = url.pathname + url.search;
             }
@@ -471,7 +467,7 @@ export class LavalinkNode {
         }
         return true;
     }
-    get poolAddress() {
+    get restAddress() {
         return `http${this.options.secure ? "s" : ""}://${this.options.host}:${this.options.port}`;
     }
     reconnect(instaReconnect = false) {
@@ -506,9 +502,9 @@ export class LavalinkNode {
             clearTimeout(this.reconnectTimeout);
         // reset the reconnect attempts amount
         this.reconnectAttempts = 1;
-        this.info = await this.fetchInfo().catch(() => null);
+        this.info = await this.fetchInfo().catch((e) => (console.error(e, "ON-OPEN-FETCH"), null));
         if (!this.info && ["v3", "v4"].includes(this.version)) {
-            const errorString = `Lavalink Node (${this.poolAddress}) does not provide any /${this.version}/info`;
+            const errorString = `Lavalink Node (${this.restAddress}) does not provide any /${this.version}/info`;
             throw new Error(errorString);
         }
         this.NodeManager.emit("connect", this);

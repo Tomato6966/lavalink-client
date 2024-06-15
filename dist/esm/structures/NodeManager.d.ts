@@ -5,7 +5,7 @@ import { LavalinkNode, LavalinkNodeOptions } from "./Node";
 import { DestroyReasonsType } from "./Player";
 import { LavalinkPlayer, MiniMap } from "./Utils";
 type LavalinkNodeIdentifier = string;
-interface NodeManagerEvents {
+export interface NodeManagerEvents {
     /**
      * Emitted when a Node is created.
      * @event Manager.nodeManager#create

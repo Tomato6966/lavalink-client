@@ -59,6 +59,7 @@ class LavalinkManager extends events_1.EventEmitter {
             },
             advancedOptions: {
                 debugOptions: {
+                    logCustomSearches: options?.advancedOptions?.debugOptions?.logCustomSearches ?? false,
                     noAudio: options?.advancedOptions?.debugOptions?.noAudio ?? false,
                     playerDestroy: {
                         dontThrowError: options?.advancedOptions?.debugOptions?.playerDestroy?.dontThrowError ?? false,

@@ -1,5 +1,3 @@
-import { fetch } from "undici";
-
 import { Player } from "../Player";
 import { UnresolvedSearchResult } from "../Utils";
 
@@ -7,6 +5,7 @@ export const bandCampSearch = async (player:Player, query: string, requestUser: 
     let error = null;
     let tracks = [];
     
+    if(player.LavalinkManager.options.advancedOptions.debugOptions.logCustomSearches) console.log(`Lavalink-Client-Debug | SEARCHING | - ${query} on lavalink-client`)
     player.LavalinkManager.utils.validateQueryString(player.node, query);
     
     try {

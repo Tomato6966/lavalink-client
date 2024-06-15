@@ -76,7 +76,7 @@ export class Queue {
         sync: async (override = true, dontSyncCurrent = true) => {
             const data = await this.QueueSaver.get(this.guildId);
             if (!data)
-                return console.log("No data found to sync for guildId: ", this.guildId);
+                throw new Error(`No data found to sync for guildId: ${this.guildId}`);
             if (!dontSyncCurrent && !this.current && (this.managerUtils.isTrack(data.current)))
                 this.current = data.current;
             if (Array.isArray(data.tracks) && data?.tracks.length && data.tracks.some(track => this.managerUtils.isTrack(track) || this.managerUtils.isUnresolvedTrack(track)))

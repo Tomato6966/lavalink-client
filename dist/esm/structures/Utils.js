@@ -46,7 +46,7 @@ export class ManagerUtils {
                     identifier: data.info.identifier,
                     title: data.info.title,
                     author: data.info.author,
-                    duration: data.info.length || data.info.duration,
+                    duration: data.info.duration || data.info.length,
                     artworkUrl: data.info.artworkUrl || data.pluginInfo?.artworkUrl || data.plugin?.artworkUrl,
                     uri: data.info.uri,
                     sourceName: data.info.sourceName,
@@ -202,7 +202,7 @@ export class ManagerUtils {
             throw new Error("Lavalink Node has not 'soundcloud' enabled");
         }
         if (SourceLinksRegexes.bandcamp.test(queryString) && !node.info?.sourceManagers?.includes("bandcamp")) {
-            throw new Error("Lavalink Node has not 'bandcamp' enabled");
+            throw new Error("Lavalink Node has not 'bandcamp' enabled (introduced with lavaplayer 2.2.0 or lavalink 4.0.6)");
         }
         if (SourceLinksRegexes.TwitchTv.test(queryString) && !node.info?.sourceManagers?.includes("twitch")) {
             throw new Error("Lavalink Node has not 'twitch' enabled");
@@ -234,9 +234,10 @@ export class ManagerUtils {
         return;
     }
     transformQuery(query) {
+        const sourceOfQuery = typeof query === "string" ? undefined : (DefaultSources[(query.source?.trim?.()?.toLowerCase?.()) ?? this.LavalinkManager?.options?.playerOptions?.defaultSearchPlatform?.toLowerCase?.()] ?? (query.source?.trim?.()?.toLowerCase?.()));
         const Query = {
             query: typeof query === "string" ? query : query.query,
-            source: DefaultSources[(typeof query === "string" ? undefined : query.source?.trim?.()?.toLowerCase?.()) ?? this.LavalinkManager?.options?.playerOptions?.defaultSearchPlatform?.toLowerCase?.()] ?? (typeof query === "string" ? undefined : query.source?.trim?.()?.toLowerCase?.()) ?? this.LavalinkManager?.options?.playerOptions?.defaultSearchPlatform?.toLowerCase?.()
+            source: sourceOfQuery ?? this.LavalinkManager?.options?.playerOptions?.defaultSearchPlatform?.toLowerCase?.()
         };
         const foundSource = Object.keys(DefaultSources).find(source => Query.query?.toLowerCase?.()?.startsWith(`${source}:`.toLowerCase()))?.trim?.()?.toLowerCase?.();
         // ignore links...
@@ -248,10 +249,11 @@ export class ManagerUtils {
     }
     transformLavaSearchQuery(query) {
         // transform the query object
+        const sourceOfQuery = typeof query === "string" ? undefined : (DefaultSources[(query.source?.trim?.()?.toLowerCase?.()) ?? this.LavalinkManager?.options?.playerOptions?.defaultSearchPlatform?.toLowerCase?.()] ?? (query.source?.trim?.()?.toLowerCase?.()));
         const Query = {
             query: typeof query === "string" ? query : query.query,
             types: query.types ? ["track", "playlist", "artist", "album", "text"].filter(v => query.types?.find(x => x.toLowerCase().startsWith(v))) : ["track", "playlist", "artist", "album", /*"text"*/],
-            source: DefaultSources[(typeof query === "string" ? undefined : query.source?.trim?.()?.toLowerCase?.()) ?? this.LavalinkManager?.options?.playerOptions?.defaultSearchPlatform?.toLowerCase?.()] ?? (typeof query === "string" ? undefined : query.source?.trim?.()?.toLowerCase?.()) ?? this.LavalinkManager?.options?.playerOptions?.defaultSearchPlatform?.toLowerCase?.()
+            source: sourceOfQuery ?? this.LavalinkManager?.options?.playerOptions?.defaultSearchPlatform?.toLowerCase?.()
         };
         const foundSource = Object.keys(DefaultSources).find(source => Query.query.toLowerCase().startsWith(`${source}:`.toLowerCase()))?.trim?.()?.toLowerCase?.();
         if (foundSource && DefaultSources[foundSource]) {

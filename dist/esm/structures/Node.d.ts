@@ -1,12 +1,13 @@
 /// <reference types="node" />
 import internal from "stream";
-import { Dispatcher, Pool } from "undici";
 import { NodeManager } from "./NodeManager";
 import { DestroyReasonsType, Player } from "./Player";
 import { Track } from "./Track";
 import { Base64, InvalidLavalinkRestRequest, LavalinkPlayer, LavaSearchQuery, LavaSearchResponse, PlayerUpdateInfo, RoutePlanner, SearchQuery, SearchResult, Session } from "./Utils";
-/** Modifies any outgoing REST requests. */
-export type ModifyRequest = (options: Dispatcher.RequestOptions) => void;
+/** Ability to manipulate fetch requests */
+export type ModifyRequest = (options: RequestInit & {
+    path: string;
+}) => void;
 export declare const validSponsorBlocks: string[];
 export type SponsorBlockSegment = "sponsor" | "selfpromo" | "interaction" | "intro" | "outro" | "preview" | "music_offtopic" | "filler";
 export interface LavalinkNodeOptions {
@@ -24,14 +25,12 @@ export interface LavalinkNodeOptions {
     id?: string;
     /** Voice Regions of this Node */
     regions?: string[];
-    /** Options for the undici http pool used for http requests */
-    poolOptions?: Pool.Options;
     /** The retryAmount for the node. */
     retryAmount?: number;
     /** The retryDelay for the node. */
     retryDelay?: number;
-    /** Pool Undici Options - requestTimeout */
-    requestTimeout?: number;
+    /** signal for cancelling requests - default: AbortSignal.timeout(options.requestSignalTimeoutMS || 10000) - put <= 0 to disable */
+    requestSignalTimeoutMS?: number;
 }
 export interface MemoryStats {
     /** The free memory of the allocated amount. */
@@ -145,8 +144,6 @@ export declare class LavalinkNode {
     private reconnectAttempts;
     /** The Socket of the Lavalink */
     private socket;
-    /** The Rest Server for this Lavalink */
-    private rest;
     /** Version of what the Lavalink Server should be */
     private version;
     /**
@@ -168,7 +165,7 @@ export declare class LavalinkNode {
      * @param modify Used to modify the request before being sent
      * @returns The returned data
      */
-    request(endpoint: string, modify?: ModifyRequest, parseAsText?: boolean): Promise<unknown>;
+    request(endpoint: string, modify?: ModifyRequest, parseAsText?: boolean): Promise<any>;
     /**
      * Search something raw on the node, please note only add tracks to players of that node
      * @param query SearchQuery Object
@@ -188,7 +185,7 @@ export declare class LavalinkNode {
      * @param guildId
      * @returns
      */
-    destroyPlayer(guildId: any): Promise<unknown>;
+    destroyPlayer(guildId: any): Promise<any>;
     /**
      * Connect to the Lavalink Node
      * @param sessionId Provide the Session Id of the previous connection, to resume the node and it's player(s)
@@ -266,12 +263,12 @@ export declare class LavalinkNode {
         /**
          * Release all blacklisted IP addresses into pool of IPs
          */
-        unmarkAllFailedAddresses: () => Promise<unknown>;
+        unmarkAllFailedAddresses: () => Promise<any>;
     };
     /** Private Utils */
     private validate;
     private syncPlayerData;
-    private get poolAddress();
+    private get restAddress();
     private reconnect;
     private open;
     private close;
