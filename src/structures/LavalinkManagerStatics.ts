@@ -51,10 +51,14 @@ export const DefaultSources: Record<SearchPlatform, LavalinkSearchPlatform|Clien
     "flowery": "ftts",
     "flowery.tts": "ftts",
     "flowerytts": "ftts",
-    // Client sided search platforms
+    // Client sided search platforms (after lavalinkv4.0.6 it will search via bcsearch on the node itself)
     "bandcamp": "bcsearch",
     "bc": "bcsearch",
     "bcsearch": "bcsearch",
+    // other searches:
+    "phsearch": "phsearch",
+    "pornhub": "phsearch",
+    "porn": "phsearch",
     // local files
     "local": "local",
     // http requests
