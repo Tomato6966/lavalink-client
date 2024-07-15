@@ -187,6 +187,31 @@ client.lavalink = new LavalinkManager({
 })
 ```
 
+## How to do resuming
+
+```js
+// 1. while the player is playing, make sure to enable it:
+const durationToKeepPlayingInMS = 600_000;
+await player.node.updateSession(true, durationToKeepPlayingInMS);
+```
+
+```js
+// 2. make sure to have an eventlistener for resuming events somewhere
+client.lavalink.nodeManager.on("resumed", (node, payload, fetchedPlayers) => {
+  // create players:
+  for(const fetchedPlayer of fetchedPlayers) {
+    const player = client.lavalink.createPlayer({
+       guildId: fetchedPlayer.guildId,
+    });
+    player.setVolume(fetchedPlayer.volume);
+    // and apply other things (e.g. paused, voice, filters, state, ...) (stuff like vc channel, text channel you need to store somewhere)
+    await player.queue.utils.sync(); // only works with a queuestore
+    // you can now overwride the player.queue.current track from the fetchedPlayer, or use the one from the queue.uztils.sync function
+    // continue with your resuming code...
+  } 
+})
+``` 
+
 ***
 
 
@@ -268,7 +293,7 @@ const response = await player.search({
 
 # Node Resuming got supported
 # First enable it by doing:
-+ await player.node.updateResuming(true, 360_000);
++ await player.node.updateSession(true, 360_000);
 # then when reconnecting to the node add to the node.createeOptions the sessionId: "" of the previous session
 # and after  connecting the nodeManager.on("resumed", (node, payload, players) => {}) will be executed, where you can sync the players!
 
