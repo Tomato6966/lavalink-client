@@ -237,6 +237,7 @@ export class ManagerUtils {
         const sourceOfQuery = typeof query === "string" ? undefined : (DefaultSources[(query.source?.trim?.()?.toLowerCase?.()) ?? this.LavalinkManager?.options?.playerOptions?.defaultSearchPlatform?.toLowerCase?.()] ?? (query.source?.trim?.()?.toLowerCase?.()));
         const Query = {
             query: typeof query === "string" ? query : query.query,
+            extraQueryUrlParams: typeof query !== "string" ? query.extraQueryUrlParams : undefined,
             source: sourceOfQuery ?? this.LavalinkManager?.options?.playerOptions?.defaultSearchPlatform?.toLowerCase?.()
         };
         const foundSource = Object.keys(DefaultSources).find(source => Query.query?.toLowerCase?.()?.startsWith(`${source}:`.toLowerCase()))?.trim?.()?.toLowerCase?.();

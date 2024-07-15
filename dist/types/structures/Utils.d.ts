@@ -105,6 +105,7 @@ export declare class ManagerUtils {
     validateQueryString(node: LavalinkNode, queryString: string, sourceString?: LavalinkSearchPlatform): void;
     transformQuery(query: SearchQuery): {
         query: string;
+        extraQueryUrlParams: URLSearchParams;
         source: any;
     };
     transformLavaSearchQuery(query: LavaSearchQuery): {
@@ -453,6 +454,8 @@ export interface LavaSearchResponse {
 export type SearchQuery = {
     /** lavalink search Query / identifier string */
     query: string;
+    /** Extra url query params to use, e.g. for flowertts */
+    extraQueryUrlParams?: URLSearchParams;
     /** Source to append to the search query string */
     source?: SearchPlatform;
 } | /** Our just the search query / identifier string */ string;

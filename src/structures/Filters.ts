@@ -8,7 +8,7 @@ export class FilterManager {
     /** The Equalizer bands currently applied to the Lavalink Server */
     public equalizerBands: EQBand[] = [];
     /** Private Util for the instaFix Filters option */
-    public filterUpdatedState: number = 0;
+    public filterUpdatedState: boolean = false;
     /** All "Active" / "disabled" Player Filters */
     public filters: PlayerFilters = {
         volume: false,
@@ -111,7 +111,6 @@ export class FilterManager {
      * Apply Player filters for lavalink filter sending data, if the filter is enabled / not
      */
     async applyPlayerFilters() {
-        
         const sendData = { ...this.data } as LavalinkFilterData & { equalizer: EQBand[] };
         this.checkFiltersState();
 
@@ -151,14 +150,17 @@ export class FilterManager {
         }
 
         const now = performance.now();
+        
+        if (this.player.options.instaUpdateFiltersFix === true) this.filterUpdatedState = true;
+
         await this.player.node.updatePlayer({
             guildId: this.player.guildId,
             playerOptions: {
                 filters: sendData,
             }
         })
+        
         this.player.ping.lavalink = Math.round((performance.now() - now) / 10) / 100;
-        if (this.player.options.instaUpdateFiltersFix === true) this.filterUpdatedState = 1;
         return;
     }
 
@@ -635,6 +637,8 @@ export class FilterManager {
         if (!this.player.node.sessionId) throw new Error("The Lavalink-Node is either not ready or not up to date");
 
         const now = performance.now();
+        
+        if (this.player.options.instaUpdateFiltersFix === true) this.filterUpdatedState = true
 
         await this.player.node.updatePlayer({
             guildId: this.player.guildId,
@@ -644,8 +648,6 @@ export class FilterManager {
         });
 
         this.player.ping.lavalink = Math.round((performance.now() - now) / 10) / 100;
-
-        if (this.player.options.instaUpdateFiltersFix === true) this.filterUpdatedState = 1;
 
         return this;
     }

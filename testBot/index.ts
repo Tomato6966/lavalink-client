@@ -21,7 +21,7 @@ const client = new Client({
 
 if(envConfig.redis.url && 1 < 0) { // little invalid if statement so the redis doesn't happen for testing purposes
     client.redis = createClient({ url: envConfig.redis.url, password: envConfig.redis.password });
-    client.redis.connect();
+    client.redis.connect(); // @ts-ignore
     client.redis.on("error", (err) => console.log('Redis Client Error', err));
 } else client.redis = new MiniMap<string, string>();
 
@@ -42,7 +42,7 @@ console.log(LavalinkNodesOfEnv); // you can then provide the result of here in L
 client.lavalink = new LavalinkManager({
     nodes: [
         {
-            authorization: "yourverystrongpassword",
+            authorization: "chrissy_localhost",
             host: "localhost",
             port: 2333,
             id: "testnode",
@@ -80,6 +80,7 @@ client.lavalink = new LavalinkManager({
     linksBlacklist: [],
     linksWhitelist: [],
     advancedOptions: {
+        maxFilterFixDuration: 600_000, // only allow instafixfilterupdate for tracks sub 10mins
         debugOptions: {
             noAudio: false,
             playerDestroy: {

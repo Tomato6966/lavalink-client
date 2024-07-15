@@ -55,6 +55,7 @@ export class LavalinkManager extends EventEmitter {
                 queueStore: options?.queueOptions?.queueStore ?? new DefaultQueueStore(),
             },
             advancedOptions: {
+                maxFilterFixDuration: options?.advancedOptions?.maxFilterFixDuration ?? 600000,
                 debugOptions: {
                     logCustomSearches: options?.advancedOptions?.debugOptions?.logCustomSearches ?? false,
                     noAudio: options?.advancedOptions?.debugOptions?.noAudio ?? false,
@@ -147,6 +148,7 @@ export class LavalinkManager extends EventEmitter {
      *     linksBlacklist: [],
      *     linksWhitelist: [],
      *     advancedOptions: {
+     *       maxFilterFixDuration: 600_000,
      *       debugOptions: {
      *         noAudio: false,
      *         playerDestroy: {
@@ -241,6 +243,12 @@ export class LavalinkManager extends EventEmitter {
      * Delete's a player from the cache without destroying it on lavalink (only works when it's disconnected)
      * @param guildId
      * @returns
+     *
+     * @example
+     * ```ts
+     * client.lavalink.deletePlayer(interaction.guildId);
+     * // shouldn't be used except you know what you are doing.
+     * ```
      */
     deletePlayer(guildId) {
         const oldPlayer = this.getPlayer(guildId);
@@ -257,6 +265,12 @@ export class LavalinkManager extends EventEmitter {
     }
     /**
      * Checks wether the the lib is useable based on if any node is connected
+     *
+     * @example
+     * ```ts
+     * if(!client.lavalink.useable) return console.error("can'T search yet, because there is no useable lavalink node.")
+     * // continue with code e.g. createing a player and searching
+     * ```
      */
     get useable() {
         return this.nodeManager.nodes.filter(v => v.connected).size > 0;
@@ -266,7 +280,6 @@ export class LavalinkManager extends EventEmitter {
      * @param clientData
      *
      * @example
-     *
      * ```ts
      * // on the bot ready event
      * client.on("ready", () => {

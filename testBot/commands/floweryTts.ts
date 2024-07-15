@@ -38,10 +38,15 @@ export default {
         const query = (interaction.options as CommandInteractionOptionResolver ).getString("text")!;
         const voice = (interaction.options as CommandInteractionOptionResolver ).getString("voice")!
         
-        const response = await player.search({ query: 
-            `${query}${voice ? `?voice=${voice}` : ""}`
-        , source: "ftts" }, interaction.user);
-       
+        const extraParams = new URLSearchParams();
+        if(voice) extraParams.append(`voice`, voice);
+        
+        const response = await player.search({ 
+            query: `${query}`,
+            extraQueryUrlParams: extraParams, 
+            source: "ftts"
+        }, interaction.user);
+
         if(!response || !response.tracks?.length) return interaction.reply({ content: `No Tracks found`, ephemeral: true });
 
         player.queue.add(response.tracks[0]);

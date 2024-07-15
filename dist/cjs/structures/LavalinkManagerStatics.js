@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.SourceLinksRegexes = exports.LavalinkPlugins = exports.DefaultSources = void 0;
+/** Default Sources Record, to allow source parsing with multiple inputs. */
 exports.DefaultSources = {
     // youtubemusic
     "youtube music": "ytmsearch",
@@ -66,6 +67,7 @@ exports.DefaultSources = {
     "link": "link",
     "uri": "uri"
 };
+/** Lavalink Plugins definiton */
 exports.LavalinkPlugins = {
     DuncteBot_Plugin: "DuncteBot-plugin",
     LavaSrc: "lavasrc-plugin",
@@ -73,6 +75,7 @@ exports.LavalinkPlugins = {
     LavaSearch: "lavasearch-plugin",
     LavalinkFilterPlugin: "lavalink-filter-plugin"
 };
+/** Lavalink Sources regexes for url validations */
 exports.SourceLinksRegexes = {
     /** DEFAULT SUPPORTED BY LAVALINK */
     YoutubeRegex: /https?:\/\/?(?:www\.)?(?:(m|www)\.)?(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|shorts|playlist\?|watch\?v=|watch\?.+(?:&|&#38;);v=))([a-zA-Z0-9\-_]{11})?(?:(?:\?|&|&#38;)index=((?:\d){1,3}))?(?:(?:\?|&|&#38;)?list=([a-zA-Z\-_0-9]{34}))?(?:\S+)?/,

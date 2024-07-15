@@ -5,7 +5,7 @@ export class FilterManager {
     /** The Equalizer bands currently applied to the Lavalink Server */
     equalizerBands = [];
     /** Private Util for the instaFix Filters option */
-    filterUpdatedState = 0;
+    filterUpdatedState = false;
     /** All "Active" / "disabled" Player Filters */
     filters = {
         volume: false,
@@ -157,6 +157,8 @@ export class FilterManager {
                 delete sendData[key];
         }
         const now = performance.now();
+        if (this.player.options.instaUpdateFiltersFix === true)
+            this.filterUpdatedState = true;
         await this.player.node.updatePlayer({
             guildId: this.player.guildId,
             playerOptions: {
@@ -164,8 +166,6 @@ export class FilterManager {
             }
         });
         this.player.ping.lavalink = Math.round((performance.now() - now) / 10) / 100;
-        if (this.player.options.instaUpdateFiltersFix === true)
-            this.filterUpdatedState = 1;
         return;
     }
     /**
@@ -651,6 +651,8 @@ export class FilterManager {
         if (!this.player.node.sessionId)
             throw new Error("The Lavalink-Node is either not ready or not up to date");
         const now = performance.now();
+        if (this.player.options.instaUpdateFiltersFix === true)
+            this.filterUpdatedState = true;
         await this.player.node.updatePlayer({
             guildId: this.player.guildId,
             playerOptions: {
@@ -658,8 +660,6 @@ export class FilterManager {
             }
         });
         this.player.ping.lavalink = Math.round((performance.now() - now) / 10) / 100;
-        if (this.player.options.instaUpdateFiltersFix === true)
-            this.filterUpdatedState = 1;
         return this;
     }
     /** Clears the equalizer bands. */

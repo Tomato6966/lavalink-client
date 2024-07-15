@@ -4,28 +4,58 @@ import { LavalinkNode, SponsorBlockSegment } from "./Node";
 import { Queue } from "./Queue";
 import { Track, UnresolvedTrack } from "./Track";
 import { Base64, LavalinkPlayerVoiceOptions, LavaSearchQuery, SearchQuery } from "./Utils";
-type PlayerDestroyReasons = "QueueEmpty" | "NodeDestroy" | "NodeDeleted" | "LavalinkNoVoice" | "NodeReconnectFail" | "PlayerReconnectFail" | "Disconnected" | "ChannelDeleted" | "ReconnectAllNodes" | "DisconnectAllNodes";
-export type DestroyReasonsType = PlayerDestroyReasons | string;
-export declare const DestroyReasons: Record<PlayerDestroyReasons, PlayerDestroyReasons>;
+export declare enum DestroyReasons {
+    QueueEmpty = "QueueEmpty",
+    NodeDestroy = "NodeDestroy",
+    NodeDeleted = "NodeDeleted",
+    LavalinkNoVoice = "LavalinkNoVoice",
+    NodeReconnectFail = "NodeReconnectFail",
+    Disconnected = "Disconnected",
+    PlayerReconnectFail = "PlayerReconnectFail",
+    ChannelDeleted = "ChannelDeleted",
+    DisconnectAllNodes = "DisconnectAllNodes",
+    ReconnectAllNodes = "ReconnectAllNodes"
+}
+export type DestroyReasonsType = keyof typeof DestroyReasons | string;
 export interface PlayerJson {
+    /** Guild Id where the player was playing in */
     guildId: string;
+    /** Options provided to the player */
     options: PlayerOptions;
+    /** Voice Channel Id the player was playing in */
     voiceChannelId: string;
+    /** Text Channel Id the player was synced to */
     textChannelId?: string;
+    /** Position the player was at */
     position: number;
+    /** Lavalink's position the player was at */
     lastPosition: number;
+    /** Last time the position was sent from lavalink */
+    lastPositionChange: number;
+    /** Volume in % from the player (without volumeDecrementer) */
     volume: number;
+    /** Real Volume used in lavalink (with the volumeDecrementer) */
     lavalinkVolume: number;
+    /** The repeatmode from the player */
     repeatMode: RepeatMode;
+    /** Pause state */
     paused: boolean;
+    /** Wether the player was playing or not */
     playing: boolean;
+    /** When the player was created */
     createdTimeStamp?: number;
+    /** All current used fitlers Data */
     filters: FilterData;
+    /** The player's ping object */
     ping: {
+        /** Ping to the voice websocket server */
         ws: number;
+        /** Avg. calc. Ping to the lavalink server */
         lavalink: number;
     };
+    /** Equalizer Bands used in lavalink */
     equalizer: EQBand[];
+    /** The Id of the last used node */
     nodeId?: string;
 }
 export type RepeatMode = "queue" | "track" | "off";
@@ -88,10 +118,15 @@ export interface PlayOptions extends LavalinkPlayOptions {
     clientTrack?: Track | UnresolvedTrack;
 }
 export interface Player {
+    /** Filter Manager per player */
     filterManager: FilterManager;
+    /** circular reference to the lavalink Manager from the Player for easier use */
     LavalinkManager: LavalinkManager;
+    /** Player options currently used, mutation doesn't affect player's state */
     options: PlayerOptions;
+    /** The lavalink node assigned the the player, don't change it manually */
     node: LavalinkNode;
+    /** The queue from the player */
     queue: Queue;
 }
 export declare class Player {
@@ -117,7 +152,9 @@ export declare class Player {
     /** The Volume Lavalink actually is outputting */
     lavalinkVolume: number;
     /** The current Positin of the player (Calculated) */
-    position: number;
+    get position(): number;
+    /** The timestamp when the last position change update happened */
+    lastPositionChange: number;
     /** The current Positin of the player (from Lavalink) */
     lastPosition: number;
     /** When the player was created [Timestamp in Ms] (from lavalink) */
@@ -163,7 +200,7 @@ export declare class Player {
      * @param ignoreVolumeDecrementer If it should ignore the volumedecrementer option
      */
     setVolume(volume: number, ignoreVolumeDecrementer?: boolean): Promise<this>;
-    lavaSearch(query: LavaSearchQuery, requestUser: unknown): Promise<import("./Utils").SearchResult | import("./Utils").LavaSearchResponse>;
+    lavaSearch(query: LavaSearchQuery, requestUser: unknown, throwOnEmpty?: boolean): Promise<import("./Utils").SearchResult | import("./Utils").LavaSearchResponse>;
     setSponsorBlock(segments?: SponsorBlockSegment[]): Promise<void>;
     getSponsorBlock(): Promise<SponsorBlockSegment[]>;
     deleteSponsorBlock(): Promise<void>;
@@ -172,7 +209,7 @@ export declare class Player {
      * @param query Query for your data
      * @param requestUser
      */
-    search(query: SearchQuery, requestUser: unknown): Promise<import("./Utils").SearchResult | import("./Utils").UnresolvedSearchResult>;
+    search(query: SearchQuery, requestUser: unknown, throwOnEmpty?: boolean): Promise<import("./Utils").SearchResult | import("./Utils").UnresolvedSearchResult>;
     /**
      * Pause the player
      */
@@ -220,7 +257,7 @@ export declare class Player {
     /**
      * Destroy the player and disconnect from the voice channel
      */
-    destroy(reason?: string, disconnect?: boolean): Promise<this>;
+    destroy(reason?: DestroyReasons | string, disconnect?: boolean): Promise<this>;
     /**
      * Move the player on a different Audio-Node
      * @param newNode New Node / New Node Id
@@ -229,4 +266,3 @@ export declare class Player {
     /** Converts the Player including Queue to a Json state */
     toJSON(): PlayerJson;
 }
-export {};

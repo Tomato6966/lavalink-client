@@ -1,3 +1,4 @@
+/** Default Sources Record, to allow source parsing with multiple inputs. */
 export const DefaultSources = {
     // youtubemusic
     "youtube music": "ytmsearch",
@@ -63,6 +64,7 @@ export const DefaultSources = {
     "link": "link",
     "uri": "uri"
 };
+/** Lavalink Plugins definiton */
 export const LavalinkPlugins = {
     DuncteBot_Plugin: "DuncteBot-plugin",
     LavaSrc: "lavasrc-plugin",
@@ -70,6 +72,7 @@ export const LavalinkPlugins = {
     LavaSearch: "lavasearch-plugin",
     LavalinkFilterPlugin: "lavalink-filter-plugin"
 };
+/** Lavalink Sources regexes for url validations */
 export const SourceLinksRegexes = {
     /** DEFAULT SUPPORTED BY LAVALINK */
     YoutubeRegex: /https?:\/\/?(?:www\.)?(?:(m|www)\.)?(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|shorts|playlist\?|watch\?v=|watch\?.+(?:&|&#38;);v=))([a-zA-Z0-9\-_]{11})?(?:(?:\?|&|&#38;)index=((?:\d){1,3}))?(?:(?:\?|&|&#38;)?list=([a-zA-Z\-_0-9]{34}))?(?:\S+)?/,

@@ -5,18 +5,20 @@ const BandCampSearch_1 = require("./CustomSearches/BandCampSearch");
 const Filters_1 = require("./Filters");
 const Queue_1 = require("./Queue");
 const Utils_1 = require("./Utils");
-exports.DestroyReasons = {
-    QueueEmpty: "QueueEmpty",
-    NodeDestroy: "NodeDestroy",
-    NodeDeleted: "NodeDeleted",
-    LavalinkNoVoice: "LavalinkNoVoice",
-    NodeReconnectFail: "NodeReconnectFail",
-    Disconnected: "Disconnected",
-    PlayerReconnectFail: "PlayerReconnectFail",
-    ChannelDeleted: "ChannelDeleted",
-    DisconnectAllNodes: "DisconnectAllNodes",
-    ReconnectAllNodes: "ReconnectAllNodes"
-};
+var DestroyReasons;
+(function (DestroyReasons) {
+    DestroyReasons["QueueEmpty"] = "QueueEmpty";
+    DestroyReasons["NodeDestroy"] = "NodeDestroy";
+    DestroyReasons["NodeDeleted"] = "NodeDeleted";
+    DestroyReasons["LavalinkNoVoice"] = "LavalinkNoVoice";
+    DestroyReasons["NodeReconnectFail"] = "NodeReconnectFail";
+    DestroyReasons["Disconnected"] = "Disconnected";
+    DestroyReasons["PlayerReconnectFail"] = "PlayerReconnectFail";
+    DestroyReasons["ChannelDeleted"] = "ChannelDeleted";
+    DestroyReasons["DisconnectAllNodes"] = "DisconnectAllNodes";
+    DestroyReasons["ReconnectAllNodes"] = "ReconnectAllNodes";
+})(DestroyReasons || (exports.DestroyReasons = DestroyReasons = {}));
+;
 class Player {
     /** The Guild Id of the Player */
     guildId;
@@ -42,7 +44,11 @@ class Player {
     /** The Volume Lavalink actually is outputting */
     lavalinkVolume = 100;
     /** The current Positin of the player (Calculated) */
-    position = 0;
+    get position() {
+        return this.lastPosition + (this.lastPositionChange ? Date.now() - this.lastPositionChange : 0);
+    }
+    /** The timestamp when the last position change update happened */
+    lastPositionChange = null;
     /** The current Positin of the player (from Lavalink) */
     lastPosition = 0;
     /** When the player was created [Timestamp in Ms] (from lavalink) */
@@ -245,8 +251,8 @@ class Player {
         this.ping.lavalink = Math.round((performance.now() - now) / 10) / 100;
         return this;
     }
-    async lavaSearch(query, requestUser) {
-        return this.node.lavaSearch(query, requestUser);
+    async lavaSearch(query, requestUser, throwOnEmpty = false) {
+        return this.node.lavaSearch(query, requestUser, throwOnEmpty);
     }
     async setSponsorBlock(segments = ["sponsor", "selfpromo"]) {
         return this.node.setSponsorBlock(this, segments);
@@ -262,11 +268,11 @@ class Player {
      * @param query Query for your data
      * @param requestUser
      */
-    async search(query, requestUser) {
+    async search(query, requestUser, throwOnEmpty = false) {
         const Query = this.LavalinkManager.utils.transformQuery(query);
         if (["bcsearch", "bandcamp"].includes(Query.source) && !this.node.info.sourceManagers.includes("bandcamp"))
             return await (0, BandCampSearch_1.bandCampSearch)(this, Query.query, requestUser);
-        return this.node.search(Query, requestUser);
+        return this.node.search(Query, requestUser, throwOnEmpty);
     }
     /**
      * Pause the player
@@ -306,7 +312,7 @@ class Player {
             throw new RangeError("Current Track is not seekable / a stream");
         if (position < 0 || position > this.queue.current.info.duration)
             position = Math.max(Math.min(position, this.queue.current.info.duration), 0);
-        this.position = position;
+        this.lastPositionChange = Date.now();
         this.lastPosition = position;
         const now = performance.now();
         await this.node.updatePlayer({ guildId: this.guildId, playerOptions: { position } });
@@ -488,6 +494,7 @@ class Player {
             textChannelId: this.textChannelId,
             position: this.position,
             lastPosition: this.lastPosition,
+            lastPositionChange: this.lastPositionChange,
             volume: this.volume,
             lavalinkVolume: this.lavalinkVolume,
             repeatMode: this.repeatMode,
@@ -498,6 +505,7 @@ class Player {
             equalizer: this.filterManager?.equalizerBands || [],
             nodeId: this.node?.id,
             ping: this.ping,
+            queue: this.queue.utils.toJSON(),
         };
     }
 }

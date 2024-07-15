@@ -4,7 +4,7 @@ module.exports = {
     parserOptions: {
         project: ["tsconfig.json"],
         sourceType: 'module',
-        "ecmaVersion": "es2022"
+        "ecmaVersion": "es2022",
     },
     env: {
        es2022: true

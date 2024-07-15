@@ -16,11 +16,15 @@
       "types": [ "node", "ws" ]
   },
   "include": [ 
-      "src/**/*.ts"
+    "src/**/*.ts",
+    ".eslintrc.js"
   ],
   "exclude": [
     "node_modules",
     "dist",
+    "docs",
+    "tsDocs",
+    "config",
     "testBot",
   ]
 }

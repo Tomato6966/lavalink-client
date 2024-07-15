@@ -7,7 +7,7 @@ export declare class FilterManager {
     /** The Equalizer bands currently applied to the Lavalink Server */
     equalizerBands: EQBand[];
     /** Private Util for the instaFix Filters option */
-    filterUpdatedState: number;
+    filterUpdatedState: boolean;
     /** All "Active" / "disabled" Player Filters */
     filters: PlayerFilters;
     /** The Filter Data sent to Lavalink, only if the filter is enabled (ofc.) */
