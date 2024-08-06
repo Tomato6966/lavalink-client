@@ -2,7 +2,7 @@
 Easy, flexible and feature-rich lavalink@v4 Client. Both for Beginners and Proficients.
 
 <div align="center">
-  <p> 
+  <p>
     <img src="https://madewithlove.now.sh/at?heart=true&template=for-the-badge" alt="Made with love in Austria">
     <img alt="Made with TypeScript" src="https://img.shields.io/badge/typescript-%23007ACC.svg?style=for-the-badge&logo=typescript&logoColor=white">
   </p>
@@ -75,7 +75,7 @@ Check out the [Documentation](https://lc4.gitbook.io/lavalink-client) | or the [
 
 - ✨ Choose able queue stores (maps, collections, redis, databases, ...)
   - You can create your own queueStore, thus make it easy to sync queues accross multiple connections (e.g. dashboard-bot)
-  - Automated Queue Sync methods 
+  - Automated Queue Sync methods
   - Automated unresolveable Tracks (save the queries as Partial Track Objects -> Fetch the tracks only once they are gonna play)
 
 - 😍 Included Filter & Equalizer Management
@@ -91,20 +91,20 @@ Check out the [Documentation](https://lc4.gitbook.io/lavalink-client) | or the [
 
 - 🛡️ Client Validations
   - Allows you to whitelist links and even blacklist links / words / domain names, so that it doesn't allow requests you don't want!
-  - Checks almost all Lavalink Requests for out of bound errors, right before the request is made to prevent process breaking errors. 
+  - Checks almost all Lavalink Requests for out of bound errors, right before the request is made to prevent process breaking errors.
 
 - 🧑‍💻 Memory friendly and easy style
   - Only the required data is displayed, and the store-way & types match Lavalink#IMPLEMENTATION.md
 
 - 😘 Automated Handlings
-  - Skips the songs, on TrackEnd, TrackStuck, TrackError, 
+  - Skips the songs, on TrackEnd, TrackStuck, TrackError,
   - Destroys the player on channeldelete
   - Pauses / resumes the player if it get's muted / unmuted (server-wide) [soon]
   - ...
 
 - 😁 Much much more!
 
-*** 
+***
 
 # All Events:
 
@@ -169,10 +169,10 @@ class myCustomWatcher implements QueueChangesWatcher {
         this.client = client;
     }
     shuffled(guildId, oldStoredQueue, newStoredQueue) {
-        console.log(`${this.client.guilds.cache.get(guildId)?.name || guildId}: Queue got shuffled`)    
+        console.log(`${this.client.guilds.cache.get(guildId)?.name || guildId}: Queue got shuffled`)
     }
     tracksAdd(guildId, tracks, position, oldStoredQueue, newStoredQueue) {
-        console.log(`${this.client.guilds.cache.get(guildId)?.name || guildId}: ${tracks.length} Tracks got added into the Queue at position #${position}`);    
+        console.log(`${this.client.guilds.cache.get(guildId)?.name || guildId}: ${tracks.length} Tracks got added into the Queue at position #${position}`);
     }
     tracksRemoved(guildId, tracks, position, oldStoredQueue, newStoredQueue) {
         console.log(`${this.client.guilds.cache.get(guildId)?.name || guildId}: ${tracks.length} Tracks got removed from the Queue at position #${position}`);
@@ -208,9 +208,9 @@ client.lavalink.nodeManager.on("resumed", (node, payload, fetchedPlayers) => {
     await player.queue.utils.sync(); // only works with a queuestore
     // you can now overwride the player.queue.current track from the fetchedPlayer, or use the one from the queue.uztils.sync function
     // continue with your resuming code...
-  } 
+  }
 })
-``` 
+```
 
 ***
 
@@ -228,7 +228,7 @@ const extraParams = new URLSearchParams();
 if(voice) extraParams.append(`voice`, voice);
 
 // all params for flowertts can be found here: https://flowery.pw/docs
-const response = await player.search({ 
+const response = await player.search({
   query: `${query}`,
   extraQueryUrlParams: extraParams, // as of my knowledge this is currently only used for flowertts, adjusting the playback url dynamically mid-request
   source: "ftts"
@@ -236,7 +236,7 @@ const response = await player.search({
 ```
 
 
-*** 
+***
 
 
 # UpdateLog
@@ -254,8 +254,8 @@ const response = await player.search({
   - `player.deleteSponsorBlock()` / `node.deleteSponsorBlock()`
     - That Plugin adds following **Events** to the **Manager**: `"SegmentsLoaded"`, `"SegmentSkipped"`, `"ChapterStarted"`, `"ChaptersLoaded"`
 - Example Bot show example in autoplayFunction how to "disable" / "enable" Autoplay with bot data variables.
-- Added `ManagerOptions#emitNewSongsOnly`. If set to true, it won't emit "trackStart" Event, when track.loop is active, or the new current track == the previous (current) track. 
-- Added `ManagerOptions#linksBlacklist` which allows user to specify an array of regExp / strings to match query strings (for links / words) and if a match happens it doesn't allow the request (blacklist) 
+- Added `ManagerOptions#emitNewSongsOnly`. If set to true, it won't emit "trackStart" Event, when track.loop is active, or the new current track == the previous (current) track.
+- Added `ManagerOptions#linksBlacklist` which allows user to specify an array of regExp / strings to match query strings (for links / words) and if a match happens it doesn't allow the request (blacklist)
 - Added `ManagerOptions#linksWhitelist` which allows user to specify an array of regExp / strings to match query strings (for links only) and if a match does NOT HAPPEN it doesn't allow the request (whitelist)
 - Added `ManagerOptions#linksAllowed` if set to false, it does not allow requests which are links
 - Moved `ManaagerOptions#debugOptions` to `ManaagerOptions#advancedOptions.debugOptions`
@@ -263,10 +263,10 @@ const response = await player.search({
 ### **Version 1.2.1**
 - Adjusted `player.stopPlaying()`
   - There are now following parameters. `stopPlaying(clearQueue:boolean = true, executeAutoplay:boolean = false)`.
-    - On Default it now clears the queue and stops playing. Also it does not execute Autoplay on default. IF you want the function to behave differently, you can use the 2 states for that. 
+    - On Default it now clears the queue and stops playing. Also it does not execute Autoplay on default. IF you want the function to behave differently, you can use the 2 states for that.
   - Fixed that it looped the current track if repeatmode === "track" / "queue". (it stops playing and loop stays)
 - Implemented a `parseLavalinkConnUrl(connectionUrl:string)` Util Function.
-  - It allows you to parse Lavalink Connection Data of a Lavalink Connection Url. 
+  - It allows you to parse Lavalink Connection Data of a Lavalink Connection Url.
   Pattern: `lavalink://<nodeId>:<nodeAuthorization(Password)>@<NodeHost>:<NodePort>`
   - Note that the nodeId and NodeAuthorization must be encoded via encodeURIComponents before you provide it into the function.
   - The function will return the following: `{ id: string, authorization: string, host: string, port: number }`
@@ -298,10 +298,10 @@ const response = await player.search({
 # and after  connecting the nodeManager.on("resumed", (node, payload, players) => {}) will be executed, where you can sync the players!
 
 # Node Options got adjusted # It's a property not a method should be treated readonly
-+ node.resuming: { enabled: boolean, timeout: number | null }; 
++ node.resuming: { enabled: boolean, timeout: number | null };
 
 # Player function got added to stop playing without disconnecting
-+ player.stopPlaying(clearQueue:boolean = true, executeAutoplay:boolean = false); 
++ player.stopPlaying(clearQueue:boolean = true, executeAutoplay:boolean = false);
 
 # Node functions for sponsorBlock Plugin (https://github.com/topi314/Sponsorblock-Plugin) got added
 + deleteSponsorBlock(player:Player)
@@ -321,7 +321,7 @@ const response = await player.search({
 # Lavalink track.userData got added (basically same feature as my custom pluginInfo.clientData system)
 # You only get the track.userData data through playerUpdate object
 ```
-In one of the next updates, there will be more queueWatcher options and more custom nodeevents to trace 
+In one of the next updates, there will be more queueWatcher options and more custom nodeevents to trace
 
 Most features of this update got tested, but if you encounter any bugs feel free to open an issue!
 
@@ -378,9 +378,35 @@ const extraParams = new URLSearchParams();
 if(voice) extraParams.append(`voice`, voice);
 
 // all params for flowertts can be found here: https://flowery.pw/docs
-const response = await player.search({ 
+const response = await player.search({
   query: `${query}`,
   extraQueryUrlParams: extraParams, // as of my knowledge this is currently only used for flowertts, adjusting the playback url dynamically mid-request
   source: "ftts"
 }, interaction.user);
+```
+
+
+## **Version 2.2.2**
+- Fixed a bug in player.pause() where when you pause the track longer than the left over currentTrack.info.duration is, then it would auto skip the track on resume.
+- Fixed the handling of the previous track array ( sometimes it adds "null", due to lavalink errors )
+- Added new functions for the queue, to make migrations and coding easier for beginners,
+  - ` const previousTrack = await player.queue.shiftPrevious() ` -> removes the previously played track from the player.queue.previous array, and returns it, so you can use it for something like "play previous"
+    - *Neat 1-liner: ` await player.queue.shiftPrevious().then(clientTrack => player.play({ clientTrack })) `*
+  - ` await player.queue.remove(removeQuery) ` -> Remove function to remove stuff from the queue.tracks array., following params are valid:
+    - Array of Tracks / UnresolvedTracks, e.g. ` await player.queue.remove( player.queue.tracks.slice(4, 10) ) ` *(would remove tracks from #4 (incl.) to #10 (excl.) aka those indexes: 4, 5, 6, 7, 8, 9 - this is how array.slice works)*
+    - Single Track / UnresolveTrack, e.g. ` await player.queue.remove(player.queue.tracks[player.queue.tracks.length - 1]); ` *(would remove the last track)*
+    - Array of track-indexes, e.g. ` await player.queue.remove([1, 4, 5]) ` *(Would remove track #1, #4 and #5)*
+    - Single track index, e.g. ` await player.queue.remove(5) ` *(would remove the #5 track from the queue)*
+    - **NOTE:** I still highly recommend, to use the ` player.queue.splice() ` function for mutating the queue:
+       - it is possible to remove single tracks, multiple tracks and insert tracks at specific positions!
+    - *the remove function haven't been fully tested yet*
+  - Added `track.pluginInfo.clientData?.previousTrack` handling:
+    - If a track has this property in the pluginInfo in the clientData object set to "true" then it won't get added to the previous track array. Example:
+```js
+const previousTrack = await player.queue.shiftPrevious();
+if(previousTrack) {
+    const previousClientData = previousTrack.pluginInfo.clientData || {};
+    previousTrack.pluginInfo.clientData = { previousTrack: true, ...previousClientData }
+    await player.play({ clientTrack: previousTrack });
+}
 ```

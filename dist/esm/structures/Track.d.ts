@@ -81,6 +81,7 @@ export interface PluginInfo {
     uri?: string;
     /** You can put specific track information here, to transform the tracks... */
     clientData?: {
+        previousTrack?: boolean;
         [key: string]: any;
     };
 }

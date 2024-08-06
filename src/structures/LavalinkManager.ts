@@ -107,7 +107,7 @@ export interface LavalinkManagerEvents {
    * Emitted when a Track finished.
    * @event Manager#trackEnd
    */
-  "trackEnd": (player: Player, track: Track, payload: TrackEndEvent) => void;
+  "trackEnd": (player: Player, track: Track | null, payload: TrackEndEvent) => void;
   /**
    * Emitted when a Track got stuck while playing.
    * @event Manager#trackStuck
@@ -122,7 +122,7 @@ export interface LavalinkManagerEvents {
    * Emitted when the Playing finished and no more tracks in the queue.
    * @event Manager#queueEnd
    */
-  "queueEnd": (player: Player, track: Track, payload: TrackEndEvent | TrackStuckEvent | TrackExceptionEvent) => void;
+  "queueEnd": (player: Player, track: Track | UnresolvedTrack | null, payload: TrackEndEvent | TrackStuckEvent | TrackExceptionEvent) => void;
   /**
    * Emitted when a Player is created.
    * @event Manager#playerCreate
@@ -162,7 +162,7 @@ export interface LavalinkManagerEvents {
    * @link https://github.com/topi314/Sponsorblock-Plugin#segmentsloaded
    * @event Manager#trackError
    */
-  "SegmentsLoaded": (player: Player, track: Track | UnresolvedTrack, payload: SponsorBlockSegmentsLoaded) => void;
+  "SegmentsLoaded": (player: Player, track: Track | UnresolvedTrack | null, payload: SponsorBlockSegmentsLoaded) => void;
 
   /**
    * SPONSORBLOCK-PLUGIN EVENT
@@ -170,7 +170,7 @@ export interface LavalinkManagerEvents {
    * @link https://github.com/topi314/Sponsorblock-Plugin#segmentskipped
    * @event Manager#trackError
    */
-  "SegmentSkipped": (player: Player, track: Track | UnresolvedTrack, payload: SponsorBlockSegmentSkipped) => void;
+  "SegmentSkipped": (player: Player, track: Track | UnresolvedTrack | null, payload: SponsorBlockSegmentSkipped) => void;
 
   /**
    * SPONSORBLOCK-PLUGIN EVENT
@@ -178,7 +178,7 @@ export interface LavalinkManagerEvents {
    * @link https://github.com/topi314/Sponsorblock-Plugin#chapterstarted
    * @event Manager#trackError
    */
-  "ChapterStarted": (player: Player, track: Track | UnresolvedTrack, payload: SponsorBlockChapterStarted) => void;
+  "ChapterStarted": (player: Player, track: Track | UnresolvedTrack | null, payload: SponsorBlockChapterStarted) => void;
 
   /**
    * SPONSORBLOCK-PLUGIN EVENT
@@ -186,7 +186,7 @@ export interface LavalinkManagerEvents {
    * @link https://github.com/topi314/Sponsorblock-Plugin#chaptersloaded
    * @event Manager#trackError
    */
-  "ChaptersLoaded": (player: Player, track: Track | UnresolvedTrack, payload: SponsorBlockChaptersLoaded) => void;
+  "ChaptersLoaded": (player: Player, track: Track | UnresolvedTrack | null, payload: SponsorBlockChaptersLoaded) => void;
 }
 
 export interface LavalinkManager {
@@ -210,8 +210,8 @@ export class LavalinkManager extends EventEmitter {
 
   /**
    * Applies the options provided by the User
-   * @param options 
-   * @returns 
+   * @param options
+   * @returns
    */
   private applyOptions(options: ManagerOptions) {
     this.options = {
@@ -265,7 +265,7 @@ export class LavalinkManager extends EventEmitter {
 
   /**
    * Validates the current manager's options
-   * @param options 
+   * @param options
    */
   private validateOptions(options: ManagerOptions) {
     if (typeof options?.sendToShard !== "function") throw new SyntaxError("ManagerOption.sendToShard was not provided, which is required!");
@@ -301,8 +301,8 @@ export class LavalinkManager extends EventEmitter {
 
   /**
    * Create the Lavalink Manager
-   * @param options 
-   * 
+   * @param options
+   *
    * @example
    * ```ts
    * //const client = new Client({...}); // create your BOT Client (e.g. via discord.js)
@@ -376,7 +376,7 @@ export class LavalinkManager extends EventEmitter {
   /**
    * Get a Player from Lava
    * @param guildId The guildId of the player
-   * 
+   *
    * @example
    * ```ts
    * const player = client.lavalink.getPlayer(interaction.guildId);
@@ -393,9 +393,9 @@ export class LavalinkManager extends EventEmitter {
 
   /**
    * Create a Music-Player. If a player exists, then it returns it before creating a new one
-   * @param options 
-   * @returns 
-   * 
+   * @param options
+   * @returns
+   *
    * @example
    * ```ts
    * const player = client.lavalink.createPlayer({
@@ -411,7 +411,7 @@ export class LavalinkManager extends EventEmitter {
    *   //only needed if you want to autopick node by region (configured by you)
    *   // vcRegion: interaction.member.voice.rtcRegion,
    *   // provide a specific node
-   *   // node: client.lavalink.nodeManager.leastUsedNodes("memory")[0] 
+   *   // node: client.lavalink.nodeManager.leastUsedNodes("memory")[0]
    * });
    * ```
    */
@@ -427,10 +427,10 @@ export class LavalinkManager extends EventEmitter {
 
   /**
    * Destroy a player with optional destroy reason and disconnect it from the voice channel
-   * @param guildId 
-   * @param destroyReason 
-   * @returns 
-   * 
+   * @param guildId
+   * @param destroyReason
+   * @returns
+   *
    * @example
    * ```ts
    * client.lavalink.destroyPlayer(interaction.guildId, "forcefully destroyed the player");
@@ -445,9 +445,9 @@ export class LavalinkManager extends EventEmitter {
 
   /**
    * Delete's a player from the cache without destroying it on lavalink (only works when it's disconnected)
-   * @param guildId 
-   * @returns 
-   * 
+   * @param guildId
+   * @returns
+   *
    * @example
    * ```ts
    * client.lavalink.deletePlayer(interaction.guildId);
@@ -457,7 +457,7 @@ export class LavalinkManager extends EventEmitter {
   public deletePlayer(guildId: string) {
     const oldPlayer = this.getPlayer(guildId);
     if(!oldPlayer) return;
-    // oldPlayer.connected is operational. you could also do oldPlayer.voice?.token 
+    // oldPlayer.connected is operational. you could also do oldPlayer.voice?.token
     if (oldPlayer.voiceChannelId === "string" && oldPlayer.connected && !oldPlayer.get("internal_destroywithoutdisconnect")) {
       if(!this.options?.advancedOptions?.debugOptions?.playerDestroy?.dontThrowError) throw new Error(`Use Player#destroy() not LavalinkManager#deletePlayer() to stop the Player ${JSON.stringify(oldPlayer.toJSON?.())}`)
       else console.error("Use Player#destroy() not LavalinkManager#deletePlayer() to stop the Player", oldPlayer.toJSON?.())
@@ -467,7 +467,7 @@ export class LavalinkManager extends EventEmitter {
 
   /**
    * Checks wether the the lib is useable based on if any node is connected
-   * 
+   *
    * @example
    * ```ts
    * if(!client.lavalink.useable) return console.error("can'T search yet, because there is no useable lavalink node.")
@@ -480,8 +480,8 @@ export class LavalinkManager extends EventEmitter {
 
   /**
    * Initiates the Manager, creates all nodes and connects all of them
-   * @param clientData 
-   * 
+   * @param clientData
+   *
    * @example
    * ```ts
    * // on the bot ready event
@@ -521,9 +521,9 @@ export class LavalinkManager extends EventEmitter {
    * Sends voice data to the Lavalink server.
    * ! Without this the library won't work
    * @param data
-   * 
+   *
    * @example
-   * 
+   *
    * ```ts
    * // on the bot "raw" event
    * client.on("raw", (d) => {

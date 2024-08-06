@@ -75,9 +75,9 @@ export class FilterManager {
             // "cutoffFrequency": 284, // Integer, higher than zero, in Hz.
             // "boostFactor": 1.24389    // Float, higher than 0.0. This alters volume output. A value of 1.0 means no volume change.
             },
-            "normalization": { // Attenuates peaking where peaks are defined as having a higher value than {maxAmplitude}. 
+            "normalization": { // Attenuates peaking where peaks are defined as having a higher value than {maxAmplitude}.
             // "maxAmplitude": 0.6327, // Float, within the range of 0.0 - 1.0. A value of 0.0 mutes the output.
-            // "adaptive": true    // false 
+            // "adaptive": true    // false
             },
             "echo": { // Self-explanatory; provides an echo effect.
             // "echoLength": 0.5649, // Float, higher than 0.0, in seconds (1.0 = 1 second).
@@ -250,9 +250,9 @@ export class FilterManager {
                 // "cutoffFrequency": 284, // Integer, higher than zero, in Hz.
                 // "boostFactor": 1.24389    // Float, higher than 0.0. This alters volume output. A value of 1.0 means no volume change.
                 },
-                "normalization": { // Attenuates peaking where peaks are defined as having a higher value than {maxAmplitude}. 
+                "normalization": { // Attenuates peaking where peaks are defined as having a higher value than {maxAmplitude}.
                 // "maxAmplitude": 0.6327, // Float, within the range of 0.0 - 1.0. A value of 0.0 mutes the output.
-                // "adaptive": true    // false 
+                // "adaptive": true    // false
                 },
                 "echo": { // Self-explanatory; provides an echo effect.
                 // "echoLength": 0.5649, // Float, higher than 0.0, in seconds (1.0 = 1 second).

@@ -86,7 +86,12 @@ export interface PluginInfo {
     /** The Url provided by a Plugin */
     uri?: string,
     /** You can put specific track information here, to transform the tracks... */
-    clientData?: { [key:string] : any },
+    clientData?: {
+        /* If provided and true, then this track won't get added to the previous array */
+        previousTrack?: boolean;
+
+        [key:string] : any;
+    },
 }
 
 export interface LavalinkTrack {

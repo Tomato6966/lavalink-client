@@ -26,7 +26,7 @@ exports.DefaultSources = {
     "am": "amsearch",
     "musicapple": "amsearch",
     "music apple": "amsearch",
-    // spotify 
+    // spotify
     "spotify": "spsearch",
     "spsearch": "spsearch",
     "sp": "spsearch",

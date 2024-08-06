@@ -28,11 +28,11 @@ if(envConfig.redis.url && 1 < 0) { // little invalid if statement so the redis d
 client.defaultVolume = 100;
 
 /**
- * ? In case you wanna provide node data via env, you can use the provided util for url parsing: 
+ * ? In case you wanna provide node data via env, you can use the provided util for url parsing:
  * * Example for multiple Nodes Secure in ENV.
- * * URL-Pattern: lavalink://<nodeId>:<nodeAuthorization(Password)>@<NodeHost>:<NodePort> 
+ * * URL-Pattern: lavalink://<nodeId>:<nodeAuthorization(Password)>@<NodeHost>:<NodePort>
  * !   Important PW + ID must be encoded.
- * !   "verySpecialPassword#1" -> "verySpecialPassword%231" 
+ * !   "verySpecialPassword#1" -> "verySpecialPassword%231"
  *       (   do it in nodejs via: encodeURIComponent("verySpecialPassword#1")   )
  *          you can also use this website to encode your password: https://www.url-encode-decode.com/
 */
@@ -95,6 +95,6 @@ client.lavalink = new LavalinkManager({
 
 loadCommands(client);
 loadEvents(client);
-loadLavalinkEvents(client); 
+loadLavalinkEvents(client);
 
 client.login(envConfig.token);

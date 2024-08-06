@@ -118,7 +118,7 @@ export class Queue {
         if (this.tracks.length <= 1)
             return this.tracks.length;
         // swap #1 and #2 if only 2 tracks.
-        if (this.tracks.length == 2) {
+        if (this.tracks.length === 2) {
             [this.tracks[0], this.tracks[1]] = [this.tracks[1], this.tracks[0]];
         }
         else { // randomly swap places.
@@ -191,5 +191,108 @@ export class Queue {
         await this.utils.save();
         // return the things
         return spliced.length === 1 ? spliced[0] : spliced;
+    }
+    /**
+     * Remove stuff from the queue.tracks array
+     *  - single Track | UnresolvedTrack
+     *  - multiple Track | UnresovedTrack
+     *  - at the index or multiple indexes
+     * @param removeQueryTrack
+     * @returns null (if nothing was removed) / { removed } where removed is an array with all removed elements
+     *
+     * @example
+     * ```js
+     * // remove single track
+     *
+     * const track = player.queue.tracks[4];
+     * await player.queue.remove(track);
+     *
+     * // if you already have the index you can straight up pass it too
+     * await player.queue.remove(4);
+     *
+     *
+     * // if you want to remove multiple tracks, e.g. from position 4 to position 10 you can do smt like this
+     * await player.queue.remove(player.queue.tracks.slice(4, 10)) // get's the tracks from 4 - 10, which then get's found in the remove function to be removed
+     *
+     * // I still highly suggest to use .splice!
+     *
+     * await player.queue.splice(4, 10); // removes at index 4, 10 tracks
+     *
+     * await player.queue.splice(1, 1); // removes at index 1, 1 track
+     *
+     * await player.queue.splice(4, 0, ...tracks) // removes 0 tracks at position 4, and then inserts all tracks after position 4.
+     * ```
+     */
+    async remove(removeQueryTrack) {
+        if (typeof removeQueryTrack === "number") {
+            const toRemove = this.tracks[removeQueryTrack];
+            if (!toRemove)
+                return null;
+            const removed = this.tracks.splice(removeQueryTrack, 1);
+            await this.utils.save();
+            console.log("0st", removed, toRemove);
+            return { removed };
+        }
+        if (Array.isArray(removeQueryTrack)) {
+            if (removeQueryTrack.every(v => typeof v === "number")) {
+                const removed = [];
+                for (const i of removeQueryTrack) {
+                    if (this.tracks[i])
+                        removed.push(...this.tracks.splice(i, 1));
+                }
+                console.log("1st", removed, removeQueryTrack);
+                if (!removed.length)
+                    return null;
+                await this.utils.save();
+                return { removed };
+            }
+            const tracksToRemove = this.tracks.map((v, i) => ({ v, i })).filter(({ v, i }) => removeQueryTrack.find(t => typeof t === "number" && (t === i) ||
+                typeof t === "object" && (t.encoded && t.encoded === v.encoded ||
+                    t.info?.identifier && t.info.identifier === v.info?.identifier ||
+                    t.info?.uri && t.info.uri === v.info?.uri ||
+                    t.info?.title && t.info.title === v.info?.title ||
+                    t.info?.isrc && t.info.isrc === v.info?.isrc ||
+                    t.info?.artworkUrl && t.info.artworkUrl === v.info?.artworkUrl)));
+            if (!tracksToRemove.length)
+                return null;
+            const removed = [];
+            for (const { i } of tracksToRemove) {
+                if (this.tracks[i])
+                    removed.push(...this.tracks.splice(i, 1));
+            }
+            await this.utils.save();
+            console.log("2nd", removed, tracksToRemove);
+            return { removed };
+        }
+        const toRemove = this.tracks.findIndex((v) => removeQueryTrack.encoded && removeQueryTrack.encoded === v.encoded ||
+            removeQueryTrack.info?.identifier && removeQueryTrack.info.identifier === v.info?.identifier ||
+            removeQueryTrack.info?.uri && removeQueryTrack.info.uri === v.info?.uri ||
+            removeQueryTrack.info?.title && removeQueryTrack.info.title === v.info?.title ||
+            removeQueryTrack.info?.isrc && removeQueryTrack.info.isrc === v.info?.isrc ||
+            removeQueryTrack.info?.artworkUrl && removeQueryTrack.info.artworkUrl === v.info?.artworkUrl);
+        if (toRemove < 0)
+            return null;
+        const removed = this.tracks.splice(toRemove, 1);
+        await this.utils.save();
+        console.log("3rd", removed, toRemove);
+        return { removed };
+    }
+    /**
+     * Shifts the previous array, to return the last previous track & thus remove it from the previous queue
+     * @returns
+     *
+     * @example
+     * ```js
+     * // example on how to play the previous track again
+     * const previous = await player.queue.shiftPrevious(); // get the previous track and remove it from the previous queue array!!
+     * if(!previous) return console.error("No previous track found");
+     * await player.play({ clientTrack: previous }); // play it again
+     * ```
+     */
+    async shiftPrevious() {
+        const removed = this.previous.shift();
+        if (removed)
+            await this.utils.save();
+        return removed ?? null;
     }
 }

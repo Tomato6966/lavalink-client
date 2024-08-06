@@ -8,7 +8,9 @@ export class NodeManager extends EventEmitter {
         super();
         this.LavalinkManager = LavalinkManager;
         if (this.LavalinkManager.options.nodes)
-            this.LavalinkManager.options.nodes.forEach(node => this.createNode(node));
+            this.LavalinkManager.options.nodes.forEach(node => {
+                this.createNode(node);
+            });
     }
     /**
      * Disconnects all Nodes from lavalink ws sockets

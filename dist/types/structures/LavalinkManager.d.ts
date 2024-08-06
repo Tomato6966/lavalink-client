@@ -95,7 +95,7 @@ export interface LavalinkManagerEvents {
      * Emitted when a Track finished.
      * @event Manager#trackEnd
      */
-    "trackEnd": (player: Player, track: Track, payload: TrackEndEvent) => void;
+    "trackEnd": (player: Player, track: Track | null, payload: TrackEndEvent) => void;
     /**
      * Emitted when a Track got stuck while playing.
      * @event Manager#trackStuck
@@ -110,7 +110,7 @@ export interface LavalinkManagerEvents {
      * Emitted when the Playing finished and no more tracks in the queue.
      * @event Manager#queueEnd
      */
-    "queueEnd": (player: Player, track: Track, payload: TrackEndEvent | TrackStuckEvent | TrackExceptionEvent) => void;
+    "queueEnd": (player: Player, track: Track | UnresolvedTrack | null, payload: TrackEndEvent | TrackStuckEvent | TrackExceptionEvent) => void;
     /**
      * Emitted when a Player is created.
      * @event Manager#playerCreate
@@ -147,28 +147,28 @@ export interface LavalinkManagerEvents {
      * @link https://github.com/topi314/Sponsorblock-Plugin#segmentsloaded
      * @event Manager#trackError
      */
-    "SegmentsLoaded": (player: Player, track: Track | UnresolvedTrack, payload: SponsorBlockSegmentsLoaded) => void;
+    "SegmentsLoaded": (player: Player, track: Track | UnresolvedTrack | null, payload: SponsorBlockSegmentsLoaded) => void;
     /**
      * SPONSORBLOCK-PLUGIN EVENT
      * Emitted when a specific Segment was skipped
      * @link https://github.com/topi314/Sponsorblock-Plugin#segmentskipped
      * @event Manager#trackError
      */
-    "SegmentSkipped": (player: Player, track: Track | UnresolvedTrack, payload: SponsorBlockSegmentSkipped) => void;
+    "SegmentSkipped": (player: Player, track: Track | UnresolvedTrack | null, payload: SponsorBlockSegmentSkipped) => void;
     /**
      * SPONSORBLOCK-PLUGIN EVENT
      * Emitted when a specific Chapter starts playing
      * @link https://github.com/topi314/Sponsorblock-Plugin#chapterstarted
      * @event Manager#trackError
      */
-    "ChapterStarted": (player: Player, track: Track | UnresolvedTrack, payload: SponsorBlockChapterStarted) => void;
+    "ChapterStarted": (player: Player, track: Track | UnresolvedTrack | null, payload: SponsorBlockChapterStarted) => void;
     /**
      * SPONSORBLOCK-PLUGIN EVENT
      * Emitted when Chapters are loaded
      * @link https://github.com/topi314/Sponsorblock-Plugin#chaptersloaded
      * @event Manager#trackError
      */
-    "ChaptersLoaded": (player: Player, track: Track | UnresolvedTrack, payload: SponsorBlockChaptersLoaded) => void;
+    "ChaptersLoaded": (player: Player, track: Track | UnresolvedTrack | null, payload: SponsorBlockChaptersLoaded) => void;
 }
 export interface LavalinkManager {
     /** @private */

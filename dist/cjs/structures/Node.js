@@ -355,9 +355,11 @@ class LavalinkNode {
     destroy(destroyReason, deleteNode = true) {
         if (!this.connected)
             return;
-        const players = this.NodeManager.LavalinkManager.players.filter(p => p.node.id == this.id);
+        const players = this.NodeManager.LavalinkManager.players.filter(p => p.node.id === this.id);
         if (players)
-            players.forEach(p => p.destroy(destroyReason || Player_1.DestroyReasons.NodeDestroy));
+            players.forEach(p => {
+                p.destroy(destroyReason || Player_1.DestroyReasons.NodeDestroy);
+            });
         this.socket.close(1000, "Node-Destroy");
         this.socket.removeAllListeners();
         this.socket = null;
@@ -880,7 +882,7 @@ class LavalinkNode {
         // remove tracks from the queue
         if (player.repeatMode !== "track" || player.get("internal_skipped"))
             await (0, Utils_1.queueTrackEnd)(player);
-        else if (player.queue.current) { // If there was a current Track already and repeatmode === true, add it to the queue.
+        else if (player.queue.current && !player.queue.current?.pluginInfo?.clientData?.previousTrack) { // If there was a current Track already and repeatmode === true, add it to the queue.
             player.queue.previous.unshift(player.queue.current);
             if (player.queue.previous.length > player.queue.options.maxPreviousTracks)
                 player.queue.previous.splice(player.queue.options.maxPreviousTracks, player.queue.previous.length);
@@ -1029,7 +1031,12 @@ class LavalinkNode {
             }
         }
         player.set("internal_autoplayStopPlaying", undefined);
-        player.queue.previous.unshift(track);
+        if (track && !track?.pluginInfo?.clientData?.previousTrack) { // If there was a current Track already and repeatmode === true, add it to the queue.
+            player.queue.previous.unshift(track);
+            if (player.queue.previous.length > player.queue.options.maxPreviousTracks)
+                player.queue.previous.splice(player.queue.options.maxPreviousTracks, player.queue.previous.length);
+            await player.queue.utils.save();
+        }
         if (payload?.reason !== "stopped") {
             await player.queue.utils.save();
         }

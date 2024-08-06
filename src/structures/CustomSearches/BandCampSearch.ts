@@ -1,13 +1,13 @@
 import { Player } from "../Player";
 import { UnresolvedSearchResult } from "../Utils";
 
-export const bandCampSearch = async (player:Player, query: string, requestUser: unknown) => {
+export const bandCampSearch = async (player: Player, query: string, requestUser: unknown) => {
     let error = null;
     let tracks = [];
-    
-    if(player.LavalinkManager.options.advancedOptions.debugOptions.logCustomSearches) console.log(`Lavalink-Client-Debug | SEARCHING | - ${query} on lavalink-client`)
+
+    if (player.LavalinkManager.options.advancedOptions.debugOptions.logCustomSearches) console.log(`Lavalink-Client-Debug | SEARCHING | - ${query} on lavalink-client`)
     player.LavalinkManager.utils.validateQueryString(player.node, query);
-    
+
     try {
         const data = await fetch(`https://bandcamp.com/api/nusearch/2/autocomplete?q=${encodeURIComponent(query)}`, {
             headers: {
@@ -16,7 +16,7 @@ export const bandCampSearch = async (player:Player, query: string, requestUser: 
             }
         });
 
-        const json = await data.json() as { results: { [key:string]: string }[] };
+        const json = await data.json() as { results: { [key: string]: string }[] };
 
         tracks = json?.results?.filter(x => !!x && typeof x === "object" && "type" in x && x.type === "t").map?.(item => player.LavalinkManager.utils.buildUnresolvedTrack({
             uri: item.url || item.uri,
@@ -28,11 +28,11 @@ export const bandCampSearch = async (player:Player, query: string, requestUser: 
 
     } catch (e) { error = e; }
 
-    return { 
+    return {
         loadType: "search",
         exception: error,
         pluginInfo: {},
-        playlist:  null,
+        playlist: null,
         tracks: tracks
     } as UnresolvedSearchResult;
 }

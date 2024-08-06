@@ -339,10 +339,11 @@ export class MiniMap extends Map {
     }
 }
 export async function queueTrackEnd(player) {
-    if (player.queue.current) { // if there was a current Track -> Add it
+    if (player.queue.current && !player.queue.current?.pluginInfo?.clientData?.previousTrack) { // If there was a current Track already and repeatmode === true, add it to the queue.
         player.queue.previous.unshift(player.queue.current);
         if (player.queue.previous.length > player.queue.options.maxPreviousTracks)
             player.queue.previous.splice(player.queue.options.maxPreviousTracks, player.queue.previous.length);
+        await player.queue.utils.save();
     }
     // and if repeatMode == queue, add it back to the queue!
     if (player.repeatMode === "queue" && player.queue.current)
@@ -371,11 +372,11 @@ async function applyUnresolvedData(resTrack, data, utils) {
             resTrack.info.author = data.info.author;
     }
     else { // only overwrite if undefined / invalid
-        if ((resTrack.info.title == 'Unknown title' || resTrack.info.title == "Unspecified description") && resTrack.info.title != data.info.title)
+        if ((resTrack.info.title === 'Unknown title' || resTrack.info.title === "Unspecified description") && resTrack.info.title != data.info.title)
             resTrack.info.title = data.info.title;
-        if (resTrack.info.author != data.info.author)
+        if (resTrack.info.author !== data.info.author)
             resTrack.info.author = data.info.author;
-        if (resTrack.info.artworkUrl != data.info.artworkUrl)
+        if (resTrack.info.artworkUrl !== data.info.artworkUrl)
             resTrack.info.artworkUrl = data.info.artworkUrl;
     }
     for (const key of Object.keys(data.info))

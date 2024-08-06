@@ -113,4 +113,51 @@ export declare class Queue {
      * @returns {Track} Spliced Track
      */
     splice(index: number, amount: number, TrackOrTracks?: Track | UnresolvedTrack | (Track | UnresolvedTrack)[]): any;
+    /**
+     * Remove stuff from the queue.tracks array
+     *  - single Track | UnresolvedTrack
+     *  - multiple Track | UnresovedTrack
+     *  - at the index or multiple indexes
+     * @param removeQueryTrack
+     * @returns null (if nothing was removed) / { removed } where removed is an array with all removed elements
+     *
+     * @example
+     * ```js
+     * // remove single track
+     *
+     * const track = player.queue.tracks[4];
+     * await player.queue.remove(track);
+     *
+     * // if you already have the index you can straight up pass it too
+     * await player.queue.remove(4);
+     *
+     *
+     * // if you want to remove multiple tracks, e.g. from position 4 to position 10 you can do smt like this
+     * await player.queue.remove(player.queue.tracks.slice(4, 10)) // get's the tracks from 4 - 10, which then get's found in the remove function to be removed
+     *
+     * // I still highly suggest to use .splice!
+     *
+     * await player.queue.splice(4, 10); // removes at index 4, 10 tracks
+     *
+     * await player.queue.splice(1, 1); // removes at index 1, 1 track
+     *
+     * await player.queue.splice(4, 0, ...tracks) // removes 0 tracks at position 4, and then inserts all tracks after position 4.
+     * ```
+     */
+    remove<T extends Track | UnresolvedTrack | number | Track[] | UnresolvedTrack[] | number[] | (number | Track | UnresolvedTrack)[]>(removeQueryTrack: T): Promise<{
+        removed: (Track | UnresolvedTrack)[];
+    } | null>;
+    /**
+     * Shifts the previous array, to return the last previous track & thus remove it from the previous queue
+     * @returns
+     *
+     * @example
+     * ```js
+     * // example on how to play the previous track again
+     * const previous = await player.queue.shiftPrevious(); // get the previous track and remove it from the previous queue array!!
+     * if(!previous) return console.error("No previous track found");
+     * await player.play({ clientTrack: previous }); // play it again
+     * ```
+     */
+    shiftPrevious(): Promise<Track>;
 }

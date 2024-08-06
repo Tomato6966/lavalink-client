@@ -281,6 +281,7 @@ class Player {
         if (this.paused && !this.playing)
             throw new Error("Player is already paused - not able to pause.");
         this.paused = true;
+        this.lastPositionChange = null; // needs to removed to not cause issues
         const now = performance.now();
         await this.node.updatePlayer({ guildId: this.guildId, playerOptions: { paused: true } });
         this.ping.lavalink = Math.round((performance.now() - now) / 10) / 100;

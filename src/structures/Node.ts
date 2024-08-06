@@ -220,14 +220,14 @@ export class LavalinkNode {
 
     /**
      * Create a new Node
-     * @param options Lavalink Node Options 
+     * @param options Lavalink Node Options
      * @param manager Node Manager
-     * 
-     * 
+     *
+     *
      * @example
      * ```ts
      * // don't create a node manually, instead use:
-     * 
+     *
      * client.lavalink.nodeManager.createNode(options)
      * ```
      */
@@ -256,7 +256,7 @@ export class LavalinkNode {
      * @param url input url object
      * @param extraQueryUrlParams UrlSearchParams to use in a encodedURI, useful for example for flowertts
      * @returns the url as a valid string
-     * 
+     *
      * @example
      * ```ts
      * player.node.getRequestingUrl(new URL(`http://localhost:2333/v4/loadtracks?identifier=Never gonna give you up`));
@@ -268,7 +268,7 @@ export class LavalinkNode {
         for (const [paramKey, paramValue] of url.searchParams.entries()) {
             const decoded = decodeURIComponent(paramValue).trim(); // double decoding, once internally, a second time if decoded by provided user.
             if(decoded.includes("://") && !/^https?:\/\//.test(decoded)) { // uri, but not url.
-                const [key, ...values] = decoded.split("://"); 
+                const [key, ...values] = decoded.split("://");
                 keysToAdd.push(`${paramKey}=${encodeURI(`${key}://${encodeURIComponent(values.join("://"))}${extraQueryUrlParams && extraQueryUrlParams?.size > 0 ? `?${extraQueryUrlParams.toString()}` : ""}`)}`);
                 continue;
             }
@@ -283,7 +283,7 @@ export class LavalinkNode {
      * @param modify modify the request
      * @param extraQueryUrlParams UrlSearchParams to use in a encodedURI, useful for example for flowertts
      * @returns object containing request and option information
-     * 
+     *
      * @example
      * ```ts
      * player.node.rawRequest(`/loadtracks?identifier=Never gonna give you up`, (options) => options.method = "GET");
@@ -308,11 +308,11 @@ export class LavalinkNode {
 
         delete options.path;
         delete options.extraQueryUrlParams;
-        
+
         const request = await fetch(urlToUse, options);
 
         this.calls++;
-        
+
         return { request, options };
     }
     /**
@@ -320,7 +320,7 @@ export class LavalinkNode {
      * @param endpoint The endpoint that we will make the call to
      * @param modify Used to modify the request before being sent
      * @returns The returned data
-     * 
+     *
      * @example
      * ```ts
      * player.node.request(`/loadtracks?identifier=Never gonna give you up`, (options) => options.method = "GET", false);
@@ -342,7 +342,7 @@ export class LavalinkNode {
      * @param requestUser Request User for creating the player(s)
      * @param throwOnEmpty Wether to throw on an empty result or not
      * @returns Searchresult
-     * 
+     *
      * @example
      * ```ts
      * // use player.search() instead
@@ -406,7 +406,7 @@ export class LavalinkNode {
      * @param requestUser Request User for creating the player(s)
      * @param throwOnEmpty Wether to throw on an empty result or not
      * @returns LavaSearchresult
-     * 
+     *
      * @example
      * ```ts
      * // use player.search() instead
@@ -444,7 +444,7 @@ export class LavalinkNode {
      * Update the Player State on the Lavalink Server
      * @param data data to send to lavalink and sync locally
      * @returns result from lavalink
-     * 
+     *
      * @example
      * ```ts
      * // use player.search() instead
@@ -475,11 +475,11 @@ export class LavalinkNode {
      * Destroys the Player on the Lavalink Server
      * @param guildId
      * @returns request result
-     * 
+     *
      * @example
      * ```ts
      * // use player.destroy() instead
-     * player.node.destroyPlayer(player.guildId); 
+     * player.node.destroyPlayer(player.guildId);
      * ```
      */
     public async destroyPlayer(guildId) {
@@ -492,11 +492,11 @@ export class LavalinkNode {
      * Connect to the Lavalink Node
      * @param sessionId Provide the Session Id of the previous connection, to resume the node and it's player(s)
      * @returns void
-     * 
+     *
      * @example
      * ```ts
      * player.node.connect(); // if provided on bootup in managerOptions#nodes, this will be called automatically when doing lavalink.init()
-     * 
+     *
      * // or connect from a resuming session:
      * player.node.connect("sessionId");
      * ```
@@ -522,10 +522,10 @@ export class LavalinkNode {
         this.socket.on("error", this.error.bind(this));
     }
 
-    /** 
+    /**
      * Get the id of the node
-     * 
-     * @example 
+     *
+     * @example
      * ```ts
      * const nodeId = player.node.id;
      * console.log("node id is: ", nodeId)
@@ -540,16 +540,18 @@ export class LavalinkNode {
      * @param destroyReason Destroyreason to use when destroying the players
      * @param deleteNode wether to delete the nodte from the nodes list too, if false it will emit a disconnect. @default true
      * @returns void
-     * 
-     * @example 
+     *
+     * @example
      * ```ts
      * player.node.destroy("custom Player Destroy Reason", true);
      * ```
      */
     public destroy(destroyReason?:DestroyReasonsType, deleteNode = true) {
         if (!this.connected) return
-        const players = this.NodeManager.LavalinkManager.players.filter(p => p.node.id == this.id);
-        if (players) players.forEach(p => p.destroy(destroyReason || DestroyReasons.NodeDestroy));
+        const players = this.NodeManager.LavalinkManager.players.filter(p => p.node.id === this.id);
+        if (players) players.forEach(p => {
+            p.destroy(destroyReason || DestroyReasons.NodeDestroy);
+        });
 
         this.socket.close(1000, "Node-Destroy");
         this.socket.removeAllListeners();
@@ -567,10 +569,10 @@ export class LavalinkNode {
         return;
     }
 
-    /** 
-     * Returns if connected to the Node. 
-     * 
-     * @example 
+    /**
+     * Returns if connected to the Node.
+     *
+     * @example
      * ```ts
      * const isConnected = player.node.connected;
      * console.log("node is connected: ", isConnected ? "yes" : "no")
@@ -580,11 +582,11 @@ export class LavalinkNode {
         if (!this.socket) return false;
         return this.socket.readyState === WebSocket.OPEN;
     }
-    
-    /** 
+
+    /**
      * Returns the current ConnectionStatus
-     * 
-     * @example 
+     *
+     * @example
      * ```ts
      * try {
      *     const statusOfConnection = player.node.connectionStatus;
@@ -602,8 +604,8 @@ export class LavalinkNode {
     /**
      * Gets all Players of a Node
      * @returns array of players inside of lavalink
-     * 
-     * @example 
+     *
+     * @example
      * ```ts
      * const node = lavalink.nodes.get("NODEID");
      * const playersOfLavalink = await node?.fetchAllPlayers();
@@ -619,8 +621,8 @@ export class LavalinkNode {
     /**
      * Gets specific Player Information
      * @returns lavalink player object if player exists on lavalink
-     * 
-     * @example 
+     *
+     * @example
      * ```ts
      * const node = lavalink.nodes.get("NODEID");
      * const playerInformation = await node?.fetchPlayer("guildId");
@@ -636,8 +638,8 @@ export class LavalinkNode {
      * @param resuming Whether resuming is enabled for this session or not
      * @param timeout The timeout in seconds (default is 60s)
      * @returns the result of the request
-     * 
-     * @example 
+     *
+     * @example
      * ```ts
      * const node = player.node || lavalink.nodes.get("NODEID");
      * await node?.updateSession(true, 180e3); // will enable resuming for 180seconds
@@ -669,11 +671,11 @@ export class LavalinkNode {
          * @param encoded valid encoded base64 string from a track
          * @param requester the requesteruser for building the track
          * @returns decoded track from lavalink
-         * 
-         * @example 
+         *
+         * @example
          * ```ts
          * const encodedBase64 = 'QAACDgMACk5vIERpZ2dpdHkAC0JsYWNrc3RyZWV0AAAAAAAEo4AABjkxNjQ5NgABAB9odHRwczovL2RlZXplci5jb20vdHJhY2svOTE2NDk2AQBpaHR0cHM6Ly9lLWNkbnMtaW1hZ2VzLmR6Y2RuLm5ldC9pbWFnZXMvY292ZXIvZGFlN2EyNjViNzlmYjcxMjc4Y2RlMjUwNDg0OWQ2ZjcvMTAwMHgxMDAwLTAwMDAwMC04MC0wLTAuanBnAQAMVVNJUjE5NjAwOTc4AAZkZWV6ZXIBAChObyBEaWdnaXR5OiBUaGUgVmVyeSBCZXN0IE9mIEJsYWNrc3RyZWV0AQAjaHR0cHM6Ly93d3cuZGVlemVyLmNvbS9hbGJ1bS8xMDMyNTQBACJodHRwczovL3d3dy5kZWV6ZXIuY29tL2FydGlzdC8xODYxAQBqaHR0cHM6Ly9lLWNkbnMtaW1hZ2VzLmR6Y2RuLm5ldC9pbWFnZXMvYXJ0aXN0L2YxNmNhYzM2ZmVjMzkxZjczN2I3ZDQ4MmY1YWM3M2UzLzEwMDB4MTAwMC0wMDAwMDAtODAtMC0wLmpwZwEAT2h0dHBzOi8vY2RuLXByZXZpZXctYS5kemNkbi5uZXQvc3RyZWFtL2MtYTE1Yjg1NzFhYTYyMDBjMDQ0YmY1OWM3NmVkOTEyN2MtNi5tcDMAAAAAAAAAAAA=';
-         * const track = await player.node.decode.singleTrack(encodedBase64, interaction.user); 
+         * const track = await player.node.decode.singleTrack(encodedBase64, interaction.user);
          * ```
          */
         singleTrack: async (encoded: Base64, requester:unknown) => {
@@ -687,12 +689,12 @@ export class LavalinkNode {
          * @param encodeds valid encoded base64 string array from all tracks
          * @param requester the requesteruser for building the tracks
          * @returns array of all tracks you decoded
-         * 
-         * @example 
+         *
+         * @example
          * ```ts
          * const encodedBase64_1 = 'QAACDgMACk5vIERpZ2dpdHkAC0JsYWNrc3RyZWV0AAAAAAAEo4AABjkxNjQ5NgABAB9odHRwczovL2RlZXplci5jb20vdHJhY2svOTE2NDk2AQBpaHR0cHM6Ly9lLWNkbnMtaW1hZ2VzLmR6Y2RuLm5ldC9pbWFnZXMvY292ZXIvZGFlN2EyNjViNzlmYjcxMjc4Y2RlMjUwNDg0OWQ2ZjcvMTAwMHgxMDAwLTAwMDAwMC04MC0wLTAuanBnAQAMVVNJUjE5NjAwOTc4AAZkZWV6ZXIBAChObyBEaWdnaXR5OiBUaGUgVmVyeSBCZXN0IE9mIEJsYWNrc3RyZWV0AQAjaHR0cHM6Ly93d3cuZGVlemVyLmNvbS9hbGJ1bS8xMDMyNTQBACJodHRwczovL3d3dy5kZWV6ZXIuY29tL2FydGlzdC8xODYxAQBqaHR0cHM6Ly9lLWNkbnMtaW1hZ2VzLmR6Y2RuLm5ldC9pbWFnZXMvYXJ0aXN0L2YxNmNhYzM2ZmVjMzkxZjczN2I3ZDQ4MmY1YWM3M2UzLzEwMDB4MTAwMC0wMDAwMDAtODAtMC0wLmpwZwEAT2h0dHBzOi8vY2RuLXByZXZpZXctYS5kemNkbi5uZXQvc3RyZWFtL2MtYTE1Yjg1NzFhYTYyMDBjMDQ0YmY1OWM3NmVkOTEyN2MtNi5tcDMAAAAAAAAAAAA=';
          * const encodedBase64_2 = 'QAABJAMAClRhbGsgYSBMb3QACjQwNHZpbmNlbnQAAAAAAAHr1gBxTzpodHRwczovL2FwaS12Mi5zb3VuZGNsb3VkLmNvbS9tZWRpYS9zb3VuZGNsb3VkOnRyYWNrczo4NTE0MjEwNzYvMzUyYTRiOTAtNzYxOS00M2E5LWJiOGItMjIxMzE0YzFjNjNhL3N0cmVhbS9obHMAAQAsaHR0cHM6Ly9zb3VuZGNsb3VkLmNvbS80MDR2aW5jZW50L3RhbGstYS1sb3QBADpodHRwczovL2kxLnNuZGNkbi5jb20vYXJ0d29ya3MtRTN1ek5Gc0Y4QzBXLTAtb3JpZ2luYWwuanBnAQAMUVpITkExOTg1Nzg0AApzb3VuZGNsb3VkAAAAAAAAAAA=';
-         * const tracks = await player.node.decode.multipleTracks([encodedBase64_1, encodedBase64_2], interaction.user); 
+         * const tracks = await player.node.decode.multipleTracks([encodedBase64_1, encodedBase64_2], interaction.user);
          * ```
          */
         multipleTracks: async (encodeds: Base64[], requester:unknown) => {
@@ -710,10 +712,10 @@ export class LavalinkNode {
     /**
      * Request Lavalink statistics.
      * @returns the lavalink node stats
-     * 
+     *
      * @example
      * ```ts
-     * const lavalinkStats = await player.node.fetchStats(); 
+     * const lavalinkStats = await player.node.fetchStats();
      * ```
      */
     public async fetchStats() {
@@ -723,10 +725,10 @@ export class LavalinkNode {
     /**
      * Request Lavalink version.
      * @returns the current used lavalink version
-     * 
+     *
      * @example
      * ```ts
-     * const lavalinkVersion = await player.node.fetchVersion(); 
+     * const lavalinkVersion = await player.node.fetchVersion();
      * ```
      */
     public async fetchVersion() {
@@ -737,10 +739,10 @@ export class LavalinkNode {
     /**
      * Request Lavalink information.
      * @returns lavalink info object
-     * 
+     *
      * @example
      * ```ts
-     * const lavalinkInfo = await player.node.fetchInfo(); 
+     * const lavalinkInfo = await player.node.fetchInfo();
      * const availablePlugins:string[] = lavalinkInfo.plugins.map(plugin => plugin.name);
      * const availableSources:string[] = lavalinkInfo.sourceManagers;
      * ```
@@ -756,10 +758,10 @@ export class LavalinkNode {
         /**
          * Get routplanner Info from Lavalink for ip rotation
          * @returns the status of the routeplanner
-         * 
+         *
          * @example
          * ```ts
-         * const routePlannerStatus = await player.node.routePlannerApi.getStatus(); 
+         * const routePlannerStatus = await player.node.routePlannerApi.getStatus();
          * const usedBlock = routePlannerStatus.details?.ipBlock;
          * const currentIp = routePlannerStatus.currentAddress;
          * ```
@@ -773,10 +775,10 @@ export class LavalinkNode {
          * Release blacklisted IP address into pool of IPs for ip rotation
          * @param address IP address
          * @returns request data of the request
-         * 
+         *
          * @example
          * ```ts
-         * await player.node.routePlannerApi.unmarkFailedAddress("ipv6address"); 
+         * await player.node.routePlannerApi.unmarkFailedAddress("ipv6address");
          * ```
          */
         unmarkFailedAddress: async (address: string) => {
@@ -792,10 +794,10 @@ export class LavalinkNode {
         /**
          * Release all blacklisted IP addresses into pool of IPs
          * @returns request data of the request
-         * 
+         *
          * @example
          * ```ts
-         * await player.node.routePlannerApi.unmarkAllFailedAddresses(); 
+         * await player.node.routePlannerApi.unmarkAllFailedAddresses();
          * ```
          */
         unmarkAllFailedAddresses: async () => {
@@ -817,7 +819,7 @@ export class LavalinkNode {
     }
 
     /**
-     * Sync the data of the player you make an action to lavalink to 
+     * Sync the data of the player you make an action to lavalink to
      * @param data data to use to update the player
      * @param res result data from lavalink, to override, if available
      * @returns boolean
@@ -889,8 +891,8 @@ export class LavalinkNode {
      * Reconnect to the lavalink node
      * @param instaReconnect @default false wether to instantly try to reconnect
      * @returns void
-     * 
-     * @example 
+     *
+     * @example
      * ```ts
      * await player.node.reconnect();
      * ```
@@ -977,7 +979,7 @@ export class LavalinkNode {
                 player.lastPosition = payload.state.position || 0;
                 player.connected = payload.state.connected;
                 player.ping.ws = payload.state.ping >= 0 ? payload.state.ping : player.ping.ws <= 0 && player.connected ? null : player.ping.ws || 0;
-                
+
                 if (!player.createdTimeStamp && payload.state.time) player.createdTimeStamp = payload.state.time;
 
                 if(player.filterManager.filterUpdatedState === true && ((player.queue.current?.info?.duration || 0) <= (player.LavalinkManager.options.advancedOptions.maxFilterFixDuration || 600_000) || isAbsolute(player.queue.current?.info?.uri))) {
@@ -1001,7 +1003,7 @@ export class LavalinkNode {
                 return;
         }
     }
-    
+
     /** @private middleware util function for handling all kind of events from websocket */
     private async handleEvent(payload: PlayerEventType & PlayerEvents) {
         if (!payload.guildId) return;
@@ -1023,7 +1025,7 @@ export class LavalinkNode {
         }
         return;
     }
-    
+
     /** @private util function for handling trackStart event */
     private trackStart(player: Player, track: Track, payload: TrackStartEvent) {
         player.playing = true;
@@ -1053,7 +1055,7 @@ export class LavalinkNode {
         }
         // remove tracks from the queue
         if (player.repeatMode !== "track" || player.get("internal_skipped")) await queueTrackEnd(player);
-        else if (player.queue.current) { // If there was a current Track already and repeatmode === true, add it to the queue.
+        else if (player.queue.current && !player.queue.current?.pluginInfo?.clientData?.previousTrack) { // If there was a current Track already and repeatmode === true, add it to the queue.
             player.queue.previous.unshift(player.queue.current as Track);
             if (player.queue.previous.length > player.queue.options.maxPreviousTracks) player.queue.previous.splice(player.queue.options.maxPreviousTracks, player.queue.previous.length);
             await player.queue.utils.save();
@@ -1066,7 +1068,7 @@ export class LavalinkNode {
         // play track if autoSkip is true
         return this.NodeManager.LavalinkManager.options.autoSkip && player.play({ noReplace: true });
     }
-    
+
     /** @private util function for handling trackStuck event */
     private async trackStuck(player: Player, track: Track, payload: TrackStuckEvent) {
         this.NodeManager.LavalinkManager.emit("trackStuck", player, track, payload);
@@ -1079,7 +1081,7 @@ export class LavalinkNode {
         // play track if autoSkip is true
         return (this.NodeManager.LavalinkManager.options.autoSkip && player.queue.current) && player.play({ noReplace: true });
     }
-    
+
     /** @private util function for handling trackError event */
     private async trackError(
         player: Player,
@@ -1097,7 +1099,7 @@ export class LavalinkNode {
         // play track if autoSkip is true
         return (this.NodeManager.LavalinkManager.options.autoSkip && player.queue.current) && player.play({ noReplace: true });
     }
-    
+
     /** @private util function for handling socketClosed event */
     private socketClosed(player: Player, payload: WebSocketClosedEvent) {
         return this.NodeManager.LavalinkManager.emit("playerSocketClosed", player, payload);
@@ -1107,17 +1109,17 @@ export class LavalinkNode {
     private SponsorBlockSegmentLoaded(player:Player, track: Track, payload:SponsorBlockSegmentsLoaded) {
         return this.NodeManager.LavalinkManager.emit("SegmentsLoaded", player, track, payload);
     }
-    
+
     /** @private util function for handling SponsorBlock SegmentSkipped event */
     private SponsorBlockSegmentSkipped(player:Player, track: Track, payload:SponsorBlockSegmentSkipped) {
         return this.NodeManager.LavalinkManager.emit("SegmentSkipped", player, track, payload);
     }
-    
+
     /** @private util function for handling SponsorBlock Chaptersloaded event */
     private SponsorBlockChaptersLoaded(player:Player, track: Track, payload:SponsorBlockChaptersLoaded) {
         return this.NodeManager.LavalinkManager.emit("ChaptersLoaded", player, track, payload);
     }
-    
+
     /** @private util function for handling SponsorBlock Chaptersstarted event */
     private SponsorBlockChapterStarted(player:Player, track: Track, payload:SponsorBlockChapterStarted) {
         return this.NodeManager.LavalinkManager.emit("ChapterStarted", player, track, payload);
@@ -1127,7 +1129,7 @@ export class LavalinkNode {
      * Get the current sponsorblocks for the sponsorblock plugin
      * @param player passthrough the player
      * @returns sponsorblock seggment from lavalink
-     * 
+     *
      * @example
      * ```ts
      * // use it on the player via player.getSponsorBlock();
@@ -1145,7 +1147,7 @@ export class LavalinkNode {
      * Set the current sponsorblocks for the sponsorblock plugin
      * @param player passthrough the player
      * @returns void
-     * 
+     *
      * @example
      * ```ts
      * // use it on the player via player.setSponsorBlock();
@@ -1172,7 +1174,7 @@ export class LavalinkNode {
      * Delete the sponsorblock plugins
      * @param player passthrough the player
      * @returns void
-     * 
+     *
      * @example
      * ```ts
      * // use it on the player via player.deleteSponsorBlock();
@@ -1206,7 +1208,11 @@ export class LavalinkNode {
         }
         player.set("internal_autoplayStopPlaying", undefined);
 
-        player.queue.previous.unshift(track);
+        if (track && !track?.pluginInfo?.clientData?.previousTrack) { // If there was a current Track already and repeatmode === true, add it to the queue.
+            player.queue.previous.unshift(track);
+            if (player.queue.previous.length > player.queue.options.maxPreviousTracks) player.queue.previous.splice(player.queue.options.maxPreviousTracks, player.queue.previous.length);
+            await player.queue.utils.save();
+        }
 
         if ((payload as TrackEndEvent)?.reason !== "stopped") {
             await player.queue.utils.save();
