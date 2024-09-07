@@ -1,9 +1,64 @@
 import { EventEmitter } from "stream";
+import { DestroyReasons } from "./Constants";
 import { LavalinkNode } from "./Node";
-import { DestroyReasons } from "./Player";
 import { MiniMap } from "./Utils";
 export class NodeManager extends EventEmitter {
+    /**
+     * Emit an event
+     * @param event The event to emit
+     * @param args The arguments to pass to the event
+     * @returns
+     */
+    emit(event, ...args) {
+        return super.emit(event, ...args);
+    }
+    /**
+     * Add an event listener
+     * @param event The event to listen to
+     * @param listener The listener to add
+     * @returns
+     */
+    on(event, listener) {
+        return super.on(event, listener);
+    }
+    /**
+     * Add an event listener that only fires once
+     * @param event The event to listen to
+     * @param listener The listener to add
+     * @returns
+     */
+    once(event, listener) {
+        return super.once(event, listener);
+    }
+    /**
+     * Remove an event listener
+     * @param event The event to remove the listener from
+     * @param listener The listener to remove
+     * @returns
+     */
+    off(event, listener) {
+        return super.off(event, listener);
+    }
+    /**
+     * Remove an event listener
+     * @param event The event to remove the listener from
+     * @param listener The listener to remove
+     * @returns
+     */
+    removeListener(event, listener) {
+        return super.removeListener(event, listener);
+    }
+    /**
+     * The LavalinkManager that created this NodeManager
+     */
+    LavalinkManager;
+    /**
+     * A map of all nodes in the nodeManager
+     */
     nodes = new MiniMap();
+    /**
+     * @param LavalinkManager The LavalinkManager that created this NodeManager
+     */
     constructor(LavalinkManager) {
         super();
         this.LavalinkManager = LavalinkManager;
@@ -65,6 +120,11 @@ export class NodeManager extends EventEmitter {
         }
         return counter;
     }
+    /**
+     * Create a node and add it to the nodeManager
+     * @param options The options for the node
+     * @returns The node that was created
+     */
     createNode(options) {
         if (this.nodes.has(options.id || `${options.host}:${options.port}`))
             return this.nodes.get(options.id || `${options.host}:${options.port}`);
@@ -72,6 +132,11 @@ export class NodeManager extends EventEmitter {
         this.nodes.set(newNode.id, newNode);
         return newNode;
     }
+    /**
+     * Get the nodes sorted for the least usage, by a sorttype
+     * @param sortType The type of sorting to use
+     * @returns
+     */
     leastUsedNodes(sortType = "players") {
         switch (sortType) {
             case "memory":
@@ -125,6 +190,11 @@ export class NodeManager extends EventEmitter {
                 break;
         }
     }
+    /**
+     * Delete a node from the nodeManager and destroy it
+     * @param node The node to delete
+     * @returns
+     */
     deleteNode(node) {
         const decodeNode = typeof node === "string" ? this.nodes.get(node) : node || this.leastUsedNodes()[0];
         if (!decodeNode)

@@ -2,11 +2,57 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.LavalinkManager = void 0;
 const events_1 = require("events");
+const Constants_1 = require("./Constants");
 const NodeManager_1 = require("./NodeManager");
 const Player_1 = require("./Player");
 const Queue_1 = require("./Queue");
 const Utils_1 = require("./Utils");
 class LavalinkManager extends events_1.EventEmitter {
+    /**
+     * Emit an event
+     * @param event The event to emit
+     * @param args The arguments to pass to the event
+     * @returns
+     */
+    emit(event, ...args) {
+        return super.emit(event, ...args);
+    }
+    /**
+     * Add an event listener
+     * @param event The event to listen to
+     * @param listener The listener to add
+     * @returns
+     */
+    on(event, listener) {
+        return super.on(event, listener);
+    }
+    /**
+     * Add an event listener that only fires once
+     * @param event The event to listen to
+     * @param listener The listener to add
+     * @returns
+     */
+    once(event, listener) {
+        return super.once(event, listener);
+    }
+    /**
+     * Remove an event listener
+     * @param event The event to remove the listener from
+     * @param listener The listener to remove
+     * @returns
+     */
+    off(event, listener) {
+        return super.off(event, listener);
+    }
+    /**
+     * Remove an event listener
+     * @param event The event to remove the listener from
+     * @param listener The listener to remove
+     * @returns
+     */
+    removeListener(event, listener) {
+        return super.removeListener(event, listener);
+    }
     /** The Options of LavalinkManager (changeable) */
     options;
     /** LavalinkManager's NodeManager to manage all Nodes */
@@ -352,7 +398,7 @@ class LavalinkManager extends events_1.EventEmitter {
                 return;
             const player = this.getPlayer(update.guild_id);
             if (player && player.voiceChannelId === update.id)
-                return void player.destroy(Player_1.DestroyReasons.ChannelDeleted);
+                return void player.destroy(Constants_1.DestroyReasons.ChannelDeleted);
         }
         // for voice updates
         if (["VOICE_STATE_UPDATE", "VOICE_SERVER_UPDATE"].includes(data.t)) {
@@ -409,19 +455,25 @@ class LavalinkManager extends events_1.EventEmitter {
             }
             else {
                 if (this.options?.playerOptions?.onDisconnect?.destroyPlayer === true) {
-                    return void await player.destroy(Player_1.DestroyReasons.Disconnected);
+                    return void await player.destroy(Constants_1.DestroyReasons.Disconnected);
                 }
                 this.emit("playerDisconnect", player, player.voiceChannelId);
-                if (!player.paused)
-                    await player.pause();
                 if (this.options?.playerOptions?.onDisconnect?.autoReconnect === true) {
                     try {
+                        const positionPrevios = player.position;
+                        console.debug("Auto reconnect", positionPrevios, player.lastPosition);
                         await player.connect();
+                        // replay the current playing stream
+                        await player.play({
+                            position: positionPrevios,
+                            paused: player.paused,
+                            clientTrack: player.queue.current,
+                        });
                     }
-                    catch {
-                        return void await player.destroy(Player_1.DestroyReasons.PlayerReconnectFail);
+                    catch (e) {
+                        console.error(e);
+                        return void await player.destroy(Constants_1.DestroyReasons.PlayerReconnectFail);
                     }
-                    return void player.paused && await player.resume();
                 }
                 player.voiceChannelId = null;
                 player.voice = Object.assign({});

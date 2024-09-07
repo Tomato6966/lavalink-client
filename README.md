@@ -146,7 +146,7 @@ client.lavalink.on("error", (node, error, payload) => {
 - `error` ➡️ `(node, error, payload) => {}`
 - `resumed` ➡️ `(node, payload, players) => {}`
   - Resuming needs to be handled manually by you *(aka add the players to the manager)*
-- e.g.:
+- e.g. of listening to node events:
 ```js
 client.lavalink.nodeManager.on("create", (node, payload) => {
   console.log(`The Lavalink Node #${node.id} connected`);
@@ -209,6 +209,74 @@ client.lavalink.nodeManager.on("resumed", (node, payload, fetchedPlayers) => {
     // you can now overwride the player.queue.current track from the fetchedPlayer, or use the one from the queue.uztils.sync function
     // continue with your resuming code...
   }
+})
+```
+
+## Resuming full Example
+Full code sample: can be found on the [Testbot in here](https://github.com/Tomato6966/lavalink-client/blob/main/testBot/Utils/handleResuming.ts)
+```js
+// but here is the schema:
+client.lavalink.nodeManager.on("connect", (node) => node.updateSession(true, 360e3));
+client.lavalink.nodeManager.on("resumed", (node, payload, fetchedPlayers) => {
+  // create players:
+  for(const fetchedPlayer of fetchedPlayers) {
+    // fetchedPlayer is the live data from lavalink
+    // saved Player data is the config you should save in a database / file or smt
+    const savedPlayerData = await getSavedPlayerData(fetchedPlayer.guildId);
+    const player = client.lavalink.createPlayer({
+       guildId: fetchedPlayer.guildId,
+    });
+    // if lavalink says the bot got disconnected, we can skip the resuming, or force reconnect whatever you want!, here we choose to not do anything and thus delete the saved player data
+    if(!data.state.connected) {
+        console.log("skipping resuming player, because it already disconnected");
+        await deletedSavedPlayerData(data.guildId);
+        continue;
+    }
+    // now you can create the player based on the live and saved data
+    const player = client.lavalink.createPlayer({
+        guildId: data.guildId,
+        node: node.id,
+        // you need to update the volume of the player by the volume of lavalink which might got decremented by the volume decrementer
+        volume: client.lavalink.options.playerOptions?.volumeDecrementer
+        ? Math.round(data.volume / client.lavalink.options.playerOptions.volumeDecrementer)
+        : data.volume,
+        // all of the following options are needed to be provided by some sort of player saving
+        voiceChannelId: dataOfSaving.voiceChannelId,
+        textChannelId: dataOfSaving.textChannelId,
+        // all of the following options can either be saved too, or you can use pre-defined defaults
+        selfDeaf: dataOfSaving.options?.selfDeaf || true,
+        selfMute: dataOfSaving.options?.selfMute || false,
+
+        applyVolumeAsFilter: dataOfSaving.options.applyVolumeAsFilter,
+        instaUpdateFiltersFix: dataOfSaving.options.instaUpdateFiltersFix,
+        vcRegion: dataOfSaving.options.vcRegion,
+    });
+
+    // player.voice = data.voice;
+    // normally just player.voice is enough, but if you restart the entire bot, you need to create a new connection, thus call player.connect();
+    await player.connect();
+
+    player.filterManager.data = data.filters; // override the filters data
+    await player.queue.utils.sync(true, false); // get the queue data including the current track (for the requester)
+    // override the current track with the data from lavalink
+    if(data.track) player.queue.current = client.lavalink.utils.buildTrack(data.track, player.queue.current?.requester || client.user);
+    // override the position of the player
+    player.lastPosition = data.state.position;
+    player.lastPositionChange = Date.now();
+    // you can also override the ping of the player, or wait about 30s till it's done automatically
+    player.ping.lavalink = data.state.ping;
+    // important to have skipping work correctly later
+    player.paused = data.paused;
+    player.playing = !data.paused && !!data.track;
+    // That's about it
+  }
+})
+client.lavalink.on("playerUpdate", (oldPlayer, newPlayer) => { // automatically sync player data on updates. if you don'T want to save everything you can instead also just save the data on playerCreate
+    setSavedPlayerData(newPlayer.toJSON());
+});
+// delete the player again
+client.lavalink.on("playerDestroy", (player) => {
+    deleteSavedPlayerData(player.guildId);
 })
 ```
 
@@ -410,3 +478,29 @@ if(previousTrack) {
     await player.play({ clientTrack: previousTrack });
 }
 ```
+
+
+## **Version 2.3.0**
+
+- Added a heartbeat + ping-pong system to check wether the client is still connected to the node, if the node doesn't receive a ping in time, it will destroy the node and thus cause a reconnect.
+- For that following new nodeOptions got added:
+  - `enablePingOnStatsCheck: boolean` (default: true)
+  - `heartBeatInterval: number` (default: 30_000)
+  - Added new Property on a node:
+    - `isAlive: boolean` (if it's false, then it's not connected to the node anymore, and will AUTOMATICALLY Cause a reconnect within the heartBeatInterval)
+    - `heartBeatPing: number` (the ping it takes lavalink to respond to the acknowledge of heartbeat)
+  - Added new NodeManager Events:
+    - `reconnectinprogress` (when the client internal reconnect system is triggered, the actual reconnect gets triggered by the node after your retryDelay)
+- Refactored internal code for better readability and maintainability
+- Removed several intermediate promises
+- Added new types for better type safety
+- Updated types for better type safety
+- Reduced default retryDelay from 30s to 10s
+- Added example on the testbot how to store player data easily and how to use the resume feature, and updated the Resuming Example in the README [jump](#how-to-do-resuming) by adding a [full example](#resuming-full-example)
+
+- **"Breaking Change" for providing track / clientTrack for player.play()**
+  - Instead of adding the track to the queue and skipping to it, they get directly played by lavalink through replacing the track.
+  - To make this work, we need to pass the transformed requester object to the userData of the track. (all handled by the client)
+  - *This is technically better than skipping to a track but i wanted to point it out.*
+    - You can play with clientTrack like this: `player.play({ clientTrack: searchResult.tracks[0] })`
+    - You can play with just track like this: `player.play({ track: { encoded: "base64string..." }, requester: interaction.user })`

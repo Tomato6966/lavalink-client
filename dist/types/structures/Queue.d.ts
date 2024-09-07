@@ -1,61 +1,78 @@
-import { Track, UnresolvedTrack } from "./Track";
 import { MiniMap } from "./Utils";
-export interface StoredQueue {
-    current: Track | null;
-    previous: Track[];
-    tracks: Track[];
-}
-export interface QueueStoreManager extends Record<string, any> {
-    /** @async get a Value (MUST RETURN UNPARSED!) */
-    get: (guildId: unknown) => Promise<unknown>;
-    /** @async Set a value inside a guildId (MUST BE UNPARSED) */
-    set: (guildId: unknown, value: unknown) => Promise<unknown>;
-    /** @async Delete a Database Value based of it's guildId */
-    delete: (guildId: unknown) => Promise<unknown>;
-    /** @async Transform the value(s) inside of the QueueStoreManager (IF YOU DON'T NEED PARSING/STRINGIFY, then just return the value) */
-    stringify: (value: unknown) => Promise<unknown>;
-    /** @async Parse the saved value back to the Queue (IF YOU DON'T NEED PARSING/STRINGIFY, then just return the value) */
-    parse: (value: unknown) => Promise<Partial<StoredQueue>>;
-}
-export interface ManagerQueueOptions {
-    /** Maximum Amount of tracks for the queue.previous array. Set to 0 to not save previous songs. Defaults to 25 Tracks */
-    maxPreviousTracks?: number;
-    /** Custom Queue Store option */
-    queueStore?: QueueStoreManager;
-    /** Custom Queue Watcher class */
-    queueChangesWatcher?: QueueChangesWatcher;
-}
-export interface QueueSaver {
-    /** @private */
-    _: QueueStoreManager;
-    /** @private */
+import type { Track, UnresolvedTrack } from "./Types/Track";
+import type { ManagerQueueOptions, QueueStoreManager, StoredQueue } from "./Types/Queue";
+export declare class QueueSaver {
+    /**
+     * The queue store manager
+     */
+    private _;
+    /**
+     * The options for the queue saver
+     */
     options: {
         maxPreviousTracks: number;
     };
-}
-export declare class QueueSaver {
     constructor(options: ManagerQueueOptions);
+    /**
+     * Get the queue for a guild
+     * @param guildId The guild ID
+     * @returns The queue for the guild
+     */
     get(guildId: string): Promise<Partial<StoredQueue>>;
+    /**
+     * Delete the queue for a guild
+     * @param guildId The guild ID
+     * @returns The queue for the guild
+     */
     delete(guildId: string): Promise<unknown>;
-    set(guildId: string, value: any): Promise<unknown>;
+    /**
+     * Set the queue for a guild
+     * @param guildId The guild ID
+     * @param valueToStringify The queue to set
+     * @returns The queue for the guild
+     */
+    set(guildId: string, valueToStringify: StoredQueue): Promise<unknown>;
+    /**
+     * Sync the queue for a guild
+     * @param guildId The guild ID
+     * @returns The queue for the guild
+     */
     sync(guildId: string): Promise<Partial<StoredQueue>>;
 }
 export declare class DefaultQueueStore implements QueueStoreManager {
     private data;
     constructor();
+    /**
+     * Get the queue for a guild
+     * @param guildId The guild ID
+     * @returns The queue for the guild
+     */
     get(guildId: any): Promise<unknown>;
-    set(guildId: any, stringifiedValue: any): Promise<MiniMap<unknown, unknown>>;
+    /**
+     * Set the queue for a guild
+     * @param guildId The guild ID
+     * @param valueToStringify The queue to set
+     * @returns The queue for the guild
+     */
+    set(guildId: any, valueToStringify: any): Promise<MiniMap<unknown, unknown>>;
+    /**
+     * Delete the queue for a guild
+     * @param guildId The guild ID
+     * @returns The queue for the guild
+     */
     delete(guildId: any): Promise<boolean>;
+    /**
+     * Stringify the queue for a guild
+     * @param value The queue to stringify
+     * @returns The stringified queue
+     */
     stringify(value: any): Promise<any>;
+    /**
+     * Parse the queue for a guild
+     * @param value The queue to parse
+     * @returns The parsed queue
+     */
     parse(value: any): Promise<Partial<StoredQueue>>;
-}
-export interface QueueChangesWatcher {
-    /** get a Value (MUST RETURN UNPARSED!) */
-    tracksAdd: (guildId: string, tracks: (Track | UnresolvedTrack)[], position: number, oldStoredQueue: StoredQueue, newStoredQueue: StoredQueue) => any;
-    /** Set a value inside a guildId (MUST BE UNPARSED) */
-    tracksRemoved: (guildId: string, tracks: (Track | UnresolvedTrack)[], position: number, oldStoredQueue: StoredQueue, newStoredQueue: StoredQueue) => any;
-    /** Set a value inside a guildId (MUST BE UNPARSED) */
-    shuffled: (guildId: string, oldStoredQueue: StoredQueue, newStoredQueue: StoredQueue) => any;
 }
 export declare class Queue {
     readonly tracks: (Track | UnresolvedTrack)[];
@@ -68,6 +85,13 @@ export declare class Queue {
     private readonly QueueSaver;
     private managerUtils;
     private queueChanges;
+    /**
+     * Create a new Queue
+     * @param guildId The guild ID
+     * @param data The data to initialize the queue with
+     * @param QueueSaver The queue saver to use
+     * @param queueOptions
+     */
     constructor(guildId: string, data?: Partial<StoredQueue>, QueueSaver?: QueueSaver, queueOptions?: ManagerQueueOptions);
     /**
      * Utils for a Queue

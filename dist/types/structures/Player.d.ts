@@ -1,123 +1,12 @@
-import { EQBand, FilterData, FilterManager, LavalinkFilterData } from "./Filters";
-import { LavalinkManager } from "./LavalinkManager";
-import { LavalinkNode, SponsorBlockSegment } from "./Node";
+import { FilterManager } from "./Filters";
 import { Queue } from "./Queue";
-import { Track, UnresolvedTrack } from "./Track";
-import { Base64, LavalinkPlayerVoiceOptions, LavaSearchQuery, SearchQuery } from "./Utils";
-export declare enum DestroyReasons {
-    QueueEmpty = "QueueEmpty",
-    NodeDestroy = "NodeDestroy",
-    NodeDeleted = "NodeDeleted",
-    LavalinkNoVoice = "LavalinkNoVoice",
-    NodeReconnectFail = "NodeReconnectFail",
-    Disconnected = "Disconnected",
-    PlayerReconnectFail = "PlayerReconnectFail",
-    ChannelDeleted = "ChannelDeleted",
-    DisconnectAllNodes = "DisconnectAllNodes",
-    ReconnectAllNodes = "ReconnectAllNodes"
-}
-export type DestroyReasonsType = keyof typeof DestroyReasons | string;
-export interface PlayerJson {
-    /** Guild Id where the player was playing in */
-    guildId: string;
-    /** Options provided to the player */
-    options: PlayerOptions;
-    /** Voice Channel Id the player was playing in */
-    voiceChannelId: string;
-    /** Text Channel Id the player was synced to */
-    textChannelId?: string;
-    /** Position the player was at */
-    position: number;
-    /** Lavalink's position the player was at */
-    lastPosition: number;
-    /** Last time the position was sent from lavalink */
-    lastPositionChange: number;
-    /** Volume in % from the player (without volumeDecrementer) */
-    volume: number;
-    /** Real Volume used in lavalink (with the volumeDecrementer) */
-    lavalinkVolume: number;
-    /** The repeatmode from the player */
-    repeatMode: RepeatMode;
-    /** Pause state */
-    paused: boolean;
-    /** Wether the player was playing or not */
-    playing: boolean;
-    /** When the player was created */
-    createdTimeStamp?: number;
-    /** All current used fitlers Data */
-    filters: FilterData;
-    /** The player's ping object */
-    ping: {
-        /** Ping to the voice websocket server */
-        ws: number;
-        /** Avg. calc. Ping to the lavalink server */
-        lavalink: number;
-    };
-    /** Equalizer Bands used in lavalink */
-    equalizer: EQBand[];
-    /** The Id of the last used node */
-    nodeId?: string;
-}
-export type RepeatMode = "queue" | "track" | "off";
-export interface PlayerOptions {
-    /** Guild id of the player */
-    guildId: string;
-    /** The Voice Channel Id */
-    voiceChannelId: string;
-    /** The Text Channel Id of the Player */
-    textChannelId?: string;
-    /** instantly change volume with the one play request */
-    volume?: number;
-    /** VC Region for node selections */
-    vcRegion?: string;
-    /** if it should join deafened */
-    selfDeaf?: boolean;
-    /** If it should join muted */
-    selfMute?: boolean;
-    /** If it should use a specific lavalink node */
-    node?: LavalinkNode | string;
-    /** If when applying filters, it should use the insta apply filters fix  */
-    instaUpdateFiltersFix?: boolean;
-    /** If a volume should be applied via filters instead of lavalink-volume */
-    applyVolumeAsFilter?: boolean;
-}
-export type anyObject = {
-    [key: string | number]: string | number | null | anyObject;
-};
-export interface BasePlayOptions {
-    /** The position to start the track. */
-    position?: number;
-    /** The position to end the track. */
-    endTime?: number;
-    /** If to start "paused" */
-    paused?: boolean;
-    /** The Volume to start with */
-    volume?: number;
-    /** The Lavalink Filters to use | only with the new REST API */
-    filters?: Partial<LavalinkFilterData>;
-    /** Voice Update for Lavalink */
-    voice?: LavalinkPlayerVoiceOptions;
-}
-export interface LavalinkPlayOptions extends BasePlayOptions {
-    /** Which Track to play | don't provide, if it should pick from the Queue */
-    track?: {
-        /** The track encoded base64 string to use instead of the one from the queue system */
-        encoded?: Base64 | null;
-        /** The identifier of the track to use */
-        identifier?: string;
-        /** Custom User Data for the track to provide, will then be on the userData object from the track */
-        userData?: anyObject;
-        /** The Track requester for when u provide encodedTrack / identifer */
-        requester?: unknown;
-    };
-}
-export interface PlayOptions extends LavalinkPlayOptions {
-    /** Whether to not replace the track if a play payload is sent. */
-    noReplace?: boolean;
-    /** Adds track on queue and skips to it */
-    clientTrack?: Track | UnresolvedTrack;
-}
-export interface Player {
+import type { DestroyReasons } from "./Constants";
+import type { LavalinkNode } from "./Node";
+import type { SponsorBlockSegment } from "./Types/Node";
+import type { PlayerJson, PlayerOptions, PlayOptions, RepeatMode } from "./Types/Player";
+import type { LavalinkManager } from "./LavalinkManager";
+import type { LavalinkPlayerVoiceOptions, LavaSearchQuery, SearchQuery } from "./Types/Utils";
+export declare class Player {
     /** Filter Manager per player */
     filterManager: FilterManager;
     /** circular reference to the lavalink Manager from the Player for easier use */
@@ -128,8 +17,6 @@ export interface Player {
     node: LavalinkNode;
     /** The queue from the player */
     queue: Queue;
-}
-export declare class Player {
     /** The Guild Id of the Player */
     guildId: string;
     /** The Voice Channel Id of the Player */
@@ -157,12 +44,14 @@ export declare class Player {
     lastPositionChange: number;
     /** The current Positin of the player (from Lavalink) */
     lastPosition: number;
+    lastSavedPosition: number;
     /** When the player was created [Timestamp in Ms] (from lavalink) */
     createdTimeStamp: number;
     /** The Player Connection's State (from Lavalink) */
     connected: boolean | undefined;
     /** Voice Server Data (from Lavalink) */
     voice: LavalinkPlayerVoiceOptions;
+    /** Custom data for the player */
     private readonly data;
     /**
      * Create a new Player
@@ -200,16 +89,33 @@ export declare class Player {
      * @param ignoreVolumeDecrementer If it should ignore the volumedecrementer option
      */
     setVolume(volume: number, ignoreVolumeDecrementer?: boolean): Promise<this>;
-    lavaSearch(query: LavaSearchQuery, requestUser: unknown, throwOnEmpty?: boolean): Promise<import("./Utils").SearchResult | import("./Utils").LavaSearchResponse>;
+    /**
+     * Search for a track
+     * @param query The query to search for
+     * @param requestUser The user that requested the track
+     * @param throwOnEmpty If an error should be thrown if no track is found
+     * @returns The search result
+     */
+    lavaSearch(query: LavaSearchQuery, requestUser: unknown, throwOnEmpty?: boolean): Promise<import("./Types/Utils").SearchResult | import("./Types/Utils").LavaSearchResponse>;
+    /**
+     * Set the SponsorBlock
+     * @param segments The segments to set
+     */
     setSponsorBlock(segments?: SponsorBlockSegment[]): Promise<void>;
+    /**
+     * Get the SponsorBlock
+     */
     getSponsorBlock(): Promise<SponsorBlockSegment[]>;
+    /**
+     * Delete the SponsorBlock
+     */
     deleteSponsorBlock(): Promise<void>;
     /**
      *
      * @param query Query for your data
      * @param requestUser
      */
-    search(query: SearchQuery, requestUser: unknown, throwOnEmpty?: boolean): Promise<import("./Utils").SearchResult | import("./Utils").UnresolvedSearchResult>;
+    search(query: SearchQuery, requestUser: unknown, throwOnEmpty?: boolean): Promise<import("./Types/Utils").UnresolvedSearchResult | import("./Types/Utils").SearchResult>;
     /**
      * Pause the player
      */
@@ -228,11 +134,12 @@ export declare class Player {
      * @param repeatMode
      */
     setRepeatMode(repeatMode: RepeatMode): Promise<this>;
+    1: any;
     /**
      * Skip the current song, or a specific amount of songs
      * @param amount provide the index of the next track to skip to
      */
-    skip(skipTo?: number, throwError?: boolean): any;
+    skip(skipTo?: number, throwError?: boolean): Promise<this>;
     /**
      * Clears the queue and stops playing. Does not destroy the Player and not leave the channel
      * @returns

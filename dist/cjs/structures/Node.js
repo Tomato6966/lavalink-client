@@ -1,16 +1,22 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.LavalinkNode = exports.validSponsorBlocks = void 0;
+exports.LavalinkNode = void 0;
 const tslib_1 = require("tslib");
 const path_1 = require("path");
 const ws_1 = tslib_1.__importDefault(require("ws"));
-const Player_1 = require("./Player");
+const Constants_1 = require("./Constants");
 const Utils_1 = require("./Utils");
-exports.validSponsorBlocks = ["sponsor", "selfpromo", "interaction", "intro", "outro", "preview", "music_offtopic", "filler"];
 /**
  * Lavalink Node creator class
  */
 class LavalinkNode {
+    heartBeatPingTimestamp = 0;
+    heartBeatPongTimestamp = 0;
+    get heartBeatPing() {
+        return this.heartBeatPongTimestamp - this.heartBeatPingTimestamp;
+    }
+    heartBeatInterval;
+    pingTimeout;
     /** The provided Options of the Node */
     options;
     /** The amount of rest calls the node has made. */
@@ -70,8 +76,11 @@ class LavalinkNode {
         this.options = {
             secure: false,
             retryAmount: 5,
-            retryDelay: 30e3,
+            retryDelay: 10e3,
             requestSignalTimeoutMS: 10000,
+            heartBeatInterval: 30000,
+            closeOnError: true,
+            enablePingOnStatsCheck: true,
             ...options
         };
         this.NodeManager = manager;
@@ -150,6 +159,8 @@ class LavalinkNode {
      * ```
      */
     async request(endpoint, modify, parseAsText = false) {
+        if (!this.connected)
+            throw new Error("The node is not connected to the Lavalink Server!, Please call node.connect() first!");
         const { request, options } = await this.rawRequest(endpoint, modify);
         if (["DELETE", "PUT"].includes(options.method))
             return;
@@ -234,7 +245,7 @@ class LavalinkNode {
         if (Query.source)
             this.NodeManager.LavalinkManager.utils.validateSourceString(this, Query.source);
         if (/^https?:\/\//.test(Query.query))
-            return await this.search({ query: Query.query, source: Query.source }, requestUser);
+            return this.search({ query: Query.query, source: Query.source }, requestUser);
         if (!["spsearch", "sprec", "amsearch", "dzsearch", "dzisrc", "ytmsearch", "ytsearch"].includes(Query.source))
             throw new SyntaxError(`Query.source must be a source from LavaSrc: "spsearch" | "sprec" | "amsearch" | "dzsearch" | "dzisrc" | "ytmsearch" | "ytsearch"`);
         if (!this.info.plugins.find(v => v.name === "lavasearch-plugin"))
@@ -296,7 +307,7 @@ class LavalinkNode {
     async destroyPlayer(guildId) {
         if (!this.sessionId)
             throw new Error("The Lavalink-Node is either not ready, or not up to date!");
-        return await this.request(`/sessions/${this.sessionId}/players/${guildId}`, r => { r.method = "DELETE"; });
+        return this.request(`/sessions/${this.sessionId}/players/${guildId}`, r => { r.method = "DELETE"; });
     }
     /**
      * Connect to the Lavalink Node
@@ -328,6 +339,17 @@ class LavalinkNode {
         this.socket.on("close", (code, reason) => this.close(code, reason?.toString()));
         this.socket.on("message", this.message.bind(this));
         this.socket.on("error", this.error.bind(this));
+        // this.socket.on("ping", () => this.heartBeat("ping")); // lavalink doesn'T send ping periodically, therefore we use the stats message
+    }
+    heartBeat() {
+        if (this.pingTimeout)
+            clearTimeout(this.pingTimeout);
+        this.pingTimeout = setTimeout(() => {
+            if (!this.socket)
+                return console.error("Node-Ping-Acknowledge-Timeout - Socket not available - maybe reconnecting?");
+            this.isAlive = false;
+            this.socket.terminate();
+        }, 65000); // the stats endpoint get's sent every 60s. se wee add a 5s buffer to make sure we don't miss any stats message
     }
     /**
      * Get the id of the node
@@ -358,7 +380,7 @@ class LavalinkNode {
         const players = this.NodeManager.LavalinkManager.players.filter(p => p.node.id === this.id);
         if (players)
             players.forEach(p => {
-                p.destroy(destroyReason || Player_1.DestroyReasons.NodeDestroy);
+                p.destroy(destroyReason || Constants_1.DestroyReasons.NodeDestroy);
             });
         this.socket.close(1000, "Node-Destroy");
         this.socket.removeAllListeners();
@@ -388,6 +410,7 @@ class LavalinkNode {
             return false;
         return this.socket.readyState === ws_1.default.OPEN;
     }
+    isAlive = false;
     /**
      * Returns the current ConnectionStatus
      *
@@ -419,11 +442,7 @@ class LavalinkNode {
     async fetchAllPlayers() {
         if (!this.sessionId)
             throw new Error("The Lavalink-Node is either not ready, or not up to date!");
-        const players = await this.request(`/sessions/${this.sessionId}/players`);
-        if (!Array.isArray(players))
-            return [];
-        else
-            return players;
+        return this.request(`/sessions/${this.sessionId}/players`) || [];
     }
     /**
      * Gets specific Player Information
@@ -438,7 +457,7 @@ class LavalinkNode {
     async fetchPlayer(guildId) {
         if (!this.sessionId)
             throw new Error("The Lavalink-Node is either not ready, or not up to date!");
-        return await this.request(`/sessions/${this.sessionId}/players/${guildId}`);
+        return this.request(`/sessions/${this.sessionId}/players/${guildId}`);
     }
     /**
      * Updates the session with and enables/disables resuming and timeout
@@ -464,7 +483,7 @@ class LavalinkNode {
             enabled: typeof resuming === "boolean" ? resuming : false,
             timeout: typeof resuming === "boolean" && resuming === true ? timeout : null,
         };
-        return await this.request(`/sessions/${this.sessionId}`, r => {
+        return this.request(`/sessions/${this.sessionId}`, r => {
             r.method = "PATCH";
             r.headers = { Authorization: this.options.authorization, 'Content-Type': 'application/json' };
             r.body = JSON.stringify(data);
@@ -688,7 +707,7 @@ class LavalinkNode {
             if (!player)
                 return;
             if (typeof res?.voice?.connected === "boolean" && res.voice.connected === false)
-                return player.destroy(Player_1.DestroyReasons.LavalinkNoVoice);
+                return player.destroy(Constants_1.DestroyReasons.LavalinkNoVoice);
             player.ping.ws = res?.voice?.ping || player?.ping.ws;
         }
         return true;
@@ -710,11 +729,12 @@ class LavalinkNode {
      * ```
      */
     reconnect(instaReconnect = false) {
+        this.NodeManager.emit("reconnectinprogress", this);
         if (instaReconnect) {
             if (this.reconnectAttempts >= this.options.retryAmount) {
                 const error = new Error(`Unable to connect after ${this.options.retryAmount} attempts.`);
                 this.NodeManager.emit("error", this, error);
-                return this.destroy(Player_1.DestroyReasons.NodeReconnectFail);
+                return this.destroy(Constants_1.DestroyReasons.NodeReconnectFail);
             }
             this.socket.removeAllListeners();
             this.socket = null;
@@ -727,7 +747,7 @@ class LavalinkNode {
             if (this.reconnectAttempts >= this.options.retryAmount) {
                 const error = new Error(`Unable to connect after ${this.options.retryAmount} attempts.`);
                 this.NodeManager.emit("error", this, error);
-                return this.destroy(Player_1.DestroyReasons.NodeReconnectFail);
+                return this.destroy(Constants_1.DestroyReasons.NodeReconnectFail);
             }
             this.socket.removeAllListeners();
             this.socket = null;
@@ -738,6 +758,29 @@ class LavalinkNode {
     }
     /** @private util function for handling opening events from websocket */
     async open() {
+        this.isAlive = true;
+        // trigger heartbeat-ping timeout - this is to check wether the client lost connection without knowing it
+        if (this.options.enablePingOnStatsCheck)
+            this.heartBeat();
+        if (this.heartBeatInterval)
+            clearInterval(this.heartBeatInterval);
+        if (this.options.heartBeatInterval > 0) {
+            // everytime a pong happens, set this.isAlive to true
+            this.socket.on("pong", () => {
+                this.heartBeatPongTimestamp = performance.now();
+                this.isAlive = true;
+            });
+            // every x ms send a ping to lavalink to retrieve a pong later on
+            this.heartBeatInterval = setInterval(() => {
+                if (!this.socket)
+                    return console.error("Node-Heartbeat-Interval - Socket not available - maybe reconnecting?");
+                if (!this.isAlive)
+                    this.close(500, "Node-Heartbeat-Timeout");
+                this.isAlive = false;
+                this.heartBeatPingTimestamp = performance.now();
+                this.socket.ping();
+            }, this.options.heartBeatInterval || 30000);
+        }
         if (this.reconnectTimeout)
             clearTimeout(this.reconnectTimeout);
         // reset the reconnect attempts amount
@@ -751,6 +794,12 @@ class LavalinkNode {
     }
     /** @private util function for handling closing events from websocket */
     close(code, reason) {
+        if (this.pingTimeout)
+            clearTimeout(this.pingTimeout);
+        if (this.heartBeatInterval)
+            clearInterval(this.heartBeatInterval);
+        if (code === 1006 && !reason)
+            reason = "Socket got terminated due to no ping connection";
         this.NodeManager.emit("disconnect", this, { code, reason });
         if (code !== 1000 || reason !== "Node-Destroy")
             this.reconnect();
@@ -760,6 +809,14 @@ class LavalinkNode {
         if (!error)
             return;
         this.NodeManager.emit("error", this, error);
+        if (this.options.closeOnError) {
+            if (this.heartBeatInterval)
+                clearInterval(this.heartBeatInterval);
+            if (this.pingTimeout)
+                clearTimeout(this.pingTimeout);
+            this.socket?.close(500, "Node-Error - Force Reconnect");
+        }
+        ;
     }
     /** @private util function for handling message events from websocket */
     async message(d) {
@@ -773,6 +830,8 @@ class LavalinkNode {
         this.NodeManager.emit("raw", this, payload);
         switch (payload.op) {
             case "stats":
+                if (this.options.enablePingOnStatsCheck)
+                    this.heartBeat(); // lavalink doesn'T send "ping" periodically, therefore we use the stats message to check for a ping
                 delete payload.op;
                 this.stats = { ...payload };
                 break;
@@ -802,7 +861,13 @@ class LavalinkNode {
                 this.sessionId = payload.sessionId;
                 this.resuming.enabled = payload.resumed;
                 if (payload.resumed === true) {
-                    this.NodeManager.emit("resumed", this, payload, await this.fetchAllPlayers());
+                    try {
+                        this.NodeManager.emit("resumed", this, payload, await this.fetchAllPlayers());
+                    }
+                    catch (e) {
+                        console.error("Failed to fetch players for resumed event, falling back without players array", e);
+                        this.NodeManager.emit("resumed", this, payload, []);
+                    }
                 }
                 break;
             default:
@@ -812,7 +877,7 @@ class LavalinkNode {
     }
     /** @private middleware util function for handling all kind of events from websocket */
     async handleEvent(payload) {
-        if (!payload.guildId)
+        if (!payload?.guildId)
             return;
         const player = this.NodeManager.LavalinkManager.getPlayer(payload.guildId);
         if (!player)
@@ -851,39 +916,51 @@ class LavalinkNode {
         }
         return;
     }
+    async getTrackOfPayload(payload) {
+        return "track" in payload
+            ? this.NodeManager.LavalinkManager.utils.buildTrack(payload.track, undefined)
+            : null;
+    }
     /** @private util function for handling trackStart event */
-    trackStart(player, track, payload) {
+    async trackStart(player, track, payload) {
         player.playing = true;
         player.paused = false;
         // don't emit the event if previous track == new track aka track loop
         if (this.NodeManager.LavalinkManager.options?.emitNewSongsOnly === true && player.queue.previous[0]?.info?.identifier === track?.info?.identifier)
             return;
-        return this.NodeManager.LavalinkManager.emit("trackStart", player, track, payload);
+        if (!player.queue.current) {
+            player.queue.current = await this.getTrackOfPayload(payload);
+            if (player.queue.current)
+                await player.queue.utils.save();
+        }
+        return this.NodeManager.LavalinkManager.emit("trackStart", player, player.queue.current, payload);
     }
     /** @private util function for handling trackEnd event */
     async trackEnd(player, track, payload) {
+        const trackToUse = track || await this.getTrackOfPayload(payload);
+        // If a track was forcibly played
+        if (payload.reason === "replaced") {
+            return this.NodeManager.LavalinkManager.emit("trackEnd", player, trackToUse, payload);
+        }
         // If there are no songs in the queue
         if (!player.queue.tracks.length && (player.repeatMode === "off" || player.get("internal_stopPlaying")))
             return this.queueEnd(player, track, payload);
-        // If a track was forcibly played
-        if (payload.reason === "replaced")
-            return this.NodeManager.LavalinkManager.emit("trackEnd", player, track, payload);
         // If a track had an error while starting
         if (["loadFailed", "cleanup"].includes(payload.reason)) {
             await (0, Utils_1.queueTrackEnd)(player);
             // if no track available, end queue
             if (!player.queue.current)
-                return this.queueEnd(player, track, payload);
+                return this.queueEnd(player, trackToUse, payload);
             // fire event
-            this.NodeManager.LavalinkManager.emit("trackEnd", player, track, payload);
+            this.NodeManager.LavalinkManager.emit("trackEnd", player, trackToUse, payload);
             // play track if autoSkip is true
             return this.NodeManager.LavalinkManager.options.autoSkip && player.play({ noReplace: true });
         }
         // remove tracks from the queue
         if (player.repeatMode !== "track" || player.get("internal_skipped"))
             await (0, Utils_1.queueTrackEnd)(player);
-        else if (player.queue.current && !player.queue.current?.pluginInfo?.clientData?.previousTrack) { // If there was a current Track already and repeatmode === true, add it to the queue.
-            player.queue.previous.unshift(player.queue.current);
+        else if (trackToUse && !trackToUse?.pluginInfo?.clientData?.previousTrack) { // If there was a current Track already and repeatmode === true, add it to the queue.
+            player.queue.previous.unshift(trackToUse);
             if (player.queue.previous.length > player.queue.options.maxPreviousTracks)
                 player.queue.previous.splice(player.queue.options.maxPreviousTracks, player.queue.previous.length);
             await player.queue.utils.save();
@@ -891,60 +968,65 @@ class LavalinkNode {
         player.set("internal_skipped", false);
         // if no track available, end queue
         if (!player.queue.current)
-            return this.queueEnd(player, track, payload);
+            return this.queueEnd(player, trackToUse, payload);
         // fire event
-        this.NodeManager.LavalinkManager.emit("trackEnd", player, track, payload);
+        this.NodeManager.LavalinkManager.emit("trackEnd", player, trackToUse, payload);
         // play track if autoSkip is true
         return this.NodeManager.LavalinkManager.options.autoSkip && player.play({ noReplace: true });
     }
     /** @private util function for handling trackStuck event */
     async trackStuck(player, track, payload) {
-        this.NodeManager.LavalinkManager.emit("trackStuck", player, track, payload);
+        this.NodeManager.LavalinkManager.emit("trackStuck", player, track || await this.getTrackOfPayload(payload), payload);
         // If there are no songs in the queue
         if (!player.queue.tracks.length && (player.repeatMode === "off" || player.get("internal_stopPlaying")))
-            return this.queueEnd(player, track, payload);
+            return this.queueEnd(player, track || await this.getTrackOfPayload(payload), payload);
         // remove the current track, and enqueue the next one
         await (0, Utils_1.queueTrackEnd)(player);
         // if no track available, end queue
         if (!player.queue.current)
-            return this.queueEnd(player, track, payload);
+            return this.queueEnd(player, track || await this.getTrackOfPayload(payload), payload);
         // play track if autoSkip is true
         return (this.NodeManager.LavalinkManager.options.autoSkip && player.queue.current) && player.play({ noReplace: true });
     }
     /** @private util function for handling trackError event */
     async trackError(player, track, payload) {
-        this.NodeManager.LavalinkManager.emit("trackError", player, track, payload);
+        this.NodeManager.LavalinkManager.emit("trackError", player, track || await this.getTrackOfPayload(payload), payload);
         return; // get's handled by trackEnd
         // If there are no songs in the queue
         if (!player.queue.tracks.length && (player.repeatMode === "off" || player.get("internal_stopPlaying")))
-            return this.queueEnd(player, track, payload);
+            return this.queueEnd(player, track || await this.getTrackOfPayload(payload), payload);
         // remove the current track, and enqueue the next one
         await (0, Utils_1.queueTrackEnd)(player);
         // if no track available, end queue
         if (!player.queue.current)
-            return this.queueEnd(player, track, payload);
+            return this.queueEnd(player, track || await this.getTrackOfPayload(payload), payload);
         // play track if autoSkip is true
         return (this.NodeManager.LavalinkManager.options.autoSkip && player.queue.current) && player.play({ noReplace: true });
     }
     /** @private util function for handling socketClosed event */
     socketClosed(player, payload) {
-        return this.NodeManager.LavalinkManager.emit("playerSocketClosed", player, payload);
+        this.NodeManager.LavalinkManager.emit("playerSocketClosed", player, payload);
+        // i don't think this is needed.
+        // this.socket = null;
+        // // causing a socket reconnect
+        // this.connect();
+        return;
     }
     /** @private util function for handling SponsorBlock Segmentloaded event */
-    SponsorBlockSegmentLoaded(player, track, payload) {
-        return this.NodeManager.LavalinkManager.emit("SegmentsLoaded", player, track, payload);
+    async SponsorBlockSegmentLoaded(player, track, payload) {
+        return this.NodeManager.LavalinkManager.emit("SegmentsLoaded", player, track || await this.getTrackOfPayload(payload), payload);
     }
     /** @private util function for handling SponsorBlock SegmentSkipped event */
-    SponsorBlockSegmentSkipped(player, track, payload) {
-        return this.NodeManager.LavalinkManager.emit("SegmentSkipped", player, track, payload);
+    async SponsorBlockSegmentSkipped(player, track, payload) {
+        return this.NodeManager.LavalinkManager.emit("SegmentSkipped", player, track || await this.getTrackOfPayload(payload), payload);
     }
     /** @private util function for handling SponsorBlock Chaptersloaded event */
-    SponsorBlockChaptersLoaded(player, track, payload) {
-        return this.NodeManager.LavalinkManager.emit("ChaptersLoaded", player, track, payload);
+    async SponsorBlockChaptersLoaded(player, track, payload) {
+        return this.NodeManager.LavalinkManager.emit("ChaptersLoaded", player, track || await this.getTrackOfPayload(payload), payload);
     }
     /** @private util function for handling SponsorBlock Chaptersstarted event */
-    SponsorBlockChapterStarted(player, track, payload) {
-        return this.NodeManager.LavalinkManager.emit("ChapterStarted", player, track, payload);
+    async SponsorBlockChapterStarted(player, track, payload) {
+        return this.NodeManager.LavalinkManager.emit("ChapterStarted", player, track || await this.getTrackOfPayload(payload), payload);
     }
     /**
      * Get the current sponsorblocks for the sponsorblock plugin
@@ -983,8 +1065,8 @@ class LavalinkNode {
         if (!segments.length)
             throw new RangeError("No Segments provided. Did you ment to use 'deleteSponsorBlock'?");
         // a not valid segment
-        if (segments.some(v => !exports.validSponsorBlocks.includes(v.toLowerCase())))
-            throw new SyntaxError(`You provided a sponsorblock which isn't valid, valid ones are: ${exports.validSponsorBlocks.map(v => `'${v}'`).join(", ")}`);
+        if (segments.some(v => !Constants_1.validSponsorBlocks.includes(v.toLowerCase())))
+            throw new SyntaxError(`You provided a sponsorblock which isn't valid, valid ones are: ${Constants_1.validSponsorBlocks.map(v => `'${v}'`).join(", ")}`);
         // do the request
         await this.request(`/sessions/${this.sessionId}/players/${player.guildId}/sponsorblock/categories`, (r) => {
             r.method = "PUT";
@@ -1042,14 +1124,14 @@ class LavalinkNode {
         }
         if (typeof this.NodeManager.LavalinkManager.options.playerOptions?.onEmptyQueue?.destroyAfterMs === "number" && !isNaN(this.NodeManager.LavalinkManager.options.playerOptions.onEmptyQueue?.destroyAfterMs) && this.NodeManager.LavalinkManager.options.playerOptions.onEmptyQueue?.destroyAfterMs >= 0) {
             if (this.NodeManager.LavalinkManager.options.playerOptions.onEmptyQueue?.destroyAfterMs === 0)
-                return player.destroy(Player_1.DestroyReasons.QueueEmpty);
+                return player.destroy(Constants_1.DestroyReasons.QueueEmpty);
             else {
                 if (player.get("internal_queueempty")) {
                     clearTimeout(player.get("internal_queueempty"));
                     player.set("internal_queueempty", undefined);
                 }
                 player.set("internal_queueempty", setTimeout(() => {
-                    player.destroy(Player_1.DestroyReasons.QueueEmpty);
+                    player.destroy(Constants_1.DestroyReasons.QueueEmpty);
                 }, this.NodeManager.LavalinkManager.options.playerOptions.onEmptyQueue?.destroyAfterMs));
             }
         }

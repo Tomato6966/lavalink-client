@@ -19,8 +19,7 @@ export function NodesEvents(client:BotClient) {
         console.log(node.id, " :: DESTROYED :: ");
     }).on("error", (node, error, payload) => {
         console.log(node.id, " :: ERRORED :: ", error, " :: PAYLOAD :: ", payload);
-    }).on("resumed", (node, payload, players) => {{
-        console.log(node.id, " :: RESUMED :: ", players.length, " PLAYERS STILL PLAYING :: PAYLOAD ::", payload);
-        console.log(players);
-    }});
+    }).on("resumed", (node, payload, players) => {
+        // console.log(node.id, " :: RESUMED :: ", Array.isArray(players) ? players.length : players, " PLAYERS STILL PLAYING :: PAYLOAD ::", payload);
+    });
 }

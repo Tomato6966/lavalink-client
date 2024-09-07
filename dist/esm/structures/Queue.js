@@ -1,39 +1,94 @@
 import { ManagerUtils, MiniMap, QueueSymbol } from "./Utils";
 export class QueueSaver {
+    /**
+     * The queue store manager
+     */
+    _;
+    /**
+     * The options for the queue saver
+     */
+    options;
     constructor(options) {
         this._ = options?.queueStore || new DefaultQueueStore();
         this.options = {
             maxPreviousTracks: options?.maxPreviousTracks || 25,
         };
     }
+    /**
+     * Get the queue for a guild
+     * @param guildId The guild ID
+     * @returns The queue for the guild
+     */
     async get(guildId) {
-        return await this._.parse(await this._.get(guildId));
+        return this._.parse(await this._.get(guildId));
     }
+    /**
+     * Delete the queue for a guild
+     * @param guildId The guild ID
+     * @returns The queue for the guild
+     */
     async delete(guildId) {
-        return await this._.delete(guildId);
+        return this._.delete(guildId);
     }
-    async set(guildId, value) {
-        return await this._.set(guildId, await this._.stringify(value));
+    /**
+     * Set the queue for a guild
+     * @param guildId The guild ID
+     * @param valueToStringify The queue to set
+     * @returns The queue for the guild
+     */
+    async set(guildId, valueToStringify) {
+        return this._.set(guildId, await this._.stringify(valueToStringify));
     }
+    /**
+     * Sync the queue for a guild
+     * @param guildId The guild ID
+     * @returns The queue for the guild
+     */
     async sync(guildId) {
-        return await this.get(guildId);
+        return this.get(guildId);
     }
 }
 export class DefaultQueueStore {
     data = new MiniMap();
     constructor() { }
+    /**
+     * Get the queue for a guild
+     * @param guildId The guild ID
+     * @returns The queue for the guild
+     */
     async get(guildId) {
         return await this.data.get(guildId);
     }
-    async set(guildId, stringifiedValue) {
-        return await this.data.set(guildId, stringifiedValue);
+    /**
+     * Set the queue for a guild
+     * @param guildId The guild ID
+     * @param valueToStringify The queue to set
+     * @returns The queue for the guild
+     */
+    async set(guildId, valueToStringify) {
+        return await this.data.set(guildId, valueToStringify);
     }
+    /**
+     * Delete the queue for a guild
+     * @param guildId The guild ID
+     * @returns The queue for the guild
+     */
     async delete(guildId) {
         return await this.data.delete(guildId);
     }
+    /**
+     * Stringify the queue for a guild
+     * @param value The queue to stringify
+     * @returns The stringified queue
+     */
     async stringify(value) {
         return value; // JSON.stringify(value);
     }
+    /**
+     * Parse the queue for a guild
+     * @param value The queue to parse
+     * @returns The parsed queue
+     */
     async parse(value) {
         return value; // JSON.parse(value)
     }
@@ -47,6 +102,13 @@ export class Queue {
     QueueSaver = null;
     managerUtils = new ManagerUtils();
     queueChanges;
+    /**
+     * Create a new Queue
+     * @param guildId The guild ID
+     * @param data The data to initialize the queue with
+     * @param QueueSaver The queue saver to use
+     * @param queueOptions
+     */
     constructor(guildId, data = {}, QueueSaver, queueOptions) {
         this.queueChanges = queueOptions.queueChangesWatcher || null;
         this.guildId = guildId;
@@ -230,7 +292,6 @@ export class Queue {
                 return null;
             const removed = this.tracks.splice(removeQueryTrack, 1);
             await this.utils.save();
-            console.log("0st", removed, toRemove);
             return { removed };
         }
         if (Array.isArray(removeQueryTrack)) {
@@ -240,7 +301,6 @@ export class Queue {
                     if (this.tracks[i])
                         removed.push(...this.tracks.splice(i, 1));
                 }
-                console.log("1st", removed, removeQueryTrack);
                 if (!removed.length)
                     return null;
                 await this.utils.save();
@@ -261,7 +321,6 @@ export class Queue {
                     removed.push(...this.tracks.splice(i, 1));
             }
             await this.utils.save();
-            console.log("2nd", removed, tracksToRemove);
             return { removed };
         }
         const toRemove = this.tracks.findIndex((v) => removeQueryTrack.encoded && removeQueryTrack.encoded === v.encoded ||
@@ -274,7 +333,6 @@ export class Queue {
             return null;
         const removed = this.tracks.splice(toRemove, 1);
         await this.utils.save();
-        console.log("3rd", removed, toRemove);
         return { removed };
     }
     /**

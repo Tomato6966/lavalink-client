@@ -1,144 +1,29 @@
 import { bandCampSearch } from "./CustomSearches/BandCampSearch";
-import { EQBand, FilterData, FilterManager, LavalinkFilterData } from "./Filters";
-import { LavalinkManager } from "./LavalinkManager";
-import { LavalinkNode, SponsorBlockSegment } from "./Node";
+import { FilterManager } from "./Filters";
 import { Queue, QueueSaver } from "./Queue";
-import { Track, UnresolvedTrack } from "./Track";
-import {
-	Base64, LavalinkPlayerVoiceOptions, LavaSearchQuery, queueTrackEnd, SearchQuery
-} from "./Utils";
+import { queueTrackEnd } from "./Utils";
 
-export enum DestroyReasons {
-    QueueEmpty = "QueueEmpty",
-    NodeDestroy = "NodeDestroy",
-    NodeDeleted = "NodeDeleted",
-    LavalinkNoVoice = "LavalinkNoVoice",
-    NodeReconnectFail = "NodeReconnectFail",
-    Disconnected = "Disconnected",
-    PlayerReconnectFail = "PlayerReconnectFail",
-    ChannelDeleted = "ChannelDeleted",
-    DisconnectAllNodes = "DisconnectAllNodes",
-    ReconnectAllNodes = "ReconnectAllNodes"
-};
-export type DestroyReasonsType = keyof typeof DestroyReasons | string;
-
-export interface PlayerJson {
-    /** Guild Id where the player was playing in */
-    guildId: string;
-    /** Options provided to the player */
-    options: PlayerOptions;
-    /** Voice Channel Id the player was playing in */
-    voiceChannelId: string;
-    /** Text Channel Id the player was synced to */
-    textChannelId?: string;
-    /** Position the player was at */
-    position: number;
-    /** Lavalink's position the player was at */
-    lastPosition: number;
-    /** Last time the position was sent from lavalink */
-    lastPositionChange: number;
-    /** Volume in % from the player (without volumeDecrementer) */
-    volume: number;
-    /** Real Volume used in lavalink (with the volumeDecrementer) */
-    lavalinkVolume: number;
-    /** The repeatmode from the player */
-    repeatMode: RepeatMode;
-    /** Pause state */
-    paused: boolean;
-    /** Wether the player was playing or not */
-    playing: boolean;
-    /** When the player was created */
-    createdTimeStamp?: number;
-    /** All current used fitlers Data */
-    filters: FilterData;
-    /** The player's ping object */
-    ping: {
-        /** Ping to the voice websocket server */
-        ws: number;
-        /** Avg. calc. Ping to the lavalink server */
-        lavalink: number;
-    }
-    /** Equalizer Bands used in lavalink */
-    equalizer: EQBand[];
-    /** The Id of the last used node */
-    nodeId?: string;
-}
-
-export type RepeatMode = "queue" | "track" | "off";
-export interface PlayerOptions {
-    /** Guild id of the player */
-    guildId: string;
-    /** The Voice Channel Id */
-    voiceChannelId: string;
-    /** The Text Channel Id of the Player */
-    textChannelId?: string;
-    /** instantly change volume with the one play request */
-    volume?: number;
-    /** VC Region for node selections */
-    vcRegion?: string;
-    /** if it should join deafened */
-    selfDeaf?: boolean;
-    /** If it should join muted */
-    selfMute?: boolean;
-    /** If it should use a specific lavalink node */
-    node?: LavalinkNode | string;
-    /** If when applying filters, it should use the insta apply filters fix  */
-    instaUpdateFiltersFix?: boolean;
-    /** If a volume should be applied via filters instead of lavalink-volume */
-    applyVolumeAsFilter?: boolean;
-}
-
-export type anyObject = { [key: string | number]: string | number | null | anyObject };
-
-export interface BasePlayOptions {
-    /** The position to start the track. */
-    position?: number;
-    /** The position to end the track. */
-    endTime?: number;
-    /** If to start "paused" */
-    paused?: boolean;
-    /** The Volume to start with */
-    volume?: number;
-    /** The Lavalink Filters to use | only with the new REST API */
-    filters?: Partial<LavalinkFilterData>;
-    /** Voice Update for Lavalink */
-    voice?: LavalinkPlayerVoiceOptions;
-}
-export interface LavalinkPlayOptions extends BasePlayOptions {
-    /** Which Track to play | don't provide, if it should pick from the Queue */
-    track?: {
-        /** The track encoded base64 string to use instead of the one from the queue system */
-        encoded?: Base64 | null; // null stops the current track
-        /** The identifier of the track to use */
-        identifier?: string;
-        /** Custom User Data for the track to provide, will then be on the userData object from the track */
-        userData?: anyObject;
-        /** The Track requester for when u provide encodedTrack / identifer */
-        requester?: unknown;
-    };
-}
-export interface PlayOptions extends LavalinkPlayOptions {
-    /** Whether to not replace the track if a play payload is sent. */
-    noReplace?: boolean;
-    /** Adds track on queue and skips to it */
-    clientTrack?: Track | UnresolvedTrack;
-}
-
-
-export interface Player {
-    /** Filter Manager per player */
-    filterManager: FilterManager;
-    /** circular reference to the lavalink Manager from the Player for easier use */
-    LavalinkManager: LavalinkManager;
-    /** Player options currently used, mutation doesn't affect player's state */
-    options: PlayerOptions;
-    /** The lavalink node assigned the the player, don't change it manually */
-    node: LavalinkNode;
-    /** The queue from the player */
-    queue: Queue,
-}
-
+import type { Track, UnresolvedTrack } from "./Types/Track";
+import type { DestroyReasons } from "./Constants";
+import type { LavalinkNode } from "./Node";
+import type { SponsorBlockSegment } from "./Types/Node";
+import type { anyObject, LavalinkPlayOptions, PlayerJson, PlayerOptions, PlayOptions, RepeatMode } from "./Types/Player";
+import type { LavalinkManager } from "./LavalinkManager";
+import type {
+    LavalinkPlayerVoiceOptions, LavaSearchQuery, SearchQuery
+} from "./Types/Utils";
 export class Player {
+    /** Filter Manager per player */
+    public filterManager: FilterManager;
+    /** circular reference to the lavalink Manager from the Player for easier use */
+    public LavalinkManager: LavalinkManager;
+    /** Player options currently used, mutation doesn't affect player's state */
+    public options: PlayerOptions;
+    /** The lavalink node assigned the the player, don't change it manually */
+    public node: LavalinkNode;
+    /** The queue from the player */
+    public queue: Queue;
+
     /** The Guild Id of the Player */
     public guildId: string;
     /** The Voice Channel Id of the Player */
@@ -173,6 +58,8 @@ export class Player {
     /** The current Positin of the player (from Lavalink) */
     public lastPosition: number = 0;
 
+    public lastSavedPosition: number = 0;
+
     /** When the player was created [Timestamp in Ms] (from lavalink) */
     public createdTimeStamp: number;
     /** The Player Connection's State (from Lavalink) */
@@ -183,7 +70,7 @@ export class Player {
         sessionId: null,
         token: null
     };
-
+    /** Custom data for the player */
     private readonly data: Record<string, unknown> = {};
 
     /**
@@ -268,40 +155,60 @@ export class Player {
             clearTimeout(this.get("internal_queueempty"));
             this.set("internal_queueempty", undefined);
         }
-        let replaced = false;
-        // if clientTrack provided, play it
+
+        // if clientTrack provided, override options.track object
         if (options?.clientTrack && (this.LavalinkManager.utils.isTrack(options?.clientTrack) || this.LavalinkManager.utils.isUnresolvedTrack(options.clientTrack))) {
             if (this.LavalinkManager.utils.isUnresolvedTrack(options.clientTrack)) await (options.clientTrack as UnresolvedTrack).resolve(this);
 
             if ((typeof options.track?.userData === "object" || typeof options.clientTrack?.userData === "object") && options.clientTrack) options.clientTrack.userData = { ...(options?.clientTrack.userData || {}), ...(options.track?.userData || {}) };
 
-            await this.queue.add(options?.clientTrack, 0);
-
-            return await this.skip();
+            options.track = {
+                encoded: options.clientTrack?.encoded,
+                requester: options.clientTrack?.requester,
+                userData: options.clientTrack?.userData,
+            }
         }
-        else if (options?.track?.encoded) {
-            // handle play encoded options manually // TODO let it resolve by lavalink!
-            const track = await this.node.decode.singleTrack(options.track?.encoded, options.track?.requester || this.queue?.current?.requester || this.queue.previous?.[0]?.requester || this.queue.tracks?.[0]?.requester || this.LavalinkManager.options.client);
+        // if either encoded or identifier is provided generate the data to play them
+        if (options?.track?.encoded || options?.track?.identifier) {
+            this.queue.current = options.clientTrack as Track || null;
+            this.queue.utils.save();
 
-            if (track) {
-                if (typeof options.track?.userData === "object") track.userData = { ...(track.userData || {}), ...(options.track.userData || {}) };
-                replaced = true;
-                this.queue.add(track, 0);
-                await queueTrackEnd(this);
+            if (typeof options?.volume === "number" && !isNaN(options?.volume)) {
+                this.volume = Math.max(Math.min(options?.volume, 500), 0);
+                let vol = Number(this.volume);
+                if (this.LavalinkManager.options.playerOptions.volumeDecrementer) vol *= this.LavalinkManager.options.playerOptions.volumeDecrementer;
+                this.lavalinkVolume = Math.round(vol);
+                options.volume = this.lavalinkVolume;
             }
 
-        } else if (options?.track?.identifier) {
-            // handle play identifier options manually // TODO let it resolve by lavalink!
-            const res = await this.search({
-                query: options?.track?.identifier
-            }, options?.track?.requester || this.queue?.current?.requester || this.queue.previous?.[0]?.requester || this.queue.tracks?.[0]?.requester || this.LavalinkManager.options.client);
+            const track = Object.fromEntries(Object.entries({
+                encoded: options.track.encoded,
+                identifier: options.track.identifier,
+            }).filter(v => typeof v[1] !== "undefined")) as LavalinkPlayOptions["track"];
 
-            if (res.tracks[0]) {
-                if (typeof options.track?.userData === "object") res.tracks[0].userData = { ...(res.tracks[0].userData || {}), ...(options.track.userData || {}) };
-                replaced = true;
-                this.queue.add(res.tracks[0], 0);
-                await queueTrackEnd(this);
-            }
+            if(typeof options.track.userData === "object") track.userData = {
+                ...(options.track.userData || {})
+            };
+
+            if(typeof options?.track?.requester === "object") track.userData = {
+                ...(track.userData || {}),
+                requester: this.LavalinkManager.utils.getTransformedRequester(options?.track?.requester || {}) as anyObject
+            };
+
+
+            return this.node.updatePlayer({
+                guildId: this.guildId,
+                noReplace: false,
+                playerOptions: Object.fromEntries(Object.entries({
+                    track,
+                    position: options.position ?? undefined,
+                    paused: options.paused ?? undefined,
+                    endTime: options?.endTime ?? undefined,
+                    filters: options?.filters ?? undefined,
+                    volume: options.volume ?? this.lavalinkVolume ?? undefined,
+                    voice: options.voice ?? undefined,
+                }).filter(v => typeof v[1] !== "undefined")) as Partial<LavalinkPlayOptions>,
+            });
         }
 
         if (!this.queue.current && this.queue.tracks.length) await queueTrackEnd(this);
@@ -358,7 +265,7 @@ export class Player {
 
         await this.node.updatePlayer({
             guildId: this.guildId,
-            noReplace: replaced ? replaced : (options?.noReplace ?? false),
+            noReplace: (options?.noReplace ?? false),
             playerOptions: finalOptions,
         });
 
@@ -392,19 +299,32 @@ export class Player {
         this.ping.lavalink = Math.round((performance.now() - now) / 10) / 100;
         return this;
     }
-
+    /**
+     * Search for a track
+     * @param query The query to search for
+     * @param requestUser The user that requested the track
+     * @param throwOnEmpty If an error should be thrown if no track is found
+     * @returns The search result
+     */
     async lavaSearch(query: LavaSearchQuery, requestUser: unknown, throwOnEmpty: boolean = false) {
         return this.node.lavaSearch(query, requestUser, throwOnEmpty);
     }
-
+    /**
+     * Set the SponsorBlock
+     * @param segments The segments to set
+     */
     public async setSponsorBlock(segments: SponsorBlockSegment[] = ["sponsor", "selfpromo"]) {
         return this.node.setSponsorBlock(this, segments);
     }
-
+    /**
+     * Get the SponsorBlock
+     */
     public async getSponsorBlock() {
         return this.node.getSponsorBlock(this);
     }
-
+    /**
+     * Delete the SponsorBlock
+     */
     public async deleteSponsorBlock() {
         return this.node.deleteSponsorBlock(this);
     }
@@ -479,7 +399,7 @@ export class Player {
         if (!["off", "track", "queue"].includes(repeatMode)) throw new RangeError("Repeatmode must be either 'off', 'track', or 'queue'");
         this.repeatMode = repeatMode;
         return this;
-    }
+    }1
 
     /**
      * Skip the current song, or a specific amount of songs
@@ -493,7 +413,7 @@ export class Player {
             await this.queue.splice(0, skipTo - 1);
         }
 
-        if (!this.playing) return await this.play();
+        if (!this.playing) return (this.play(), this);
 
         const now = performance.now();
         this.set("internal_skipped", true);
@@ -678,6 +598,7 @@ export class Player {
             filters: this.filterManager?.data || {},
             equalizer: this.filterManager?.equalizerBands || [],
             nodeId: this.node?.id,
+            nodeSessionId: this.node?.sessionId,
             ping: this.ping,
             queue: this.queue.utils.toJSON(),
         } as PlayerJson

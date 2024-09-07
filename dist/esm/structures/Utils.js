@@ -40,13 +40,19 @@ export class ManagerUtils {
         if (!data.info)
             throw new RangeError("Argument 'data.info' must be present.");
         try {
+            let transformedRequester = typeof requester === "object"
+                ? this.getTransformedRequester(requester)
+                : undefined;
+            if (!transformedRequester && typeof data?.userData?.requester === "object" && data.userData.requester !== null) {
+                transformedRequester = this.getTransformedRequester(data.userData.requester);
+            }
             const r = {
                 encoded: data.encoded,
                 info: {
                     identifier: data.info.identifier,
                     title: data.info.title,
                     author: data.info.author,
-                    duration: data.info.duration || data.info.length,
+                    duration: data.info?.duration || data.info?.length,
                     artworkUrl: data.info.artworkUrl || data.pluginInfo?.artworkUrl || data.plugin?.artworkUrl,
                     uri: data.info.uri,
                     sourceName: data.info.sourceName,
@@ -54,8 +60,12 @@ export class ManagerUtils {
                     isStream: data.info.isStream,
                     isrc: data.info.isrc,
                 },
-                pluginInfo: this.buildPluginInfo(data),
-                requester: typeof this.LavalinkManager?.options?.playerOptions?.requesterTransformer === "function" ? this.LavalinkManager?.options?.playerOptions?.requesterTransformer(data?.requester || requester) : requester,
+                userData: {
+                    ...(data.userData || {}),
+                    requester: transformedRequester
+                },
+                pluginInfo: this.buildPluginInfo(data, "clientData" in data ? data.clientData : {}),
+                requester: transformedRequester || this.getTransformedRequester(this.LavalinkManager?.options?.client),
             };
             Object.defineProperty(r, TrackSymbol, { configurable: true, value: true });
             return r;
@@ -76,7 +86,7 @@ export class ManagerUtils {
             encoded: query.encoded || undefined,
             info: query.info ? query.info : query.title ? query : undefined,
             pluginInfo: this.buildPluginInfo(query),
-            requester: typeof this.LavalinkManager?.options?.playerOptions?.requesterTransformer === "function" ? this.LavalinkManager?.options?.playerOptions?.requesterTransformer((query?.requester || requester)) : requester,
+            requester: this.getTransformedRequester(requester),
             async resolve(player) {
                 const closest = await getClosestTrack(this, player);
                 if (!closest)
@@ -112,6 +122,17 @@ export class ManagerUtils {
             return false;
         return true;
     }
+    getTransformedRequester(requester) {
+        try {
+            return typeof this.LavalinkManager?.options?.playerOptions?.requesterTransformer === "function"
+                ? this.LavalinkManager?.options?.playerOptions?.requesterTransformer(requester)
+                : requester;
+        }
+        catch (e) {
+            console.error("errored while transforming requester:", e);
+            return requester;
+        }
+    }
     /**
      * Validate if a data is equal to node options
      * @param data
@@ -125,26 +146,26 @@ export class ManagerUtils {
             return false;
         if (typeof data.authorization !== "string" || !data.authorization.length)
             return false;
-        if ("secure" in data && typeof data.secure !== "boolean")
+        if ("secure" in data && typeof data.secure !== "boolean" && data.secure !== undefined)
             return false;
-        if ("sessionId" in data && typeof data.sessionId !== "string")
+        if ("sessionId" in data && typeof data.sessionId !== "string" && data.sessionId !== undefined)
             return false;
-        if ("id" in data && typeof data.id !== "string")
+        if ("id" in data && typeof data.id !== "string" && data.id !== undefined)
             return false;
-        if ("regions" in data && (!Array.isArray(data.regions) || !data.regions.every(v => typeof v === "string")))
+        if ("regions" in data && (!Array.isArray(data.regions) || !data.regions.every(v => typeof v === "string") && data.regions !== undefined))
             return false;
-        if ("poolOptions" in data && typeof data.poolOptions !== "object")
+        if ("poolOptions" in data && typeof data.poolOptions !== "object" && data.poolOptions !== undefined)
             return false;
-        if ("retryAmount" in data && (typeof data.retryAmount !== "number" || isNaN(data.retryAmount) || data.retryAmount <= 0))
+        if ("retryAmount" in data && (typeof data.retryAmount !== "number" || isNaN(data.retryAmount) || data.retryAmount <= 0 && data.retryAmount !== undefined))
             return false;
-        if ("retryDelay" in data && (typeof data.retryDelay !== "number" || isNaN(data.retryDelay) || data.retryDelay <= 0))
+        if ("retryDelay" in data && (typeof data.retryDelay !== "number" || isNaN(data.retryDelay) || data.retryDelay <= 0 && data.retryDelay !== undefined))
             return false;
-        if ("requestTimeout" in data && (typeof data.requestTimeout !== "number" || isNaN(data.requestTimeout) || data.requestTimeout <= 0))
+        if ("requestTimeout" in data && (typeof data.requestTimeout !== "number" || isNaN(data.requestTimeout) || data.requestTimeout <= 0 && data.requestTimeout !== undefined))
             return false;
         return true;
     }
     /**
-     * Validate if a data is euqal to a track
+     * Validate if a data is equal to a track
      * @param data the Track to validate
      * @returns
      */
@@ -164,7 +185,7 @@ export class ManagerUtils {
             return false;
         if (data[UnresolvedTrackSymbol] === true)
             return true;
-        return typeof data === "object" && (("info" in data && typeof data.info.title === "string") || typeof data.encoded === "string") && typeof data.resolve === "function";
+        return typeof data === "object" && (("info" in data && typeof data.info.title === "string") || typeof data.encoded === "string") && "resolve" in data && typeof data.resolve === "function";
     }
     /**
      * Checks if the provided argument is a valid UnresolvedTrack.

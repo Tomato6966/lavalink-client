@@ -12,6 +12,7 @@ module.exports = {
     plugins: ['@typescript-eslint'],
     rules: {
         "@typescript-eslint/no-unsafe-declaration-merging": 1,
-        "@typescript-eslint/no-explicit-any": 1
+        "@typescript-eslint/no-explicit-any": 1,
+        '@typescript-eslint/consistent-type-imports': 'error',
     }
-} 
+}

@@ -1,68 +1,56 @@
 /// <reference types="node" />
 import { EventEmitter } from "stream";
-import { LavalinkManager } from "./LavalinkManager";
-import { LavalinkNode, LavalinkNodeOptions } from "./Node";
-import { DestroyReasonsType } from "./Player";
-import { LavalinkPlayer, MiniMap } from "./Utils";
-type LavalinkNodeIdentifier = string;
-export interface NodeManagerEvents {
-    /**
-     * Emitted when a Node is created.
-     * @event Manager.nodeManager#create
-     */
-    "create": (node: LavalinkNode) => void;
-    /**
-     * Emitted when a Node is destroyed.
-     * @event Manager.nodeManager#destroy
-     */
-    "destroy": (node: LavalinkNode, destroyReason?: DestroyReasonsType) => void;
-    /**
-     * Emitted when a Node is connected.
-     * @event Manager.nodeManager#connect
-     */
-    "connect": (node: LavalinkNode) => void;
-    /**
-     * Emitted when a Node is reconnecting.
-     * @event Manager.nodeManager#reconnecting
-    */
-    "reconnecting": (node: LavalinkNode) => void;
-    /**
-     * Emitted when a Node is disconnects.
-     * @event Manager.nodeManager#disconnect
-    */
-    "disconnect": (node: LavalinkNode, reason: {
-        code?: number;
-        reason?: string;
-    }) => void;
-    /**
-     * Emitted when a Node is error.
-     * @event Manager.nodeManager#error
-    */
-    "error": (node: LavalinkNode, error: Error, payload?: unknown) => void;
-    /**
-     * Emits every single Node event.
-     * @event Manager.nodeManager#raw
-    */
-    "raw": (node: LavalinkNode, payload: unknown) => void;
-    /**
-     * Emits when the node connects resumed. You then need to create all players within this event for your usecase.
-     * Aka for that you need to be able to save player data like vc channel + text channel in a db and then sync it again
-     * @event Manager.nodeManager#nodeResumed
-     */
-    "resumed": (node: LavalinkNode, paylaod: {
-        resumed: true;
-        sessionId: string;
-        op: "ready";
-    }, players: LavalinkPlayer[]) => void;
-}
-export declare interface NodeManager {
-    on<U extends keyof NodeManagerEvents>(event: U, listener: NodeManagerEvents[U]): this;
-    emit<U extends keyof NodeManagerEvents>(event: U, ...args: Parameters<NodeManagerEvents[U]>): boolean;
-    /** @private */
-    LavalinkManager: LavalinkManager;
-}
+import { LavalinkNode } from "./Node";
+import { MiniMap } from "./Utils";
+import type { LavalinkNodeIdentifier, LavalinkNodeOptions, NodeManagerEvents } from "./Types/Node";
+import type { LavalinkManager } from "./LavalinkManager";
 export declare class NodeManager extends EventEmitter {
+    /**
+     * Emit an event
+     * @param event The event to emit
+     * @param args The arguments to pass to the event
+     * @returns
+     */
+    emit<Event extends keyof NodeManagerEvents>(event: Event, ...args: Parameters<NodeManagerEvents[Event]>): boolean;
+    /**
+     * Add an event listener
+     * @param event The event to listen to
+     * @param listener The listener to add
+     * @returns
+     */
+    on<Event extends keyof NodeManagerEvents>(event: Event, listener: NodeManagerEvents[Event]): this;
+    /**
+     * Add an event listener that only fires once
+     * @param event The event to listen to
+     * @param listener The listener to add
+     * @returns
+     */
+    once<Event extends keyof NodeManagerEvents>(event: Event, listener: NodeManagerEvents[Event]): this;
+    /**
+     * Remove an event listener
+     * @param event The event to remove the listener from
+     * @param listener The listener to remove
+     * @returns
+     */
+    off<Event extends keyof NodeManagerEvents>(event: Event, listener: NodeManagerEvents[Event]): this;
+    /**
+     * Remove an event listener
+     * @param event The event to remove the listener from
+     * @param listener The listener to remove
+     * @returns
+     */
+    removeListener<Event extends keyof NodeManagerEvents>(event: Event, listener: NodeManagerEvents[Event]): this;
+    /**
+     * The LavalinkManager that created this NodeManager
+     */
+    LavalinkManager: LavalinkManager;
+    /**
+     * A map of all nodes in the nodeManager
+     */
     nodes: MiniMap<string, LavalinkNode>;
+    /**
+     * @param LavalinkManager The LavalinkManager that created this NodeManager
+     */
     constructor(LavalinkManager: LavalinkManager);
     /**
      * Disconnects all Nodes from lavalink ws sockets
@@ -80,8 +68,22 @@ export declare class NodeManager extends EventEmitter {
      * @returns amount of nodes
      */
     reconnectAll(): Promise<number>;
+    /**
+     * Create a node and add it to the nodeManager
+     * @param options The options for the node
+     * @returns The node that was created
+     */
     createNode(options: LavalinkNodeOptions): LavalinkNode;
+    /**
+     * Get the nodes sorted for the least usage, by a sorttype
+     * @param sortType The type of sorting to use
+     * @returns
+     */
     leastUsedNodes(sortType?: "memory" | "cpuLavalink" | "cpuSystem" | "calls" | "playingPlayers" | "players"): LavalinkNode[];
+    /**
+     * Delete a node from the nodeManager and destroy it
+     * @param node The node to delete
+     * @returns
+     */
     deleteNode(node: LavalinkNodeIdentifier | LavalinkNode): void;
 }
-export {};

@@ -1,92 +1,115 @@
-import { Track, UnresolvedTrack } from "./Track";
 import { ManagerUtils, MiniMap, QueueSymbol } from "./Utils";
 
-export interface StoredQueue {
-    current: Track | null;
-    previous: Track[];
-    tracks: Track[];
-}
-
-export interface QueueStoreManager extends Record<string, any> {
-    /** @async get a Value (MUST RETURN UNPARSED!) */
-    get: (guildId: unknown) => Promise<unknown>;
-    /** @async Set a value inside a guildId (MUST BE UNPARSED) */
-    set: (guildId: unknown, value: unknown) => Promise<unknown>;
-    /** @async Delete a Database Value based of it's guildId */
-    delete: (guildId: unknown) => Promise<unknown>;
-    /** @async Transform the value(s) inside of the QueueStoreManager (IF YOU DON'T NEED PARSING/STRINGIFY, then just return the value) */
-    stringify: (value: unknown) => Promise<unknown>;
-    /** @async Parse the saved value back to the Queue (IF YOU DON'T NEED PARSING/STRINGIFY, then just return the value) */
-    parse: (value: unknown) => Promise<Partial<StoredQueue>>;
-}
-
-export interface ManagerQueueOptions {
-    /** Maximum Amount of tracks for the queue.previous array. Set to 0 to not save previous songs. Defaults to 25 Tracks */
-    maxPreviousTracks?: number;
-    /** Custom Queue Store option */
-    queueStore?: QueueStoreManager;
-    /** Custom Queue Watcher class */
-    queueChangesWatcher?: QueueChangesWatcher;
-}
-
-export interface QueueSaver {
-    /** @private */
-    _: QueueStoreManager;
-    /** @private */
-    options: {
-        maxPreviousTracks: number
-    };
-}
-
+import type { Track, UnresolvedTrack } from "./Types/Track";
+import type {
+    ManagerQueueOptions, QueueChangesWatcher, QueueStoreManager, StoredQueue
+} from "./Types/Queue";
 
 export class QueueSaver {
+    /**
+     * The queue store manager
+     */
+    private _: QueueStoreManager;
+    /**
+     * The options for the queue saver
+     */
+    public options: {
+        maxPreviousTracks: number
+    };
     constructor(options: ManagerQueueOptions) {
         this._ = options?.queueStore || new DefaultQueueStore();
         this.options = {
             maxPreviousTracks: options?.maxPreviousTracks || 25,
         };
     }
+
+    /**
+     * Get the queue for a guild
+     * @param guildId The guild ID
+     * @returns The queue for the guild
+     */
     async get(guildId: string) {
-        return await this._.parse(await this._.get(guildId));
+        return this._.parse(await this._.get(guildId));
     }
+
+    /**
+     * Delete the queue for a guild
+     * @param guildId The guild ID
+     * @returns The queue for the guild
+     */
     async delete(guildId: string) {
-        return await this._.delete(guildId);
+        return this._.delete(guildId);
     }
-    async set(guildId: string, value: any) {
-        return await this._.set(guildId, await this._.stringify(value));
+
+    /**
+     * Set the queue for a guild
+     * @param guildId The guild ID
+     * @param valueToStringify The queue to set
+     * @returns The queue for the guild
+     */
+    async set(guildId: string, valueToStringify: StoredQueue) {
+        return this._.set(guildId, await this._.stringify(valueToStringify));
     }
+
+    /**
+     * Sync the queue for a guild
+     * @param guildId The guild ID
+     * @returns The queue for the guild
+     */
     async sync(guildId: string) {
-        return await this.get(guildId);
+        return this.get(guildId);
     }
 }
 
 export class DefaultQueueStore implements QueueStoreManager {
     private data = new MiniMap();
     constructor() { }
+
+    /**
+     * Get the queue for a guild
+     * @param guildId The guild ID
+     * @returns The queue for the guild
+     */
     async get(guildId) {
         return await this.data.get(guildId);
     }
-    async set(guildId, stringifiedValue) {
-        return await this.data.set(guildId, stringifiedValue)
+
+    /**
+     * Set the queue for a guild
+     * @param guildId The guild ID
+     * @param valueToStringify The queue to set
+     * @returns The queue for the guild
+     */
+    async set(guildId, valueToStringify) {
+        return await this.data.set(guildId, valueToStringify)
     }
+
+    /**
+     * Delete the queue for a guild
+     * @param guildId The guild ID
+     * @returns The queue for the guild
+     */
     async delete(guildId) {
         return await this.data.delete(guildId);
     }
+
+    /**
+     * Stringify the queue for a guild
+     * @param value The queue to stringify
+     * @returns The stringified queue
+     */
     async stringify(value) {
         return value; // JSON.stringify(value);
     }
+
+    /**
+     * Parse the queue for a guild
+     * @param value The queue to parse
+     * @returns The parsed queue
+     */
     async parse(value) {
         return value as Partial<StoredQueue>; // JSON.parse(value)
     }
-}
-
-export interface QueueChangesWatcher {
-    /** get a Value (MUST RETURN UNPARSED!) */
-    tracksAdd: (guildId: string, tracks: (Track | UnresolvedTrack)[], position: number, oldStoredQueue: StoredQueue, newStoredQueue: StoredQueue) => any;
-    /** Set a value inside a guildId (MUST BE UNPARSED) */
-    tracksRemoved: (guildId: string, tracks: (Track | UnresolvedTrack)[], position: number, oldStoredQueue: StoredQueue, newStoredQueue: StoredQueue) => any;
-    /** Set a value inside a guildId (MUST BE UNPARSED) */
-    shuffled: (guildId: string, oldStoredQueue: StoredQueue, newStoredQueue: StoredQueue) => any;
 }
 
 export class Queue {
@@ -98,6 +121,14 @@ export class Queue {
     private readonly QueueSaver: QueueSaver | null = null;
     private managerUtils = new ManagerUtils();
     private queueChanges: QueueChangesWatcher | null;
+
+    /**
+     * Create a new Queue
+     * @param guildId The guild ID
+     * @param data The data to initialize the queue with
+     * @param QueueSaver The queue saver to use
+     * @param queueOptions
+     */
     constructor(guildId: string, data: Partial<StoredQueue> = {}, QueueSaver?: QueueSaver, queueOptions?: ManagerQueueOptions) {
         this.queueChanges = queueOptions.queueChangesWatcher || null;
         this.guildId = guildId;
@@ -147,14 +178,14 @@ export class Queue {
         /**
          * @returns {{current:Track|null, previous:Track[], tracks:Track[]}}The Queue, but in a raw State, which allows easier handling for the QueueStoreManager
          */
-        toJSON: () => {
+        toJSON: () : StoredQueue=> {
             if (this.previous.length > this.options.maxPreviousTracks) this.previous.splice(this.options.maxPreviousTracks, this.previous.length);
             return {
                 current: this.current ? { ...this.current } : null,
                 previous: this.previous ? [...this.previous] : [],
                 tracks: this.tracks ? [...this.tracks] : [],
-            } as StoredQueue;
-        },
+            };
+        } ,
 
         /**
          * Get the Total Duration of the Queue-Songs summed up
@@ -190,6 +221,7 @@ export class Queue {
         await this.utils.save();
         return this.tracks.length;
     }
+
     /**
      * Add a Track to the Queue, and after saved in the "db" it returns the amount of the Tracks
      * @param {Track | Track[]} TrackOrTracks
@@ -270,26 +302,24 @@ export class Queue {
      * await player.queue.splice(4, 0, ...tracks) // removes 0 tracks at position 4, and then inserts all tracks after position 4.
      * ```
      */
-    public async remove<T extends Track|UnresolvedTrack|number|Track[]|UnresolvedTrack[]|number[]|(number|Track|UnresolvedTrack)[]>(removeQueryTrack:T) : Promise<{ removed: (Track|UnresolvedTrack)[] } | null> {
-        if(typeof removeQueryTrack === "number") {
+    public async remove<T extends Track | UnresolvedTrack | number | Track[] | UnresolvedTrack[] | number[] | (number | Track | UnresolvedTrack)[]>(removeQueryTrack: T): Promise<{ removed: (Track | UnresolvedTrack)[] } | null> {
+        if (typeof removeQueryTrack === "number") {
             const toRemove = this.tracks[removeQueryTrack];
-            if(!toRemove) return null;
+            if (!toRemove) return null;
 
             const removed = this.tracks.splice(removeQueryTrack, 1);
             await this.utils.save();
-            console.log("0st", removed, toRemove);
 
             return { removed }
         }
 
-        if(Array.isArray(removeQueryTrack)) {
-            if(removeQueryTrack.every(v => typeof v === "number")) {
+        if (Array.isArray(removeQueryTrack)) {
+            if (removeQueryTrack.every(v => typeof v === "number")) {
                 const removed = [];
-                for(const i of removeQueryTrack) {
-                    if(this.tracks[i]) removed.push(...this.tracks.splice(i, 1))
+                for (const i of removeQueryTrack) {
+                    if (this.tracks[i]) removed.push(...this.tracks.splice(i, 1))
                 }
-                console.log("1st", removed, removeQueryTrack);
-                if(!removed.length) return null;
+                if (!removed.length) return null;
                 await this.utils.save();
 
                 return { removed };
@@ -307,16 +337,15 @@ export class Queue {
                 )
             ));
 
-            if(!tracksToRemove.length) return null;
+            if (!tracksToRemove.length) return null;
 
             const removed = [];
 
-            for(const { i } of tracksToRemove) {
-                if(this.tracks[i]) removed.push(...this.tracks.splice(i, 1))
+            for (const { i } of tracksToRemove) {
+                if (this.tracks[i]) removed.push(...this.tracks.splice(i, 1))
             }
 
             await this.utils.save();
-            console.log("2nd", removed, tracksToRemove);
 
             return { removed };
         }
@@ -329,11 +358,10 @@ export class Queue {
             removeQueryTrack.info?.artworkUrl && removeQueryTrack.info.artworkUrl === v.info?.artworkUrl
         );
 
-        if(toRemove < 0) return null;
+        if (toRemove < 0) return null;
 
         const removed = this.tracks.splice(toRemove, 1);
         await this.utils.save();
-        console.log("3rd", removed, toRemove);
 
         return { removed };
     }
@@ -352,7 +380,7 @@ export class Queue {
      */
     public async shiftPrevious() {
         const removed = this.previous.shift();
-        if(removed) await this.utils.save();
+        if (removed) await this.utils.save();
         return removed ?? null;
     }
 }

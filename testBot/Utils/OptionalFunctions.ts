@@ -1,8 +1,9 @@
 import { CustomRequester } from "../types/Client";
 
 export const requesterTransformer = (requester:any):CustomRequester => {
+    if(!requester) return { id: "unknown", username: "unknown", avatar: undefined };
     // if it's already the transformed requester
-    if(typeof requester === "object" && "avatar" in requester && Object.keys(requester).length === 3) return requester as CustomRequester; 
+    if(typeof requester === "object" && "avatar" in requester && Object.keys(requester).length === 3) return requester as CustomRequester;
     // if it's still a discord.js User
     if(typeof requester === "object" && "displayAvatarURL" in requester) { // it's a user
         return {
@@ -11,6 +12,7 @@ export const requesterTransformer = (requester:any):CustomRequester => {
             avatar: requester.displayAvatarURL(),
         }
     }
+    if(typeof requester === "object") return { ...requester };
     // if it's non of the above
     return { id: requester!.toString(), username: "unknown" }; // reteurn something that makes sense for you!
 };
@@ -21,7 +23,7 @@ export const autoPlayFunction = async (player, lastPlayedTrack) => {
     // and do player.set("autoplay_disabled", false) if you want to "enable" it again (it's enabled on default)
     if(player.get("autoplay_disabled") === true) return;
     if(!lastPlayedTrack) return;
-    
+
     if(lastPlayedTrack.info.sourceName === "spotify") {
         const filtered = player.queue.previous.filter(v => v.info.sourceName === "spotify").slice(0, 5);
         const ids = filtered.map(v => v.info.identifier || v.info.uri.split("/")?.reverse()?.[0] || v.info.uri.split("/")?.reverse()?.[1]);
@@ -33,11 +35,11 @@ export const autoPlayFunction = async (player, lastPlayedTrack) => {
                 response.tracks = response.tracks.filter(v => v.info.identifier !== lastPlayedTrack.info.identifier); // remove the lastPlayed track if it's in there..
                 return response;
             }).catch(console.warn);
-            if(res && res.tracks.length) await player.queue.add(res.tracks.slice(0, 5).map(track => { 
-                // transform the track plugininfo so you can figure out if the track is from autoplay or not. 
-                track.pluginInfo.clientData = { ...(track.pluginInfo.clientData||{}), fromAutoplay: true }; 
+            if(res && res.tracks.length) await player.queue.add(res.tracks.slice(0, 5).map(track => {
+                // transform the track plugininfo so you can figure out if the track is from autoplay or not.
+                track.pluginInfo.clientData = { ...(track.pluginInfo.clientData||{}), fromAutoplay: true };
                 return track;
-            })); 
+            }));
         }
         return;
     }
@@ -49,9 +51,9 @@ export const autoPlayFunction = async (player, lastPlayedTrack) => {
             response.tracks = response.tracks.filter(v => v.info.identifier !== lastPlayedTrack.info.identifier); // remove the lastPlayed track if it's in there..
             return response;
         }).catch(console.warn);
-        if(res && res.tracks.length) await player.queue.add(res.tracks.slice(0, 5).map(track => { 
-            // transform the track plugininfo so you can figure out if the track is from autoplay or not. 
-            track.pluginInfo.clientData = { ...(track.pluginInfo.clientData||{}), fromAutoplay: true }; 
+        if(res && res.tracks.length) await player.queue.add(res.tracks.slice(0, 5).map(track => {
+            // transform the track plugininfo so you can figure out if the track is from autoplay or not.
+            track.pluginInfo.clientData = { ...(track.pluginInfo.clientData||{}), fromAutoplay: true };
             return track;
         }));
         return;

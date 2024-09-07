@@ -1,6 +1,6 @@
-import {
-	ClientCustomSearchPlatformUtils, LavalinkSearchPlatform, SearchPlatform, SourcesRegex
-} from "./Utils";
+import type {
+    ClientCustomSearchPlatformUtils, LavalinkSearchPlatform, SearchPlatform, SourcesRegex
+} from "./Types/Utils";
 
 /** Default Sources Record, to allow source parsing with multiple inputs. */
 export const DefaultSources: Record<SearchPlatform, LavalinkSearchPlatform | ClientCustomSearchPlatformUtils> = {

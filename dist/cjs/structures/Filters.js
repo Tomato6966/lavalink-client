@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.EQList = exports.audioOutputsData = exports.FilterManager = void 0;
+exports.FilterManager = void 0;
+const Constants_1 = require("./Constants");
 /**
  * The FilterManager for each player
  */
@@ -87,7 +88,7 @@ class FilterManager {
             // "decay": 0.4649       // Float, within the range of 0.0 - 1.0. A value of 1.0 means no decay, and a value of 0.0 means
             },
         },
-        channelMix: exports.audioOutputsData.stereo,
+        channelMix: Constants_1.audioOutputsData.stereo,
         /*distortion: {
             sinOffset: 0,
             sinScale: 1,
@@ -273,7 +274,7 @@ class FilterManager {
                 frequency: 0,
                 depth: 0 // 0 < x = 1
             },
-            channelMix: exports.audioOutputsData.stereo,
+            channelMix: Constants_1.audioOutputsData.stereo,
         })) {
             this.data[key] = value;
         }
@@ -300,9 +301,9 @@ class FilterManager {
     async setAudioOutput(type) {
         if (this.player.node.info && !this.player.node.info?.filters?.includes("channelMix"))
             throw new Error("Node#Info#filters does not include the 'channelMix' Filter (Node has it not enable)");
-        if (!type || !exports.audioOutputsData[type])
+        if (!type || !Constants_1.audioOutputsData[type])
             throw "Invalid audio type added, must be 'mono' / 'stereo' / 'left' / 'right'";
-        this.data.channelMix = exports.audioOutputsData[type];
+        this.data.channelMix = Constants_1.audioOutputsData[type];
         this.filters.audioOutput = type;
         await this.applyPlayerFilters();
         return this.filters.audioOutput;
@@ -383,7 +384,8 @@ class FilterManager {
             throw new Error("Node#Info#filters does not include the 'rotation' Filter (Node has it not enable)");
         this.data.rotation.rotationHz = this.filters.rotation ? 0 : rotationHz;
         this.filters.rotation = !this.filters.rotation;
-        return await this.applyPlayerFilters(), this.filters.rotation;
+        await this.applyPlayerFilters();
+        return this.filters.rotation;
     }
     /**
      * Enables / Disables the Vibrato effect, (Optional: provide your Own Data)
@@ -671,229 +673,3 @@ class FilterManager {
     }
 }
 exports.FilterManager = FilterManager;
-/**  The audio Outputs Data map declaration */
-exports.audioOutputsData = {
-    mono: {
-        leftToLeft: 0.5,
-        leftToRight: 0.5,
-        rightToLeft: 0.5,
-        rightToRight: 0.5,
-    },
-    stereo: {
-        leftToLeft: 1,
-        leftToRight: 0,
-        rightToLeft: 0,
-        rightToRight: 1,
-    },
-    left: {
-        leftToLeft: 1,
-        leftToRight: 0,
-        rightToLeft: 1,
-        rightToRight: 0,
-    },
-    right: {
-        leftToLeft: 0,
-        leftToRight: 1,
-        rightToLeft: 0,
-        rightToRight: 1,
-    },
-};
-exports.EQList = {
-    /** A Bassboost Equalizer, so high it distorts the audio */
-    BassboostEarrape: [
-        { band: 0, gain: 0.6 * 0.375 },
-        { band: 1, gain: 0.67 * 0.375 },
-        { band: 2, gain: 0.67 * 0.375 },
-        { band: 3, gain: 0.4 * 0.375 },
-        { band: 4, gain: -0.5 * 0.375 },
-        { band: 5, gain: 0.15 * 0.375 },
-        { band: 6, gain: -0.45 * 0.375 },
-        { band: 7, gain: 0.23 * 0.375 },
-        { band: 8, gain: 0.35 * 0.375 },
-        { band: 9, gain: 0.45 * 0.375 },
-        { band: 10, gain: 0.55 * 0.375 },
-        { band: 11, gain: -0.6 * 0.375 },
-        { band: 12, gain: 0.55 * 0.375 },
-        { band: 13, gain: -0.5 * 0.375 },
-        { band: 14, gain: -0.75 * 0.375 },
-    ],
-    /** A High and decent Bassboost Equalizer */
-    BassboostHigh: [
-        { band: 0, gain: 0.6 * 0.25 },
-        { band: 1, gain: 0.67 * 0.25 },
-        { band: 2, gain: 0.67 * 0.25 },
-        { band: 3, gain: 0.4 * 0.25 },
-        { band: 4, gain: -0.5 * 0.25 },
-        { band: 5, gain: 0.15 * 0.25 },
-        { band: 6, gain: -0.45 * 0.25 },
-        { band: 7, gain: 0.23 * 0.25 },
-        { band: 8, gain: 0.35 * 0.25 },
-        { band: 9, gain: 0.45 * 0.25 },
-        { band: 10, gain: 0.55 * 0.25 },
-        { band: 11, gain: -0.6 * 0.25 },
-        { band: 12, gain: 0.55 * 0.25 },
-        { band: 13, gain: -0.5 * 0.25 },
-        { band: 14, gain: -0.75 * 0.25 },
-    ],
-    /** A decent Bassboost Equalizer */
-    BassboostMedium: [
-        { band: 0, gain: 0.6 * 0.1875 },
-        { band: 1, gain: 0.67 * 0.1875 },
-        { band: 2, gain: 0.67 * 0.1875 },
-        { band: 3, gain: 0.4 * 0.1875 },
-        { band: 4, gain: -0.5 * 0.1875 },
-        { band: 5, gain: 0.15 * 0.1875 },
-        { band: 6, gain: -0.45 * 0.1875 },
-        { band: 7, gain: 0.23 * 0.1875 },
-        { band: 8, gain: 0.35 * 0.1875 },
-        { band: 9, gain: 0.45 * 0.1875 },
-        { band: 10, gain: 0.55 * 0.1875 },
-        { band: 11, gain: -0.6 * 0.1875 },
-        { band: 12, gain: 0.55 * 0.1875 },
-        { band: 13, gain: -0.5 * 0.1875 },
-        { band: 14, gain: -0.75 * 0.1875 },
-    ],
-    /** A slight Bassboost Equalizer */
-    BassboostLow: [
-        { band: 0, gain: 0.6 * 0.125 },
-        { band: 1, gain: 0.67 * 0.125 },
-        { band: 2, gain: 0.67 * 0.125 },
-        { band: 3, gain: 0.4 * 0.125 },
-        { band: 4, gain: -0.5 * 0.125 },
-        { band: 5, gain: 0.15 * 0.125 },
-        { band: 6, gain: -0.45 * 0.125 },
-        { band: 7, gain: 0.23 * 0.125 },
-        { band: 8, gain: 0.35 * 0.125 },
-        { band: 9, gain: 0.45 * 0.125 },
-        { band: 10, gain: 0.55 * 0.125 },
-        { band: 11, gain: -0.6 * 0.125 },
-        { band: 12, gain: 0.55 * 0.125 },
-        { band: 13, gain: -0.5 * 0.125 },
-        { band: 14, gain: -0.75 * 0.125 },
-    ],
-    /** Makes the Music slightly "better" */
-    BetterMusic: [
-        { band: 0, gain: 0.25 },
-        { band: 1, gain: 0.025 },
-        { band: 2, gain: 0.0125 },
-        { band: 3, gain: 0 },
-        { band: 4, gain: 0 },
-        { band: 5, gain: -0.0125 },
-        { band: 6, gain: -0.025 },
-        { band: 7, gain: -0.0175 },
-        { band: 8, gain: 0 },
-        { band: 9, gain: 0 },
-        { band: 10, gain: 0.0125 },
-        { band: 11, gain: 0.025 },
-        { band: 12, gain: 0.25 },
-        { band: 13, gain: 0.125 },
-        { band: 14, gain: 0.125 },
-    ],
-    /** Makes the Music sound like rock music / sound rock music better */
-    Rock: [
-        { band: 0, gain: 0.300 },
-        { band: 1, gain: 0.250 },
-        { band: 2, gain: 0.200 },
-        { band: 3, gain: 0.100 },
-        { band: 4, gain: 0.050 },
-        { band: 5, gain: -0.050 },
-        { band: 6, gain: -0.150 },
-        { band: 7, gain: -0.200 },
-        { band: 8, gain: -0.100 },
-        { band: 9, gain: -0.050 },
-        { band: 10, gain: 0.050 },
-        { band: 11, gain: 0.100 },
-        { band: 12, gain: 0.200 },
-        { band: 13, gain: 0.250 },
-        { band: 14, gain: 0.300 },
-    ],
-    /** Makes the Music sound like Classic music / sound Classic music better */
-    Classic: [
-        { band: 0, gain: 0.375 },
-        { band: 1, gain: 0.350 },
-        { band: 2, gain: 0.125 },
-        { band: 3, gain: 0 },
-        { band: 4, gain: 0 },
-        { band: 5, gain: 0.125 },
-        { band: 6, gain: 0.550 },
-        { band: 7, gain: 0.050 },
-        { band: 8, gain: 0.125 },
-        { band: 9, gain: 0.250 },
-        { band: 10, gain: 0.200 },
-        { band: 11, gain: 0.250 },
-        { band: 12, gain: 0.300 },
-        { band: 13, gain: 0.250 },
-        { band: 14, gain: 0.300 },
-    ],
-    /** Makes the Music sound like Pop music / sound Pop music better */
-    Pop: [
-        { band: 0, gain: 0.2635 },
-        { band: 1, gain: 0.22141 },
-        { band: 2, gain: -0.21141 },
-        { band: 3, gain: -0.1851 },
-        { band: 4, gain: -0.155 },
-        { band: 5, gain: 0.21141 },
-        { band: 6, gain: 0.22456 },
-        { band: 7, gain: 0.237 },
-        { band: 8, gain: 0.237 },
-        { band: 9, gain: 0.237 },
-        { band: 10, gain: -0.05 },
-        { band: 11, gain: -0.116 },
-        { band: 12, gain: 0.192 },
-        { band: 13, gain: 0 },
-    ],
-    /** Makes the Music sound like Electronic music / sound Electronic music better */
-    Electronic: [
-        { band: 0, gain: 0.375 },
-        { band: 1, gain: 0.350 },
-        { band: 2, gain: 0.125 },
-        { band: 3, gain: 0 },
-        { band: 4, gain: 0 },
-        { band: 5, gain: -0.125 },
-        { band: 6, gain: -0.125 },
-        { band: 7, gain: 0 },
-        { band: 8, gain: 0.25 },
-        { band: 9, gain: 0.125 },
-        { band: 10, gain: 0.15 },
-        { band: 11, gain: 0.2 },
-        { band: 12, gain: 0.250 },
-        { band: 13, gain: 0.350 },
-        { band: 14, gain: 0.400 },
-    ],
-    /** Boosts all Bands slightly for louder and fuller sound */
-    FullSound: [
-        { band: 0, gain: 0.25 + 0.375 },
-        { band: 1, gain: 0.25 + 0.025 },
-        { band: 2, gain: 0.25 + 0.0125 },
-        { band: 3, gain: 0.25 + 0 },
-        { band: 4, gain: 0.25 + 0 },
-        { band: 5, gain: 0.25 + -0.0125 },
-        { band: 6, gain: 0.25 + -0.025 },
-        { band: 7, gain: 0.25 + -0.0175 },
-        { band: 8, gain: 0.25 + 0 },
-        { band: 9, gain: 0.25 + 0 },
-        { band: 10, gain: 0.25 + 0.0125 },
-        { band: 11, gain: 0.25 + 0.025 },
-        { band: 12, gain: 0.25 + 0.375 },
-        { band: 13, gain: 0.25 + 0.125 },
-        { band: 14, gain: 0.25 + 0.125 },
-    ],
-    /** Boosts basses + lower highs for a pro gaming sound */
-    Gaming: [
-        { band: 0, gain: 0.350 },
-        { band: 1, gain: 0.300 },
-        { band: 2, gain: 0.250 },
-        { band: 3, gain: 0.200 },
-        { band: 4, gain: 0.150 },
-        { band: 5, gain: 0.100 },
-        { band: 6, gain: 0.050 },
-        { band: 7, gain: -0.0 },
-        { band: 8, gain: -0.050 },
-        { band: 9, gain: -0.100 },
-        { band: 10, gain: -0.150 },
-        { band: 11, gain: -0.200 },
-        { band: 12, gain: -0.250 },
-        { band: 13, gain: -0.300 },
-        { band: 14, gain: -0.350 },
-    ],
-};

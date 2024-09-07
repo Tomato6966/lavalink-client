@@ -13,9 +13,12 @@
       "esModuleInterop": true,
       "allowSyntheticDefaultImports": true,
       "forceConsistentCasingInFileNames": true,
-      "types": [ "node", "ws" ]
+      "types": [ "node", "ws" ],
+      "lib": [
+        "ES2022", "DOM"
+    ]
   },
-  "include": [ 
+  "include": [
     "src/**/*.ts",
     ".eslintrc.js"
   ],

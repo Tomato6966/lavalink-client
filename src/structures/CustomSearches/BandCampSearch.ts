@@ -1,5 +1,5 @@
-import { Player } from "../Player";
-import { UnresolvedSearchResult } from "../Utils";
+import type { Player } from "../Player";
+import type { UnresolvedSearchResult } from "../Types/Utils";
 
 export const bandCampSearch = async (player: Player, query: string, requestUser: unknown) => {
     let error = null;

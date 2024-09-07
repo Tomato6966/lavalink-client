@@ -5,9 +5,10 @@ import {
 } from "discord.js";
 import { RedisClientType } from "redis";
 
-import { LavalinkManager, MiniMap } from "../../src";
+import type { LavalinkManager, MiniMap } from "../../src";
+import type { JSONStore } from "../Utils/CustomClasses";
 
-declare type InteractionExecuteFN = (client:BotClient, interaction:ChatInputCommandInteraction<"cached">) => any; 
+declare type InteractionExecuteFN = (client:BotClient, interaction:ChatInputCommandInteraction<"cached">) => any;
 declare type AutoCompleteExecuteFN = (client:BotClient, interaction:AutocompleteInteraction) => any;
 
 export interface CustomRequester {
@@ -38,6 +39,6 @@ export interface Event {
 export interface BotClient extends Client {
     lavalink: LavalinkManager;
     commands: MiniMap<string, Command|SubCommand>;
-    redis: RedisClientType | MiniMap<string, string>;
+    redis: RedisClientType | JSONStore | MiniMap<string, string>;
     defaultVolume: number;
 }
