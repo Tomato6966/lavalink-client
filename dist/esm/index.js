@@ -13,3 +13,4 @@ export * from "./structures/Types/Player";
 export * from "./structures/Types/Queue";
 export * from "./structures/Types/Node";
 export * from "./structures/Constants";
+export * from "./structures/Types/Manager";
