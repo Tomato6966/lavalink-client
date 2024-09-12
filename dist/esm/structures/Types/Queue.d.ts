@@ -28,7 +28,7 @@ export interface QueueChangesWatcher {
     /** get a Value (MUST RETURN UNPARSED!) */
     tracksAdd: (guildId: string, tracks: (Track | UnresolvedTrack)[], position: number, oldStoredQueue: StoredQueue, newStoredQueue: StoredQueue) => void;
     /** Set a value inside a guildId (MUST BE UNPARSED) */
-    tracksRemoved: (guildId: string, tracks: (Track | UnresolvedTrack)[], position: number, oldStoredQueue: StoredQueue, newStoredQueue: StoredQueue) => void;
+    tracksRemoved: (guildId: string, tracks: (Track | UnresolvedTrack)[], position: number | number[], oldStoredQueue: StoredQueue, newStoredQueue: StoredQueue) => void;
     /** Set a value inside a guildId (MUST BE UNPARSED) */
     shuffled: (guildId: string, oldStoredQueue: StoredQueue, newStoredQueue: StoredQueue) => void;
 }

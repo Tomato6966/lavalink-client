@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Player = void 0;
+const Constants_1 = require("./Constants");
 const BandCampSearch_1 = require("./CustomSearches/BandCampSearch");
 const Filters_1 = require("./Filters");
 const Queue_1 = require("./Queue");
@@ -72,8 +73,17 @@ class Player {
         this.guildId = this.options.guildId;
         this.voiceChannelId = this.options.voiceChannelId;
         this.textChannelId = this.options.textChannelId || null;
-        this.node = typeof this.options.node === "string" ? this.LavalinkManager.nodeManager.nodes.get(this.options.node) : this.options.node;
+        this.node = typeof this.options.node === "string"
+            ? this.LavalinkManager.nodeManager.nodes.get(this.options.node)
+            : this.options.node;
         if (!this.node || typeof this.node.request !== "function") {
+            if (typeof this.options.node === "string" && this.LavalinkManager.options?.advancedOptions?.enableDebugEvents) {
+                this.LavalinkManager.emit("debug", Constants_1.DebugEvents.PlayerCreateNodeNotFound, {
+                    state: "warn",
+                    message: `Player was created with provided node Id: ${this.options.node}, but no node with that Id was found.`,
+                    functionLayer: "Player > constructor()",
+                });
+            }
             const least = this.LavalinkManager.nodeManager.leastUsedNodes();
             this.node = least.filter(v => options.vcRegion ? v.options?.regions?.includes(options.vcRegion) : true)[0] || least[0] || null;
         }
@@ -128,6 +138,13 @@ class Player {
      */
     async play(options = {}) {
         if (this.get("internal_queueempty")) {
+            if (typeof this.options.node === "string" && this.LavalinkManager.options?.advancedOptions?.enableDebugEvents) {
+                this.LavalinkManager.emit("debug", Constants_1.DebugEvents.PlayerPlayQueueEmptyTimeoutClear, {
+                    state: "log",
+                    message: `Player was called to play something, while there was a queueEmpty Timeout set, clearing the timeout.`,
+                    functionLayer: "Player > play()",
+                });
+            }
             clearTimeout(this.get("internal_queueempty"));
             this.set("internal_queueempty", undefined);
         }
@@ -168,6 +185,13 @@ class Player {
                     ...(track.userData || {}),
                     requester: this.LavalinkManager.utils.getTransformedRequester(options?.track?.requester || {})
                 };
+            if (typeof this.options.node === "string" && this.LavalinkManager.options?.advancedOptions?.enableDebugEvents) {
+                this.LavalinkManager.emit("debug", Constants_1.DebugEvents.PlayerPlayWithTrackReplace, {
+                    state: "log",
+                    message: `Player was called to play something, with a specific track provided. Replacing the current Track and resolving the track on trackStart Event.`,
+                    functionLayer: "Player > play()",
+                });
+            }
             return this.node.updatePlayer({
                 guildId: this.guildId,
                 noReplace: false,
@@ -185,6 +209,13 @@ class Player {
         if (!this.queue.current && this.queue.tracks.length)
             await (0, Utils_1.queueTrackEnd)(this);
         if (this.queue.current && this.LavalinkManager.utils.isUnresolvedTrack(this.queue.current)) {
+            if (typeof this.options.node === "string" && this.LavalinkManager.options?.advancedOptions?.enableDebugEvents) {
+                this.LavalinkManager.emit("debug", Constants_1.DebugEvents.PlayerPlayUnresolvedTrack, {
+                    state: "log",
+                    message: `Player Play was called, current Queue Song is unresolved, resolving the track.`,
+                    functionLayer: "Player > play()",
+                });
+            }
             try {
                 // resolve the unresolved track
                 await this.queue.current.resolve(this);
@@ -192,6 +223,14 @@ class Player {
                     this.queue.current.userData = { ...(this.queue.current?.userData || {}), ...(options.track?.userData || {}) };
             }
             catch (error) {
+                if (typeof this.options.node === "string" && this.LavalinkManager.options?.advancedOptions?.enableDebugEvents) {
+                    this.LavalinkManager.emit("debug", Constants_1.DebugEvents.PlayerPlayUnresolvedTrackFailed, {
+                        state: "error",
+                        error: error,
+                        message: `Player Play was called, current Queue Song is unresolved, but couldn't resolve it`,
+                        functionLayer: "Player > play() > resolve currentTrack",
+                    });
+                }
                 this.LavalinkManager.emit("trackError", this, this.queue.current, error);
                 if (options && "clientTrack" in options)
                     delete options.clientTrack;
@@ -258,6 +297,13 @@ class Player {
             : this.volume), 1000), 0));
         const now = performance.now();
         if (this.LavalinkManager.options.playerOptions.applyVolumeAsFilter) {
+            if (typeof this.options.node === "string" && this.LavalinkManager.options?.advancedOptions?.enableDebugEvents) {
+                this.LavalinkManager.emit("debug", Constants_1.DebugEvents.PlayerVolumeAsFilter, {
+                    state: "log",
+                    message: `Player Volume was set as a Filter, because LavalinkManager option "playerOptions.applyVolumeAsFilter" is true`,
+                    functionLayer: "Player > setVolume()",
+                });
+            }
             await this.node.updatePlayer({ guildId: this.guildId, playerOptions: { filters: { volume: this.lavalinkVolume / 100 } } });
         }
         else {
@@ -302,8 +348,16 @@ class Player {
      */
     async search(query, requestUser, throwOnEmpty = false) {
         const Query = this.LavalinkManager.utils.transformQuery(query);
-        if (["bcsearch", "bandcamp"].includes(Query.source) && !this.node.info.sourceManagers.includes("bandcamp"))
+        if (["bcsearch", "bandcamp"].includes(Query.source) && !this.node.info.sourceManagers.includes("bandcamp")) {
+            if (typeof this.options.node === "string" && this.LavalinkManager.options?.advancedOptions?.enableDebugEvents) {
+                this.LavalinkManager.emit("debug", Constants_1.DebugEvents.BandcampSearchLokalEngine, {
+                    state: "log",
+                    message: `Player.search was called with a Bandcamp Query, but no bandcamp search was enabled on lavalink, searching with the custom Search Engine.`,
+                    functionLayer: "Player > search()",
+                });
+            }
             return await (0, BandCampSearch_1.bandCampSearch)(this, Query.query, requestUser);
+        }
         return this.node.search(Query, requestUser, throwOnEmpty);
     }
     /**
@@ -362,7 +416,6 @@ class Player {
         this.repeatMode = repeatMode;
         return this;
     }
-    1;
     /**
      * Skip the current song, or a specific amount of songs
      * @param amount provide the index of the next track to skip to
@@ -468,6 +521,13 @@ class Player {
         if (this.LavalinkManager.options.advancedOptions?.debugOptions.playerDestroy.debugLog)
             console.log(`Lavalink-Client-Debug | PlayerDestroy [::] destroy Function, [guildId ${this.guildId}] - Destroy-Reason: ${String(reason)}`);
         if (this.get("internal_destroystatus") === true) {
+            if (this.LavalinkManager.options?.advancedOptions?.enableDebugEvents) {
+                this.LavalinkManager.emit("debug", Constants_1.DebugEvents.PlayerDestroyingSomewhereElse, {
+                    state: "warn",
+                    message: `Player is already destroying somewhere else..`,
+                    functionLayer: "Player > destroy()",
+                });
+            }
             if (this.LavalinkManager.options.advancedOptions?.debugOptions.playerDestroy.debugLog)
                 console.log(`Lavalink-Client-Debug | PlayerDestroy [::] destroy Function, [guildId ${this.guildId}] - Already destroying somewhere else..`);
             return;
@@ -499,10 +559,19 @@ class Player {
         const updateNode = typeof newNode === "string" ? this.LavalinkManager.nodeManager.nodes.get(newNode) : newNode;
         if (!updateNode)
             throw new Error("Could not find the new Node");
+        if (typeof this.options.node === "string" && this.LavalinkManager.options?.advancedOptions?.enableDebugEvents) {
+            this.LavalinkManager.emit("debug", Constants_1.DebugEvents.PlayerChangeNode, {
+                state: "log",
+                message: `Player.changeNode() was executed, trying to change from "${this.node.id}" to "${updateNode.id}"`,
+                functionLayer: "Player > changeNode()",
+            });
+        }
         const data = this.toJSON();
+        const currentTrack = this.queue.current;
         await this.node.destroyPlayer(this.guildId);
         this.node = updateNode;
         const now = performance.now();
+        await this.connect();
         await this.node.updatePlayer({
             guildId: this.guildId,
             noReplace: false,
@@ -511,9 +580,7 @@ class Player {
                 volume: Math.round(Math.max(Math.min(data.volume, 1000), 0)),
                 paused: data.paused,
                 filters: { ...data.filters, equalizer: data.equalizer },
-                voice: this.voice,
-                track: this.queue.current ?? undefined
-                // track: this.queue.current,
+                track: currentTrack ?? undefined
             },
         });
         this.ping.lavalink = Math.round((performance.now() - now) / 10) / 100;
