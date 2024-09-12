@@ -504,3 +504,34 @@ if(previousTrack) {
   - *This is technically better than skipping to a track but i wanted to point it out.*
     - You can play with clientTrack like this: `player.play({ clientTrack: searchResult.tracks[0] })`
     - You can play with just track like this: `player.play({ track: { encoded: "base64string..." }, requester: interaction.user })`
+
+
+## **Version 2.3.1**
+
+- Fixed Export, where types of Manager weren't exported correctly
+- Fixed Dist Folder containing old, left over not needed files
+
+## **Version 2.3.2**
+- Added Missing function calls for the QueueWatcher of tracksRemoved within the queue.remove() function:
+- Added new DestroyReasons:
+    - TrackStuckMaxTracksErroredPerTime
+    - TrackErrorMaxTracksErroredPerTime
+- Added new Prevention Systems for CrashbackLoop recognitions:
+    - `this.NodeManager.LavalinkManager.options.playerOptions.maxErrorsPerTime`:
+        - object: `{ threshold: number, maxAmount: number }` (set threshold to 0 or maxAmount to -1 to disable)
+        - Default: `{ threshold: 10_000, maxAmount: 3 }`
+        - If there are trackError or trackStuck Events > maxAmount within the given treshhold, the player will be destroyed prevent more errors and thus potential ratelimits.
+    - `this.NodeManager.LavalinkManager.options.playerOptions.minAutoPlayMs`:
+        - number: `10_000` (default)
+        - If there is an AutoplayFunction, and it get's executed before that threshold, than it won't trigger the autoplay function again. *(this is ignored for when the player is skipped)*
+        - This prevents autoplays from happeneing on a crashbackloop
+        - Set to `0` to disable
+- **Added new Event "debug":**
+    - `LavalinkManager#debug(event:DebugEvents, data:{ state: "log" | "warn" | "error", message:string, functionLayer:string, error?:Error })`
+    - This function Event will emit, when the following option is set to **` true `**: `LavalinkManager.options.advancedOptions.enableDebugEvents`
+    - You can use the **` DebugEvents `**  Enum to listen to specific events and only show those you care
+    - You can filter for the **` data.state `** to only show the certain log-level state
+    - The **` functionLayer `** string will show you where the debug event was triggered from
+    - The **` message `** string will show what is debugged
+    - The **` error `** object will show you the error that happened, if there was one.
+    - *This took quite some time to code, and i am sure there are still many logs you might want, feel free to open an issue or commit with an PR, if you think something is missing!*

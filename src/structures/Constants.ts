@@ -1,5 +1,58 @@
 import type { AudioOutputs, ChannelMixFilter, EQBand } from "./Types/Filters";
 
+export enum DebugEvents {
+    SetSponsorBlock = "SetSponsorBlock",
+    DeleteSponsorBlock = "DeleteSponsorBlock",
+    TrackEndReplaced = "TrackEndReplaced",
+
+    AutoplayNoSongsAdded = "AutoplayNoSongsAdded",
+    AutoplayThresholdSpamLimiter = "AutoplayThresholdSpamLimiter",
+    TriggerQueueEmptyInterval = "TriggerQueueEmptyInterval",
+    QueueEnded = "QueueEnded",
+    TrackStartNewSongsOnly = "TrackStartNewSongsOnly",
+    TrackStartNoTrack = "TrackStartNoTrack",
+
+    ResumingFetchingError = "ResumingFetchingError",
+
+    PlayerUpdateNoPlayer = "PlayerUpdateNoPlayer",
+    PlayerUpdateFilterFixApply = "PlayerUpdateFilterFixApply",
+    PlayerUpdateSuccess = "PlayerUpdateSuccess",
+
+    HeartBeatTriggered = "HeartBeatTriggered",
+    NoSocketOnDestroy = "NoSocketOnDestroy",
+    SocketTerminateHeartBeatTimeout = "SocketTerminateHeartBeatTimeout",
+
+    TryingConnectWhileConnected = "TryingConnectWhileConnected",
+
+    LavaSearchNothingFound = "LavaSearchNothingFound",
+    SearchNothingFound = "SearchNothingFound",
+
+    ValidatingBlacklistLinks = "ValidatingBlacklistLinks",
+    ValidatingWhitelistLinks = "ValidatingWhitelistLinks",
+
+    TrackErrorMaxTracksErroredPerTime = "TrackErrorMaxTracksErroredPerTime",
+    TrackStuckMaxTracksErroredPerTime = "TrackStuckMaxTracksErroredPerTime",
+
+    PlayerDestroyingSomewhereElse = "PlayerDestroyingSomewhereElse",
+    PlayerCreateNodeNotFound = "PlayerCreateNodeNotFound",
+    PlayerPlayQueueEmptyTimeoutClear = "PlayerPlayQueueEmptyTimeoutClear",
+    PlayerPlayWithTrackReplace = "PlayerPlayWithTrackReplace",
+    PlayerPlayUnresolvedTrack = "PlayerPlayUnresolvedTrack",
+    PlayerPlayUnresolvedTrackFailed = "PlayerPlayUnresolvedTrackFailed",
+    PlayerVolumeAsFilter = "PlayerVolumeAsFilter",
+    BandcampSearchLokalEngine = "BandcampSearchLokalEngine",
+    PlayerChangeNode = "PlayerChangeNode",
+
+    BuildTrackError = "BuildTrackError",
+    TransformRequesterFunctionFailed = "TransformRequesterFunctionFailed",
+    GetClosestTrackFailed = "GetClosestTrackFailed",
+    PlayerDeleteInsteadOfDestroy = "PlayerDeleteInsteadOfDestroy",
+    FailedToConnectToNodes = "FailedToConnectToNodes",
+    NoAudioDebug = "NoAudioDebug",
+    PlayerAutoReconnect = "PlayerAutoReconnect"
+}
+
+
 export enum DestroyReasons {
     QueueEmpty = "QueueEmpty",
     NodeDestroy = "NodeDestroy",
@@ -10,7 +63,10 @@ export enum DestroyReasons {
     PlayerReconnectFail = "PlayerReconnectFail",
     ChannelDeleted = "ChannelDeleted",
     DisconnectAllNodes = "DisconnectAllNodes",
-    ReconnectAllNodes = "ReconnectAllNodes"
+    ReconnectAllNodes = "ReconnectAllNodes",
+
+    TrackErrorMaxTracksErroredPerTime = "TrackErrorMaxTracksErroredPerTime",
+    TrackStuckMaxTracksErroredPerTime = "TrackStuckMaxTracksErroredPerTime",
 };
 
 

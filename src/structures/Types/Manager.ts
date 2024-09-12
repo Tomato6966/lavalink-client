@@ -1,3 +1,5 @@
+import type { DebugEvents } from "../Constants";
+
 import type { Player } from "../Player";
 import type { LavalinkNodeOptions } from "./Node";
 import type { DestroyReasonsType, PlayerJson } from "./Player";
@@ -107,6 +109,15 @@ export interface LavalinkManagerEvents {
      * @event Manager#trackError
      */
     "ChaptersLoaded": (player: Player, track: Track | UnresolvedTrack | null, payload: SponsorBlockChaptersLoaded) => void;
+
+    /**
+     * Lavalink-Client Debug Event
+     * Emitted for several erros, and logs within lavalink-client, if managerOptions.advancedOptions.enableDebugEvents is true
+     * Useful for debugging the lavalink-client
+     *
+     * @event Manager#debug
+     */
+    "debug": (eventKey: DebugEvents, eventData: { message: string, state: "log" | "warn" | "error", error?: Error|string, functionLayer: string }) => void;
 }
 /**
  * The Bot client Options needed for the manager
@@ -138,6 +149,15 @@ export interface ManagerPlayerOptions {
         autoReconnect?: boolean;
         /** Instantly destroy player (overrides autoReconnect) | Don't provide == disable feature*/
         destroyPlayer?: boolean;
+    };
+    /** Minimum time to play the song before autoPlayFunction is executed (prevents error spamming) Set to 0 to disable it @default 10000 */
+    minAutoPlayMs?: number;
+    /** Allows you to declare how many tracks are allowed to error/stuck within a time-frame before player is destroyed @default "{threshold: 35000, maxAmount: 3 }" */
+    maxErrorsPerTime?: {
+        /** The threshold time to count errors (recommended is 35s) */
+        threshold: number;
+        /** The max amount of errors within the threshold time which are allowed before destroying the player (when errors > maxAmount -> player.destroy()) */
+        maxAmount: number;
     };
     /* What the Player should do, when the queue gets empty */
     onEmptyQueue?: {
@@ -178,6 +198,8 @@ export interface ManagerOptions {
     advancedOptions?: {
         /** Max duration for that the filter fix duration works (in ms) - default is 8mins */
         maxFilterFixDuration?: number,
+        /** Enable Debug event */
+        enableDebugEvents?: boolean;
         /** optional */
         debugOptions?: {
             /** For logging custom searches */

@@ -3,6 +3,7 @@
 import { URL } from "node:url";
 import { isRegExp } from "node:util/types";
 
+import { DebugEvents } from "./Constants";
 import { DefaultSources, LavalinkPlugins, SourceLinksRegexes } from "./LavalinkManagerStatics";
 
 import type { LavalinkNodeOptions } from "./Types/Node";
@@ -90,6 +91,14 @@ export class ManagerUtils {
             Object.defineProperty(r, TrackSymbol, { configurable: true, value: true });
             return r;
         } catch (error) {
+            if(this.LavalinkManager?.options?.advancedOptions?.enableDebugEvents) {
+                this.LavalinkManager?.emit("debug", DebugEvents.BuildTrackError, {
+                    error: error,
+                    functionLayer: "ManagerUtils > buildTrack()",
+                    message: "Error while building track",
+                    state: "error",
+                });
+            }
             throw new RangeError(`Argument "data" is not a valid track: ${error.message}`);
         }
     }
@@ -127,6 +136,7 @@ export class ManagerUtils {
         Object.defineProperty(unresolvedTrack, UnresolvedTrackSymbol, { configurable: true, value: true });
         return unresolvedTrack as UnresolvedTrack;
     }
+
     /**
      * Validate if a data is equal to a node
      * @param data
@@ -147,7 +157,14 @@ export class ManagerUtils {
                 ? this.LavalinkManager?.options?.playerOptions?.requesterTransformer(requester)
                 : requester;
         } catch (e) {
-            console.error("errored while transforming requester:", e);
+            if(this.LavalinkManager?.options?.advancedOptions?.enableDebugEvents) {
+                this.LavalinkManager?.emit("debug", DebugEvents.TransformRequesterFunctionFailed, {
+                    error: e,
+                    functionLayer: "ManagerUtils > getTransformedRequester()",
+                    message: "Your custom transformRequesterFunction failed to execute, please check your function for errors.",
+                    state: "error",
+                });
+            }
             return requester;
         }
     }
@@ -200,7 +217,19 @@ export class ManagerUtils {
     }
 
     async getClosestTrack(data: UnresolvedTrack, player: Player): Promise<Track | undefined> {
-        return getClosestTrack(data, player);
+        try {
+            return getClosestTrack(data, player);
+        } catch (e) {
+            if(this.LavalinkManager?.options?.advancedOptions?.enableDebugEvents) {
+                this.LavalinkManager?.emit("debug", DebugEvents.GetClosestTrackFailed, {
+                    error: e,
+                    functionLayer: "ManagerUtils > getClosestTrack()",
+                    message: "Failed to resolve track because the getClosestTrack function failed.",
+                    state: "error",
+                });
+            }
+            throw e;
+        }
     }
 
 
@@ -208,56 +237,77 @@ export class ManagerUtils {
         if (!node.info) throw new Error("No Lavalink Node was provided");
         if (!node.info.sourceManagers?.length) throw new Error("Lavalink Node, has no sourceManagers enabled");
 
-        if (sourceString === "speak" && queryString.length > 100)
-            // checks for blacklisted links / domains / queries
-            if (this.LavalinkManager.options?.linksBlacklist?.length > 0 && this.LavalinkManager.options?.linksBlacklist.some(v => (typeof v === "string" && (queryString.toLowerCase().includes(v.toLowerCase()) || v.toLowerCase().includes(queryString.toLowerCase()))) || isRegExp(v) && v.test(queryString))) {
+        if(!queryString.trim().length) throw new Error(`Query string is empty, please provide a valid query string.`)
+
+        if (sourceString === "speak" && queryString.length > 100) throw new Error(`Query is speak, which is limited to 100 characters.`)
+
+        // checks for blacklisted links / domains / queries
+        if (this.LavalinkManager.options?.linksBlacklist?.length > 0) {
+            if(this.LavalinkManager.options?.advancedOptions?.enableDebugEvents) {
+                this.LavalinkManager.emit("debug", DebugEvents.ValidatingBlacklistLinks, {
+                    state: "log",
+                    message: `Validating Query against LavalinkManager.options.linksBlacklist, query: "${queryString}"`,
+                    functionLayer: "(LavalinkNode > node | player) > search() > validateQueryString()",
+                });
+            }
+            if(this.LavalinkManager.options?.linksBlacklist.some(v => (typeof v === "string" && (queryString.toLowerCase().includes(v.toLowerCase()) || v.toLowerCase().includes(queryString.toLowerCase()))) || isRegExp(v) && v.test(queryString))) {
                 throw new Error(`Query string contains a link / word which is blacklisted.`)
             }
+        }
 
         if (!/^https?:\/\//.test(queryString)) return;
         else if (this.LavalinkManager.options?.linksAllowed === false) throw new Error("Using links to make a request is not allowed.")
 
         // checks for if the query is whitelisted (should only work for links, so it skips the check for no link queries)
-        if (this.LavalinkManager.options?.linksWhitelist?.length > 0 && !this.LavalinkManager.options?.linksWhitelist.some(v => (typeof v === "string" && (queryString.toLowerCase().includes(v.toLowerCase()) || v.toLowerCase().includes(queryString.toLowerCase()))) || isRegExp(v) && v.test(queryString))) {
-            throw new Error(`Query string contains a link / word which isn't whitelisted.`)
+        if (this.LavalinkManager.options?.linksWhitelist?.length > 0) {
+            if(this.LavalinkManager.options?.advancedOptions?.enableDebugEvents) {
+                this.LavalinkManager.emit("debug", DebugEvents.ValidatingWhitelistLinks, {
+                    state: "log",
+                    message: `Link was provided to the Query, validating against LavalinkManager.options.linksWhitelist, query: "${queryString}"`,
+                    functionLayer: "(LavalinkNode > node | player) > search() > validateQueryString()",
+                });
+            }
+            if(!this.LavalinkManager.options?.linksWhitelist.some(v => (typeof v === "string" && (queryString.toLowerCase().includes(v.toLowerCase()) || v.toLowerCase().includes(queryString.toLowerCase()))) || isRegExp(v) && v.test(queryString))) {
+                throw new Error(`Query string contains a link / word which isn't whitelisted.`)
+            }
         }
 
         // missing links: beam.pro local getyarn.io clypit pornhub reddit ocreamix soundgasm
         if ((SourceLinksRegexes.YoutubeMusicRegex.test(queryString) || SourceLinksRegexes.YoutubeRegex.test(queryString)) && !node.info?.sourceManagers?.includes("youtube")) {
-            throw new Error("Lavalink Node has not 'youtube' enabled");
+            throw new Error("Query / Link Provided for this Source but Lavalink Node has not 'youtube' enabled");
         }
         if ((SourceLinksRegexes.SoundCloudMobileRegex.test(queryString) || SourceLinksRegexes.SoundCloudRegex.test(queryString)) && !node.info?.sourceManagers?.includes("soundcloud")) {
-            throw new Error("Lavalink Node has not 'soundcloud' enabled");
+            throw new Error("Query / Link Provided for this Source but Lavalink Node has not 'soundcloud' enabled");
         }
         if (SourceLinksRegexes.bandcamp.test(queryString) && !node.info?.sourceManagers?.includes("bandcamp")) {
-            throw new Error("Lavalink Node has not 'bandcamp' enabled (introduced with lavaplayer 2.2.0 or lavalink 4.0.6)");
+            throw new Error("Query / Link Provided for this Source but Lavalink Node has not 'bandcamp' enabled (introduced with lavaplayer 2.2.0 or lavalink 4.0.6)");
         }
         if (SourceLinksRegexes.TwitchTv.test(queryString) && !node.info?.sourceManagers?.includes("twitch")) {
-            throw new Error("Lavalink Node has not 'twitch' enabled");
+            throw new Error("Query / Link Provided for this Source but Lavalink Node has not 'twitch' enabled");
         }
         if (SourceLinksRegexes.vimeo.test(queryString) && !node.info?.sourceManagers?.includes("vimeo")) {
-            throw new Error("Lavalink Node has not 'vimeo' enabled");
+            throw new Error("Query / Link Provided for this Source but Lavalink Node has not 'vimeo' enabled");
         }
         if (SourceLinksRegexes.tiktok.test(queryString) && !node.info?.sourceManagers?.includes("tiktok")) {
-            throw new Error("Lavalink Node has not 'tiktok' enabled");
+            throw new Error("Query / Link Provided for this Source but Lavalink Node has not 'tiktok' enabled");
         }
         if (SourceLinksRegexes.mixcloud.test(queryString) && !node.info?.sourceManagers?.includes("mixcloud")) {
-            throw new Error("Lavalink Node has not 'mixcloud' enabled");
+            throw new Error("Query / Link Provided for this Source but Lavalink Node has not 'mixcloud' enabled");
         }
         if (SourceLinksRegexes.AllSpotifyRegex.test(queryString) && !node.info?.sourceManagers?.includes("spotify")) {
-            throw new Error("Lavalink Node has not 'spotify' enabled");
+            throw new Error("Query / Link Provided for this Source but Lavalink Node has not 'spotify' enabled");
         }
         if (SourceLinksRegexes.appleMusic.test(queryString) && !node.info?.sourceManagers?.includes("applemusic")) {
-            throw new Error("Lavalink Node has not 'applemusic' enabled");
+            throw new Error("Query / Link Provided for this Source but Lavalink Node has not 'applemusic' enabled");
         }
         if (SourceLinksRegexes.AllDeezerRegex.test(queryString) && !node.info?.sourceManagers?.includes("deezer")) {
-            throw new Error("Lavalink Node has not 'deezer' enabled");
+            throw new Error("Query / Link Provided for this Source but Lavalink Node has not 'deezer' enabled");
         }
         if (SourceLinksRegexes.AllDeezerRegex.test(queryString) && node.info?.sourceManagers?.includes("deezer") && !node.info?.sourceManagers?.includes("http")) {
-            throw new Error("Lavalink Node has not 'http' enabled, which is required to have 'deezer' to work");
+            throw new Error("Query / Link Provided for this Source but Lavalink Node has not 'http' enabled, which is required to have 'deezer' to work");
         }
         if (SourceLinksRegexes.musicYandex.test(queryString) && !node.info?.sourceManagers?.includes("yandexmusic")) {
-            throw new Error("Lavalink Node has not 'yandexmusic' enabled");
+            throw new Error("Query / Link Provided for this Source but Lavalink Node has not 'yandexmusic' enabled");
         }
         return;
     }

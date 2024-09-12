@@ -74,6 +74,11 @@ console.log(LavalinkNodesOfEnv); // you can then provide the result of here in L
             username: "TESTBOT"
         },
         playerOptions: {
+            maxErrorsPerTime: {
+                threshold: 10_000,
+                maxAmount: 3
+            },
+            minAutoPlayMs: 10_000,
             applyVolumeAsFilter: false,
             clientBasedPositionUpdateInterval: 50, // in ms to up-calc player.position
             defaultSearchPlatform: "ytmsearch",
@@ -94,15 +99,16 @@ console.log(LavalinkNodesOfEnv); // you can then provide the result of here in L
             queueStore: new myCustomStore(client.redis),
             queueChangesWatcher: new myCustomWatcher(client)
         },
-        linksBlacklist: [],
+        linksBlacklist: ["porn", "youtube.com", "youtu.be"],
         linksWhitelist: [],
         advancedOptions: {
+            enableDebugEvents: true,
             maxFilterFixDuration: 600_000, // only allow instafixfilterupdate for tracks sub 10mins
             debugOptions: {
-                noAudio: true,
+                noAudio: false,
                 playerDestroy: {
-                    dontThrowError: true,
-                    debugLog: true
+                    dontThrowError: false,
+                    debugLog: false
                 }
             }
         }

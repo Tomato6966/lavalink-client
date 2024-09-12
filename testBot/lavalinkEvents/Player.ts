@@ -1,5 +1,6 @@
 import { EmbedBuilder, TextChannel } from "discord.js";
 
+import { DebugEvents } from "../../src";
 import { BotClient, CustomRequester } from "../types/Client";
 import { formatMS_HHMMSS } from "../Utils/Time";
 
@@ -28,7 +29,19 @@ export function PlayerEvents(client:BotClient) {
         console.log(player.guildId, " :: Player moved from Voice Channel :: ", oldVoiceChannelId, " :: To ::", newVoiceChannelId);
     }).on("playerSocketClosed", (player, payload) => {
         console.log(player.guildId, " :: Player socket got closed from lavalink :: ", payload);
-    })
+    }).on("debug", (eventKey, eventData) => {
+        // skip specific log
+        if(eventKey === DebugEvents.NoAudioDebug && eventData.message === "Manager is not initated yet") return;
+        // skip specific event log of a log-level-state "log"
+        if(eventKey === DebugEvents.PlayerUpdateSuccess && eventData.state === "log") return;
+
+        console.group("Lavalink-Client-Debug:");
+        console.log("-".repeat(20));
+        console.debug(`[${eventKey}]`);
+        console.debug(eventData)
+        console.log("-".repeat(20));
+        console.groupEnd();
+    });
 
     /**
      * Queue/Track Events
