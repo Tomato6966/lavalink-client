@@ -16,3 +16,4 @@ tslib_1.__exportStar(require("./structures/Types/Player"), exports);
 tslib_1.__exportStar(require("./structures/Types/Queue"), exports);
 tslib_1.__exportStar(require("./structures/Types/Node"), exports);
 tslib_1.__exportStar(require("./structures/Constants"), exports);
+tslib_1.__exportStar(require("./structures/Types/Manager"), exports);
