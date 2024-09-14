@@ -2,9 +2,9 @@
   "name": "lavalink-client",
   "version": "2.3.3",
   "description": "Easy, flexible and feature-rich lavalink@v4 Client. Both for Beginners and Proficients.",
-  "main": "dist/cjs/index.js",
-  "module": "dist/esm/index.js",
-  "types": "dist/types/index.d.js",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.js",
   "scripts": {
     "build": "tsc --outDir ./dist",
     "lint": "biome lint --write ./src",
@@ -20,7 +20,7 @@
     "access": "public"
   },
   "files": [
-    "dist"
+    "dist/**"
   ],
   "repository": {
     "type": "git",
