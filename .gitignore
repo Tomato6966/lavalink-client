@@ -4,3 +4,6 @@ testBot/.env
 testBot/node_modules
 testBot/src
 .vscode
+pnpm-lock.yaml
+package-lock.json
+dist

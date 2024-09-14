@@ -1,0 +1,103 @@
+{
+    "$schema": "https://biomejs.dev/schemas/1.8.1/schema.json",
+    "linter": {
+        "enabled": true,
+        "rules": {
+            "all": true,
+            "security": {
+                "noGlobalEval": "off"
+            },
+            "suspicious": {
+                "noGlobalIsNan": "off",
+                "noExplicitAny": "off",
+                "noAssignInExpressions": "off",
+                "noUnsafeDeclarationMerging": "off",
+                "noEmptyInterface": "off",
+                "noConfusingVoidType": "off",
+                "noImplicitAnyLet": "off",
+                "noEmptyBlockStatements": "off",
+                "useAwait": "off",
+                "noConsoleLog": "off",
+                "noAsyncPromiseExecutor": "off",
+                "noThenProperty": "off"
+            },
+            "style": {
+                "noCommaOperator": "off",
+                "noNonNullAssertion": "off",
+                "noParameterAssign": "off",
+                "useExportType": "error",
+                "useImportType": "error",
+                "useNodejsImportProtocol": "error",
+                "useNamingConvention": "off",
+                "noParameterProperties": "off",
+                "useFilenamingConvention": "off",
+                "noNamespaceImport": "off",
+                "useSingleCaseStatement": "off",
+                "useBlockStatements": "off",
+                "useEnumInitializers": "off",
+                "noArguments": "off",
+                "useForOf": "off"
+            },
+            "correctness": {
+                "noUnusedVariables": "off",
+                "noNodejsModules": "off"
+            },
+            "nursery": {
+                "useImportRestrictions": "off"
+            },
+            "complexity": {
+                "noUselessLoneBlockStatements": "warn",
+                "noBannedTypes": "off",
+                "noForEach": "off",
+                "noUselessConstructor": "off",
+                "noExcessiveCognitiveComplexity": "off",
+                "noStaticOnlyClass": "off"
+            },
+            "a11y": {
+                "all": false
+            },
+            "performance": {
+                "noDelete": "off",
+                "noBarrelFile": "off",
+                "noReExportAll": "off"
+            }
+        }
+    },
+    "json": {
+        "formatter": {
+            "enabled": true,
+            "indentWidth": 2,
+            "lineWidth": 80
+        }
+    },
+    "formatter": {
+        "enabled": true,
+        "indentWidth": 2,
+        "indentStyle": "tab",
+        "lineWidth": 120,
+        "lineEnding": "crlf",
+        "formatWithErrors": true
+    },
+    "javascript": {
+        "formatter": {
+            "quoteStyle": "single",
+            "arrowParentheses": "asNeeded",
+            "bracketSameLine": true,
+            "semicolons": "always"
+        }
+    },
+    "files": {
+        "ignoreUnknown": true,
+        "ignore": [
+            "node_modules/",
+            "dist",
+            "tools",
+            "testBot",
+            "package.json",
+            "tsconfig.json"
+        ]
+    },
+    "organizeImports": {
+        "enabled": false
+    }
+}
