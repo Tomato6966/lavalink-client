@@ -4,3 +4,5 @@ testBot/.env
 testBot/node_modules
 testBot/src
 .vscode
+dist
+__tests__

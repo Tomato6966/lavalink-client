@@ -5,12 +5,12 @@
       "module": "CommonJS",
       "declaration": true,
       "outDir": "./dist",
-      "rootDir": "./src",
       "skipLibCheck": true,
       "importHelpers": true,
       "moduleResolution": "node",
       "baseUrl": ".",
       "esModuleInterop": true,
+      "sourceMap": true,
       "allowSyntheticDefaultImports": true,
       "forceConsistentCasingInFileNames": true,
       "types": [ "node", "ws" ],
@@ -18,10 +18,6 @@
         "ES2022", "DOM"
     ]
   },
-  "include": [
-    "src/**/*.ts",
-    ".eslintrc.js"
-  ],
   "exclude": [
     "node_modules",
     "dist",
