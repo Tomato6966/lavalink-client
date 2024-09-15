@@ -421,11 +421,27 @@ export async function queueTrackEnd(player) {
         player.queue.tracks.push(player.queue.current);
     // change the current Track to the next upcoming one
     const nextSong = player.queue.tracks.shift();
-    if (player.LavalinkManager.utils.isUnresolvedTrack(nextSong))
-        await nextSong.resolve(player);
-    player.queue.current = nextSong || null;
-    // save it in the DB
-    await player.queue.utils.save();
+    try {
+        if (player.LavalinkManager.utils.isUnresolvedTrack(nextSong))
+            await nextSong.resolve(player);
+        player.queue.current = nextSong || null;
+        // save it in the DB
+        await player.queue.utils.save();
+    }
+    catch (error) {
+        if (player.LavalinkManager.options?.advancedOptions?.enableDebugEvents) {
+            player.LavalinkManager.emit("debug", DebugEvents.PlayerPlayUnresolvedTrackFailed, {
+                state: "error",
+                error: error,
+                message: `queueTrackEnd Util was called, tried to resolve the next track, but failed to find the closest matching song`,
+                functionLayer: "Player > play() > resolve currentTrack",
+            });
+        }
+        player.LavalinkManager.emit("trackError", player, player.queue.current, error);
+        // try to play the next track if possible
+        if (player.LavalinkManager.options?.autoSkipOnResolveError === true && player.queue.tracks[0])
+            return queueTrackEnd(player);
+    }
     // return the new current Track
     return player.queue.current;
 }
