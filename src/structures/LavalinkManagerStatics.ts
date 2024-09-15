@@ -66,7 +66,12 @@ export const DefaultSources: Record<SearchPlatform, LavalinkSearchPlatform | Cli
     "http": "http",
     "https": "https",
     "link": "link",
-    "uri": "uri"
+    "uri": "uri",
+    // jiosaavn
+    "jiosaavn": "jssearch",
+    "js": "jssearch",
+    "jssearch": "jssearch",
+    "jsrec": "jsrec"
 }
 
 /** Lavalink Plugins definiton */
@@ -75,6 +80,7 @@ export const LavalinkPlugins = {
     LavaSrc: "lavasrc-plugin",
     GoogleCloudTTS: "tts-plugin",
     LavaSearch: "lavasearch-plugin",
+    Jiosaavn_Plugin: "jiosaavn-plugin",
     LavalinkFilterPlugin: "lavalink-filter-plugin"
 }
 
