@@ -1,4 +1,4 @@
-import { EventEmitter } from "stream";
+import { EventEmitter } from "events";
 
 import { DestroyReasons } from "./Constants";
 import { LavalinkNode } from "./Node";
