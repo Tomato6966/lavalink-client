@@ -1,5 +1,5 @@
 /// <reference types="node" />
-import { EventEmitter } from "stream";
+import { EventEmitter } from "events";
 import { LavalinkNode } from "./Node";
 import { MiniMap } from "./Utils";
 import type { LavalinkNodeIdentifier, LavalinkNodeOptions, NodeManagerEvents } from "./Types/Node";

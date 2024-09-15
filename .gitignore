@@ -4,4 +4,5 @@ testBot/.env
 testBot/node_modules
 testBot/src
 .vscode
-pnpm-lock.yaml
+bun.lockb
+package-lock.json

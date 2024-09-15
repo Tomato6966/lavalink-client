@@ -164,7 +164,7 @@ export class Player {
      */
     async play(options: Partial<PlayOptions> = {}) {
         if (this.get("internal_queueempty")) {
-            if(typeof this.options.node === "string" && this.LavalinkManager.options?.advancedOptions?.enableDebugEvents) {
+            if(this.LavalinkManager.options?.advancedOptions?.enableDebugEvents) {
                 this.LavalinkManager.emit("debug", DebugEvents.PlayerPlayQueueEmptyTimeoutClear, {
                     state: "log",
                     message: `Player was called to play something, while there was a queueEmpty Timeout set, clearing the timeout.`,
@@ -177,7 +177,31 @@ export class Player {
 
         // if clientTrack provided, override options.track object
         if (options?.clientTrack && (this.LavalinkManager.utils.isTrack(options?.clientTrack) || this.LavalinkManager.utils.isUnresolvedTrack(options.clientTrack))) {
-            if (this.LavalinkManager.utils.isUnresolvedTrack(options.clientTrack)) await (options.clientTrack as UnresolvedTrack).resolve(this);
+            if (this.LavalinkManager.utils.isUnresolvedTrack(options.clientTrack)) {
+                try {
+                    // resolve the unresolved track
+                    await (options.clientTrack as UnresolvedTrack).resolve(this);
+                } catch (error) {
+                    if(this.LavalinkManager.options?.advancedOptions?.enableDebugEvents) {
+                        this.LavalinkManager.emit("debug", DebugEvents.PlayerPlayUnresolvedTrackFailed, {
+                            state: "error",
+                            error: error,
+                            message: `Player Play was called with clientTrack, Song is unresolved, but couldn't resolve it`,
+                            functionLayer: "Player > play() > resolve currentTrack",
+                        });
+                    }
+    
+                    this.LavalinkManager.emit("trackError", this, this.queue.current, error);
+    
+                    if (options && "clientTrack" in options) delete options.clientTrack;
+                    if (options && "track" in options) delete options.track;
+    
+                    // try to play the next track if possible
+                    if (this.LavalinkManager.options?.autoSkipOnResolveError === true && this.queue.tracks[0]) return this.play(options);
+    
+                    return this;
+                }
+            }
 
             if ((typeof options.track?.userData === "object" || typeof options.clientTrack?.userData === "object") && options.clientTrack) options.clientTrack.userData = { ...(options?.clientTrack.userData || {}), ...(options.track?.userData || {}) };
 
@@ -214,7 +238,7 @@ export class Player {
                 requester: this.LavalinkManager.utils.getTransformedRequester(options?.track?.requester || {}) as anyObject
             };
 
-            if(typeof this.options.node === "string" && this.LavalinkManager.options?.advancedOptions?.enableDebugEvents) {
+            if(this.LavalinkManager.options?.advancedOptions?.enableDebugEvents) {
                 this.LavalinkManager.emit("debug", DebugEvents.PlayerPlayWithTrackReplace, {
                     state: "log",
                     message: `Player was called to play something, with a specific track provided. Replacing the current Track and resolving the track on trackStart Event.`,
@@ -240,7 +264,7 @@ export class Player {
         if (!this.queue.current && this.queue.tracks.length) await queueTrackEnd(this);
 
         if (this.queue.current && this.LavalinkManager.utils.isUnresolvedTrack(this.queue.current)) {
-            if(typeof this.options.node === "string" && this.LavalinkManager.options?.advancedOptions?.enableDebugEvents) {
+            if(this.LavalinkManager.options?.advancedOptions?.enableDebugEvents) {
                 this.LavalinkManager.emit("debug", DebugEvents.PlayerPlayUnresolvedTrack, {
                     state: "log",
                     message: `Player Play was called, current Queue Song is unresolved, resolving the track.`,
@@ -254,7 +278,7 @@ export class Player {
 
                 if (typeof options.track?.userData === "object" && this.queue.current) this.queue.current.userData = { ...(this.queue.current?.userData || {}), ...(options.track?.userData || {}) };
             } catch (error) {
-                if(typeof this.options.node === "string" && this.LavalinkManager.options?.advancedOptions?.enableDebugEvents) {
+                if(this.LavalinkManager.options?.advancedOptions?.enableDebugEvents) {
                     this.LavalinkManager.emit("debug", DebugEvents.PlayerPlayUnresolvedTrackFailed, {
                         state: "error",
                         error: error,
@@ -335,7 +359,7 @@ export class Player {
 
         const now = performance.now();
         if (this.LavalinkManager.options.playerOptions.applyVolumeAsFilter) {
-            if(typeof this.options.node === "string" && this.LavalinkManager.options?.advancedOptions?.enableDebugEvents) {
+            if(this.LavalinkManager.options?.advancedOptions?.enableDebugEvents) {
                 this.LavalinkManager.emit("debug", DebugEvents.PlayerVolumeAsFilter, {
                     state: "log",
                     message: `Player Volume was set as a Filter, because LavalinkManager option "playerOptions.applyVolumeAsFilter" is true`,
@@ -387,7 +411,7 @@ export class Player {
         const Query = this.LavalinkManager.utils.transformQuery(query);
 
         if (["bcsearch", "bandcamp"].includes(Query.source) && !this.node.info.sourceManagers.includes("bandcamp")) {
-            if(typeof this.options.node === "string" && this.LavalinkManager.options?.advancedOptions?.enableDebugEvents) {
+            if(this.LavalinkManager.options?.advancedOptions?.enableDebugEvents) {
                 this.LavalinkManager.emit("debug", DebugEvents.BandcampSearchLokalEngine, {
                     state: "log",
                     message: `Player.search was called with a Bandcamp Query, but no bandcamp search was enabled on lavalink, searching with the custom Search Engine.`,
@@ -658,7 +682,7 @@ export class Player {
         const updateNode = typeof newNode === "string" ? this.LavalinkManager.nodeManager.nodes.get(newNode) : newNode;
         if (!updateNode) throw new Error("Could not find the new Node");
 
-        if(typeof this.options.node === "string" && this.LavalinkManager.options?.advancedOptions?.enableDebugEvents) {
+        if(this.LavalinkManager.options?.advancedOptions?.enableDebugEvents) {
             this.LavalinkManager.emit("debug", DebugEvents.PlayerChangeNode, {
                 state: "log",
                 message: `Player.changeNode() was executed, trying to change from "${this.node.id}" to "${updateNode.id}"`,

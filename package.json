@@ -1,20 +1,26 @@
 {
   "name": "lavalink-client",
-  "version": "2.3.3",
+  "version": "2.3.4",
   "description": "Easy, flexible and feature-rich lavalink@v4 Client. Both for Beginners and Proficients.",
   "main": "dist/cjs/index.js",
   "module": "dist/esm/index.js",
   "types": "dist/types/index.d.js",
   "scripts": {
     "build": "npm run build:cjs && npm run build:esm && npm run build:types",
-    "build:cjs": "node tools/cleanup cjs && tsc -p config/tsconfig.cjs.json",
-    "build:esm": "node tools/cleanup esm && tsc -p config/tsconfig.esm.json",
-    "build:types": "node tools/cleanup types && tsc -p config/tsconfig.types.json",
+    "build:cjs": "node tools/cleanup cjs && tsc -p config/tsconfig.cjs.json && tsc-alias -p config/tsconfig.cjs.json && node tools/fixup cjs",
+    "build:esm": "node tools/cleanup esm && tsc -p config/tsconfig.esm.json && tsc-alias -p config/tsconfig.esm.json && node tools/fixup esm",
+    "build:types": "node tools/cleanup types && tsc -p config/tsconfig.types.json && tsc-alias -p config/tsconfig.types.json",
     "clean": "node tools/cleanup",
     "lint": "eslint .",
     "lint:fix": "npm run lint -- --fix",
     "test": "node -v",
     "docs": "npx typedoc"
+  },
+  "exports": {
+    "require": "./dist/cjs/index.js",
+    "import": "./dist/esm/index.js",
+    "types": "./dist/types/index.d.js",
+    "default": "./dist/cjs/index.js"
   },
   "publishConfig": {
     "access": "public"
@@ -47,21 +53,22 @@
   },
   "homepage": "https://lc4.gitbook.io/lavalink-client/",
   "devDependencies": {
-    "@types/node": "^22.5.5",
-    "@types/ws": "^8.5.12",
-    "@typescript-eslint/eslint-plugin": "^8.5.0",
-    "@typescript-eslint/parser": "^8.5.0",
-    "eslint": "^9.10.0",
-    "ts-loader": "^9.5.1",
-    "typedoc": "^0.26.7",
-    "typedoc-theme-hierarchy": "^5.0.3",
-    "typescript": "^5.6.2"
+    "@types/node": "^20.4.8",
+    "@types/ws": "^8.5.5",
+    "@typescript-eslint/eslint-plugin": "^6.4.0",
+    "@typescript-eslint/parser": "^6.4.0",
+    "eslint": "^8.47.0",
+    "tsc-alias": "^1.8.10",
+    "typedoc": "^0.25.4",
+    "typedoc-theme-hierarchy": "^4.1.2",
+    "typescript": "^5.1.6"
   },
   "dependencies": {
-    "tslib": "^2.7.0",
-    "ws": "^8.18.0"
+    "tslib": "^2.6.1",
+    "ws": "^8.13.0"
   },
   "engines": {
-    "node": ">=18.0.0"
+    "node": ">=18.0.0",
+    "bun": ">=1.0.0"
   }
 }
