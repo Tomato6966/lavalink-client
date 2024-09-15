@@ -7,14 +7,20 @@
   "types": "dist/types/index.d.js",
   "scripts": {
     "build": "npm run build:cjs && npm run build:esm && npm run build:types",
-    "build:cjs": "node tools/cleanup cjs && tsc -p config/tsconfig.cjs.json",
-    "build:esm": "node tools/cleanup esm && tsc -p config/tsconfig.esm.json",
-    "build:types": "node tools/cleanup types && tsc -p config/tsconfig.types.json",
+    "build:cjs": "node tools/cleanup cjs && tsc -p config/tsconfig.cjs.json && tsc-alias -p config/tsconfig.cjs.json && node tools/fixup cjs",
+    "build:esm": "node tools/cleanup esm && tsc -p config/tsconfig.esm.json && && tsc-alias -p config/tsconfig.esm.json node tools/fixup cjs",
+    "build:types": "node tools/cleanup types && tsc -p config/tsconfig.types.json && tsc-alias -p config/tsconfig.types.json",
     "clean": "node tools/cleanup",
     "lint": "eslint .",
     "lint:fix": "npm run lint -- --fix",
     "test": "node -v",
     "docs": "npx typedoc"
+  },
+  "exports": {
+    "require": "./dist/cjs/index.js",
+    "import": "./dist/esm/index.js",
+    "types": "./dist/types/index.d.js",
+    "default": "./dist/cjs/index.js"
   },
   "publishConfig": {
     "access": "public"
@@ -52,6 +58,7 @@
     "@typescript-eslint/eslint-plugin": "^6.4.0",
     "@typescript-eslint/parser": "^6.4.0",
     "eslint": "^8.47.0",
+    "tsc-alias": "^1.8.10",
     "ts-loader": "^9.4.4",
     "typedoc": "^0.25.4",
     "typedoc-theme-hierarchy": "^4.1.2",
@@ -62,6 +69,7 @@
     "ws": "^8.13.0"
   },
   "engines": {
-    "node": ">=18.0.0"
+    "node": ">=18.0.0",
+    "bun": ">=1.0.0"
   }
 }
