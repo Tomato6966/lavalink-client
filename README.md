@@ -493,7 +493,7 @@ if(previousTrack) {
 - Fixed Export, where types of Manager weren't exported correctly
 - Fixed Dist Folder containing old, left over not needed files
 
-## **Version 2.3.2**
+## **Version 2.3.2** / **Version 2.3.3**
 - Added Missing function calls for the QueueWatcher of tracksRemoved within the queue.remove() function:
 - Added new DestroyReasons:
     - TrackStuckMaxTracksErroredPerTime
@@ -516,4 +516,10 @@ if(previousTrack) {
     - The **` functionLayer `** string will show you where the debug event was triggered from
     - The **` message `** string will show what is debugged
     - The **` error `** object will show you the error that happened, if there was one.
-    - *This took quite some time to code, and i am sure there are still many logs you might want, feel free to open an issue or commit with an PR, if you think something is missing!*
+    - *This took quite some time to code, and i am sure there are still many logs you might want, feel free to open an issue
+
+
+## **Version 2.3.4**
+- Improved the package bundling with tsc-alias, to export files with file types
+- Added package.json to exported dist, for easier parsing ability and compatibility with older and newer node versions
+- Added error handling for resolving unresolved tracks on trackend
