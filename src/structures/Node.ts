@@ -650,7 +650,7 @@ export class LavalinkNode {
          * ```
          */
         //Get lyrics for a track
-        get: async (track: Track, skipTrackSource: boolean) => {
+        get: async (track: Track, skipTrackSource: boolean = false) => {
             if (!this.sessionId) throw new Error("the Lavalink-Node is either not ready, or not up to date!");
             const url = `/lyrics?track=${track.encoded}&skipTrackSource=${skipTrackSource}`;
             return (await this.request(url)) as LyricsResult | null;
@@ -669,7 +669,7 @@ export class LavalinkNode {
          * const lyrics = await player.node.lyrics.getCurrentTrack(guildId);
          * ```
          */
-        getCurrentTrack: async (guildId: string, skipTrackSource: boolean) => {
+        getCurrentTrack: async (guildId: string, skipTrackSource: boolean = false) => {
             if (!this.sessionId) throw new Error("the Lavalink-Node is either not ready, or not up to date!");
             const url = `/sessions/${this.sessionId}/players/${guildId}/track/lyrics?skipTrackSource=${skipTrackSource}`;
             return (await this.request(url)) as LyricsResult | null;
