@@ -8,7 +8,7 @@
   "scripts": {
     "build": "npm run build:cjs && npm run build:esm && npm run build:types",
     "build:cjs": "node tools/cleanup cjs && tsc -p config/tsconfig.cjs.json && tsc-alias -p config/tsconfig.cjs.json && node tools/fixup cjs",
-    "build:esm": "node tools/cleanup esm && tsc -p config/tsconfig.esm.json && && tsc-alias -p config/tsconfig.esm.json node tools/fixup cjs",
+    "build:esm": "node tools/cleanup esm && tsc -p config/tsconfig.esm.json && tsc-alias -p config/tsconfig.esm.json && node tools/fixup esm",
     "build:types": "node tools/cleanup types && tsc -p config/tsconfig.types.json && tsc-alias -p config/tsconfig.types.json",
     "clean": "node tools/cleanup",
     "lint": "eslint .",
@@ -59,7 +59,6 @@
     "@typescript-eslint/parser": "^6.4.0",
     "eslint": "^8.47.0",
     "tsc-alias": "^1.8.10",
-    "ts-loader": "^9.4.4",
     "typedoc": "^0.25.4",
     "typedoc-theme-hierarchy": "^4.1.2",
     "typescript": "^5.1.6"
