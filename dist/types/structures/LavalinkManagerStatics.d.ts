@@ -7,7 +7,9 @@ export declare const LavalinkPlugins: {
     LavaSrc: string;
     GoogleCloudTTS: string;
     LavaSearch: string;
+    Jiosaavn_Plugin: string;
     LavalinkFilterPlugin: string;
+    JavaTimedLyricsPlugin: string;
 };
 /** Lavalink Sources regexes for url validations */
 export declare const SourceLinksRegexes: Record<SourcesRegex, RegExp>;

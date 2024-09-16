@@ -722,3 +722,21 @@ if(previousTrack) {
 - FIXED autoplay not working :: Accidentally added an invalid if statement, which made autoplay not working anymore (during the if statement  to not prevent autoplay spam)
 - Added a new AutoplayExecution Debug Log
 - Added more samples to the Testbot related configuration
+
+
+## **Version 2.3.6
+- Added Lyrics Support:
+  - New Player Functions:
+    - **` const lyrics = await player.getCurrentLyrics(false); `** -> *Get lyrics of current playing track*
+    - **` const lyrics = await player.getLyrics(track, true); `** -> *Get lyrics of a specific track with ignoring it's sources*
+    - **` player.subscribeLyrics(); `** -> *Subscribe this guild to retrieve "live lyrics" as the song is *playing
+    - **` player.unsubscribeLyrics(); `** -> *Unsubscribe from lyrics
+  - New Node Functions ( same as from player, just so you can access it without player too ):*
+    - **` const lyrics = await player.node.lyrics.getCurrent(player.guildId, false); `**
+    - **` const lyrics = await player.node.lyrics.get(track, true); `**
+    - **` player.node.lyrics.subscribe(player.guildId); `**
+    - **` player.node.lyrics.unsubscribe(player.guildId); `**
+  - New Manager Event sfor Lyrics:
+    - **` lavalink.on("LyricsLine", (player, track, lyricsLine) => {}); `**
+    - **` lavalink.on("LyricsFound", (player, track, data) => {}); `**
+    - **` lavalink.on("LyricsNotFound", (player, track, lyricsLine) => {}); `**

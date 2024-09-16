@@ -1,6 +1,7 @@
 import { FilterManager } from "./Filters.js";
 import { Queue } from "./Queue.js";
 import type { DestroyReasons } from "./Constants.js";
+import type { Track } from "./Types/Track.js";
 import type { LavalinkNode } from "./Node.js";
 import type { SponsorBlockSegment } from "./Types/Node.js";
 import type { PlayerJson, PlayerOptions, PlayOptions, RepeatMode } from "./Types/Player.js";
@@ -164,6 +165,48 @@ export declare class Player {
      * Destroy the player and disconnect from the voice channel
      */
     destroy(reason?: DestroyReasons | string, disconnect?: boolean): Promise<this>;
+    /**
+     * Get the current lyrics of the track currently playing on the guild
+     * @param guildId The guild id to get the current lyrics for
+     * @param skipTrackSource If true, it will not try to get the lyrics from the track source
+     * @returns The current lyrics
+     * @example
+     * ```ts
+     * const lyrics = await player.getCurrentLyrics();
+     * ```
+     */
+    getCurrentLyrics(skipTrackSource?: boolean): Promise<import("./Types/Node.js").LyricsResult>;
+    /**
+     * Get the lyrics of a specific track
+     * @param track The track to get the lyrics for
+     * @param skipTrackSource If true, it will not try to get the lyrics from the track source
+     * @returns The lyrics of the track
+     * @example
+     * ```ts
+     * const lyrics = await player.getLyrics(player.queue.tracks[0], true);
+     * ```
+     */
+    getLyrics(track: Track, skipTrackSource?: boolean): Promise<import("./Types/Node.js").LyricsResult>;
+    /**
+     * Subscribe to the lyrics event on a specific guild to active live lyrics events
+     * @param guildId The guild id to subscribe to
+     * @returns The unsubscribe function
+     * @example
+     * ```ts
+     * const lyrics = await player.subscribeLyrics();
+     * ```
+     */
+    subscribeLyrics(): Promise<any>;
+    /**
+     * Unsubscribe from the lyrics event on a specific guild to disable live lyrics events
+     * @param guildId The guild id to unsubscribe from
+     * @returns The unsubscribe function
+     * @example
+     * ```ts
+     * const lyrics = await player.unsubscribeLyrics();
+     * ```
+     */
+    unsubscribeLyrics(guildId: string): Promise<any>;
     /**
      * Move the player on a different Audio-Node
      * @param newNode New Node / New Node Id

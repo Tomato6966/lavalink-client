@@ -302,6 +302,9 @@ export class ManagerUtils {
         if (SourceLinksRegexes.musicYandex.test(queryString) && !node.info?.sourceManagers?.includes("yandexmusic")) {
             throw new Error("Query / Link Provided for this Source but Lavalink Node has not 'yandexmusic' enabled");
         }
+        if (SourceLinksRegexes.jiosaavn.test(queryString) && !node.info?.sourceManagers?.includes("jiosaavn")) {
+            throw new Error("Query / Link Provided for this Source but Lavalink Node has not 'jiosaavn' (via jiosaavn-plugin) enabled");
+        }
         return;
     }
     transformQuery(query) {
@@ -356,6 +359,12 @@ export class ManagerUtils {
         }
         if (source === "dzsearch" && node.info?.sourceManagers?.includes("deezer") && !node.info?.sourceManagers?.includes("http")) {
             throw new Error("Lavalink Node has not 'http' enabled, which is required to have 'dzsearch' to work");
+        }
+        if (source === "jsrec" && !node.info?.sourceManagers?.includes("jiosaavn")) {
+            throw new Error("Lavalink Node has not 'jiosaavn' (via jiosaavn-plugin) enabled, which is required to have 'jsrec' to work");
+        }
+        if (source === "jssearch" && !node.info?.sourceManagers?.includes("jiosaavn")) {
+            throw new Error("Lavalink Node has not 'jiosaavn' (via jiosaavn-plugin) enabled, which is required to have 'jssearch' to work");
         }
         if (source === "scsearch" && !node.info?.sourceManagers?.includes("soundcloud")) {
             throw new Error("Lavalink Node has not 'soundcloud' enabled, which is required to have 'scsearch' work");

@@ -3,6 +3,7 @@ import type internal from "stream";
 import type { LavalinkNode } from "../Node.js";
 import type { DestroyReasonsType } from "./Player.js";
 import type { InvalidLavalinkRestRequest, LavalinkPlayer } from "./Utils.js";
+import type { PluginInfo } from "./Track.js";
 /** Ability to manipulate fetch requests */
 export type ModifyRequest = (options: RequestInit & {
     path: string;
@@ -156,6 +157,28 @@ export interface PluginObject {
     name: string;
     /** The version of the plugin */
     version: string;
+}
+export interface LyricsResult {
+    /**The name of the source */
+    sourceName: string;
+    /**The name of the provider */
+    provider: string;
+    /**The result text */
+    text: string | null;
+    /**The lyrics lines */
+    lines: LyricsLine[];
+    /**Information about the plugin */
+    plugin: PluginInfo;
+}
+export interface LyricsLine {
+    /**The millisecond timestamp */
+    timestamp: number;
+    /**The line duration in milliseconds */
+    duration: number | null;
+    /**The line text */
+    line: string;
+    /**Information about the plugin */
+    plugin: PluginInfo;
 }
 export type LavalinkNodeIdentifier = string;
 export interface NodeManagerEvents {

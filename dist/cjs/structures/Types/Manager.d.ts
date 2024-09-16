@@ -4,7 +4,7 @@ import type { LavalinkNodeOptions } from "./Node.js";
 import type { DestroyReasonsType, PlayerJson } from "./Player.js";
 import type { ManagerQueueOptions } from "./Queue.js";
 import type { Track, UnresolvedTrack } from "./Track.js";
-import type { GuildShardPayload, SearchPlatform, SponsorBlockChaptersLoaded, SponsorBlockChapterStarted, SponsorBlockSegmentSkipped, SponsorBlockSegmentsLoaded, TrackExceptionEvent, TrackEndEvent, TrackStuckEvent, WebSocketClosedEvent, TrackStartEvent } from "./Utils.js";
+import type { GuildShardPayload, SearchPlatform, SponsorBlockChaptersLoaded, SponsorBlockChapterStarted, SponsorBlockSegmentSkipped, SponsorBlockSegmentsLoaded, TrackExceptionEvent, TrackEndEvent, TrackStuckEvent, WebSocketClosedEvent, TrackStartEvent, LyricsFoundEvent, LyricsNotFoundEvent, LyricsLineEvent } from "./Utils.js";
 /**
  * The events from the lavalink Manager
  */
@@ -114,6 +114,24 @@ export interface LavalinkManagerEvents {
         error?: Error | string;
         functionLayer: string;
     }) => void;
+    /**
+     * Emitted when a Lyrics line is received
+     * @link https://github.com/topi314/LavaLyrics
+     * @event Manager#LyricsLine
+     */
+    "LyricsLine": (player: Player, track: Track | UnresolvedTrack | null, payload: LyricsLineEvent) => void;
+    /**
+     * Emitted when a Lyrics is found
+     * @link https://github.com/topi314/LavaLyrics
+     * @event Manager#LyricsFound
+     */
+    "LyricsFound": (player: Player, track: Track | UnresolvedTrack | null, payload: LyricsFoundEvent) => void;
+    /**
+     * Emitted when a Lyrics is not found
+     * @link https://github.com/topi314/LavaLyrics
+     * @event Manager#LyricsNotFound
+     */
+    "LyricsNotFound": (player: Player, track: Track | UnresolvedTrack | null, payload: LyricsNotFoundEvent) => void;
 }
 /**
  * The Bot client Options needed for the manager

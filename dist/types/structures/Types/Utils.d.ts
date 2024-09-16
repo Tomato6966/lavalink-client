@@ -1,6 +1,6 @@
 import type { MiniMap } from "../Utils";
 import type { LavalinkFilterData } from "./Filters";
-import type { NodeStats } from "./Node";
+import type { LyricsLine, LyricsResult, NodeStats } from "./Node";
 import type { LavalinkPlayOptions } from "./Player";
 import type { LavalinkTrack, PluginInfo, Track, UnresolvedTrack } from "./Track";
 /** Helper for generating Opaque types. */
@@ -13,15 +13,16 @@ export type IntegerNumber = Opaque<number, 'Int'>;
 export type FloatNumber = Opaque<number, 'Float'>;
 export type LavaSrcSearchPlatformBase = "spsearch" | "sprec" | "amsearch" | "dzsearch" | "dzisrc" | "ymsearch";
 export type LavaSrcSearchPlatform = LavaSrcSearchPlatformBase | "ftts";
+export type JioSaavnSearchPlatform = "jssearch" | "jsrec";
 export type DuncteSearchPlatform = "speak" | "phsearch" | "pornhub" | "porn" | "tts";
 export type LavalinkClientSearchPlatform = "bcsearch";
 export type LavalinkClientSearchPlatformResolve = "bandcamp" | "bc";
-export type LavalinkSearchPlatform = "ytsearch" | "ytmsearch" | "scsearch" | "bcsearch" | LavaSrcSearchPlatform | DuncteSearchPlatform | LavalinkClientSearchPlatform;
+export type LavalinkSearchPlatform = "ytsearch" | "ytmsearch" | "scsearch" | "bcsearch" | LavaSrcSearchPlatform | DuncteSearchPlatform | JioSaavnSearchPlatform | LavalinkClientSearchPlatform;
 export type ClientCustomSearchPlatformUtils = "local" | "http" | "https" | "link" | "uri";
 export type ClientSearchPlatform = ClientCustomSearchPlatformUtils | // for file/link requests
-"youtube" | "yt" | "youtube music" | "youtubemusic" | "ytm" | "musicyoutube" | "music youtube" | "soundcloud" | "sc" | "am" | "apple music" | "applemusic" | "apple" | "musicapple" | "music apple" | "sp" | "spsuggestion" | "spotify" | "spotify.com" | "spotifycom" | "dz" | "deezer" | "yandex" | "yandex music" | "yandexmusic" | "flowerytts" | "flowery" | "flowery.tts" | LavalinkClientSearchPlatformResolve | LavalinkClientSearchPlatform;
+"youtube" | "yt" | "youtube music" | "youtubemusic" | "ytm" | "musicyoutube" | "music youtube" | "soundcloud" | "sc" | "am" | "apple music" | "applemusic" | "apple" | "musicapple" | "music apple" | "sp" | "spsuggestion" | "spotify" | "spotify.com" | "spotifycom" | "dz" | "deezer" | "yandex" | "yandex music" | "yandexmusic" | "flowerytts" | "flowery" | "flowery.tts" | LavalinkClientSearchPlatformResolve | LavalinkClientSearchPlatform | "js" | "jiosaavn";
 export type SearchPlatform = LavalinkSearchPlatform | ClientSearchPlatform;
-export type SourcesRegex = "YoutubeRegex" | "YoutubeMusicRegex" | "SoundCloudRegex" | "SoundCloudMobileRegex" | "DeezerTrackRegex" | "DeezerArtistRegex" | "DeezerEpisodeRegex" | "DeezerMixesRegex" | "DeezerPageLinkRegex" | "DeezerPlaylistRegex" | "DeezerAlbumRegex" | "AllDeezerRegex" | "AllDeezerRegexWithoutPageLink" | "SpotifySongRegex" | "SpotifyPlaylistRegex" | "SpotifyArtistRegex" | "SpotifyEpisodeRegex" | "SpotifyShowRegex" | "SpotifyAlbumRegex" | "AllSpotifyRegex" | "mp3Url" | "m3uUrl" | "m3u8Url" | "mp4Url" | "m4aUrl" | "wavUrl" | "aacpUrl" | "tiktok" | "mixcloud" | "musicYandex" | "radiohost" | "bandcamp" | "appleMusic" | "TwitchTv" | "vimeo";
+export type SourcesRegex = "YoutubeRegex" | "YoutubeMusicRegex" | "SoundCloudRegex" | "SoundCloudMobileRegex" | "DeezerTrackRegex" | "DeezerArtistRegex" | "DeezerEpisodeRegex" | "DeezerMixesRegex" | "DeezerPageLinkRegex" | "DeezerPlaylistRegex" | "DeezerAlbumRegex" | "AllDeezerRegex" | "AllDeezerRegexWithoutPageLink" | "SpotifySongRegex" | "SpotifyPlaylistRegex" | "SpotifyArtistRegex" | "SpotifyEpisodeRegex" | "SpotifyShowRegex" | "SpotifyAlbumRegex" | "AllSpotifyRegex" | "mp3Url" | "m3uUrl" | "m3u8Url" | "mp4Url" | "m4aUrl" | "wavUrl" | "aacpUrl" | "tiktok" | "mixcloud" | "musicYandex" | "radiohost" | "bandcamp" | "jiosaavn" | "appleMusic" | "TwitchTv" | "vimeo";
 export interface PlaylistInfo {
     /** The playlist name */
     name: string;
@@ -62,7 +63,7 @@ export interface MiniMapConstructor {
     readonly prototype: MiniMap<unknown, unknown>;
     readonly [Symbol.species]: MiniMapConstructor;
 }
-export type PlayerEvents = TrackStartEvent | TrackEndEvent | TrackStuckEvent | TrackExceptionEvent | WebSocketClosedEvent | SponsorBlockSegmentEvents;
+export type PlayerEvents = TrackStartEvent | TrackEndEvent | TrackStuckEvent | TrackExceptionEvent | WebSocketClosedEvent | SponsorBlockSegmentEvents | LyricsEvent;
 export type Severity = "COMMON" | "SUSPICIOUS" | "FAULT";
 export interface Exception {
     /** Severity of the error */
@@ -148,9 +149,66 @@ export interface SponsorBlockChaptersLoaded extends PlayerEvent {
         duration: number;
     }[];
 }
+/**
+ * Types & Events for Lyrics plugin from Lavalink: https://github.com/topi314/LavaLyrics
+ */
+export type LyricsEvent = LyricsFoundEvent | LyricsNotFoundEvent | LyricsLineEvent;
+export type LyricsEventType = "LyricsFoundEvent" | "LyricsNotFoundEvent" | "LyricsLineEvent";
+export interface LyricsFoundEvent extends PlayerEvent {
+    /** The lyricsfound event */
+    type: "LyricsFoundEvent";
+    /** The guildId */
+    guildId: string;
+    /** The lyrics */
+    lyrics: LyricsResult;
+}
+export interface LyricsNotFoundEvent extends PlayerEvent {
+    /**The lyricsnotfound event*/
+    type: "LyricsNotFoundEvent";
+    /**The guildId*/
+    guildId: string;
+}
+export interface LyricsLineEvent extends PlayerEvent {
+    /**The lyricsline event*/
+    type: "LyricsLineEvent";
+    /** The guildId */
+    guildId: string;
+    /** The line number */
+    lineIndex: number;
+    /** The line */
+    line: LyricsLine;
+    /**skipped is true if the line was skipped */
+    skipped: boolean;
+}
+export interface LyricsFoundEvent extends PlayerEvent {
+    /** The lyricsfound event */
+    type: "LyricsFoundEvent";
+    /** The guildId */
+    guildId: string;
+    /** The lyrics */
+    lyrics: LyricsResult;
+}
+export interface LyricsNotFoundEvent extends PlayerEvent {
+    /**The lyricsnotfound event*/
+    type: "LyricsNotFoundEvent";
+    /**The guildId*/
+    guildId: string;
+}
+export interface LyricsLineEvent extends PlayerEvent {
+    /**The lyricsline event*/
+    type: "LyricsLineEvent";
+    /** The guildId */
+    guildId: string;
+    /** The line number */
+    lineIndex: number;
+    /** The line */
+    line: LyricsLine;
+    /**skipped is true if the line was skipped */
+    skipped: boolean;
+}
 export type LoadTypes = "track" | "playlist" | "search" | "error" | "empty";
 export type State = "CONNECTED" | "CONNECTING" | "DISCONNECTED" | "DISCONNECTING" | "DESTROYING";
-export type PlayerEventType = "TrackStartEvent" | "TrackEndEvent" | "TrackExceptionEvent" | "TrackStuckEvent" | "WebSocketClosedEvent" | SponsorBlockSegmentEventType;
+export type PlayerEventType = "TrackStartEvent" | "TrackEndEvent" | "TrackExceptionEvent" | "TrackStuckEvent" | "WebSocketClosedEvent" | SponsorBlockSegmentEventType | LyricsEventType;
 export type TrackEndReason = "finished" | "loadFailed" | "stopped" | "replaced" | "cleanup";
 export interface InvalidLavalinkRestRequest {
     /** Rest Request Data for when it was made */

@@ -3,7 +3,7 @@ import type { DestroyReasonsType } from "./Types/Player";
 import type { Track } from "./Types/Track";
 import type { Base64, InvalidLavalinkRestRequest, LavalinkPlayer, LavaSearchQuery, LavaSearchResponse, PlayerUpdateInfo, RoutePlanner, SearchQuery, SearchResult, Session } from "./Types/Utils";
 import type { NodeManager } from "./NodeManager";
-import type { BaseNodeStats, LavalinkInfo, LavalinkNodeOptions, ModifyRequest, NodeStats, SponsorBlockSegment } from "./Types/Node";
+import type { BaseNodeStats, LavalinkInfo, LavalinkNodeOptions, LyricsResult, ModifyRequest, NodeStats, SponsorBlockSegment } from "./Types/Node";
 /**
  * Lavalink Node creator class
  */
@@ -271,6 +271,62 @@ export declare class LavalinkNode {
          */
         multipleTracks: (encodeds: Base64[], requester: unknown) => Promise<Track[]>;
     };
+    lyrics: {
+        /**
+         * Get the lyrics of a track
+         * @param track the track to get the lyrics for
+         * @param skipTrackSource wether to skip the track source or not
+         * @returns the lyrics of the track
+         * @example
+         *
+         * ```ts
+         * const lyrics = await player.node.lyrics.get(track, true);
+         * // use it of player instead:
+         * // const lyrics = await player.getLyrics(track, true);
+         * ```
+         */
+        get: (track: Track, skipTrackSource?: boolean) => Promise<LyricsResult>;
+        /**
+         * Get the lyrics of the current playing track
+         *
+         * @param guildId the guild id of the player
+         * @param skipTrackSource wether to skip the track source or not
+         * @returns the lyrics of the current playing track
+         * @example
+         * ```ts
+         * const lyrics = await player.node.lyrics.getCurrent(guildId);
+         * // use it of player instead:
+         * // const lyrics = await player.getCurrentLyrics();
+         * ```
+         */
+        getCurrent: (guildId: string, skipTrackSource?: boolean) => Promise<LyricsResult>;
+        /**
+         * subscribe to lyrics updates for a guild
+         * @param guildId the guild id of the player
+         * @returns request data of the request
+         *
+         * @example
+         * ```ts
+         * await player.node.lyrics.subscribe(guildId);
+         * // use it of player instead:
+         * // const lyrics = await player.subscribeLyrics();
+         * ```
+         */
+        subscribe: (guildId: string) => Promise<any>;
+        /**
+         * unsubscribe from lyrics updates for a guild
+         * @param guildId the guild id of the player
+         * @returns request data of the request
+         *
+         * @example
+         * ```ts
+         * await player.node.lyrics.unsubscribe(guildId);
+         * // use it of player instead:
+         * // const lyrics = await player.unsubscribeLyrics();
+         * ```
+         */
+        unsubscribe: (guildId: string) => Promise<any>;
+    };
     /**
      * Request Lavalink statistics.
      * @returns the lavalink node stats
@@ -432,4 +488,28 @@ export declare class LavalinkNode {
     deleteSponsorBlock(player: Player): Promise<void>;
     /** private util function for handling the queue end event */
     private queueEnd;
+    /**
+     * Emitted whenever a line of lyrics gets emitted
+     * @event
+     * @param {Player} player The player that emitted the event
+     * @param {Track} track The track that emitted the event
+     * @param {LyricsLineEvent} payload The payload of the event
+     */
+    private LyricsLine;
+    /**
+     * Emitted whenever the lyrics for a track got found
+     * @event
+     * @param {Player} player The player that emitted the event
+     * @param {Track} track The track that emitted the event
+     * @param {LyricsFoundEvent} payload The payload of the event
+     */
+    private LyricsFound;
+    /**
+     * Emitted whenever the lyrics for a track got not found
+     * @event
+     * @param {Player} player The player that emitted the event
+     * @param {Track} track The track that emitted the event
+     * @param {LyricsNotFoundEvent} payload The payload of the event
+     */
+    private LyricsNotFound;
 }

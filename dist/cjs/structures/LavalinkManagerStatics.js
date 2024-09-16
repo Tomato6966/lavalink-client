@@ -65,7 +65,12 @@ exports.DefaultSources = {
     "http": "http",
     "https": "https",
     "link": "link",
-    "uri": "uri"
+    "uri": "uri",
+    // jiosaavn
+    "jiosaavn": "jssearch",
+    "js": "jssearch",
+    "jssearch": "jssearch",
+    "jsrec": "jsrec"
 };
 /** Lavalink Plugins definiton */
 exports.LavalinkPlugins = {
@@ -73,7 +78,9 @@ exports.LavalinkPlugins = {
     LavaSrc: "lavasrc-plugin",
     GoogleCloudTTS: "tts-plugin",
     LavaSearch: "lavasearch-plugin",
-    LavalinkFilterPlugin: "lavalink-filter-plugin"
+    Jiosaavn_Plugin: "jiosaavn-plugin",
+    LavalinkFilterPlugin: "lavalink-filter-plugin",
+    JavaTimedLyricsPlugin: "java-lyrics-plugin"
 };
 /** Lavalink Sources regexes for url validations */
 exports.SourceLinksRegexes = {
@@ -111,6 +118,8 @@ exports.SourceLinksRegexes = {
     SpotifyAlbumRegex: /(https?:\/\/)(www\.)?open\.spotify\.com\/((?<region>[a-zA-Z-]+)\/)?(user\/(?<user>[a-zA-Z0-9-_]+)\/)?album\/(?<identifier>[a-zA-Z0-9-_]+)/,
     AllSpotifyRegex: /(https?:\/\/)(www\.)?open\.spotify\.com\/((?<region>[a-zA-Z-]+)\/)?(user\/(?<user>[a-zA-Z0-9-_]+)\/)?(?<type>track|album|playlist|artist|episode|show)\/(?<identifier>[a-zA-Z0-9-_]+)/,
     appleMusic: /https?:\/\/?(?:www\.)?music\.apple\.com\/(\S+)/,
+    /** From jiosaavn-plugin */
+    jiosaavn: /(https?:\/\/)(www\.)?jiosaavn\.com\/(?<type>song|album|featured|artist)\/([a-zA-Z0-9-_\/,]+)/,
     /** FROM DUNCTE BOT PLUGIN */
     tiktok: /https:\/\/www\.tiktok\.com\//,
     mixcloud: /https:\/\/www\.mixcloud\.com\//,

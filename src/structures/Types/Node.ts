@@ -2,7 +2,7 @@ import type internal from "stream";
 import type { LavalinkNode } from "../Node";
 import type { DestroyReasonsType } from "./Player";
 import type { InvalidLavalinkRestRequest, LavalinkPlayer } from "./Utils";
-import { PluginInfo } from "./Track";
+import type { PluginInfo } from "./Track";
 
 /** Ability to manipulate fetch requests */
 export type ModifyRequest = (options: RequestInit & { path: string, extraQueryUrlParams?: URLSearchParams }) => void;
