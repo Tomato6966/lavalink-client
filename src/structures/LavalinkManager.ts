@@ -261,7 +261,7 @@ export class LavalinkManager extends EventEmitter {
      * ```
      * @returns
      */
-    public getPlayer(guildId: string) {
+    public getPlayer(guildId: string): Player | undefined {
         return this.players.get(guildId);
     }
 
