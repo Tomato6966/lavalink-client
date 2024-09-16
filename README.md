@@ -106,6 +106,198 @@ Check out the [Documentation](https://lc4.gitbook.io/lavalink-client) | or the [
 
 ***
 
+# Sample Configuration
+
+
+<details><summary>Complete Configuration Example, with all available options</summary>
+
+```ts
+import { LavalinkManager, QueueChangesWatcher, QueueStoreManager } from "lavalink-client";
+import { RedisClientType } from "redis"; // example for custom queue store
+import { Client, GatewayIntentBits } from "discord.js"; // example for a discord bot
+
+// you might want to extend the types of the client, to bind lavalink to it.
+const client = new Client({
+    intents: [
+        GatewayIntentBits.Guilds,
+        GatewayIntentBits.GuildVoiceStates,
+    ]
+});
+
+const previouslyUsedSessions = new Map<string, string>(); //nodeManager.on("connect", node => previouslyUsedSessions.set(node.id, node.sessionId))
+
+client.lavalink = new LavalinkManager({
+    nodes: [
+        {
+            authorization: "localhoist",
+            host: "localhost",
+            port: 2333,
+            id: "testnode",
+            // get the previously used session, to restart with "resuming" enabled
+            sessionId: previouslyUsedSessions.get("testnode"),
+            requestSignalTimeoutMS: 3000,
+            closeOnError: true,
+            heartBeatInterval: 30_000,
+            enablePingOnStatsCheck: true,
+            retryDelay: 10e3,
+            secure: false,
+            retryAmount: 5,
+        }
+    ],
+    sendToShard: (guildId, payload) => client.guilds.cache.get(guildId)?.shard?.send(payload),
+    autoSkip: true,
+    client: { // client: client.user
+        id: envConfig.clientId, // REQUIRED! (at least after the .init)
+        username: "TESTBOT",
+    },
+    autoSkipOnResolveError: true, // skip song, if resolving an unresolved song fails
+    emitNewSongsOnly: true, // don't emit "looping songs"
+    playerOptions: {
+        // These are the default prevention methods
+        maxErrorsPerTime: {
+            threshold: 10_000,
+            maxAmount: 3,
+        },
+        // only allow an autoplay function to execute, if the previous function was longer ago than this number.
+        minAutoPlayMs: 10_000,
+
+        applyVolumeAsFilter: false,
+        clientBasedPositionUpdateInterval: 50, // in ms to up-calc player.position
+        defaultSearchPlatform: "ytmsearch",
+        volumeDecrementer: 0.75, // on client 100% == on lavalink 75%
+        requesterTransformer: requesterTransformer,
+        onDisconnect: {
+            autoReconnect: true, // automatically attempts a reconnect, if the bot disconnects from the voice channel, if it fails, it get's destroyed
+            destroyPlayer: false // overrides autoReconnect and directly destroys the player if the bot disconnects from the vc
+        },
+        onEmptyQueue: {
+            destroyAfterMs: 30_000, // 0 === instantly destroy | don't provide the option, to don't destroy the player
+            autoPlayFunction: autoPlayFunction,
+        },
+        useUnresolvedData: true,
+    },
+    queueOptions: {
+        maxPreviousTracks: 10,
+        // only needed if you want and need external storage, don't provide if you don't need to
+        queueStore: new myCustomStore(client.redis), // client.redis = new redis()
+        // only needed, if you want to watch changes in the queue via a custom class,
+        queueChangesWatcher: new myCustomWatcher(client)
+    },
+    linksAllowed: true,
+    // example: don't allow p*rn / youtube links., you can also use a regex pattern if you want.
+    // linksBlacklist: ["porn", "youtube.com", "youtu.be"],
+    linksBlacklist: [],
+    linksWhitelist: [],
+    advancedOptions: {
+        enableDebugEvents: true,
+        maxFilterFixDuration: 600_000, // only allow instafixfilterupdate for tracks sub 10mins
+        debugOptions: {
+            noAudio: false,
+            playerDestroy: {
+                dontThrowError: false,
+                debugLog: false,
+            },
+            logCustomSearches: false,
+        }
+    }
+});
+
+
+client.on("raw", d => client.lavalink.sendRawData(d)); // send raw data to lavalink-client to handle stuff
+
+client.on("ready", () => {
+    client.lavalink.init(client.user); // init lavalink
+});
+
+// for the custom queue Store create a redis instance
+client.redis = createClient({ url: "redis://localhost:6379", password: "securepass" });
+client.redis.connect();
+
+
+// Custom external queue Store
+export class myCustomStore implements QueueStoreManager {
+    private redis:RedisClientType;
+    constructor(redisClient:RedisClientType) {
+        this.redis = redisClient;
+    }
+    async get(guildId): Promise<any> {
+        return await this.redis.get(this.id(guildId));
+    }
+    async set(guildId, stringifiedQueueData): Promise<any> {
+        return await this.redis.set(this.id(guildId), stringifiedQueueData);
+    }
+    async delete(guildId): Promise<any> {
+        return await this.redis.del(this.id(guildId));
+    }
+    async parse(stringifiedQueueData): Promise<Partial<StoredQueue>> {
+        return JSON.parse(stringifiedQueueData);
+    }
+    async stringify(parsedQueueData): Promise<any> {
+        return JSON.stringify(parsedQueueData);
+    }
+    private id(guildId) {
+        return `lavalinkqueue_${guildId}`; // transform the id to your belikings
+    }
+}
+
+// Custom Queue Watcher Functions
+export class myCustomWatcher implements QueueChangesWatcher {
+    constructor() {
+    }
+    shuffled(guildId, oldStoredQueue, newStoredQueue) {
+        console.log(`${this.client.guilds.cache.get(guildId)?.name || guildId}: Queue got shuffled`)
+    }
+    tracksAdd(guildId, tracks, position, oldStoredQueue, newStoredQueue) {
+        console.log(`${this.client.guilds.cache.get(guildId)?.name || guildId}: ${tracks.length} Tracks got added into the Queue at position #${position}`);
+    }
+    tracksRemoved(guildId, tracks, position, oldStoredQueue, newStoredQueue) {
+        console.log(`${this.client.guilds.cache.get(guildId)?.name || guildId}: ${tracks.length} Tracks got removed from the Queue at position #${position}`);
+    }
+}
+```
+
+</details>
+
+
+
+```ts
+import { LavalinkManager } from "lavalink-client";
+import { Client, GatewayIntentBits } from "discord.js"; // example for a discord bot
+
+// you might want to extend the types of the client, to bind lavalink to it.
+const client = new Client({
+    intents: [
+        GatewayIntentBits.Guilds,
+        GatewayIntentBits.GuildVoiceStates,
+    ]
+});
+
+// create instance
+client.lavalink = new LavalinkManager({
+    nodes: [
+        {
+            authorization: "localhoist",
+            host: "localhost",
+            port: 2333,
+            id: "testnode",
+        }
+    ],
+    sendToShard: (guildId, payload) => client.guilds.cache.get(guildId)?.shard?.send(payload),
+    autoSkip: true,
+    client: {
+        id: envConfig.clientId,
+        username: "TESTBOT",
+    },
+});
+
+client.on("raw", d => client.lavalink.sendRawData(d)); // send raw data to lavalink-client to handle stuff
+
+client.on("ready", () => {
+    client.lavalink.init(client.user); // init lavalink
+});
+
+```
+
 # All Events:
 
 ## On **Lavalink-Manager**:
@@ -523,3 +715,10 @@ if(previousTrack) {
 - Improved the package bundling with tsc-alias, to export files with file types
 - Added package.json to exported dist, for easier parsing ability and compatibility with older and newer node versions
 - Added error handling for resolving unresolved tracks on trackend
+
+
+## **Version 2.3.5**
+- FIXED not able to import :: Accidentally removed tsc-alias configuration, which made importing not work
+- FIXED autoplay not working :: Accidentally added an invalid if statement, which made autoplay not working anymore (during the if statement  to not prevent autoplay spam)
+- Added a new AutoplayExecution Debug Log
+- Added more samples to the Testbot related configuration

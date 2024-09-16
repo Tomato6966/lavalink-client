@@ -6,6 +6,7 @@ var DebugEvents;
     DebugEvents["SetSponsorBlock"] = "SetSponsorBlock";
     DebugEvents["DeleteSponsorBlock"] = "DeleteSponsorBlock";
     DebugEvents["TrackEndReplaced"] = "TrackEndReplaced";
+    DebugEvents["AutoplayExecution"] = "AutoplayExecution";
     DebugEvents["AutoplayNoSongsAdded"] = "AutoplayNoSongsAdded";
     DebugEvents["AutoplayThresholdSpamLimiter"] = "AutoplayThresholdSpamLimiter";
     DebugEvents["TriggerQueueEmptyInterval"] = "TriggerQueueEmptyInterval";

@@ -5,6 +5,7 @@ export enum DebugEvents {
     DeleteSponsorBlock = "DeleteSponsorBlock",
     TrackEndReplaced = "TrackEndReplaced",
 
+    AutoplayExecution = "AutoplayExecution",
     AutoplayNoSongsAdded = "AutoplayNoSongsAdded",
     AutoplayThresholdSpamLimiter = "AutoplayThresholdSpamLimiter",
     TriggerQueueEmptyInterval = "TriggerQueueEmptyInterval",

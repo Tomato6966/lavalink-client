@@ -1,7 +1,7 @@
 import { Client, GatewayIntentBits } from "discord.js";
 import { createClient } from "redis";
 
-import { LavalinkManager, MiniMap, parseLavalinkConnUrl } from "../src";
+import { LavalinkManager, ManagerOptions, MiniMap, parseLavalinkConnUrl } from "../src";
 import { envConfig } from "./config";
 import { loadCommands } from "./handler/commandLoader";
 import { loadEvents } from "./handler/eventsLoader";
@@ -48,6 +48,15 @@ console.log(LavalinkNodesOfEnv); // you can then provide the result of here in L
     const playerSaver = new PlayerSaver();
     const nodeSessions = await playerSaver.getAllLastNodeSessions();
 
+    const client = new Client({
+        intents: [
+            GatewayIntentBits.Guilds,
+            GatewayIntentBits.GuildVoiceStates,
+            GatewayIntentBits.MessageContent,
+            GatewayIntentBits.GuildMessages
+        ]
+    }) as BotClient;
+
     client.lavalink = new LavalinkManager({
         nodes: [
             {
@@ -71,14 +80,19 @@ console.log(LavalinkNodesOfEnv); // you can then provide the result of here in L
         autoSkip: true,
         client: { // client: client.user
             id: envConfig.clientId, // REQUIRED! (at least after the .init)
-            username: "TESTBOT"
+            username: "TESTBOT",
         },
+        autoSkipOnResolveError: true, // skip song, if resolving an unresolved song fails
+        emitNewSongsOnly: true, // don't emit "looping songs"
         playerOptions: {
+            // These are the default prevention methods
             maxErrorsPerTime: {
                 threshold: 10_000,
-                maxAmount: 3
+                maxAmount: 3,
             },
+            // only allow an autoplay function to execute, if the previous function was longer ago than this number.
             minAutoPlayMs: 10_000,
+
             applyVolumeAsFilter: false,
             clientBasedPositionUpdateInterval: 50, // in ms to up-calc player.position
             defaultSearchPlatform: "ytmsearch",
@@ -92,14 +106,17 @@ console.log(LavalinkNodesOfEnv); // you can then provide the result of here in L
                 destroyAfterMs: 30_000, // 0 === instantly destroy | don't provide the option, to don't destroy the player
                 autoPlayFunction: autoPlayFunction,
             },
-            useUnresolvedData: true
+            useUnresolvedData: true,
         },
         queueOptions: {
             maxPreviousTracks: 10,
             queueStore: new myCustomStore(client.redis),
             queueChangesWatcher: new myCustomWatcher(client)
         },
-        linksBlacklist: ["porn", "youtube.com", "youtu.be"],
+        linksAllowed: true,
+        // example: don't allow p*rn / youtube links., you can also use a regex pattern if you want.
+        // linksBlacklist: ["porn", "youtube.com", "youtu.be"],
+        linksBlacklist: [],
         linksWhitelist: [],
         advancedOptions: {
             enableDebugEvents: true,
@@ -108,11 +125,12 @@ console.log(LavalinkNodesOfEnv); // you can then provide the result of here in L
                 noAudio: false,
                 playerDestroy: {
                     dontThrowError: false,
-                    debugLog: false
-                }
+                    debugLog: false,
+                },
+                logCustomSearches: false,
             }
         }
-    });
+    } as Required<ManagerOptions>);
 
     // all what you need to do to enable resuming
     handleResuming(client, playerSaver);
