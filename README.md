@@ -724,7 +724,7 @@ if(previousTrack) {
 - Added more samples to the Testbot related configuration
 
 
-## **Version 2.3.6
+## **Version 2.3.6**
 - Added Lyrics Support:
   - New Player Functions:
     - **` const lyrics = await player.getCurrentLyrics(false); `** -> *Get lyrics of current playing track*
