@@ -289,7 +289,7 @@ export class LavalinkManager extends EventEmitter {
      * });
      * ```
      */
-    public createPlayer(options: PlayerOptions) {
+    public createPlayer(options: PlayerOptions): Player {
         const oldPlayer = this.getPlayer(options?.guildId)
         if (oldPlayer) return oldPlayer;
 
@@ -311,7 +311,7 @@ export class LavalinkManager extends EventEmitter {
      * // recommend to do it on the player tho: player.destroy("forcefully destroyed the player");
      * ```
      */
-    public destroyPlayer(guildId: string, destroyReason?: string) {
+    public destroyPlayer(guildId: string, destroyReason?: string): Promise<void | Player> {
         const oldPlayer = this.getPlayer(guildId);
         if (!oldPlayer) return;
         return oldPlayer.destroy(destroyReason);
@@ -328,7 +328,7 @@ export class LavalinkManager extends EventEmitter {
      * // shouldn't be used except you know what you are doing.
      * ```
      */
-    public deletePlayer(guildId: string) {
+    public deletePlayer(guildId: string): boolean | void {
         const oldPlayer = this.getPlayer(guildId);
         if (!oldPlayer) return;
         // oldPlayer.connected is operational. you could also do oldPlayer.voice?.token
@@ -354,7 +354,7 @@ export class LavalinkManager extends EventEmitter {
      * // continue with code e.g. createing a player and searching
      * ```
      */
-    public get useable() {
+    public get useable(): boolean {
         return this.nodeManager.nodes.filter(v => v.connected).size > 0;
     }
 
@@ -373,7 +373,7 @@ export class LavalinkManager extends EventEmitter {
      * });
      * ```
      */
-    public async init(clientData: BotClientOptions) {
+    public async init(clientData: BotClientOptions): Promise<LavalinkManager> {
         if (this.initiated) return this;
         clientData = clientData ?? {} as BotClientOptions;
         this.options.client = { ...(this.options?.client || {}), ...clientData };
