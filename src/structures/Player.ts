@@ -641,9 +641,13 @@ export class Player {
      * @param guildId The guild id to get the current lyrics for
      * @param skipTrackSource If true, it will not try to get the lyrics from the track source
      * @returns The current lyrics
+     * @example
+     * ```ts
+     * const lyrics = await player.getCurrentLyrics();
+     * ```
      */
-    public async getCurrentLyrics(guildId: string, skipTrackSource?: boolean) {
-        return await this.node.lyrics.getCurrentTrack(guildId, skipTrackSource);
+    public async getCurrentLyrics(skipTrackSource?: boolean) {
+        return await this.node.lyrics.getCurrent(this.guildId, skipTrackSource);
     }
 
     /**
@@ -651,6 +655,10 @@ export class Player {
      * @param track The track to get the lyrics for
      * @param skipTrackSource If true, it will not try to get the lyrics from the track source
      * @returns The lyrics of the track
+     * @example
+     * ```ts
+     * const lyrics = await player.getLyrics(player.queue.tracks[0], true);
+     * ```
      */
     public async getLyrics(track: Track, skipTrackSource?: boolean) {
         return await this.node.lyrics.get(track, skipTrackSource);
@@ -660,17 +668,25 @@ export class Player {
      * Subscribe to the lyrics event on a specific guild to active live lyrics events
      * @param guildId The guild id to subscribe to
      * @returns The unsubscribe function
+     * @example
+     * ```ts
+     * const lyrics = await player.subscribeLyrics();
+     * ```
      */
-    public subscribe(guildId: string) {
-        return this.node.lyrics.subscribe(guildId);
+    public subscribeLyrics() {
+        return this.node.lyrics.subscribe(this.guildId);
     }
 
     /**
      * Unsubscribe from the lyrics event on a specific guild to disable live lyrics events
      * @param guildId The guild id to unsubscribe from
      * @returns The unsubscribe function
+     * @example
+     * ```ts
+     * const lyrics = await player.unsubscribeLyrics();
+     * ```
      */
-    public unsubscribe(guildId: string) {
+    public unsubscribeLyrics(guildId: string) {
         return this.node.lyrics.unsubscribe(guildId);
     }
     

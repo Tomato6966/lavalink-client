@@ -91,6 +91,7 @@ export type SourcesRegex = "YoutubeRegex" |
     "musicYandex" |
     "radiohost" |
     "bandcamp" |
+    "jiosaavn" | 
     "appleMusic" |
     "TwitchTv" |
     "vimeo";
