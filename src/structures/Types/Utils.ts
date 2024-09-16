@@ -1,7 +1,7 @@
 import type { MiniMap } from "../Utils";
 
 import type { LavalinkFilterData } from "./Filters";
-import type { NodeStats } from "./Node";
+import type { LyricsLine, LyricsResult, NodeStats } from "./Node";
 import type { LavalinkPlayOptions } from "./Player";
 import type { LavalinkTrack, PluginInfo, Track, UnresolvedTrack } from "./Track";
 
@@ -23,6 +23,8 @@ export type LavaSrcSearchPlatformBase =
     "ymsearch";
 export type LavaSrcSearchPlatform = LavaSrcSearchPlatformBase | "ftts";
 
+export type JioSaavnSearchPlatform = "jssearch" | "jsrec";
+
 export type DuncteSearchPlatform =
     "speak" |
     "phsearch" |
@@ -39,6 +41,7 @@ export type LavalinkSearchPlatform = "ytsearch" |
     "bcsearch" |
     LavaSrcSearchPlatform |
     DuncteSearchPlatform |
+    JioSaavnSearchPlatform |
     LavalinkClientSearchPlatform;
 
 export type ClientCustomSearchPlatformUtils = "local" | "http" | "https" | "link" | "uri";
@@ -52,7 +55,7 @@ export type ClientSearchPlatform =
     "sp" | "spsuggestion" | "spotify" | "spotify.com" | "spotifycom" |
     "dz" | "deezer" |
     "yandex" | "yandex music" | "yandexmusic" |
-    "flowerytts" | "flowery" | "flowery.tts" | LavalinkClientSearchPlatformResolve | LavalinkClientSearchPlatform;
+    "flowerytts" | "flowery" | "flowery.tts" | LavalinkClientSearchPlatformResolve | LavalinkClientSearchPlatform | "js" | "jiosaavn";
 
 export type SearchPlatform = LavalinkSearchPlatform | ClientSearchPlatform;
 
@@ -88,6 +91,7 @@ export type SourcesRegex = "YoutubeRegex" |
     "musicYandex" |
     "radiohost" |
     "bandcamp" |
+    "jiosaavn" | 
     "appleMusic" |
     "TwitchTv" |
     "vimeo";
@@ -141,7 +145,7 @@ export type PlayerEvents =
     | TrackEndEvent
     | TrackStuckEvent
     | TrackExceptionEvent
-    | WebSocketClosedEvent | SponsorBlockSegmentEvents;
+    | WebSocketClosedEvent | SponsorBlockSegmentEvents | LyricsEvent;
 
 export type Severity = "COMMON" | "SUSPICIOUS" | "FAULT";
 
@@ -255,7 +259,70 @@ export interface SponsorBlockChaptersLoaded extends PlayerEvent {
     }[]
 }
 
+/**
+ * Types & Events for Lyrics plugin from Lavalink: https://github.com/topi314/LavaLyrics
+ */
+export type LyricsEvent = LyricsFoundEvent | LyricsNotFoundEvent | LyricsLineEvent;
 
+export type LyricsEventType = "LyricsFoundEvent" | "LyricsNotFoundEvent" | "LyricsLineEvent";
+
+export interface LyricsFoundEvent extends PlayerEvent {
+    /** The lyricsfound event */
+    type: "LyricsFoundEvent";
+    /** The guildId */
+    guildId: string;
+    /** The lyrics */
+    lyrics: LyricsResult;
+}
+
+export interface LyricsNotFoundEvent extends PlayerEvent {
+    /**The lyricsnotfound event*/
+    type: "LyricsNotFoundEvent";
+    /**The guildId*/
+    guildId: string;
+}
+
+export interface LyricsLineEvent extends PlayerEvent {
+    /**The lyricsline event*/
+    type: "LyricsLineEvent";
+    /** The guildId */
+    guildId: string;
+    /** The line number */
+    lineIndex: number;
+    /** The line */
+    line: LyricsLine;
+    /**skipped is true if the line was skipped */
+    skipped: boolean;
+}
+
+export interface LyricsFoundEvent extends PlayerEvent {
+    /** The lyricsfound event */
+    type: "LyricsFoundEvent";
+    /** The guildId */
+    guildId: string;
+    /** The lyrics */
+    lyrics: LyricsResult;
+}
+
+export interface LyricsNotFoundEvent extends PlayerEvent {
+    /**The lyricsnotfound event*/
+    type: "LyricsNotFoundEvent";
+    /**The guildId*/
+    guildId: string;
+}
+
+export interface LyricsLineEvent extends PlayerEvent {
+    /**The lyricsline event*/
+    type: "LyricsLineEvent";
+    /** The guildId */
+    guildId: string;
+    /** The line number */
+    lineIndex: number;
+    /** The line */
+    line: LyricsLine;
+    /**skipped is true if the line was skipped */
+    skipped: boolean;
+}
 export type LoadTypes =
     | "track"
     | "playlist"
@@ -275,7 +342,7 @@ export type PlayerEventType =
     | "TrackEndEvent"
     | "TrackExceptionEvent"
     | "TrackStuckEvent"
-    | "WebSocketClosedEvent" | SponsorBlockSegmentEventType;
+    | "WebSocketClosedEvent" | SponsorBlockSegmentEventType | LyricsEventType;
 
 export type TrackEndReason =
     | "finished"

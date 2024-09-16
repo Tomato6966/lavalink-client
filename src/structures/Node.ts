@@ -7,11 +7,11 @@ import { NodeSymbol, queueTrackEnd } from "./Utils";
 import type { Player } from "./Player";
 import type { DestroyReasonsType } from "./Types/Player";
 import type { LavalinkTrack, PluginInfo, Track } from "./Types/Track";
-import type { Base64, InvalidLavalinkRestRequest, LavalinkPlayer, LavaSearchQuery, LavaSearchResponse, LoadTypes, PlayerEvents, PlayerEventType, PlayerUpdateInfo, RoutePlanner, SearchQuery, SearchResult, Session, SponsorBlockChaptersLoaded, SponsorBlockChapterStarted, SponsorBlockSegmentSkipped, SponsorBlockSegmentsLoaded, TrackEndEvent, TrackExceptionEvent, TrackStartEvent, TrackStuckEvent, WebSocketClosedEvent } from "./Types/Utils";
+import type { Base64, InvalidLavalinkRestRequest, LavalinkPlayer, LavaSearchQuery, LavaSearchResponse, LoadTypes, LyricsFoundEvent, LyricsLineEvent, LyricsNotFoundEvent, PlayerEvents, PlayerEventType, PlayerUpdateInfo, RoutePlanner, SearchQuery, SearchResult, Session, SponsorBlockChaptersLoaded, SponsorBlockChapterStarted, SponsorBlockSegmentSkipped, SponsorBlockSegmentsLoaded, TrackEndEvent, TrackExceptionEvent, TrackStartEvent, TrackStuckEvent, WebSocketClosedEvent } from "./Types/Utils";
 import type { NodeManager } from "./NodeManager";
 
 import type {
-	BaseNodeStats, LavalinkInfo, LavalinkNodeOptions, ModifyRequest, NodeStats, SponsorBlockSegment
+	BaseNodeStats, LavalinkInfo, LavalinkNodeOptions, LyricsResult, ModifyRequest, NodeStats, SponsorBlockSegment
 } from "./Types/Node";
 /**
  * Lavalink Node creator class
@@ -637,6 +637,124 @@ export class LavalinkNode {
         }
     }
 
+    lyrics = {
+        /**
+         * Get the lyrics of a track
+         * @param track the track to get the lyrics for
+         * @param skipTrackSource wether to skip the track source or not
+         * @returns the lyrics of the track
+         * @example
+         *
+         * ```ts
+         * const lyrics = await player.node.lyrics.get(track, true);
+         * // use it of player instead:
+         * // const lyrics = await player.getLyrics(track, true);
+         * ```
+         */
+        get: async (track: Track, skipTrackSource: boolean = false) => {
+            if (!this.sessionId) throw new Error("the Lavalink-Node is either not ready, or not up to date!");
+
+            if(
+                !this.info.plugins.find(v => v.name === "lavalyrics-plugin")
+            ) throw new RangeError(`there is no lavalyrics-plugin available in the lavalink node (required for lyrics): ${this.id}`);
+
+            if(
+                !this.info.plugins.find(v => v.name === "lavasrc-plugin") &&
+                !this.info.plugins.find(v => v.name === "java-lyrics-plugin")
+            ) throw new RangeError(`there is no lyrics source (via lavasrc-plugin / java-lyrics-plugin) available in the lavalink node (required for lyrics): ${this.id}`);
+
+            const url = `/lyrics?track=${track.encoded}&skipTrackSource=${skipTrackSource}`;
+            return (await this.request(url)) as LyricsResult | null;
+        },
+
+        /**
+         * Get the lyrics of the current playing track
+         *
+         * @param guildId the guild id of the player
+         * @param skipTrackSource wether to skip the track source or not
+         * @returns the lyrics of the current playing track
+         * @example
+         * ```ts
+         * const lyrics = await player.node.lyrics.getCurrent(guildId);
+         * // use it of player instead:
+         * // const lyrics = await player.getCurrentLyrics();
+         * ```
+         */
+        getCurrent: async (guildId: string, skipTrackSource: boolean = false) => {
+            if (!this.sessionId) throw new Error("the Lavalink-Node is either not ready, or not up to date!");
+
+            if(
+                !this.info.plugins.find(v => v.name === "lavalyrics-plugin")
+            ) throw new RangeError(`there is no lavalyrics-plugin available in the lavalink node (required for lyrics): ${this.id}`);
+
+            if(
+                !this.info.plugins.find(v => v.name === "lavasrc-plugin") &&
+                !this.info.plugins.find(v => v.name === "java-lyrics-plugin")
+            ) throw new RangeError(`there is no lyrics source (via lavasrc-plugin / java-lyrics-plugin) available in the lavalink node (required for lyrics): ${this.id}`);
+
+            const url = `/sessions/${this.sessionId}/players/${guildId}/track/lyrics?skipTrackSource=${skipTrackSource}`;
+            return (await this.request(url)) as LyricsResult | null;
+        },
+
+        /**
+         * subscribe to lyrics updates for a guild
+         * @param guildId the guild id of the player
+         * @returns request data of the request
+         *
+         * @example
+         * ```ts
+         * await player.node.lyrics.subscribe(guildId);
+         * // use it of player instead:
+         * // const lyrics = await player.subscribeLyrics();
+         * ```
+         */
+
+        subscribe: async (guildId: string) => {
+            if (!this.sessionId) throw new Error("the Lavalink-Node is either not ready, or not up to date!");
+
+            if(
+                !this.info.plugins.find(v => v.name === "lavalyrics-plugin")
+            ) throw new RangeError(`there is no lavalyrics-plugin available in the lavalink node (required for lyrics): ${this.id}`);
+
+            if(
+                !this.info.plugins.find(v => v.name === "lavasrc-plugin") &&
+                !this.info.plugins.find(v => v.name === "java-lyrics-plugin")
+            ) throw new RangeError(`there is no lyrics source (via lavasrc-plugin / java-lyrics-plugin) available in the lavalink node (required for lyrics): ${this.id}`);
+
+            return await this.request(`/sessions/${this.sessionId}/players/${guildId}/lyrics/subscribe`, (options) => {
+                options.method = "POST";
+            }).catch(() => { });
+        },
+        /**
+         * unsubscribe from lyrics updates for a guild
+         * @param guildId the guild id of the player
+         * @returns request data of the request
+         *
+         * @example
+         * ```ts
+         * await player.node.lyrics.unsubscribe(guildId);
+         * // use it of player instead:
+         * // const lyrics = await player.unsubscribeLyrics();
+         * ```
+         */
+        unsubscribe: async (guildId: string) => {
+            if (!this.sessionId) throw new Error("the Lavalink-Node is either not ready, or not up to date!");
+
+            if(
+                !this.info.plugins.find(v => v.name === "lavalyrics-plugin")
+            ) throw new RangeError(`there is no lavalyrics-plugin available in the lavalink node (required for lyrics): ${this.id}`);
+
+            if(
+                !this.info.plugins.find(v => v.name === "lavasrc-plugin") &&
+                !this.info.plugins.find(v => v.name === "java-lyrics-plugin")
+            ) throw new RangeError(`there is no lyrics source (via lavasrc-plugin / java-lyrics-plugin) available in the lavalink node (required for lyrics): ${this.id}`);
+
+            return await this.request(`/sessions/${this.sessionId}/players/${guildId}/lyrics/unsubscribe`, (options) => {
+                options.method = "DELETE";
+            }).catch(() => { });
+        },
+    };
+
     /**
      * Request Lavalink statistics.
      * @returns the lavalink node stats
@@ -1017,6 +1135,9 @@ export class LavalinkNode {
             case "SegmentSkipped": this.SponsorBlockSegmentSkipped(player, player.queue.current as Track, payload); break;
             case "ChaptersLoaded": this.SponsorBlockChaptersLoaded(player, player.queue.current as Track, payload); break;
             case "ChapterStarted": this.SponsorBlockChapterStarted(player, player.queue.current as Track, payload); break;
+            case "LyricsLineEvent": this.LyricsLine(player, player.queue.current as Track, payload); break;
+            case "LyricsFoundEvent": this.LyricsFound(player, player.queue.current as Track, payload); break;
+            case "LyricsNotFoundEvent": this.LyricsNotFound(player, player.queue.current as Track, payload); break;
             default: this.NodeManager.emit("error", this, new Error(`Node#event unknown event '${(payload as PlayerEventType & PlayerEvents).type}'.`), (payload as PlayerEventType & PlayerEvents)); break;
         }
         return;
@@ -1368,5 +1489,37 @@ export class LavalinkNode {
         }
 
         return this.NodeManager.LavalinkManager.emit("queueEnd", player, track, payload);
+    }
+
+    /**
+     * Emitted whenever a line of lyrics gets emitted
+     * @event
+     * @param {Player} player The player that emitted the event
+     * @param {Track} track The track that emitted the event
+     * @param {LyricsLineEvent} payload The payload of the event
+     */
+    private LyricsLine(player: Player, track: Track, payload: LyricsLineEvent) {
+        return this.NodeManager.LavalinkManager.emit("LyricsLine", player, track, payload);
+    }
+
+    /**
+     * Emitted whenever the lyrics for a track got found
+     * @event
+     * @param {Player} player The player that emitted the event
+     * @param {Track} track The track that emitted the event
+     * @param {LyricsFoundEvent} payload The payload of the event
+     */
+    private LyricsFound(player: Player, track: Track, payload: LyricsFoundEvent) {
+        return this.NodeManager.LavalinkManager.emit("LyricsFound", player, track, payload);
+    }
+    /**
+     * Emitted whenever the lyrics for a track got not found
+     * @event
+     * @param {Player} player The player that emitted the event
+     * @param {Track} track The track that emitted the event
+     * @param {LyricsNotFoundEvent} payload The payload of the event
+     */
+    private LyricsNotFound(player: Player, track: Track, payload: LyricsNotFoundEvent) {
+        return this.NodeManager.LavalinkManager.emit("LyricsNotFound", player, track, payload);
     }
 }

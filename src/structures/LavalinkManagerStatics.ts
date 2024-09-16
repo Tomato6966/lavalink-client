@@ -66,7 +66,12 @@ export const DefaultSources: Record<SearchPlatform, LavalinkSearchPlatform | Cli
     "http": "http",
     "https": "https",
     "link": "link",
-    "uri": "uri"
+    "uri": "uri",
+    // jiosaavn
+    "jiosaavn": "jssearch",
+    "js": "jssearch",
+    "jssearch": "jssearch",
+    "jsrec": "jsrec"
 }
 
 /** Lavalink Plugins definiton */
@@ -75,7 +80,9 @@ export const LavalinkPlugins = {
     LavaSrc: "lavasrc-plugin",
     GoogleCloudTTS: "tts-plugin",
     LavaSearch: "lavasearch-plugin",
-    LavalinkFilterPlugin: "lavalink-filter-plugin"
+    Jiosaavn_Plugin: "jiosaavn-plugin",
+    LavalinkFilterPlugin: "lavalink-filter-plugin",
+    JavaTimedLyricsPlugin: "java-lyrics-plugin"
 }
 
 /** Lavalink Sources regexes for url validations */
@@ -119,6 +126,9 @@ export const SourceLinksRegexes: Record<SourcesRegex, RegExp> = {
     AllSpotifyRegex: /(https?:\/\/)(www\.)?open\.spotify\.com\/((?<region>[a-zA-Z-]+)\/)?(user\/(?<user>[a-zA-Z0-9-_]+)\/)?(?<type>track|album|playlist|artist|episode|show)\/(?<identifier>[a-zA-Z0-9-_]+)/,
 
     appleMusic: /https?:\/\/?(?:www\.)?music\.apple\.com\/(\S+)/,
+
+    /** From jiosaavn-plugin */
+    jiosaavn: /(https?:\/\/)(www\.)?jiosaavn\.com\/(?<type>song|album|featured|artist)\/([a-zA-Z0-9-_\/,]+)/,
 
     /** FROM DUNCTE BOT PLUGIN */
     tiktok: /https:\/\/www\.tiktok\.com\//,
