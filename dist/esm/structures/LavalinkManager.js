@@ -1,9 +1,9 @@
 import { EventEmitter } from "events";
-import { DebugEvents, DestroyReasons } from "./Constants";
-import { NodeManager } from "./NodeManager";
-import { Player } from "./Player";
-import { DefaultQueueStore } from "./Queue";
-import { ManagerUtils, MiniMap } from "./Utils";
+import { DebugEvents, DestroyReasons } from "./Constants.js";
+import { NodeManager } from "./NodeManager.js";
+import { Player } from "./Player.js";
+import { DefaultQueueStore } from "./Queue.js";
+import { ManagerUtils, MiniMap } from "./Utils.js";
 export class LavalinkManager extends EventEmitter {
     /**
      * Emit an event

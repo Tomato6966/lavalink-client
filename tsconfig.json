@@ -29,5 +29,9 @@
     "tsDocs",
     "config",
     "testBot",
-  ]
+  ],
+  "tsc-alias": {
+    "verbose": false,
+    "resolveFullPaths": true,
+  }
 }

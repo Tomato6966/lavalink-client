@@ -1,8 +1,8 @@
-import type { DestroyReasons } from "../Constants";
-import type { LavalinkNode } from "../Node";
-import type { EQBand, FilterData, LavalinkFilterData } from "./Filters";
-import type { Track, UnresolvedTrack } from "./Track";
-import type { Base64, LavalinkPlayerVoiceOptions } from "./Utils";
+import type { DestroyReasons } from "../Constants.js";
+import type { LavalinkNode } from "../Node.js";
+import type { EQBand, FilterData, LavalinkFilterData } from "./Filters.js";
+import type { Track, UnresolvedTrack } from "./Track.js";
+import type { Base64, LavalinkPlayerVoiceOptions } from "./Utils.js";
 export type DestroyReasonsType = keyof typeof DestroyReasons | string;
 export interface PlayerJson {
     /** Guild Id where the player was playing in */

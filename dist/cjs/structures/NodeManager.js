@@ -2,9 +2,9 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.NodeManager = void 0;
 const events_1 = require("events");
-const Constants_1 = require("./Constants");
-const Node_1 = require("./Node");
-const Utils_1 = require("./Utils");
+const Constants_1 = require("./Constants.js");
+const Node_1 = require("./Node.js");
+const Utils_1 = require("./Utils.js");
 class NodeManager extends events_1.EventEmitter {
     /**
      * Emit an event

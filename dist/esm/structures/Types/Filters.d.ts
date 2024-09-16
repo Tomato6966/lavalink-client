@@ -1,4 +1,4 @@
-import type { FloatNumber, IntegerNumber } from "./Utils";
+import type { FloatNumber, IntegerNumber } from "./Utils.js";
 /** The Audio Outputs type */
 export type AudioOutputs = "mono" | "stereo" | "left" | "right";
 /** The "active" / "disabled" Player Filters */

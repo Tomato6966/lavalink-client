@@ -1,4 +1,4 @@
-import { audioOutputsData } from "./Constants";
+import { audioOutputsData } from "./Constants.js";
 /**
  * The FilterManager for each player
  */

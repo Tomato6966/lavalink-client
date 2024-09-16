@@ -1,7 +1,7 @@
 import { EventEmitter } from "events";
-import { DestroyReasons } from "./Constants";
-import { LavalinkNode } from "./Node";
-import { MiniMap } from "./Utils";
+import { DestroyReasons } from "./Constants.js";
+import { LavalinkNode } from "./Node.js";
+import { MiniMap } from "./Utils.js";
 export class NodeManager extends EventEmitter {
     /**
      * Emit an event

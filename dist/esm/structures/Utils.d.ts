@@ -1,9 +1,9 @@
-import type { LavalinkNodeOptions } from "./Types/Node";
-import type { LavalinkSearchPlatform, LavaSearchQuery, MiniMapConstructor, SearchPlatform, SearchQuery } from "./Types/Utils";
-import type { LavalinkManager } from "./LavalinkManager";
-import type { LavalinkNode } from "./Node";
-import type { Player } from "./Player";
-import type { LavalinkTrack, Track, UnresolvedQuery, UnresolvedTrack } from "./Types/Track";
+import type { LavalinkNodeOptions } from "./Types/Node.js";
+import type { LavalinkSearchPlatform, LavaSearchQuery, MiniMapConstructor, SearchPlatform, SearchQuery } from "./Types/Utils.js";
+import type { LavalinkManager } from "./LavalinkManager.js";
+import type { LavalinkNode } from "./Node.js";
+import type { Player } from "./Player.js";
+import type { LavalinkTrack, Track, UnresolvedQuery, UnresolvedTrack } from "./Types/Track.js";
 export declare const TrackSymbol: unique symbol;
 export declare const UnresolvedTrackSymbol: unique symbol;
 export declare const QueueSymbol: unique symbol;

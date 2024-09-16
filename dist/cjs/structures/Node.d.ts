@@ -1,9 +1,9 @@
-import type { Player } from "./Player";
-import type { DestroyReasonsType } from "./Types/Player";
-import type { Track } from "./Types/Track";
-import type { Base64, InvalidLavalinkRestRequest, LavalinkPlayer, LavaSearchQuery, LavaSearchResponse, PlayerUpdateInfo, RoutePlanner, SearchQuery, SearchResult, Session } from "./Types/Utils";
-import type { NodeManager } from "./NodeManager";
-import type { BaseNodeStats, LavalinkInfo, LavalinkNodeOptions, ModifyRequest, NodeStats, SponsorBlockSegment } from "./Types/Node";
+import type { Player } from "./Player.js";
+import type { DestroyReasonsType } from "./Types/Player.js";
+import type { Track } from "./Types/Track.js";
+import type { Base64, InvalidLavalinkRestRequest, LavalinkPlayer, LavaSearchQuery, LavaSearchResponse, PlayerUpdateInfo, RoutePlanner, SearchQuery, SearchResult, Session } from "./Types/Utils.js";
+import type { NodeManager } from "./NodeManager.js";
+import type { BaseNodeStats, LavalinkInfo, LavalinkNodeOptions, ModifyRequest, NodeStats, SponsorBlockSegment } from "./Types/Node.js";
 /**
  * Lavalink Node creator class
  */

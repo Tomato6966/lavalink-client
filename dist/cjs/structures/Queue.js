@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Queue = exports.DefaultQueueStore = exports.QueueSaver = void 0;
-const Utils_1 = require("./Utils");
+const Utils_1 = require("./Utils.js");
 class QueueSaver {
     /**
      * The queue store manager

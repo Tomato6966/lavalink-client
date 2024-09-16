@@ -1,7 +1,7 @@
 import { isAbsolute } from "path";
 import WebSocket from "ws";
-import { DebugEvents, DestroyReasons, validSponsorBlocks } from "./Constants";
-import { NodeSymbol, queueTrackEnd } from "./Utils";
+import { DebugEvents, DestroyReasons, validSponsorBlocks } from "./Constants.js";
+import { NodeSymbol, queueTrackEnd } from "./Utils.js";
 /**
  * Lavalink Node creator class
  */

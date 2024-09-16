@@ -4,8 +4,8 @@ exports.LavalinkNode = void 0;
 const tslib_1 = require("tslib");
 const path_1 = require("path");
 const ws_1 = tslib_1.__importDefault(require("ws"));
-const Constants_1 = require("./Constants");
-const Utils_1 = require("./Utils");
+const Constants_1 = require("./Constants.js");
+const Utils_1 = require("./Utils.js");
 /**
  * Lavalink Node creator class
  */

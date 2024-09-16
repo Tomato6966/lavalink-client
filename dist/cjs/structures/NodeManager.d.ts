@@ -1,9 +1,9 @@
 /// <reference types="node" />
 import { EventEmitter } from "events";
-import { LavalinkNode } from "./Node";
-import { MiniMap } from "./Utils";
-import type { LavalinkNodeIdentifier, LavalinkNodeOptions, NodeManagerEvents } from "./Types/Node";
-import type { LavalinkManager } from "./LavalinkManager";
+import { LavalinkNode } from "./Node.js";
+import { MiniMap } from "./Utils.js";
+import type { LavalinkNodeIdentifier, LavalinkNodeOptions, NodeManagerEvents } from "./Types/Node.js";
+import type { LavalinkManager } from "./LavalinkManager.js";
 export declare class NodeManager extends EventEmitter {
     /**
      * Emit an event

@@ -1,4 +1,4 @@
-import type { Track, UnresolvedTrack } from "./Track";
+import type { Track, UnresolvedTrack } from "./Track.js";
 export interface StoredQueue {
     current: Track | null;
     previous: Track[];

@@ -1,11 +1,11 @@
-import { FilterManager } from "./Filters";
-import { Queue } from "./Queue";
-import type { DestroyReasons } from "./Constants";
-import type { LavalinkNode } from "./Node";
-import type { SponsorBlockSegment } from "./Types/Node";
-import type { PlayerJson, PlayerOptions, PlayOptions, RepeatMode } from "./Types/Player";
-import type { LavalinkManager } from "./LavalinkManager";
-import type { LavalinkPlayerVoiceOptions, LavaSearchQuery, SearchQuery } from "./Types/Utils";
+import { FilterManager } from "./Filters.js";
+import { Queue } from "./Queue.js";
+import type { DestroyReasons } from "./Constants.js";
+import type { LavalinkNode } from "./Node.js";
+import type { SponsorBlockSegment } from "./Types/Node.js";
+import type { PlayerJson, PlayerOptions, PlayOptions, RepeatMode } from "./Types/Player.js";
+import type { LavalinkManager } from "./LavalinkManager.js";
+import type { LavalinkPlayerVoiceOptions, LavaSearchQuery, SearchQuery } from "./Types/Utils.js";
 export declare class Player {
     /** Filter Manager per player */
     filterManager: FilterManager;
@@ -96,7 +96,7 @@ export declare class Player {
      * @param throwOnEmpty If an error should be thrown if no track is found
      * @returns The search result
      */
-    lavaSearch(query: LavaSearchQuery, requestUser: unknown, throwOnEmpty?: boolean): Promise<import("./Types/Utils").SearchResult | import("./Types/Utils").LavaSearchResponse>;
+    lavaSearch(query: LavaSearchQuery, requestUser: unknown, throwOnEmpty?: boolean): Promise<import("./Types/Utils.js").SearchResult | import("./Types/Utils.js").LavaSearchResponse>;
     /**
      * Set the SponsorBlock
      * @param segments The segments to set
@@ -115,7 +115,7 @@ export declare class Player {
      * @param query Query for your data
      * @param requestUser
      */
-    search(query: SearchQuery, requestUser: unknown, throwOnEmpty?: boolean): Promise<import("./Types/Utils").UnresolvedSearchResult | import("./Types/Utils").SearchResult>;
+    search(query: SearchQuery, requestUser: unknown, throwOnEmpty?: boolean): Promise<import("./Types/Utils.js").UnresolvedSearchResult | import("./Types/Utils.js").SearchResult>;
     /**
      * Pause the player
      */

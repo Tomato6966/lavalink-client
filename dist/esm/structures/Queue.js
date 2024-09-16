@@ -1,4 +1,4 @@
-import { ManagerUtils, MiniMap, QueueSymbol } from "./Utils";
+import { ManagerUtils, MiniMap, QueueSymbol } from "./Utils.js";
 export class QueueSaver {
     /**
      * The queue store manager

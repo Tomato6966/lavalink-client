@@ -1,5 +1,5 @@
-import type { Player } from "./Player";
-import type { AudioOutputs, EQBand, FilterData, PlayerFilters, TimescaleFilter } from "./Types/Filters";
+import type { Player } from "./Player.js";
+import type { AudioOutputs, EQBand, FilterData, PlayerFilters, TimescaleFilter } from "./Types/Filters.js";
 /**
  * The FilterManager for each player
  */

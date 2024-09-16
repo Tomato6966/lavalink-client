@@ -1,7 +1,7 @@
 import { URL } from "node:url";
 import { isRegExp } from "node:util/types";
-import { DebugEvents } from "./Constants";
-import { DefaultSources, LavalinkPlugins, SourceLinksRegexes } from "./LavalinkManagerStatics";
+import { DebugEvents } from "./Constants.js";
+import { DefaultSources, LavalinkPlugins, SourceLinksRegexes } from "./LavalinkManagerStatics.js";
 export const TrackSymbol = Symbol("LC-Track");
 export const UnresolvedTrackSymbol = Symbol("LC-Track-Unresolved");
 export const QueueSymbol = Symbol("LC-Queue");

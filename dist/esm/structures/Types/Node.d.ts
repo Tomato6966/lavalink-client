@@ -1,8 +1,8 @@
 /// <reference types="node" />
 import type internal from "stream";
-import type { LavalinkNode } from "../Node";
-import type { DestroyReasonsType } from "./Player";
-import type { InvalidLavalinkRestRequest, LavalinkPlayer } from "./Utils";
+import type { LavalinkNode } from "../Node.js";
+import type { DestroyReasonsType } from "./Player.js";
+import type { InvalidLavalinkRestRequest, LavalinkPlayer } from "./Utils.js";
 /** Ability to manipulate fetch requests */
 export type ModifyRequest = (options: RequestInit & {
     path: string;

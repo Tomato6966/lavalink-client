@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.FilterManager = void 0;
-const Constants_1 = require("./Constants");
+const Constants_1 = require("./Constants.js");
 /**
  * The FilterManager for each player
  */

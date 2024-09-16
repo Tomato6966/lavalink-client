@@ -1,10 +1,10 @@
-import type { DebugEvents } from "../Constants";
-import type { Player } from "../Player";
-import type { LavalinkNodeOptions } from "./Node";
-import type { DestroyReasonsType, PlayerJson } from "./Player";
-import type { ManagerQueueOptions } from "./Queue";
-import type { Track, UnresolvedTrack } from "./Track";
-import type { GuildShardPayload, SearchPlatform, SponsorBlockChaptersLoaded, SponsorBlockChapterStarted, SponsorBlockSegmentSkipped, SponsorBlockSegmentsLoaded, TrackExceptionEvent, TrackEndEvent, TrackStuckEvent, WebSocketClosedEvent, TrackStartEvent } from "./Utils";
+import type { DebugEvents } from "../Constants.js";
+import type { Player } from "../Player.js";
+import type { LavalinkNodeOptions } from "./Node.js";
+import type { DestroyReasonsType, PlayerJson } from "./Player.js";
+import type { ManagerQueueOptions } from "./Queue.js";
+import type { Track, UnresolvedTrack } from "./Track.js";
+import type { GuildShardPayload, SearchPlatform, SponsorBlockChaptersLoaded, SponsorBlockChapterStarted, SponsorBlockSegmentSkipped, SponsorBlockSegmentsLoaded, TrackExceptionEvent, TrackEndEvent, TrackStuckEvent, WebSocketClosedEvent, TrackStartEvent } from "./Utils.js";
 /**
  * The events from the lavalink Manager
  */

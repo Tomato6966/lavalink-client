@@ -1,11 +1,11 @@
 /// <reference types="node" />
 import { EventEmitter } from "events";
-import { NodeManager } from "./NodeManager";
-import { Player } from "./Player";
-import { ManagerUtils, MiniMap } from "./Utils";
-import type { BotClientOptions, LavalinkManagerEvents, ManagerOptions } from "./Types/Manager";
-import type { PlayerOptions } from "./Types/Player";
-import type { ChannelDeletePacket, VoicePacket, VoiceServer, VoiceState } from "./Types/Utils";
+import { NodeManager } from "./NodeManager.js";
+import { Player } from "./Player.js";
+import { ManagerUtils, MiniMap } from "./Utils.js";
+import type { BotClientOptions, LavalinkManagerEvents, ManagerOptions } from "./Types/Manager.js";
+import type { PlayerOptions } from "./Types/Player.js";
+import type { ChannelDeletePacket, VoicePacket, VoiceServer, VoiceState } from "./Types/Utils.js";
 export declare class LavalinkManager extends EventEmitter {
     /**
      * Emit an event

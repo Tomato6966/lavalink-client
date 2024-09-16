@@ -1,6 +1,6 @@
-import type { Player } from "../Player";
-import type { anyObject } from "./Player";
-import type { Base64 } from "./Utils";
+import type { Player } from "../Player.js";
+import type { anyObject } from "./Player.js";
+import type { Base64 } from "./Utils.js";
 /** Sourcenames provided by lavalink server */
 export type LavalinkSourceNames = "youtube" | "youtubemusic" | "soundcloud" | "bandcamp" | "twitch";
 /** Source Names provided by lava src plugin */

@@ -1,11 +1,11 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Player = void 0;
-const Constants_1 = require("./Constants");
-const BandCampSearch_1 = require("./CustomSearches/BandCampSearch");
-const Filters_1 = require("./Filters");
-const Queue_1 = require("./Queue");
-const Utils_1 = require("./Utils");
+const Constants_1 = require("./Constants.js");
+const BandCampSearch_1 = require("./CustomSearches/BandCampSearch.js");
+const Filters_1 = require("./Filters.js");
+const Queue_1 = require("./Queue.js");
+const Utils_1 = require("./Utils.js");
 class Player {
     /** Filter Manager per player */
     filterManager;

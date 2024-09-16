@@ -1,6 +1,6 @@
-import { MiniMap } from "./Utils";
-import type { Track, UnresolvedTrack } from "./Types/Track";
-import type { ManagerQueueOptions, QueueStoreManager, StoredQueue } from "./Types/Queue";
+import { MiniMap } from "./Utils.js";
+import type { Track, UnresolvedTrack } from "./Types/Track.js";
+import type { ManagerQueueOptions, QueueStoreManager, StoredQueue } from "./Types/Queue.js";
 export declare class QueueSaver {
     /**
      * The queue store manager

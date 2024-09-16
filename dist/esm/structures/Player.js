@@ -1,8 +1,8 @@
-import { DebugEvents } from "./Constants";
-import { bandCampSearch } from "./CustomSearches/BandCampSearch";
-import { FilterManager } from "./Filters";
-import { Queue, QueueSaver } from "./Queue";
-import { queueTrackEnd } from "./Utils";
+import { DebugEvents } from "./Constants.js";
+import { bandCampSearch } from "./CustomSearches/BandCampSearch.js";
+import { FilterManager } from "./Filters.js";
+import { Queue, QueueSaver } from "./Queue.js";
+import { queueTrackEnd } from "./Utils.js";
 export class Player {
     /** Filter Manager per player */
     filterManager;

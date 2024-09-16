@@ -2,11 +2,11 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.LavalinkManager = void 0;
 const events_1 = require("events");
-const Constants_1 = require("./Constants");
-const NodeManager_1 = require("./NodeManager");
-const Player_1 = require("./Player");
-const Queue_1 = require("./Queue");
-const Utils_1 = require("./Utils");
+const Constants_1 = require("./Constants.js");
+const NodeManager_1 = require("./NodeManager.js");
+const Player_1 = require("./Player.js");
+const Queue_1 = require("./Queue.js");
+const Utils_1 = require("./Utils.js");
 class LavalinkManager extends events_1.EventEmitter {
     /**
      * Emit an event

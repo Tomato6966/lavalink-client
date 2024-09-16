@@ -1,8 +1,8 @@
-import type { MiniMap } from "../Utils";
-import type { LavalinkFilterData } from "./Filters";
-import type { NodeStats } from "./Node";
-import type { LavalinkPlayOptions } from "./Player";
-import type { LavalinkTrack, PluginInfo, Track, UnresolvedTrack } from "./Track";
+import type { MiniMap } from "../Utils.js";
+import type { LavalinkFilterData } from "./Filters.js";
+import type { NodeStats } from "./Node.js";
+import type { LavalinkPlayOptions } from "./Player.js";
+import type { LavalinkTrack, PluginInfo, Track, UnresolvedTrack } from "./Track.js";
 /** Helper for generating Opaque types. */
 export type Opaque<T, K> = T & {
     __opaque__: K;

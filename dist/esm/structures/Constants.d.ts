@@ -1,4 +1,4 @@
-import type { AudioOutputs, ChannelMixFilter, EQBand } from "./Types/Filters";
+import type { AudioOutputs, ChannelMixFilter, EQBand } from "./Types/Filters.js";
 export declare enum DebugEvents {
     SetSponsorBlock = "SetSponsorBlock",
     DeleteSponsorBlock = "DeleteSponsorBlock",
