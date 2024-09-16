@@ -1,78 +1,76 @@
-import type {
-    ClientCustomSearchPlatformUtils, LavalinkSearchPlatform, SearchPlatform, SourcesRegex
-} from "./Types/Utils";
+import type { ClientCustomSearchPlatformUtils, LavalinkSearchPlatform, SearchPlatform, SourcesRegex } from "./Types/Utils";
 
 /** Default Sources Record, to allow source parsing with multiple inputs. */
 export const DefaultSources: Record<SearchPlatform, LavalinkSearchPlatform | ClientCustomSearchPlatformUtils> = {
     // youtubemusic
     "youtube music": "ytmsearch",
-    "youtubemusic": "ytmsearch",
-    "ytmsearch": "ytmsearch",
-    "ytm": "ytmsearch",
-    "musicyoutube": "ytmsearch",
+    youtubemusic: "ytmsearch",
+    ytmsearch: "ytmsearch",
+    ytm: "ytmsearch",
+    musicyoutube: "ytmsearch",
     "music youtube": "ytmsearch",
     // youtube
-    "youtube": "ytsearch",
-    "yt": "ytsearch",
-    "ytsearch": "ytsearch",
+    youtube: "ytsearch",
+    yt: "ytsearch",
+    ytsearch: "ytsearch",
     // soundcloud
-    "soundcloud": "scsearch",
-    "scsearch": "scsearch",
-    "sc": "scsearch",
+    soundcloud: "scsearch",
+    scsearch: "scsearch",
+    sc: "scsearch",
     // apple music
     "apple music": "amsearch",
-    "apple": "amsearch",
-    "applemusic": "amsearch",
-    "amsearch": "amsearch",
-    "am": "amsearch",
-    "musicapple": "amsearch",
+    apple: "amsearch",
+    applemusic: "amsearch",
+    amsearch: "amsearch",
+    am: "amsearch",
+    musicapple: "amsearch",
     "music apple": "amsearch",
     // spotify
-    "spotify": "spsearch",
-    "spsearch": "spsearch",
-    "sp": "spsearch",
+    spotify: "spsearch",
+    spsearch: "spsearch",
+    sp: "spsearch",
     "spotify.com": "spsearch",
-    "spotifycom": "spsearch",
-    "sprec": "sprec",
-    "spsuggestion": "sprec",
+    spotifycom: "spsearch",
+    sprec: "sprec",
+    spsuggestion: "sprec",
     // deezer
-    "deezer": "dzsearch",
-    "dz": "dzsearch",
-    "dzsearch": "dzsearch",
-    "dzisrc": "dzisrc",
+    deezer: "dzsearch",
+    dz: "dzsearch",
+    dzsearch: "dzsearch",
+    dzisrc: "dzisrc",
     // yandexmusic
     "yandex music": "ymsearch",
-    "yandexmusic": "ymsearch",
-    "yandex": "ymsearch",
-    "ymsearch": "ymsearch",
+    yandexmusic: "ymsearch",
+    yandex: "ymsearch",
+    ymsearch: "ymsearch",
     // speak PLUGIN
-    "speak": "speak",
-    "tts": "tts",
-    "ftts": "ftts",
-    "flowery": "ftts",
+    speak: "speak",
+    tts: "tts",
+    ftts: "ftts",
+    flowery: "ftts",
     "flowery.tts": "ftts",
-    "flowerytts": "ftts",
+    flowerytts: "ftts",
     // Client sided search platforms (after lavalinkv4.0.6 it will search via bcsearch on the node itself)
-    "bandcamp": "bcsearch",
-    "bc": "bcsearch",
-    "bcsearch": "bcsearch",
+    bandcamp: "bcsearch",
+    bc: "bcsearch",
+    bcsearch: "bcsearch",
     // other searches:
-    "phsearch": "phsearch",
-    "pornhub": "phsearch",
-    "porn": "phsearch",
+    phsearch: "phsearch",
+    pornhub: "phsearch",
+    porn: "phsearch",
     // local files
-    "local": "local",
+    local: "local",
     // http requests
-    "http": "http",
-    "https": "https",
-    "link": "link",
-    "uri": "uri",
+    http: "http",
+    https: "https",
+    link: "link",
+    uri: "uri",
     // jiosaavn
-    "jiosaavn": "jssearch",
-    "js": "jssearch",
-    "jssearch": "jssearch",
-    "jsrec": "jsrec"
-}
+    jiosaavn: "jssearch",
+    js: "jssearch",
+    jssearch: "jssearch",
+    jsrec: "jsrec",
+};
 
 /** Lavalink Plugins definiton */
 export const LavalinkPlugins = {
@@ -82,14 +80,16 @@ export const LavalinkPlugins = {
     LavaSearch: "lavasearch-plugin",
     Jiosaavn_Plugin: "jiosaavn-plugin",
     LavalinkFilterPlugin: "lavalink-filter-plugin",
-    JavaTimedLyricsPlugin: "java-lyrics-plugin"
-}
+    JavaTimedLyricsPlugin: "java-lyrics-plugin",
+};
 
 /** Lavalink Sources regexes for url validations */
 export const SourceLinksRegexes: Record<SourcesRegex, RegExp> = {
     /** DEFAULT SUPPORTED BY LAVALINK */
-    YoutubeRegex: /https?:\/\/?(?:www\.)?(?:(m|www)\.)?(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|shorts|playlist\?|watch\?v=|watch\?.+(?:&|&#38;);v=))([a-zA-Z0-9\-_]{11})?(?:(?:\?|&|&#38;)index=((?:\d){1,3}))?(?:(?:\?|&|&#38;)?list=([a-zA-Z\-_0-9]{34}))?(?:\S+)?/,
-    YoutubeMusicRegex: /https?:\/\/?(?:www\.)?(?:(music|m|www)\.)?(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|shorts|playlist\?|watch\?v=|watch\?.+(?:&|&#38;);v=))([a-zA-Z0-9\-_]{11})?(?:(?:\?|&|&#38;)index=((?:\d){1,3}))?(?:(?:\?|&|&#38;)?list=([a-zA-Z\-_0-9]{34}))?(?:\S+)?/,
+    YoutubeRegex:
+        /https?:\/\/?(?:www\.)?(?:(m|www)\.)?(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|shorts|playlist\?|watch\?v=|watch\?.+(?:&|&#38;);v=))([a-zA-Z0-9\-_]{11})?(?:(?:\?|&|&#38;)index=((?:\d){1,3}))?(?:(?:\?|&|&#38;)?list=([a-zA-Z\-_0-9]{34}))?(?:\S+)?/,
+    YoutubeMusicRegex:
+        /https?:\/\/?(?:www\.)?(?:(music|m|www)\.)?(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|shorts|playlist\?|watch\?v=|watch\?.+(?:&|&#38;);v=))([a-zA-Z0-9\-_]{11})?(?:(?:\?|&|&#38;)index=((?:\d){1,3}))?(?:(?:\?|&|&#38;)?list=([a-zA-Z\-_0-9]{34}))?(?:\S+)?/,
 
     SoundCloudRegex: /https:\/\/(?:on\.)?soundcloud\.com\//,
     SoundCloudMobileRegex: /https?:\/\/(soundcloud\.app\.goo\.gl)\/(\S+)/,
@@ -114,16 +114,25 @@ export const SourceLinksRegexes: Record<SourcesRegex, RegExp> = {
     DeezerMixesRegex: /(https?:\/\/|)?(?:www\.)?deezer\.com\/(?:\w{2}\/)?mixes\/genre\/(\d+)/,
     DeezerEpisodeRegex: /(https?:\/\/|)?(?:www\.)?deezer\.com\/(?:\w{2}\/)?episode\/(\d+)/,
     // DeezerPodcastRegex: /(https?:\/\/|)?(?:www\.)?deezer\.com\/(?:\w{2}\/)?podcast\/(\d+)/,
-    AllDeezerRegexWithoutPageLink: /(https?:\/\/|)?(?:www\.)?deezer\.com\/(?:\w{2}\/)?(track|playlist|album|artist|mixes\/genre|episode)\/(\d+)/,
-    AllDeezerRegex: /((https?:\/\/|)?(?:www\.)?deezer\.com\/(?:\w{2}\/)?(track|playlist|album|artist|mixes\/genre|episode)\/(\d+)|(https?:\/\/|)?(?:www\.)?deezer\.page\.link\/(\S+))/,
+    AllDeezerRegexWithoutPageLink:
+        /(https?:\/\/|)?(?:www\.)?deezer\.com\/(?:\w{2}\/)?(track|playlist|album|artist|mixes\/genre|episode)\/(\d+)/,
+    AllDeezerRegex:
+        /((https?:\/\/|)?(?:www\.)?deezer\.com\/(?:\w{2}\/)?(track|playlist|album|artist|mixes\/genre|episode)\/(\d+)|(https?:\/\/|)?(?:www\.)?deezer\.page\.link\/(\S+))/,
 
-    SpotifySongRegex: /(https?:\/\/)(www\.)?open\.spotify\.com\/((?<region>[a-zA-Z-]+)\/)?(user\/(?<user>[a-zA-Z0-9-_]+)\/)?track\/(?<identifier>[a-zA-Z0-9-_]+)/,
-    SpotifyPlaylistRegex: /(https?:\/\/)(www\.)?open\.spotify\.com\/((?<region>[a-zA-Z-]+)\/)?(user\/(?<user>[a-zA-Z0-9-_]+)\/)?playlist\/(?<identifier>[a-zA-Z0-9-_]+)/,
-    SpotifyArtistRegex: /(https?:\/\/)(www\.)?open\.spotify\.com\/((?<region>[a-zA-Z-]+)\/)?(user\/(?<user>[a-zA-Z0-9-_]+)\/)?artist\/(?<identifier>[a-zA-Z0-9-_]+)/,
-    SpotifyEpisodeRegex: /(https?:\/\/)(www\.)?open\.spotify\.com\/((?<region>[a-zA-Z-]+)\/)?(user\/(?<user>[a-zA-Z0-9-_]+)\/)?episode\/(?<identifier>[a-zA-Z0-9-_]+)/,
-    SpotifyShowRegex: /(https?:\/\/)(www\.)?open\.spotify\.com\/((?<region>[a-zA-Z-]+)\/)?(user\/(?<user>[a-zA-Z0-9-_]+)\/)?show\/(?<identifier>[a-zA-Z0-9-_]+)/,
-    SpotifyAlbumRegex: /(https?:\/\/)(www\.)?open\.spotify\.com\/((?<region>[a-zA-Z-]+)\/)?(user\/(?<user>[a-zA-Z0-9-_]+)\/)?album\/(?<identifier>[a-zA-Z0-9-_]+)/,
-    AllSpotifyRegex: /(https?:\/\/)(www\.)?open\.spotify\.com\/((?<region>[a-zA-Z-]+)\/)?(user\/(?<user>[a-zA-Z0-9-_]+)\/)?(?<type>track|album|playlist|artist|episode|show)\/(?<identifier>[a-zA-Z0-9-_]+)/,
+    SpotifySongRegex:
+        /(https?:\/\/)(www\.)?open\.spotify\.com\/((?<region>[a-zA-Z-]+)\/)?(user\/(?<user>[a-zA-Z0-9-_]+)\/)?track\/(?<identifier>[a-zA-Z0-9-_]+)/,
+    SpotifyPlaylistRegex:
+        /(https?:\/\/)(www\.)?open\.spotify\.com\/((?<region>[a-zA-Z-]+)\/)?(user\/(?<user>[a-zA-Z0-9-_]+)\/)?playlist\/(?<identifier>[a-zA-Z0-9-_]+)/,
+    SpotifyArtistRegex:
+        /(https?:\/\/)(www\.)?open\.spotify\.com\/((?<region>[a-zA-Z-]+)\/)?(user\/(?<user>[a-zA-Z0-9-_]+)\/)?artist\/(?<identifier>[a-zA-Z0-9-_]+)/,
+    SpotifyEpisodeRegex:
+        /(https?:\/\/)(www\.)?open\.spotify\.com\/((?<region>[a-zA-Z-]+)\/)?(user\/(?<user>[a-zA-Z0-9-_]+)\/)?episode\/(?<identifier>[a-zA-Z0-9-_]+)/,
+    SpotifyShowRegex:
+        /(https?:\/\/)(www\.)?open\.spotify\.com\/((?<region>[a-zA-Z-]+)\/)?(user\/(?<user>[a-zA-Z0-9-_]+)\/)?show\/(?<identifier>[a-zA-Z0-9-_]+)/,
+    SpotifyAlbumRegex:
+        /(https?:\/\/)(www\.)?open\.spotify\.com\/((?<region>[a-zA-Z-]+)\/)?(user\/(?<user>[a-zA-Z0-9-_]+)\/)?album\/(?<identifier>[a-zA-Z0-9-_]+)/,
+    AllSpotifyRegex:
+        /(https?:\/\/)(www\.)?open\.spotify\.com\/((?<region>[a-zA-Z-]+)\/)?(user\/(?<user>[a-zA-Z0-9-_]+)\/)?(?<type>track|album|playlist|artist|episode|show)\/(?<identifier>[a-zA-Z0-9-_]+)/,
 
     appleMusic: /https?:\/\/?(?:www\.)?music\.apple\.com\/(\S+)/,
 
@@ -135,4 +144,4 @@ export const SourceLinksRegexes: Record<SourcesRegex, RegExp> = {
     mixcloud: /https:\/\/www\.mixcloud\.com\//,
     musicYandex: /https:\/\/music\.yandex\.ru\//,
     radiohost: /https?:\/\/[^.\s]+\.radiohost\.de\/(\S+)/,
-}
+};

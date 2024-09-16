@@ -3,7 +3,7 @@ import type { Track, UnresolvedTrack } from "./Track";
 export interface StoredQueue {
     current: Track | null;
     previous: Track[];
-    tracks: (Track|UnresolvedTrack)[];
+    tracks: (Track | UnresolvedTrack)[];
 }
 
 export interface QueueStoreManager extends Record<string, any> {
@@ -28,12 +28,23 @@ export interface ManagerQueueOptions {
     queueChangesWatcher?: QueueChangesWatcher;
 }
 
-
 export interface QueueChangesWatcher {
     /** get a Value (MUST RETURN UNPARSED!) */
-    tracksAdd: (guildId: string, tracks: (Track | UnresolvedTrack)[], position: number, oldStoredQueue: StoredQueue, newStoredQueue: StoredQueue) => void;
+    tracksAdd: (
+        guildId: string,
+        tracks: (Track | UnresolvedTrack)[],
+        position: number,
+        oldStoredQueue: StoredQueue,
+        newStoredQueue: StoredQueue,
+    ) => void;
     /** Set a value inside a guildId (MUST BE UNPARSED) */
-    tracksRemoved: (guildId: string, tracks: (Track | UnresolvedTrack)[], position: number | number[], oldStoredQueue: StoredQueue, newStoredQueue: StoredQueue) => void;
+    tracksRemoved: (
+        guildId: string,
+        tracks: (Track | UnresolvedTrack)[],
+        position: number | number[],
+        oldStoredQueue: StoredQueue,
+        newStoredQueue: StoredQueue,
+    ) => void;
     /** Set a value inside a guildId (MUST BE UNPARSED) */
     shuffled: (guildId: string, oldStoredQueue: StoredQueue, newStoredQueue: StoredQueue) => void;
 }

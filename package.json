@@ -11,8 +11,8 @@
     "build:esm": "node tools/cleanup esm && tsc -p config/tsconfig.esm.json && tsc-alias -p config/tsconfig.esm.json && node tools/fixup esm",
     "build:types": "node tools/cleanup types && tsc -p config/tsconfig.types.json && tsc-alias -p config/tsconfig.types.json",
     "clean": "node tools/cleanup",
-    "lint": "eslint .",
-    "lint:fix": "npm run lint -- --fix",
+    "lint": "biome lint --write",
+    "format": "biome format --write",
     "test": "node -v",
     "docs": "npx typedoc"
   },
@@ -53,19 +53,18 @@
   },
   "homepage": "https://lc4.gitbook.io/lavalink-client/",
   "devDependencies": {
-    "@types/node": "^20.4.8",
-    "@types/ws": "^8.5.5",
-    "@typescript-eslint/eslint-plugin": "^6.4.0",
-    "@typescript-eslint/parser": "^6.4.0",
-    "eslint": "^8.47.0",
+    "@biomejs/biome": "1.9.1",
+    "@types/node": "^22.5.5",
+    "@types/ws": "^8.5.12",
     "tsc-alias": "^1.8.10",
-    "typedoc": "^0.25.4",
-    "typedoc-theme-hierarchy": "^4.1.2",
-    "typescript": "^5.1.6"
+    "typedoc": "^0.26.7",
+    "typedoc-theme-hierarchy": "^5.0.3",
+    "typescript": "^5.6.2"
   },
   "dependencies": {
-    "tslib": "^2.6.1",
-    "ws": "^8.13.0"
+    "clean": "^4.0.2",
+    "tslib": "^2.7.0",
+    "ws": "^8.18.0"
   },
   "engines": {
     "node": ">=18.0.0",

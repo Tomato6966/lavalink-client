@@ -5,7 +5,22 @@ import type { LavalinkNodeOptions } from "./Node";
 import type { DestroyReasonsType, PlayerJson } from "./Player";
 import type { ManagerQueueOptions } from "./Queue";
 import type { Track, UnresolvedTrack } from "./Track";
-import type { GuildShardPayload, SearchPlatform, SponsorBlockChaptersLoaded, SponsorBlockChapterStarted, SponsorBlockSegmentSkipped, SponsorBlockSegmentsLoaded, TrackExceptionEvent, TrackEndEvent, TrackStuckEvent, WebSocketClosedEvent, TrackStartEvent, LyricsFoundEvent, LyricsNotFoundEvent, LyricsLineEvent } from "./Utils";
+import type {
+    GuildShardPayload,
+    SearchPlatform,
+    SponsorBlockChaptersLoaded,
+    SponsorBlockChapterStarted,
+    SponsorBlockSegmentSkipped,
+    SponsorBlockSegmentsLoaded,
+    TrackExceptionEvent,
+    TrackEndEvent,
+    TrackStuckEvent,
+    WebSocketClosedEvent,
+    TrackStartEvent,
+    LyricsFoundEvent,
+    LyricsNotFoundEvent,
+    LyricsLineEvent,
+} from "./Utils";
 
 /**
  * The events from the lavalink Manager
@@ -15,42 +30,46 @@ export interface LavalinkManagerEvents {
      * Emitted when a Track started playing.
      * @event Manager#trackStart
      */
-    "trackStart": (player: Player, track: Track | null, payload: TrackStartEvent) => void;
+    trackStart: (player: Player, track: Track | null, payload: TrackStartEvent) => void;
     /**
      * Emitted when a Track finished.
      * @event Manager#trackEnd
      */
-    "trackEnd": (player: Player, track: Track | null, payload: TrackEndEvent) => void;
+    trackEnd: (player: Player, track: Track | null, payload: TrackEndEvent) => void;
     /**
      * Emitted when a Track got stuck while playing.
      * @event Manager#trackStuck
      */
-    "trackStuck": (player: Player, track: Track | null, payload: TrackStuckEvent) => void;
+    trackStuck: (player: Player, track: Track | null, payload: TrackStuckEvent) => void;
     /**
      * Emitted when a Track errored.
      * @event Manager#trackError
      */
-    "trackError": (player: Player, track: Track | UnresolvedTrack | null, payload: TrackExceptionEvent) => void;
+    trackError: (player: Player, track: Track | UnresolvedTrack | null, payload: TrackExceptionEvent) => void;
     /**
      * Emitted when the Playing finished and no more tracks in the queue.
      * @event Manager#queueEnd
      */
-    "queueEnd": (player: Player, track: Track | UnresolvedTrack | null, payload: TrackEndEvent | TrackStuckEvent | TrackExceptionEvent) => void;
+    queueEnd: (
+        player: Player,
+        track: Track | UnresolvedTrack | null,
+        payload: TrackEndEvent | TrackStuckEvent | TrackExceptionEvent,
+    ) => void;
     /**
      * Emitted when a Player is created.
      * @event Manager#playerCreate
      */
-    "playerCreate": (player: Player) => void;
+    playerCreate: (player: Player) => void;
     /**
      * Emitted when a Player is moved within the channel.
      * @event Manager#playerMove
      */
-    "playerMove": (player: Player, oldVoiceChannelId: string, newVoiceChannelId: string) => void;
+    playerMove: (player: Player, oldVoiceChannelId: string, newVoiceChannelId: string) => void;
     /**
      * Emitted when a Player is disconnected from a channel.
      * @event Manager#playerDisconnect
      */
-    "playerDisconnect": (player: Player, voiceChannelId: string) => void;
+    playerDisconnect: (player: Player, voiceChannelId: string) => void;
     /**
      * Emitted when a Node-Socket got closed for a specific Player.
      * Usually emits when the audio websocket to discord is closed, This can happen for various reasons (normal and abnormal), e.g. when using an expired voice server update. 4xxx codes are usually bad.
@@ -64,19 +83,18 @@ export interface LavalinkManagerEvents {
      * @link https://lavalink.dev/api/websocket.html#websocketclosedevent
      * @event Manager#playerSocketClosed
      */
-    "playerSocketClosed": (player: Player, payload: WebSocketClosedEvent) => void;
+    playerSocketClosed: (player: Player, payload: WebSocketClosedEvent) => void;
     /**
      * Emitted when a Player get's destroyed
      * @event Manager#playerDestroy
      */
-    "playerDestroy": (player: Player, destroyReason?: DestroyReasonsType) => void;
+    playerDestroy: (player: Player, destroyReason?: DestroyReasonsType) => void;
 
     /**
      * Always emits when the player (on lavalink side) got updated
      * @event Manager#playerUpdate
      */
-    "playerUpdate": (oldPlayerJson: PlayerJson, newPlayer: Player) => void;
-
+    playerUpdate: (oldPlayerJson: PlayerJson, newPlayer: Player) => void;
 
     /**
      * SPONSORBLOCK-PLUGIN EVENT
@@ -84,7 +102,7 @@ export interface LavalinkManagerEvents {
      * @link https://github.com/topi314/Sponsorblock-Plugin#segmentsloaded
      * @event Manager#trackError
      */
-    "SegmentsLoaded": (player: Player, track: Track | UnresolvedTrack | null, payload: SponsorBlockSegmentsLoaded) => void;
+    SegmentsLoaded: (player: Player, track: Track | UnresolvedTrack | null, payload: SponsorBlockSegmentsLoaded) => void;
 
     /**
      * SPONSORBLOCK-PLUGIN EVENT
@@ -92,7 +110,7 @@ export interface LavalinkManagerEvents {
      * @link https://github.com/topi314/Sponsorblock-Plugin#segmentskipped
      * @event Manager#trackError
      */
-    "SegmentSkipped": (player: Player, track: Track | UnresolvedTrack | null, payload: SponsorBlockSegmentSkipped) => void;
+    SegmentSkipped: (player: Player, track: Track | UnresolvedTrack | null, payload: SponsorBlockSegmentSkipped) => void;
 
     /**
      * SPONSORBLOCK-PLUGIN EVENT
@@ -100,7 +118,7 @@ export interface LavalinkManagerEvents {
      * @link https://github.com/topi314/Sponsorblock-Plugin#chapterstarted
      * @event Manager#trackError
      */
-    "ChapterStarted": (player: Player, track: Track | UnresolvedTrack | null, payload: SponsorBlockChapterStarted) => void;
+    ChapterStarted: (player: Player, track: Track | UnresolvedTrack | null, payload: SponsorBlockChapterStarted) => void;
 
     /**
      * SPONSORBLOCK-PLUGIN EVENT
@@ -108,7 +126,7 @@ export interface LavalinkManagerEvents {
      * @link https://github.com/topi314/Sponsorblock-Plugin#chaptersloaded
      * @event Manager#trackError
      */
-    "ChaptersLoaded": (player: Player, track: Track | UnresolvedTrack | null, payload: SponsorBlockChaptersLoaded) => void;
+    ChaptersLoaded: (player: Player, track: Track | UnresolvedTrack | null, payload: SponsorBlockChaptersLoaded) => void;
 
     /**
      * Lavalink-Client Debug Event
@@ -117,28 +135,31 @@ export interface LavalinkManagerEvents {
      *
      * @event Manager#debug
      */
-    "debug": (eventKey: DebugEvents, eventData: { message: string, state: "log" | "warn" | "error", error?: Error | string, functionLayer: string }) => void;
-    
+    debug: (
+        eventKey: DebugEvents,
+        eventData: { message: string; state: "log" | "warn" | "error"; error?: Error | string; functionLayer: string },
+    ) => void;
+
     /**
      * Emitted when a Lyrics line is received
      * @link https://github.com/topi314/LavaLyrics
      * @event Manager#LyricsLine
      */
-    "LyricsLine": (player: Player, track: Track | UnresolvedTrack | null, payload: LyricsLineEvent) => void;
+    LyricsLine: (player: Player, track: Track | UnresolvedTrack | null, payload: LyricsLineEvent) => void;
 
     /**
      * Emitted when a Lyrics is found
      * @link https://github.com/topi314/LavaLyrics
      * @event Manager#LyricsFound
      */
-    "LyricsFound": (player: Player, track: Track | UnresolvedTrack | null, payload: LyricsFoundEvent) => void;
+    LyricsFound: (player: Player, track: Track | UnresolvedTrack | null, payload: LyricsFoundEvent) => void;
 
     /**
      * Emitted when a Lyrics is not found
      * @link https://github.com/topi314/LavaLyrics
      * @event Manager#LyricsNotFound
      */
-    "LyricsNotFound": (player: Player, track: Track | UnresolvedTrack | null, payload: LyricsNotFoundEvent) => void;
+    LyricsNotFound: (player: Player, track: Track | UnresolvedTrack | null, payload: LyricsNotFoundEvent) => void;
 }
 /**
  * The Bot client Options needed for the manager
@@ -218,7 +239,7 @@ export interface ManagerOptions {
     /** Advanced Options for the Library, which may or may not be "library breaking" */
     advancedOptions?: {
         /** Max duration for that the filter fix duration works (in ms) - default is 8mins */
-        maxFilterFixDuration?: number,
+        maxFilterFixDuration?: number;
         /** Enable Debug event */
         enableDebugEvents?: boolean;
         /** optional */
@@ -233,7 +254,7 @@ export interface ManagerOptions {
                 debugLog?: boolean;
                 /** If you get 'Error: Use Player#destroy("reason") not LavalinkManager#deletePlayer() to stop the Player' put it on true */
                 dontThrowError?: boolean;
-            }
-        }
-    }
+            };
+        };
+    };
 }

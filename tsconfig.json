@@ -1,37 +1,25 @@
 {
   "compilerOptions": {
-      /* Basic Options */
-      "target": "ES2022",
-      "module": "CommonJS",
-      "declaration": true,
-      "outDir": "./dist",
-      "rootDir": "./src",
-      "skipLibCheck": true,
-      "importHelpers": true,
-      "moduleResolution": "node",
-      "baseUrl": ".",
-      "esModuleInterop": true,
-      "allowSyntheticDefaultImports": true,
-      "forceConsistentCasingInFileNames": true,
-      "types": [ "node", "ws" ],
-      "lib": [
-        "ES2022", "DOM"
-    ]
+    /* Basic Options */
+    "target": "ES2022",
+    "module": "CommonJS",
+    "declaration": true,
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "skipLibCheck": true,
+    "importHelpers": true,
+    "moduleResolution": "node",
+    "baseUrl": ".",
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "forceConsistentCasingInFileNames": true,
+    "types": ["node", "ws"],
+    "lib": ["ES2022", "DOM"]
   },
-  "include": [
-    "src/**/*.ts",
-    ".eslintrc.js"
-  ],
-  "exclude": [
-    "node_modules",
-    "dist",
-    "docs",
-    "tsDocs",
-    "config",
-    "testBot",
-  ],
+  "include": ["src/**/*.ts"],
+  "exclude": ["node_modules", "dist", "docs", "tsDocs", "config", "testBot"],
   "tsc-alias": {
     "verbose": false,
-    "resolveFullPaths": true,
+    "resolveFullPaths": true
   }
 }

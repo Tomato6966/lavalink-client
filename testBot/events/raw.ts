@@ -1,9 +1,9 @@
 import { Events } from "discord.js";
-import { Event } from "../types/Client";
+import type { Event } from "../types/Client";
 
 export default {
     name: Events.Raw,
     execute: async (client, d) => {
-        client.lavalink.sendRawData(d);  // VERY IMPORTANT!
-    }
+        client.lavalink.sendRawData(d); // VERY IMPORTANT!
+    },
 } as Event;

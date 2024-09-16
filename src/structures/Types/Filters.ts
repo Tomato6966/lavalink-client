@@ -3,7 +3,6 @@ import type { FloatNumber, IntegerNumber } from "./Utils";
 /** The Audio Outputs type */
 export type AudioOutputs = "mono" | "stereo" | "left" | "right";
 
-
 /** The "active" / "disabled" Player Filters */
 export interface PlayerFilters {
     /** Sets nightcore to false, and vaporwave to false */
@@ -32,7 +31,7 @@ export interface PlayerFilters {
         echo: boolean;
         /** if reverb filter is enabled / not */
         reverb: boolean;
-    }
+    };
     lavalinkLavaDspxPlugin: {
         /** if lowPass filter is enabled / not */
         lowPass: boolean;
@@ -42,7 +41,7 @@ export interface PlayerFilters {
         normalization: boolean;
         /** if echo filter is enabled / not */
         echo: boolean;
-    }
+    };
 }
 
 /**
@@ -148,7 +147,7 @@ export interface ChannelMixFilter {
  */
 export interface LowPassFilter {
     /** The smoothing factor (1.0 < x) */
-    smoothing?: number
+    smoothing?: number;
 }
 /**
  * Filter Data stored in the Client and partially sent to Lavalink
@@ -165,32 +164,36 @@ export interface FilterData {
     lowPass?: LowPassFilter;
     pluginFilters?: {
         "lavalink-filter-plugin"?: {
-            "echo"?: {
+            echo?: {
                 delay?: number;
                 decay?: number;
-            },
-            "reverb"?: {
+            };
+            reverb?: {
                 delays?: number[];
                 gains?: number[];
             };
         };
-        "high-pass"?: { // Cuts off frequencies lower than the specified {cutoffFrequency}.
+        "high-pass"?: {
+            // Cuts off frequencies lower than the specified {cutoffFrequency}.
             cutoffFrequency?: number; // Integer, higher than zero, in Hz.
-            boostFactor?: number;    // Float, higher than 0.0. This alters volume output. A value of 1.0 means no volume change.
+            boostFactor?: number; // Float, higher than 0.0. This alters volume output. A value of 1.0 means no volume change.
         };
-        "low-pass"?: { // Cuts off frequencies higher than the specified {cutoffFrequency}.
+        "low-pass"?: {
+            // Cuts off frequencies higher than the specified {cutoffFrequency}.
             cutoffFrequency?: number; // Integer, higher than zero, in Hz.
-            boostFactor?: number;    // Float, higher than 0.0. This alters volume output. A value of 1.0 means no volume change.
+            boostFactor?: number; // Float, higher than 0.0. This alters volume output. A value of 1.0 means no volume change.
         };
-        normalization?: { // Attenuates peaking where peaks are defined as having a higher value than {maxAmplitude}.
+        normalization?: {
+            // Attenuates peaking where peaks are defined as having a higher value than {maxAmplitude}.
             maxAmplitude?: number; // Float, within the range of 0.0 - 1.0. A value of 0.0 mutes the output.
-            adaptive?: boolean;    // false
+            adaptive?: boolean; // false
         };
-        echo?: { // Self-explanatory; provides an echo effect.
+        echo?: {
+            // Self-explanatory; provides an echo effect.
             echoLength?: number; // Float, higher than 0.0, in seconds (1.0 = 1 second).
-            decay?: number;      // Float, within the range of 0.0 - 1.0. A value of 1.0 means no decay, and a value of 0.0 means
+            decay?: number; // Float, within the range of 0.0 - 1.0. A value of 1.0 means no decay, and a value of 0.0 means
         };
-    }
+    };
 }
 /**
  * Actual Filter Data sent to Lavalink

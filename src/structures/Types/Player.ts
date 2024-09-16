@@ -42,7 +42,7 @@ export interface PlayerJson {
         ws: number;
         /** Avg. calc. Ping to the lavalink server */
         lavalink: number;
-    }
+    };
     /** Equalizer Bands used in lavalink */
     equalizer: EQBand[];
     /** The Id of the last used node */

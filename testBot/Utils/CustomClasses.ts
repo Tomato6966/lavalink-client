@@ -1,9 +1,14 @@
 import { readFileSync } from "node:fs";
 import { writeFile } from "node:fs/promises";
-import { RedisClientType } from "redis";
+import type { RedisClientType } from "redis";
 
 import {
-	LavalinkManager, MiniMap, PlayerJson, QueueChangesWatcher, QueueStoreManager, StoredQueue
+    type LavalinkManager,
+    MiniMap,
+    type PlayerJson,
+    type QueueChangesWatcher,
+    type QueueStoreManager,
+    type StoredQueue,
 } from "../../src";
 
 import type { BotClient } from "../types/Client";
@@ -11,13 +16,14 @@ import type { BotClient } from "../types/Client";
 export class JSONStore {
     public data = new MiniMap<string, string>();
     filePath = process.cwd() + "/queueData.json";
-    constructor(filePath?:string) {
+    constructor(filePath?: string) {
         this.filePath = filePath || this.filePath;
         this.initLoadData();
     }
 
     async initLoadData() {
-        try { // important to do sync so it's loaded on the initialisation
+        try {
+            // important to do sync so it's loaded on the initialisation
             this.data = new MiniMap(this.JSONtoMap(readFileSync(this.filePath, "utf-8")));
         } catch (error) {
             await writeFile(this.filePath, this.MapToJSON(this.data));
@@ -63,11 +69,12 @@ export class PlayerSaver extends JSONStore {
      * Listen to the playerUpdate event and save the player data to the json file
      * @param lavalink
      */
-    listenToEvents(lavalink:LavalinkManager) {
+    listenToEvents(lavalink: LavalinkManager) {
         lavalink.on("playerUpdate", (oldPlayer, newPlayer) => {
             const newPlayerData = newPlayer.toJSON();
             // we only save the data if anything changes of what we need later on
-            if(!oldPlayer ||
+            if (
+                !oldPlayer ||
                 oldPlayer.voiceChannelId !== newPlayerData.voiceChannelId ||
                 oldPlayer.textChannelId !== newPlayerData.textChannelId ||
                 oldPlayer.options.selfDeaf !== newPlayerData.options.selfDeaf ||
@@ -78,19 +85,17 @@ export class PlayerSaver extends JSONStore {
                 oldPlayer.options.instaUpdateFiltersFix !== newPlayerData.options.instaUpdateFiltersFix ||
                 oldPlayer.options.vcRegion !== newPlayerData.options.vcRegion
             ) {
-                this.set(newPlayer.guildId, JSON.stringify(
-                    newPlayerData
-                ));
+                this.set(newPlayer.guildId, JSON.stringify(newPlayerData));
             }
         });
     }
     async getAllLastNodeSessions() {
         try {
-            const datas = Array.from(this.data.values())
+            const datas = Array.from(this.data.values());
             const sessionIds = new Map();
-            for(const theData of datas) {
+            for (const theData of datas) {
                 const json = JSON.parse(theData);
-                if(json.nodeSessionId && json.nodeId) sessionIds.set(json.nodeId, json.nodeSessionId);
+                if (json.nodeSessionId && json.nodeId) sessionIds.set(json.nodeId, json.nodeSessionId);
             }
             return sessionIds;
         } catch {
@@ -99,7 +104,7 @@ export class PlayerSaver extends JSONStore {
     }
     async getPlayer(guildId: string) {
         const data = await this.get(guildId);
-        return data ? JSON.parse(data) as PlayerJson : null;
+        return data ? (JSON.parse(data) as PlayerJson) : null;
     }
     async delPlayer(guildId: string) {
         await this.delete(guildId);
@@ -107,12 +112,12 @@ export class PlayerSaver extends JSONStore {
 }
 
 export class myCustomStore implements QueueStoreManager {
-    private redis:RedisClientType|MiniMap<string, string>|JSONStore;
+    private redis: RedisClientType | MiniMap<string, string> | JSONStore;
     private test: MiniMap<any, any>;
-    constructor(redisClient:RedisClientType|MiniMap<string, string>|JSONStore) {
+    constructor(redisClient: RedisClientType | MiniMap<string, string> | JSONStore) {
         this.redis = redisClient;
         this.test = new MiniMap();
-        this.test.delete
+        this.test.delete;
     }
     async get(guildId): Promise<any> {
         return await this.redis.get(this.id(guildId));
@@ -123,7 +128,7 @@ export class myCustomStore implements QueueStoreManager {
     }
     async delete(guildId): Promise<any> {
         // fallback for the JSONSTORe and the MINIMAP
-        if("delete" in this.redis) return await this.redis.delete(this.id(guildId));
+        if ("delete" in this.redis) return await this.redis.delete(this.id(guildId));
         return await this.redis.del(this.id(guildId));
     }
     async parse(stringifiedQueueData): Promise<Partial<StoredQueue>> {
@@ -140,17 +145,21 @@ export class myCustomStore implements QueueStoreManager {
 
 // you can make a custom queue watcher for queue logs!
 export class myCustomWatcher implements QueueChangesWatcher {
-    private client:BotClient;
-    constructor(client:BotClient) {
+    private client: BotClient;
+    constructor(client: BotClient) {
         this.client = client;
     }
     shuffled(guildId, oldStoredQueue, newStoredQueue) {
-        console.log(`${this.client.guilds.cache.get(guildId)?.name || guildId}: Queue got shuffled`)
+        console.log(`${this.client.guilds.cache.get(guildId)?.name || guildId}: Queue got shuffled`);
     }
     tracksAdd(guildId, tracks, position, oldStoredQueue, newStoredQueue) {
-        console.log(`${this.client.guilds.cache.get(guildId)?.name || guildId}: ${tracks.length} Tracks got added into the Queue at position #${position}`);
+        console.log(
+            `${this.client.guilds.cache.get(guildId)?.name || guildId}: ${tracks.length} Tracks got added into the Queue at position #${position}`,
+        );
     }
     tracksRemoved(guildId, tracks, position, oldStoredQueue, newStoredQueue) {
-        console.log(`${this.client.guilds.cache.get(guildId)?.name || guildId}: ${tracks.length} Tracks got removed from the Queue at position #${position}`);
+        console.log(
+            `${this.client.guilds.cache.get(guildId)?.name || guildId}: ${tracks.length} Tracks got removed from the Queue at position #${position}`,
+        );
     }
 }

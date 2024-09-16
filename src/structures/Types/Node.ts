@@ -1,11 +1,11 @@
-import type internal from "stream";
+import type internal from "node:stream";
 import type { LavalinkNode } from "../Node";
 import type { DestroyReasonsType } from "./Player";
 import type { InvalidLavalinkRestRequest, LavalinkPlayer } from "./Utils";
 import type { PluginInfo } from "./Track";
 
 /** Ability to manipulate fetch requests */
-export type ModifyRequest = (options: RequestInit & { path: string, extraQueryUrlParams?: URLSearchParams }) => void;
+export type ModifyRequest = (options: RequestInit & { path: string; extraQueryUrlParams?: URLSearchParams }) => void;
 
 export type SponsorBlockSegment = "sponsor" | "selfpromo" | "interaction" | "intro" | "outro" | "preview" | "music_offtopic" | "filler";
 
@@ -197,55 +197,59 @@ export interface NodeManagerEvents {
      * Emitted when a Node is created.
      * @event Manager.nodeManager#create
      */
-    "create": (node: LavalinkNode) => void;
+    create: (node: LavalinkNode) => void;
 
     /**
      * Emitted when a Node is destroyed.
      * @event Manager.nodeManager#destroy
      */
-    "destroy": (node: LavalinkNode, destroyReason?: DestroyReasonsType) => void;
+    destroy: (node: LavalinkNode, destroyReason?: DestroyReasonsType) => void;
 
     /**
      * Emitted when a Node is connected.
      * @event Manager.nodeManager#connect
      */
-    "connect": (node: LavalinkNode) => void;
+    connect: (node: LavalinkNode) => void;
 
     /**
      * Emitted when a Node is reconnecting.
      * @event Manager.nodeManager#reconnecting
-    */
-    "reconnecting": (node: LavalinkNode) => void;
+     */
+    reconnecting: (node: LavalinkNode) => void;
 
     /**
      * Emitted When a node starts to reconnect (if you have a reconnection delay, the reconnecting event will be emitted after the retryDelay.)
      * Useful to check wether the internal node reconnect system works or not
      * @event Manager.nodeManager#reconnectinprogress
      */
-    "reconnectinprogress": (node:LavalinkNode) => void;
+    reconnectinprogress: (node: LavalinkNode) => void;
 
     /**
      * Emitted when a Node is disconnects.
      * @event Manager.nodeManager#disconnect
-    */
-    "disconnect": (node: LavalinkNode, reason: { code?: number, reason?: string }) => void;
+     */
+    disconnect: (node: LavalinkNode, reason: { code?: number; reason?: string }) => void;
 
     /**
      * Emitted when a Node is error.
      * @event Manager.nodeManager#error
-    */
-    "error": (node: LavalinkNode, error: Error, payload?: unknown) => void;
+     */
+    error: (node: LavalinkNode, error: Error, payload?: unknown) => void;
 
     /**
      * Emits every single Node event.
      * @event Manager.nodeManager#raw
-    */
-    "raw": (node: LavalinkNode, payload: unknown) => void;
+     */
+    raw: (node: LavalinkNode, payload: unknown) => void;
 
     /**
      * Emits when the node connects resumed. You then need to create all players within this event for your usecase.
      * Aka for that you need to be able to save player data like vc channel + text channel in a db and then sync it again
      * @event Manager.nodeManager#nodeResumed
      */
-    "resumed": (node:LavalinkNode, paylaod: { resumed: true, sessionId: string, op: "ready" }, players:LavalinkPlayer[] | InvalidLavalinkRestRequest)  => void;
+    resumed: (
+        node: LavalinkNode,
+        paylaod: { resumed: true; sessionId: string; op: "ready" },
+        players: LavalinkPlayer[] | InvalidLavalinkRestRequest,
+    ) => void;
 }

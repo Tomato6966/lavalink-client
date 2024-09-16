@@ -1,5 +1,5 @@
 /// <reference types="node" />
-import type internal from "stream";
+import type internal from "node:stream";
 import type { LavalinkNode } from "../Node.js";
 import type { DestroyReasonsType } from "./Player.js";
 import type { InvalidLavalinkRestRequest, LavalinkPlayer } from "./Utils.js";

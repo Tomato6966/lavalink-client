@@ -50,9 +50,8 @@ export enum DebugEvents {
     PlayerDeleteInsteadOfDestroy = "PlayerDeleteInsteadOfDestroy",
     FailedToConnectToNodes = "FailedToConnectToNodes",
     NoAudioDebug = "NoAudioDebug",
-    PlayerAutoReconnect = "PlayerAutoReconnect"
+    PlayerAutoReconnect = "PlayerAutoReconnect",
 }
-
 
 export enum DestroyReasons {
     QueueEmpty = "QueueEmpty",
@@ -68,41 +67,41 @@ export enum DestroyReasons {
 
     TrackErrorMaxTracksErroredPerTime = "TrackErrorMaxTracksErroredPerTime",
     TrackStuckMaxTracksErroredPerTime = "TrackStuckMaxTracksErroredPerTime",
-};
-
+}
 
 export const validSponsorBlocks = ["sponsor", "selfpromo", "interaction", "intro", "outro", "preview", "music_offtopic", "filler"];
 
-
-
 /**  The audio Outputs Data map declaration */
 export const audioOutputsData: Record<AudioOutputs, ChannelMixFilter> = {
-    mono: { // totalLeft: 1, totalRight: 1
+    mono: {
+        // totalLeft: 1, totalRight: 1
         leftToLeft: 0.5, //each channel should in total 0 | 1, 0 === off, 1 === on, 0.5+0.5 === 1
         leftToRight: 0.5,
         rightToLeft: 0.5,
         rightToRight: 0.5,
     },
-    stereo: { // totalLeft: 1, totalRight: 1
+    stereo: {
+        // totalLeft: 1, totalRight: 1
         leftToLeft: 1,
         leftToRight: 0,
         rightToLeft: 0,
         rightToRight: 1,
     },
-    left: { // totalLeft: 1, totalRight: 0
+    left: {
+        // totalLeft: 1, totalRight: 0
         leftToLeft: 1,
         leftToRight: 0,
         rightToLeft: 1,
         rightToRight: 0,
     },
-    right: { // totalLeft: 0, totalRight: 1
+    right: {
+        // totalLeft: 0, totalRight: 1
         leftToLeft: 0,
         leftToRight: 1,
         rightToLeft: 0,
         rightToRight: 1,
     },
-}
-
+};
 
 export const EQList = {
     /** A Bassboost Equalizer, so high it distorts the audio */
@@ -197,39 +196,39 @@ export const EQList = {
     ] as EQBand[],
     /** Makes the Music sound like rock music / sound rock music better */
     Rock: [
-        { band: 0, gain: 0.300 },
-        { band: 1, gain: 0.250 },
-        { band: 2, gain: 0.200 },
-        { band: 3, gain: 0.100 },
-        { band: 4, gain: 0.050 },
-        { band: 5, gain: -0.050 },
-        { band: 6, gain: -0.150 },
-        { band: 7, gain: -0.200 },
-        { band: 8, gain: -0.100 },
-        { band: 9, gain: -0.050 },
-        { band: 10, gain: 0.050 },
-        { band: 11, gain: 0.100 },
-        { band: 12, gain: 0.200 },
-        { band: 13, gain: 0.250 },
-        { band: 14, gain: 0.300 },
+        { band: 0, gain: 0.3 },
+        { band: 1, gain: 0.25 },
+        { band: 2, gain: 0.2 },
+        { band: 3, gain: 0.1 },
+        { band: 4, gain: 0.05 },
+        { band: 5, gain: -0.05 },
+        { band: 6, gain: -0.15 },
+        { band: 7, gain: -0.2 },
+        { band: 8, gain: -0.1 },
+        { band: 9, gain: -0.05 },
+        { band: 10, gain: 0.05 },
+        { band: 11, gain: 0.1 },
+        { band: 12, gain: 0.2 },
+        { band: 13, gain: 0.25 },
+        { band: 14, gain: 0.3 },
     ] as EQBand[],
     /** Makes the Music sound like Classic music / sound Classic music better */
     Classic: [
         { band: 0, gain: 0.375 },
-        { band: 1, gain: 0.350 },
+        { band: 1, gain: 0.35 },
         { band: 2, gain: 0.125 },
         { band: 3, gain: 0 },
         { band: 4, gain: 0 },
         { band: 5, gain: 0.125 },
-        { band: 6, gain: 0.550 },
-        { band: 7, gain: 0.050 },
+        { band: 6, gain: 0.55 },
+        { band: 7, gain: 0.05 },
         { band: 8, gain: 0.125 },
-        { band: 9, gain: 0.250 },
-        { band: 10, gain: 0.200 },
-        { band: 11, gain: 0.250 },
-        { band: 12, gain: 0.300 },
-        { band: 13, gain: 0.250 },
-        { band: 14, gain: 0.300 },
+        { band: 9, gain: 0.25 },
+        { band: 10, gain: 0.2 },
+        { band: 11, gain: 0.25 },
+        { band: 12, gain: 0.3 },
+        { band: 13, gain: 0.25 },
+        { band: 14, gain: 0.3 },
     ] as EQBand[],
     /** Makes the Music sound like Pop music / sound Pop music better */
     Pop: [
@@ -251,7 +250,7 @@ export const EQList = {
     /** Makes the Music sound like Electronic music / sound Electronic music better */
     Electronic: [
         { band: 0, gain: 0.375 },
-        { band: 1, gain: 0.350 },
+        { band: 1, gain: 0.35 },
         { band: 2, gain: 0.125 },
         { band: 3, gain: 0 },
         { band: 4, gain: 0 },
@@ -262,9 +261,9 @@ export const EQList = {
         { band: 9, gain: 0.125 },
         { band: 10, gain: 0.15 },
         { band: 11, gain: 0.2 },
-        { band: 12, gain: 0.250 },
-        { band: 13, gain: 0.350 },
-        { band: 14, gain: 0.400 },
+        { band: 12, gain: 0.25 },
+        { band: 13, gain: 0.35 },
+        { band: 14, gain: 0.4 },
     ] as EQBand[],
     /** Boosts all Bands slightly for louder and fuller sound */
     FullSound: [
@@ -286,20 +285,20 @@ export const EQList = {
     ] as EQBand[],
     /** Boosts basses + lower highs for a pro gaming sound */
     Gaming: [
-        { band: 0, gain: 0.350 },
-        { band: 1, gain: 0.300 },
-        { band: 2, gain: 0.250 },
-        { band: 3, gain: 0.200 },
-        { band: 4, gain: 0.150 },
-        { band: 5, gain: 0.100 },
-        { band: 6, gain: 0.050 },
+        { band: 0, gain: 0.35 },
+        { band: 1, gain: 0.3 },
+        { band: 2, gain: 0.25 },
+        { band: 3, gain: 0.2 },
+        { band: 4, gain: 0.15 },
+        { band: 5, gain: 0.1 },
+        { band: 6, gain: 0.05 },
         { band: 7, gain: -0.0 },
-        { band: 8, gain: -0.050 },
-        { band: 9, gain: -0.100 },
-        { band: 10, gain: -0.150 },
-        { band: 11, gain: -0.200 },
-        { band: 12, gain: -0.250 },
-        { band: 13, gain: -0.300 },
-        { band: 14, gain: -0.350 },
+        { band: 8, gain: -0.05 },
+        { band: 9, gain: -0.1 },
+        { band: 10, gain: -0.15 },
+        { band: 11, gain: -0.2 },
+        { band: 12, gain: -0.25 },
+        { band: 13, gain: -0.3 },
+        { band: 14, gain: -0.35 },
     ] as EQBand[],
-}
+};
