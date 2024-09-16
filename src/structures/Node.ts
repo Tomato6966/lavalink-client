@@ -1376,7 +1376,9 @@ export class LavalinkNode {
         if(typeof this.NodeManager.LavalinkManager.options?.playerOptions?.onEmptyQueue?.autoPlayFunction === "function" && typeof player.get("internal_autoplayStopPlaying") === "undefined") {
             const previousAutoplayTime = player.get("internal_previousautoplay") as number;
             const duration = previousAutoplayTime ? Date.now() - previousAutoplayTime : 0;
-            if((duration && duration > this.NodeManager.LavalinkManager.options.playerOptions.minAutoPlayMs) || !!player.get("internal_skipped")) {
+            const skipped = !!player.get("internal_skipped") || true;
+
+            if((duration && duration > this.NodeManager.LavalinkManager.options.playerOptions.minAutoPlayMs) || skipped) {
                 await this.NodeManager.LavalinkManager.options?.playerOptions?.onEmptyQueue?.autoPlayFunction(player, track);
                 player.set("internal_previousautoplay", Date.now());
                 if(player.queue.tracks.length > 0) await queueTrackEnd(player);
