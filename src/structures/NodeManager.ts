@@ -151,38 +151,31 @@ export class NodeManager extends EventEmitter {
                 return [...this.nodes.values()]
                     .filter((node) => node.connected)
                     .sort((a, b) => (a.stats?.memory?.used || 0) - (b.stats?.memory?.used || 0)) // sort after memor
-            } break;
-            case "cpuLavalink": {
+            }            case "cpuLavalink": {
                 return [...this.nodes.values()]
                     .filter((node) => node.connected)
                     .sort((a, b) => (a.stats?.cpu?.lavalinkLoad || 0) - (b.stats?.cpu?.lavalinkLoad || 0)) // sort after memor
-            } break;
-            case "cpuSystem": {
+            }            case "cpuSystem": {
                 return [...this.nodes.values()]
                     .filter((node) => node.connected)
                     .sort((a, b) => (a.stats?.cpu?.systemLoad || 0) - (b.stats?.cpu?.systemLoad || 0)) // sort after memor
-            } break;
-            case "calls": {
+            }            case "calls": {
                 return [...this.nodes.values()]
                     .filter((node) => node.connected)
                     .sort((a, b) => a.calls - b.calls); // client sided sorting
-            } break;
-            case "playingPlayers": {
+            }            case "playingPlayers": {
                 return [...this.nodes.values()]
                     .filter((node) => node.connected)
                     .sort((a, b) => (a.stats?.playingPlayers || 0) - (b.stats?.playingPlayers || 0))
-            } break;
-            case "players": {
+            }            case "players": {
                 return [...this.nodes.values()]
                     .filter((node) => node.connected)
                     .sort((a, b) => (a.stats?.players || 0) - (b.stats?.players || 0))
-            } break;
-            default: {
+            }            default: {
                 return [...this.nodes.values()]
                     .filter((node) => node.connected)
                     .sort((a, b) => (a.stats?.players || 0) - (b.stats?.players || 0))
-            } break;
-        }
+            }        }
     }
 
     /**
