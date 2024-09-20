@@ -6,6 +6,7 @@ testBot/package-lock.json
 testBot/yarn.lock
 testBot/bun.lockdb
 testBot/src
+testBot/package-lock.json
 .vscode
 bun.lockb
 yarn.lock

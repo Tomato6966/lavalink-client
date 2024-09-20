@@ -1,6 +1,8 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.queueTrackEnd = exports.MiniMap = exports.ManagerUtils = exports.parseLavalinkConnUrl = exports.NodeSymbol = exports.QueueSymbol = exports.UnresolvedTrackSymbol = exports.TrackSymbol = void 0;
+exports.MiniMap = exports.ManagerUtils = exports.NodeSymbol = exports.QueueSymbol = exports.UnresolvedTrackSymbol = exports.TrackSymbol = void 0;
+exports.parseLavalinkConnUrl = parseLavalinkConnUrl;
+exports.queueTrackEnd = queueTrackEnd;
 const node_url_1 = require("node:url");
 const types_1 = require("node:util/types");
 const Constants_1 = require("./Constants.js");
@@ -27,7 +29,6 @@ function parseLavalinkConnUrl(connectionUrl) {
         port: Number(parsed.port),
     };
 }
-exports.parseLavalinkConnUrl = parseLavalinkConnUrl;
 class ManagerUtils {
     LavalinkManager = null;
     constructor(LavalinkManager) {
@@ -460,7 +461,6 @@ async function queueTrackEnd(player) {
     // return the new current Track
     return player.queue.current;
 }
-exports.queueTrackEnd = queueTrackEnd;
 async function applyUnresolvedData(resTrack, data, utils) {
     if (!resTrack?.info || !data?.info)
         return;

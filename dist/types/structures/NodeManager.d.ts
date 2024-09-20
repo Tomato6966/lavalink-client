@@ -1,4 +1,3 @@
-/// <reference types="node" />
 import { EventEmitter } from "events";
 import { LavalinkNode } from "./Node";
 import { MiniMap } from "./Utils";

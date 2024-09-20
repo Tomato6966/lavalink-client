@@ -1,4 +1,3 @@
-/// <reference types="node" />
 import { EventEmitter } from "events";
 import { NodeManager } from "./NodeManager.js";
 import { Player } from "./Player.js";

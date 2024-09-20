@@ -74,7 +74,7 @@ export class LavalinkNode {
             retryAmount: 5,
             retryDelay: 10e3,
             requestSignalTimeoutMS: 10000,
-            heartBeatInterval: 30000,
+            heartBeatInterval: 30_000,
             closeOnError: true,
             enablePingOnStatsCheck: true,
             ...options
@@ -399,7 +399,7 @@ export class LavalinkNode {
             }
             this.isAlive = false;
             this.socket.terminate();
-        }, 65000); // the stats endpoint get's sent every 60s. se wee add a 5s buffer to make sure we don't miss any stats message
+        }, 65_000); // the stats endpoint get's sent every 60s. se wee add a 5s buffer to make sure we don't miss any stats message
     }
     /**
      * Get the id of the node
@@ -927,7 +927,7 @@ export class LavalinkNode {
                 this.isAlive = false;
                 this.heartBeatPingTimestamp = performance.now();
                 this.socket.ping();
-            }, this.options.heartBeatInterval || 30000);
+            }, this.options.heartBeatInterval || 30_000);
         }
         if (this.reconnectTimeout)
             clearTimeout(this.reconnectTimeout);
@@ -1003,7 +1003,7 @@ export class LavalinkNode {
                     player.ping.ws = payload.state.ping >= 0 ? payload.state.ping : player.ping.ws <= 0 && player.connected ? null : player.ping.ws || 0;
                     if (!player.createdTimeStamp && payload.state.time)
                         player.createdTimeStamp = payload.state.time;
-                    if (player.filterManager.filterUpdatedState === true && ((player.queue.current?.info?.duration || 0) <= (player.LavalinkManager.options.advancedOptions.maxFilterFixDuration || 600000) || isAbsolute(player.queue.current?.info?.uri))) {
+                    if (player.filterManager.filterUpdatedState === true && ((player.queue.current?.info?.duration || 0) <= (player.LavalinkManager.options.advancedOptions.maxFilterFixDuration || 600_000) || isAbsolute(player.queue.current?.info?.uri))) {
                         player.filterManager.filterUpdatedState = false;
                         if (this.NodeManager.LavalinkManager.options?.advancedOptions?.enableDebugEvents) {
                             this.NodeManager.LavalinkManager.emit("debug", DebugEvents.PlayerUpdateFilterFixApply, {

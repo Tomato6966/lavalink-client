@@ -64,7 +64,7 @@ exports.validSponsorBlocks = ["sponsor", "selfpromo", "interaction", "intro", "o
 /**  The audio Outputs Data map declaration */
 exports.audioOutputsData = {
     mono: {
-        leftToLeft: 0.5,
+        leftToLeft: 0.5, //each channel should in total 0 | 1, 0 === off, 1 === on, 0.5+0.5 === 1
         leftToRight: 0.5,
         rightToLeft: 0.5,
         rightToRight: 0.5,
