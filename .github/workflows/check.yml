@@ -12,14 +12,14 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: "pnpm"
+          cache: 'npm'
 
-      # Install pnpm directly using npm
+      # Install pnpm globally
       - name: Install pnpm
         run: npm install -g pnpm
 
-      # Verify pnpm installation
-      - name: Check pnpm version
+      # Check pnpm installation
+      - name: Verify pnpm
         run: pnpm --version
 
       - name: Install dependencies
@@ -28,4 +28,5 @@ jobs:
       - name: Build
         run: pnpm build
 
-      - run: pnpx pkg-pr-new publish
+      - name: Publish
+        run: pnpx pkg-pr-new publish
