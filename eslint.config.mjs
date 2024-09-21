@@ -43,8 +43,9 @@ export default [{
     },
 
     rules: {
-        "@typescript-eslint/no-unsafe-declaration-merging": 1,
-        "@typescript-eslint/no-explicit-any": 1,
         "@typescript-eslint/consistent-type-imports": "error",
+        "@typescript-eslint/no-explicit-any": 1,
+        "@typescript-eslint/no-unsafe-declaration-merging": 1,
+        "@typescript-eslint/no-unused-vars": 1,
     },
 }];
