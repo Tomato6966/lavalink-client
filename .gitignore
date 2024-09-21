@@ -10,4 +10,5 @@ testBot/package-lock.json
 bun.lockb
 yarn.lock
 package-lock.json
+pnpm-lock.yaml
 dist
