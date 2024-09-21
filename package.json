@@ -6,7 +6,6 @@
   "module": "dist/esm/index.js",
   "types": "dist/types/index.d.js",
   "scripts": {
-
     "build": "npm run tool:clean && npm run build:all && npm run tool:fixbuild",
 
     "build:all": "npm run build:cjs && npm run build:esm && npm run build:types",
