@@ -25,7 +25,7 @@ jobs:
         with:
           path: ./docs
           node-version: 20 # The specific version of Node that should be used to build your site. Defaults to 20. (optional)
-          package-manager: npm
+          package-manager: bun@latest
 
   deploy:
     needs: build
