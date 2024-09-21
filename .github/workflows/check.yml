@@ -9,15 +9,17 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # Remove Corepack and set up Node.js environment
+      # Setup Node.js environment
       - uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: "pnpm"
 
-      # Install pnpm directly without relying on Corepack
-      - name: Install pnpm
-        run: npm install -g pnpm
+      # Install pnpm via pnpm/action-setup to ensure it's available
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2.3.0
+        with:
+          version: 8 # specify the pnpm version you want to use
 
       - name: Install dependencies
         run: pnpm install
@@ -25,4 +27,5 @@ jobs:
       - name: Build
         run: pnpm build
 
-      - run: pnpx pkg-pr-new publish
+      - name: Publish
+        run: pnpx pkg-pr-new publish
