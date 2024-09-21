@@ -82,6 +82,7 @@ export class NodeManager extends EventEmitter {
     /**
      * Disconnects all Nodes from lavalink ws sockets
      * @param deleteAllNodes if the nodes should also be deleted from nodeManager.nodes
+     * @param destroyPlayers if the players should be destroyed
      * @returns amount of disconnected Nodes
      */
     public async disconnectAll(deleteAllNodes = false, destroyPlayers = true) {
