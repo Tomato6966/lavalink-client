@@ -9,11 +9,15 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - run: corepack enable
+      # Remove Corepack and set up Node.js environment
       - uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: "pnpm"
+
+      # Install pnpm directly without relying on Corepack
+      - name: Install pnpm
+        run: npm install -g pnpm
 
       - name: Install dependencies
         run: pnpm install
