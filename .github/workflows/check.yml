@@ -12,7 +12,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: 'npm'  # Using 'npm' for caching
+          cache: 'false'  # Disable caching
 
       # Install pnpm globally
       - name: Install pnpm
@@ -22,9 +22,9 @@ jobs:
       - name: Verify pnpm
         run: pnpm --version
 
-      # Install dependencies without relying on a lock file
+      # Install dependencies
       - name: Install dependencies
-        run: pnpm install --no-frozen-lockfile
+        run: pnpm install
 
       - name: Build
         run: pnpm build
