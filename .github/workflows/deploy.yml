@@ -23,7 +23,7 @@ jobs:
       - name: Install, build, and upload your site
         uses: withastro/action@v3
         with:
-          path: "/docs"
+          path: .
           node-version: 20 # The specific version of Node that should be used to build your site. Defaults to 20. (optional)
           
 
