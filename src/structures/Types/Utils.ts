@@ -91,7 +91,7 @@ export type SourcesRegex = "YoutubeRegex" |
     "musicYandex" |
     "radiohost" |
     "bandcamp" |
-    "jiosaavn" | 
+    "jiosaavn" |
     "appleMusic" |
     "TwitchTv" |
     "vimeo";
@@ -502,6 +502,10 @@ export interface VoiceState {
     session_id: string;
     /** Voice Channel Id */
     channel_id: string;
+    /** Server Mute status */
+    mute: boolean;
+    /** Server Deaf status */
+    deaf: boolean;
 }
 
 /** The Base64 decodes tring by lavalink */

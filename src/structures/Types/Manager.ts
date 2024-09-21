@@ -77,6 +77,17 @@ export interface LavalinkManagerEvents {
      */
     "playerUpdate": (oldPlayerJson: PlayerJson, newPlayer: Player) => void;
 
+    /**
+     * Emitted when the player get server muted
+     * @event Manager#playerMute
+     */
+    "playerMute": (player: Player, muted: boolean) => void;
+
+    /**
+     * Emitted when the player get server deafened
+     * @event Manager#playerDeaf
+     */
+    "playerDeaf": (player: Player, deafen: boolean) => void;
 
     /**
      * SPONSORBLOCK-PLUGIN EVENT
@@ -118,7 +129,7 @@ export interface LavalinkManagerEvents {
      * @event Manager#debug
      */
     "debug": (eventKey: DebugEvents, eventData: { message: string, state: "log" | "warn" | "error", error?: Error | string, functionLayer: string }) => void;
-    
+
     /**
      * Emitted when a Lyrics line is received
      * @link https://github.com/topi314/LavaLyrics

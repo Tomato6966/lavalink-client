@@ -53,7 +53,6 @@ export enum DebugEvents {
     PlayerAutoReconnect = "PlayerAutoReconnect"
 }
 
-
 export enum DestroyReasons {
     QueueEmpty = "QueueEmpty",
     NodeDestroy = "NodeDestroy",
@@ -70,10 +69,12 @@ export enum DestroyReasons {
     TrackStuckMaxTracksErroredPerTime = "TrackStuckMaxTracksErroredPerTime",
 };
 
+export enum DisconnectReasons {
+    Disconnected = "Disconnected",
+    DisconnectAllNodes = "DisconnectAllNodes",
+}
 
 export const validSponsorBlocks = ["sponsor", "selfpromo", "interaction", "intro", "outro", "preview", "music_offtopic", "filler"];
-
-
 
 /**  The audio Outputs Data map declaration */
 export const audioOutputsData: Record<AudioOutputs, ChannelMixFilter> = {
@@ -102,7 +103,6 @@ export const audioOutputsData: Record<AudioOutputs, ChannelMixFilter> = {
         rightToRight: 1,
     },
 }
-
 
 export const EQList = {
     /** A Bassboost Equalizer, so high it distorts the audio */
