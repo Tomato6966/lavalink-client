@@ -11,8 +11,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
-          cache: 'false'  # Disable caching
+          node-version: 20  # No cache option
 
       # Install pnpm globally
       - name: Install pnpm
