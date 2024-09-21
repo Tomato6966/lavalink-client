@@ -1,0 +1,6 @@
+tsDocs/* linguist-vendored
+docs/* linguist-vendored
+dist/* linguist-vendored
+testBot/* linguist-vendored
+config/* linguist-vendored
+.vscode/* linguist-vendored
