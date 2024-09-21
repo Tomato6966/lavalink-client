@@ -468,7 +468,7 @@ export class MiniMap<K, V> extends Map<K, V> {
         const iter = this.entries();
         return Array.from({ length: this.size }, (): T => {
             const [key, value] = iter.next().value;
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+             
             return fn(value, key, this);
         });
     }
