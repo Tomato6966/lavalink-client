@@ -9,17 +9,21 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # Setup Node.js environment
+      # Add the configure-pages action with the enablement parameter
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v4
+        with:
+          enablement: 'true'  # This will enable GitHub Pages if it's not already enabled
+
       - uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: "pnpm"
 
-      # Install pnpm via pnpm/action-setup to ensure it's available
       - name: Setup pnpm
         uses: pnpm/action-setup@v2.3.0
         with:
-          version: 8 # specify the pnpm version you want to use
+          version: 8
 
       - name: Install dependencies
         run: pnpm install
