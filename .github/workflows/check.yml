@@ -18,9 +18,9 @@ jobs:
       - name: Install pnpm
         run: npm install -g pnpm
 
-      # Ensure pnpm is in the PATH
-      - name: Add pnpm to PATH
-        run: echo "/usr/local/bin" >> $GITHUB_PATH
+      # Verify pnpm installation
+      - name: Check pnpm version
+        run: pnpm --version
 
       - name: Install dependencies
         run: pnpm install
