@@ -5,7 +5,7 @@ import starlightTypeDoc, { typeDocSidebarGroup } from 'starlight-typedoc'
 
 // https://astro.build/config
 export default defineConfig({
-	site: 'https://appujet.github.io/lavalink-client/',
+	site: 'https://tomato6966.github.io/lavalink-client/',
 	base: '/docs',
 	integrations: [
 		starlight({
