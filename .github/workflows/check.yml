@@ -19,4 +19,6 @@ jobs:
       - name: Build
         run: npm run build
 
-      - run: npm run pkg-pr-new publish
+      # Replace with the actual command for publishing
+      - name: Publish
+        run: npx pkg-pr-new publish
