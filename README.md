@@ -57,9 +57,9 @@ yarn add tomato6966/lavalink-client
 
 # Documentation
 
-Check out the [Documentation](https://lc4.gitbook.io/lavalink-client) | or the [TSDocumentation](https://tomato6966.github.io/lavalink-client/) for **Examples**, and **__detailled__ Docs**, and to figure out **how to get started**. *note: it's not fully done yet (see the docs)*
-
-- __**INFO Note**__: Please use the **[TSDocumentation (auto generated, folder `/tsDocs`)](https://tomato6966.github.io/lavalink-client/)** to get the entire information of lavalink-client, *I don't have time to update the [custom written gitbook-documentation](https://lc4.gitbook.io/lavalink-client) (folder `/docs`, feel free to update it)*
+Check out the [Documentation](https://tomato6966.github.io/lavalink-client/)
+- See all [Manager-Events, e.g. for Track / player and general errors / logs](https://tomato6966.github.io/lavalink-client/interfaces/Types_Manager.LavalinkManagerEvents.html)
+- See all [NodeManager-Events e.g. for Node Errors / logs](https://tomato6966.github.io/lavalink-client/interfaces/Types_Node.NodeManagerEvents.html)
 
 # Used in:
 
@@ -740,3 +740,11 @@ if(previousTrack) {
     - **` lavalink.on("LyricsLine", (player, track, lyricsLine) => {}); `**
     - **` lavalink.on("LyricsFound", (player, track, data) => {}); `**
     - **` lavalink.on("LyricsNotFound", (player, track, lyricsLine) => {}); `**
+
+
+## **Version 2.4.0**
+- Refactored a little the project folder Structure
+- Added PR Packages to install all commits / packages at once `https://pkg.pr.new/Tomato6966/lavalink-client`
+- Removed the dist folder, and added prepare Scripts
+- Added attributes for git linting
+- Removed the old (gitbook) documentation, and swapped it to a NEW TSDOC Themed Documentation

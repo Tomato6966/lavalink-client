@@ -1,20 +1,31 @@
 {
   "name": "lavalink-client",
-  "version": "2.3.6",
+  "version": "2.4.0",
   "description": "Easy, flexible and feature-rich lavalink@v4 Client. Both for Beginners and Proficients.",
   "main": "dist/cjs/index.js",
   "module": "dist/esm/index.js",
   "types": "dist/types/index.d.js",
   "scripts": {
-    "build": "npm run build:cjs && npm run build:esm && npm run build:types",
-    "build:cjs": "node tools/cleanup cjs && tsc -p config/tsconfig.cjs.json && tsc-alias -p config/tsconfig.cjs.json && node tools/fixup cjs",
-    "build:esm": "node tools/cleanup esm && tsc -p config/tsconfig.esm.json && tsc-alias -p config/tsconfig.esm.json && node tools/fixup esm",
-    "build:types": "node tools/cleanup types && tsc -p config/tsconfig.types.json && tsc-alias -p config/tsconfig.types.json",
-    "clean": "node tools/cleanup",
+
+    "build": "npm run tool:clean && npm run build:all && npm run tool:fixbuild",
+
+    "build:all": "npm run build:cjs && npm run build:esm && npm run build:types",
+    "build:cjs": "tsc -p tools/config/tsconfig.cjs.json && tsc-alias -p tools/config/tsconfig.cjs.json",
+    "build:esm": "tsc -p tools/config/tsconfig.esm.json && tsc-alias -p tools/config/tsconfig.esm.json",
+    "build:types": "tsc -p tools/config/tsconfig.types.json && tsc-alias -p tools/config/tsconfig.types.json",
+
+    "tool:clean": "node tools/cleanup.js",
+    "tool:fixbuild": "node tools/fixup.js",
+
     "lint": "eslint .",
     "lint:fix": "npm run lint -- --fix",
+
     "test": "node -v",
-    "docs": "npx typedoc"
+
+    "docs": "npx typedoc",
+
+    "prepublishOnly": "npm run build",
+    "prepare": "npm run build"
   },
   "exports": {
     "require": "./dist/cjs/index.js",
@@ -60,11 +71,11 @@
     "eslint": "^8.47.0",
     "tsc-alias": "^1.8.10",
     "typedoc": "^0.25.4",
-    "typedoc-theme-hierarchy": "^4.1.2",
     "typescript": "^5.1.6"
   },
   "dependencies": {
     "tslib": "^2.6.1",
+    "typedoc-material-theme": "^1.1.0",
     "ws": "^8.13.0"
   },
   "engines": {
