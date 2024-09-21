@@ -441,6 +441,13 @@ export class FilterManager {
         return this.filters.lowPass;
     }
     lavalinkLavaDspxPlugin = {
+
+        /**
+         * Enables / Disables the LowPass effect, (Optional: provide your Own Data)
+         * @param boostFactor
+         * @param cutoffFrequency
+         * @returns
+         */
         toggleLowPass: async (boostFactor = 1.0, cutoffFrequency = 80): Promise<boolean> => {
             if (this.player.node.info && !this.player.node.info?.plugins?.find(v => v.name === "lavadspx-plugin")) throw new Error("Node#Info#plugins does not include the lavadspx plugin")
             if (this.player.node.info && !this.player.node.info?.filters?.includes("low-pass")) throw new Error("Node#Info#filters does not include the 'low-pass' Filter (Node has it not enable)")
@@ -460,6 +467,13 @@ export class FilterManager {
             await this.applyPlayerFilters();
             return this.filters.lavalinkLavaDspxPlugin.lowPass;
         },
+
+        /**
+         * Enables / Disables the HighPass effect, (Optional: provide your Own Data)
+         * @param boostFactor
+         * @param cutoffFrequency
+         * @returns
+         */
         toggleHighPass: async (boostFactor = 1.0, cutoffFrequency = 80): Promise<boolean> => {
             if (this.player.node.info && !this.player.node.info?.plugins?.find(v => v.name === "lavadspx-plugin")) throw new Error("Node#Info#plugins does not include the lavadspx plugin")
             if (this.player.node.info && !this.player.node.info?.filters?.includes("high-pass")) throw new Error("Node#Info#filters does not include the 'high-pass' Filter (Node has it not enable)")
@@ -479,7 +493,14 @@ export class FilterManager {
             await this.applyPlayerFilters();
             return this.filters.lavalinkLavaDspxPlugin.highPass;
         },
-        toggleNormalization: async (maxAmplitude = 0.75, adaptive: boolean = true): Promise<boolean> => {
+
+        /**
+         * Enables / Disables the Normalization effect.
+         * @param {number} [maxAmplitude=0.75] - The maximum amplitude of the audio.
+         * @param {boolean} [adaptive=true] - Whether to use adaptive normalization or not.
+         * @returns {Promise<boolean>} - The state of the filter after execution.
+         */
+        toggleNormalization: async (maxAmplitude: number = 0.75, adaptive: boolean = true): Promise<boolean> => {
             if (this.player.node.info && !this.player.node.info?.plugins?.find(v => v.name === "lavadspx-plugin")) throw new Error("Node#Info#plugins does not include the lavadspx plugin")
             if (this.player.node.info && !this.player.node.info?.filters?.includes("normalization")) throw new Error("Node#Info#filters does not include the 'normalization' Filter (Node has it not enable)")
 
@@ -498,7 +519,14 @@ export class FilterManager {
             await this.applyPlayerFilters();
             return this.filters.lavalinkLavaDspxPlugin.normalization;
         },
-        toggleEcho: async (decay = 0.5, echoLength = 0.5): Promise<boolean> => {
+
+        /**
+         * Enables / Disables the Echo effect, IMPORTANT! Only works with the correct Lavalink Plugin installed. (Optional: provide your Own Data)
+         * @param {number} [decay=0.5] - The decay of the echo effect.
+         * @param {number} [echoLength=0.5] - The length of the echo effect.
+         * @returns {Promise<boolean>} - The state of the filter after execution.
+         */
+        toggleEcho: async (decay: number = 0.5, echoLength: number = 0.5): Promise<boolean> => {
             if (this.player.node.info && !this.player.node.info?.plugins?.find(v => v.name === "lavadspx-plugin")) throw new Error("Node#Info#plugins does not include the lavadspx plugin")
             if (this.player.node.info && !this.player.node.info?.filters?.includes("echo")) throw new Error("Node#Info#filters does not include the 'echo' Filter (Node has it not enable)")
 
