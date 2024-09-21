@@ -20,7 +20,18 @@ jobs:
     steps:
       - name: Checkout your repository using git
         uses: actions/checkout@v4
-      - name: Install, build, and upload your site
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: yarn install --no-frozen-lockfile
+
+      - name: Build
+        run: yarn run build
+        
+      - name: Deploy to GitHub Pages
         uses: withastro/action@v3
         with:
           path: ./docs
