@@ -413,7 +413,6 @@ export class MiniMap extends Map {
         const iter = this.entries();
         return Array.from({ length: this.size }, () => {
             const [key, value] = iter.next().value;
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
             return fn(value, key, this);
         });
     }

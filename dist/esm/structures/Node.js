@@ -295,7 +295,6 @@ export class LavalinkNode {
         this.syncPlayerData(data);
         const res = await this.request(`/sessions/${this.sessionId}/players/${data.guildId}`, r => {
             r.method = "PATCH";
-            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             r.headers["Content-Type"] = "application/json";
             r.body = JSON.stringify(data.playerOptions);
             if (data.noReplace) {
@@ -581,7 +580,6 @@ export class LavalinkNode {
             return await this.request(`/decodetracks`, r => {
                 r.method = "POST";
                 r.body = JSON.stringify(encodeds);
-                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
                 r.headers["Content-Type"] = "application/json";
             }).then((r) => r.map(track => this.NodeManager.LavalinkManager.utils.buildTrack(track, requester)));
         }
@@ -758,7 +756,6 @@ export class LavalinkNode {
                 throw new Error("the Lavalink-Node is either not ready, or not up to date!");
             await this.request(`/routeplanner/free/address`, r => {
                 r.method = "POST";
-                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
                 r.headers["Content-Type"] = "application/json";
                 r.body = JSON.stringify({ address });
             });
@@ -777,7 +774,6 @@ export class LavalinkNode {
                 throw new Error("the Lavalink-Node is either not ready, or not up to date!");
             return await this.request(`/routeplanner/free/all`, r => {
                 r.method = "POST";
-                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
                 r.headers["Content-Type"] = "application/json";
             });
         }
