@@ -19,6 +19,7 @@ jobs:
       - name: Build
         run: npm run build
 
-      # Replace with the actual command for publishing
       - name: Publish
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: npx pkg-pr-new publish
