@@ -9,27 +9,21 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # Add the configure-pages action with the enablement parameter
-      - name: Configure GitHub Pages
-        uses: actions/configure-pages@v4
-        with:
-          enablement: 'true'  # This will enable GitHub Pages if it's not already enabled
+      # Install Bun
+      - name: Install Bun
+        run: curl -fsSL https://bun.sh/install | bash
 
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: "pnpm"
+      # Add Bun to PATH
+      - name: Set up PATH
+        run: echo "$HOME/.bun/bin" >> $GITHUB_PATH
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v2.3.0
-        with:
-          version: 8
-
+      # Install dependencies
       - name: Install dependencies
-        run: pnpm install
+        run: bun install
 
+      # Build the project
       - name: Build
-        run: pnpm build
+        run: bun build
 
-      - name: Publish
-        run: pnpx pkg-pr-new publish
+      # Publish the project
+      - run: bun pkg-pr-new publish
