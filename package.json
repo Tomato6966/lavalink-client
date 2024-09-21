@@ -7,22 +7,15 @@
   "types": "dist/types/index.d.js",
   "scripts": {
     "build": "npm run tool:clean && npm run build:all && npm run tool:fixbuild",
-
     "build:all": "npm run build:cjs && npm run build:esm && npm run build:types",
     "build:cjs": "tsc -p tools/config/tsconfig.cjs.json && tsc-alias -p tools/config/tsconfig.cjs.json",
     "build:esm": "tsc -p tools/config/tsconfig.esm.json && tsc-alias -p tools/config/tsconfig.esm.json",
     "build:types": "tsc -p tools/config/tsconfig.types.json && tsc-alias -p tools/config/tsconfig.types.json",
-
     "tool:clean": "node tools/cleanup.js",
     "tool:fixbuild": "node tools/fixup.js",
-
     "lint": "eslint .",
     "lint:fix": "npm run lint -- --fix",
-
     "test": "node -v",
-
-    "docs": "npx typedoc",
-
     "prepublishOnly": "npm run build",
     "prepare": "npm run build"
   },
@@ -71,12 +64,12 @@
     "@typescript-eslint/parser": "^8.6.0",
     "eslint": "^9.11.0",
     "tsc-alias": "^1.8.10",
-    "typedoc": "^0.26.7",
-    "typedoc-material-theme": "^1.1.0",
     "typescript": "^5.6.2"
   },
   "dependencies": {
+    "starlight-typedoc": "^0.16.0",
     "tslib": "^2.7.0",
+    "typedoc-plugin-markdown": "^4.2.7",
     "ws": "^8.18.0"
   },
   "engines": {
