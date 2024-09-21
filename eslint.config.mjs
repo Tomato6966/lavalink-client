@@ -13,39 +13,39 @@ const compat = new FlatCompat({
     allConfig: js.configs.all
 });
 
-export default [{
-    ignores: [
-        "**/config",
-        "**/dist",
-        "**/docs",
-        "**/node_modules",
-        "**/testBot",
-        "**/tsDocs",
-        "**/tools",
-        "**/.*.js",
-        "**/.*.mjs",
-        "**/.*.ts",
-    ],
-}, ...compat.extends("plugin:@typescript-eslint/recommended"), {
-    plugins: {
-        "@typescript-eslint": typescriptEslint,
+
+export default [
+    {
+        ignores: [
+            "**/config",
+            "**/dist",
+            "**/docs",
+            "**/node_modules",
+            "**/testBot",
+            "**/tools",
+            "eslint.config.mjs",
+        ],
     },
-
-    languageOptions: {
-        globals: {},
-        parser: tsParser,
-        ecmaVersion: "latest",
-        sourceType: "module",
-
-        parserOptions: {
-            project: "tsconfig.json",
+    ...compat.extends("plugin:@typescript-eslint/recommended"),
+    {
+        plugins: {
+            "@typescript-eslint": typescriptEslint,
         },
-    },
-
-    rules: {
-        "@typescript-eslint/consistent-type-imports": "error",
-        "@typescript-eslint/no-explicit-any": 1,
-        "@typescript-eslint/no-unsafe-declaration-merging": 1,
-        "@typescript-eslint/no-unused-vars": 1,
-    },
-}];
+        languageOptions: {
+            globals: {},
+            parser: tsParser,
+            ecmaVersion: "latest",
+            sourceType: "module",
+            parserOptions: {
+                project: true,
+                tsconfigRootDir: __dirname,
+            },
+        },
+        rules: {
+            "@typescript-eslint/consistent-type-imports": "error",
+            "@typescript-eslint/no-explicit-any": 1,
+            "@typescript-eslint/no-unsafe-declaration-merging": 1,
+            "@typescript-eslint/no-unused-vars": 1,
+        },
+    }
+];
