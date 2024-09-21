@@ -9,21 +9,15 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # Install Bun
-      - name: Install Bun
-        run: curl -fsSL https://bun.sh/install | bash
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "npm"
 
-      # Add Bun to PATH
-      - name: Set up PATH
-        run: echo "$HOME/.bun/bin" >> $GITHUB_PATH
-
-      # Install dependencies
       - name: Install dependencies
-        run: bun install
+        run: npm install
 
-      # Build the project with the specified entry point
       - name: Build
-        run: bun build src/index.ts
+        run: npm run build
 
-      # Publish the project
-      - run: bun pkg-pr-new publish
+      - run: npm run pkg-pr-new publish
