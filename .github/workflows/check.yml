@@ -21,9 +21,9 @@ jobs:
       - name: Install dependencies
         run: bun install
 
-      # Build the project
+      # Build the project with the specified entry point
       - name: Build
-        run: bun build
+        run: bun build src/index.ts
 
       # Publish the project
       - run: bun pkg-pr-new publish
