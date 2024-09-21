@@ -2,31 +2,15 @@ name: Publish Any Commit
 on: [push, pull_request]
 
 jobs:
-  build:
+  publish:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - uses: actions/setup-node@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
-          node-version: 20  # No cache option
-
-      # Install pnpm globally
-      - name: Install pnpm
-        run: npm install -g pnpm
-
-      # Verify pnpm installation
-      - name: Verify pnpm
-        run: pnpm --version
-
-      # Install dependencies
-      - name: Install dependencies
-        run: pnpm install
-
-      - name: Build
-        run: pnpm build
-
+          node-version: 20
       - name: Publish
-        run: pnpx pkg-pr-new publish
+        run: npx --yes pkg-pr-new publish
