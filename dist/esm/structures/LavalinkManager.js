@@ -89,9 +89,9 @@ export class LavalinkManager extends EventEmitter {
                 volumeDecrementer: options?.playerOptions?.volumeDecrementer ?? 1,
                 requesterTransformer: options?.playerOptions?.requesterTransformer ?? null,
                 useUnresolvedData: options?.playerOptions?.useUnresolvedData ?? false,
-                minAutoPlayMs: options?.playerOptions?.minAutoPlayMs ?? 10_000,
+                minAutoPlayMs: options?.playerOptions?.minAutoPlayMs ?? 10000,
                 maxErrorsPerTime: {
-                    threshold: options?.playerOptions?.maxErrorsPerTime?.threshold ?? 35_000,
+                    threshold: options?.playerOptions?.maxErrorsPerTime?.threshold ?? 35000,
                     maxAmount: options?.playerOptions?.maxErrorsPerTime?.maxAmount ?? 3
                 }
             },
@@ -108,7 +108,7 @@ export class LavalinkManager extends EventEmitter {
             },
             advancedOptions: {
                 enableDebugEvents: options?.advancedOptions?.enableDebugEvents ?? false,
-                maxFilterFixDuration: options?.advancedOptions?.maxFilterFixDuration ?? 600_000,
+                maxFilterFixDuration: options?.advancedOptions?.maxFilterFixDuration ?? 600000,
                 debugOptions: {
                     logCustomSearches: options?.advancedOptions?.debugOptions?.logCustomSearches ?? false,
                     noAudio: options?.advancedOptions?.debugOptions?.noAudio ?? false,

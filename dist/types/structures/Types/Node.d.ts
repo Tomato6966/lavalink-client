@@ -1,3 +1,4 @@
+/// <reference types="node" />
 import type internal from "stream";
 import type { LavalinkNode } from "../Node";
 import type { DestroyReasonsType } from "./Player";

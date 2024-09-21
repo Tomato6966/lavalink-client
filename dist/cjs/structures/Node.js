@@ -78,7 +78,7 @@ class LavalinkNode {
             retryAmount: 5,
             retryDelay: 10e3,
             requestSignalTimeoutMS: 10000,
-            heartBeatInterval: 30_000,
+            heartBeatInterval: 30000,
             closeOnError: true,
             enablePingOnStatsCheck: true,
             ...options
@@ -299,6 +299,7 @@ class LavalinkNode {
         this.syncPlayerData(data);
         const res = await this.request(`/sessions/${this.sessionId}/players/${data.guildId}`, r => {
             r.method = "PATCH";
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
             r.headers["Content-Type"] = "application/json";
             r.body = JSON.stringify(data.playerOptions);
             if (data.noReplace) {
@@ -402,7 +403,7 @@ class LavalinkNode {
             }
             this.isAlive = false;
             this.socket.terminate();
-        }, 65_000); // the stats endpoint get's sent every 60s. se wee add a 5s buffer to make sure we don't miss any stats message
+        }, 65000); // the stats endpoint get's sent every 60s. se wee add a 5s buffer to make sure we don't miss any stats message
     }
     /**
      * Get the id of the node
@@ -584,6 +585,7 @@ class LavalinkNode {
             return await this.request(`/decodetracks`, r => {
                 r.method = "POST";
                 r.body = JSON.stringify(encodeds);
+                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
                 r.headers["Content-Type"] = "application/json";
             }).then((r) => r.map(track => this.NodeManager.LavalinkManager.utils.buildTrack(track, requester)));
         }
@@ -760,6 +762,7 @@ class LavalinkNode {
                 throw new Error("the Lavalink-Node is either not ready, or not up to date!");
             await this.request(`/routeplanner/free/address`, r => {
                 r.method = "POST";
+                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
                 r.headers["Content-Type"] = "application/json";
                 r.body = JSON.stringify({ address });
             });
@@ -778,6 +781,7 @@ class LavalinkNode {
                 throw new Error("the Lavalink-Node is either not ready, or not up to date!");
             return await this.request(`/routeplanner/free/all`, r => {
                 r.method = "POST";
+                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
                 r.headers["Content-Type"] = "application/json";
             });
         }
@@ -927,7 +931,7 @@ class LavalinkNode {
                 this.isAlive = false;
                 this.heartBeatPingTimestamp = performance.now();
                 this.socket.ping();
-            }, this.options.heartBeatInterval || 30_000);
+            }, this.options.heartBeatInterval || 30000);
         }
         if (this.reconnectTimeout)
             clearTimeout(this.reconnectTimeout);
@@ -1003,7 +1007,7 @@ class LavalinkNode {
                     player.ping.ws = payload.state.ping >= 0 ? payload.state.ping : player.ping.ws <= 0 && player.connected ? null : player.ping.ws || 0;
                     if (!player.createdTimeStamp && payload.state.time)
                         player.createdTimeStamp = payload.state.time;
-                    if (player.filterManager.filterUpdatedState === true && ((player.queue.current?.info?.duration || 0) <= (player.LavalinkManager.options.advancedOptions.maxFilterFixDuration || 600_000) || (0, path_1.isAbsolute)(player.queue.current?.info?.uri))) {
+                    if (player.filterManager.filterUpdatedState === true && ((player.queue.current?.info?.duration || 0) <= (player.LavalinkManager.options.advancedOptions.maxFilterFixDuration || 600000) || (0, path_1.isAbsolute)(player.queue.current?.info?.uri))) {
                         player.filterManager.filterUpdatedState = false;
                         if (this.NodeManager.LavalinkManager.options?.advancedOptions?.enableDebugEvents) {
                             this.NodeManager.LavalinkManager.emit("debug", Constants_1.DebugEvents.PlayerUpdateFilterFixApply, {
