@@ -1063,7 +1063,13 @@ export class LavalinkNode {
         if (Array.isArray(d)) d = Buffer.concat(d);
         else if (d instanceof ArrayBuffer) d = Buffer.from(d);
 
-        const payload = JSON.parse(d.toString());
+        let payload;
+        try {
+            payload = JSON.parse(d.toString());
+        } catch (e) {
+            this.NodeManager.emit("error", this, e);
+            return;
+        }
 
         if (!payload.op) return;
 
