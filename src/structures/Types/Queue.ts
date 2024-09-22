@@ -3,20 +3,20 @@ import type { Track, UnresolvedTrack } from "./Track";
 export interface StoredQueue {
     current: Track | null;
     previous: Track[];
-    tracks: (Track|UnresolvedTrack)[];
+    tracks: (Track | UnresolvedTrack)[];
 }
 
-export interface QueueStoreManager extends Record<string, any> {
+export interface QueueStoreManager {
     /** @async get a Value (MUST RETURN UNPARSED!) */
-    get: (guildId: unknown) => Promise<unknown>;
+    get: (guildId: string) => Promise<StoredQueue | string>;
     /** @async Set a value inside a guildId (MUST BE UNPARSED) */
-    set: (guildId: unknown, value: unknown) => Promise<unknown>;
+    set: (guildId: string, value: StoredQueue | string) => Promise<void | boolean>;
     /** @async Delete a Database Value based of it's guildId */
-    delete: (guildId: unknown) => Promise<unknown>;
+    delete: (guildId: string) => Promise<void | boolean>;
     /** @async Transform the value(s) inside of the QueueStoreManager (IF YOU DON'T NEED PARSING/STRINGIFY, then just return the value) */
-    stringify: (value: unknown) => Promise<unknown>;
+    stringify: (value: StoredQueue | string) => Promise<StoredQueue |string>;
     /** @async Parse the saved value back to the Queue (IF YOU DON'T NEED PARSING/STRINGIFY, then just return the value) */
-    parse: (value: unknown) => Promise<Partial<StoredQueue>>;
+    parse: (value: StoredQueue | string) => Promise<Partial<StoredQueue>>;
 }
 
 export interface ManagerQueueOptions {
@@ -27,7 +27,6 @@ export interface ManagerQueueOptions {
     /** Custom Queue Watcher class */
     queueChangesWatcher?: QueueChangesWatcher;
 }
-
 
 export interface QueueChangesWatcher {
     /** get a Value (MUST RETURN UNPARSED!) */
