@@ -12,10 +12,9 @@ jobs:
         uses: oven-sh/setup-bun@v2
         with:
           bun-version: 1.1.27
-          package-manager: bun
 
       - name: Install dependencies
-        run: bun install --no-frozen-lockfile
+        run: bun install --no-frozen-lockfile --save-dev pkg-pr-new
 
       - name: Build
         run: bun run build:bun
