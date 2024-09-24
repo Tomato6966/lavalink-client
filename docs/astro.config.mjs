@@ -5,7 +5,7 @@ import starlightTypeDoc, { typeDocSidebarGroup } from "starlight-typedoc"
 
 // https://astro.build/config
 export default defineConfig({
-	site: "https://tomato6966.github.io",
+	site: "https://tomato6966.github.io/",
 	base: "lavalink-client",
 	integrations: [
 		starlight({
@@ -43,27 +43,27 @@ export default defineConfig({
 					items: [
 						{
 							label: "installation",
-							link: "/lavalink-client/home/installation",
+							link: "/home/installation",
 						},
 						{
 							label: "Setup Lavalink-Server",
-							link: "/lavalink-client/home/setup-lavalink",
+							link: "/home/setup-lavalink",
 						},
 						{
 							label: "Features",
-							link: "/lavalink-client/home/features",
+							link: "/home/features",
 						},
 						{
 							label: "Example Guides",
-							link: "/lavalink-client/home/example",
+							link: "/home/example",
 						},
 						{
 							label: "Sample Configuration",
-							link: "/lavalink-client/home/configuration",
+							link: "/home/configuration",
 						},
                         {
                             label: "Checkout Docs (Manager-Class)",
-                            link: "/lavalink-client/api/lavalinkmanager/classes/lavalinkmanager"
+                            link: "/api/lavalinkmanager/classes/lavalinkmanager"
                         },
 					],
 				},
@@ -73,19 +73,19 @@ export default defineConfig({
 					items: [
 						{
 							label: "Manager Events",
-							link: "/lavalink-client/extra/manager-events",
+							link: "/extra/manager-events",
 						},
 						{
 							label: "Node Events",
-							link: "/lavalink-client/extra/node-events",
+							link: "/extra/node-events",
 						},
 						{
 							label: "Resuming",
-							link: "/lavalink-client/extra/resuming",
+							link: "/extra/resuming",
 						},
 						{
 							label: "Version-Update-Log",
-							link: "/lavalink-client/extra/version-log",
+							link: "/extra/version-log",
 						}
 					]
 				},
