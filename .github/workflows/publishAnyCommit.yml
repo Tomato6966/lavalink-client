@@ -13,11 +13,9 @@ jobs:
         with:
           bun-version: 1.1.27
 
-      - name: Install dependencies
+# build happens automatically because of prepare script in package.json
+      - name: Install dependencies and build
         run: bun install --no-frozen-lockfile --save-dev pkg-pr-new
-
-      - name: Build
-        run: bun run build:bun
 
       - name: Publish
         run: bun --yes pkg-pr-new publish
