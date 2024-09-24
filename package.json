@@ -8,6 +8,9 @@
   "scripts": {
     "build": "npm run tool:clean && npm run build:all && npm run tool:fixbuild",
 
+    "build:bun": "bun run tool:clean && bun run build:all:bun && bun run tool:fixbuild",
+    "build:all:bun": "bun run build:cjs && bun run build:esm && bun run build:types",
+
     "build:all": "npm run build:cjs && npm run build:esm && npm run build:types",
     "build:cjs": "tsc -p tools/config/tsconfig.cjs.json && tsc-alias -p tools/config/tsconfig.cjs.json",
     "build:esm": "tsc -p tools/config/tsconfig.esm.json && tsc-alias -p tools/config/tsconfig.esm.json",
@@ -20,8 +23,6 @@
     "lint:fix": "npm run lint -- --fix",
 
     "test": "node -v",
-
-    "docs": "npx typedoc",
 
     "prepublishOnly": "npm run build",
     "prepare": "npm run build"

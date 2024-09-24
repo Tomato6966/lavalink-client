@@ -1,12 +1,8 @@
 name: Deploy to GitHub Pages
 
 on:
-  # Trigger the workflow every time you push to the `main` branch
-  # Using a different branch name? Replace `main` with your branch’s name
   push:
-    branches: [ cleanup-everything-new-docs ] # for now only 
-  # Allows you to run this workflow manually from the Actions tab on GitHub.
-  workflow_dispatch:
+    branches: [ main ]
 
 # Allow this job to clone the repo and create a page deployment
 permissions:
@@ -20,19 +16,24 @@ jobs:
     steps:
       - name: Checkout your repository using git
         uses: actions/checkout@v4
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - name: Setup Bun.js
+        uses: oven-sh/setup-bun@v2
         with:
-          node-version: 20
+          bun-version: 1.1.27
+          package-manager: bun
       - name: Install dependencies
-        run: npm install --no-frozen-lockfile
-        
+        run: bun install --no-frozen-lockfile
+        with:
+          path: ./docs
+          bun-version: 1.1.27
+          package-manager: bun
+
       - name: Deploy to GitHub Pages with Astro
         uses: withastro/action@v3
         with:
           path: ./docs
-          node-version: 20 # The specific version of Node that should be used to build your site. Defaults to 20. (optional)
-          package-manager: npm
+          bun-version: 1.1.27
+          package-manager: bun
 
   deploy:
     needs: build
