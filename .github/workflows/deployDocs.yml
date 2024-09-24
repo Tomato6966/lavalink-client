@@ -3,8 +3,8 @@ name: Deploy to GitHub Pages
 on:
   push:
     branches: [ main ]
+  workflow_dispatch:
 
-# Allow this job to clone the repo and create a page deployment
 permissions:
   contents: read
   pages: write
@@ -16,22 +16,11 @@ jobs:
     steps:
       - name: Checkout your repository using git
         uses: actions/checkout@v4
-      - name: Setup Bun.js
-        uses: oven-sh/setup-bun@v2
-        with:
-          bun-version: 1.1.27
-      - name: Install dependencies
-        run: bun install --no-frozen-lockfile
-        with:
-          path: ./docs
-          bun-version: 1.1.27
-
-      - name: Deploy to GitHub Pages with Astro
+      - name: Install, build, and upload your site
         uses: withastro/action@v3
         with:
           path: ./docs
-          bun-version: 1.1.27
-
+          package-manager: bun
   deploy:
     needs: build
     runs-on: ubuntu-latest
