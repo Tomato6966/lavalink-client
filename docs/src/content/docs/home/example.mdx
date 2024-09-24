@@ -1,0 +1,199 @@
+---
+title: Example Guide
+description: Learn how to use the lavalink@v4 Client.
+---
+
+
+```ts
+import { LavalinkManager } from "lavalink-client";
+import { Client, GatewayIntentBits } from "discord.js"; // example for a discord bot
+
+// you might want to extend the types of the client, to bind lavalink to it.
+const client = new Client({
+    intents: [
+        GatewayIntentBits.Guilds,
+        GatewayIntentBits.GuildVoiceStates,
+    ]
+});
+
+// create instance
+client.lavalink = new LavalinkManager({
+    nodes: [
+        {
+            authorization: "youshallnotpass",
+            host: "localhost",
+            port: 2333,
+            id: "testnode",
+        }
+    ],
+    sendToShard: (guildId, payload) => client.guilds.cache.get(guildId)?.shard?.send(payload),
+    autoSkip: true,
+    client: {
+        id: envConfig.clientId,
+        username: "TESTBOT",
+    },
+});
+
+client.on("raw", d => client.lavalink.sendRawData(d)); // send raw data to lavalink-client to handle stuff
+
+client.on("ready", () => {
+    client.lavalink.init(client.user); // init lavalink
+});
+
+```
+
+# All Events:
+
+## On **Lavalink-Manager**:
+> *Player related logs*
+- `playerCreate` ➡️ `(player) => {}`
+- `playerDestroy` ➡️ `(player, reason) => {}`
+- `playerDisconnect` ➡️ `(player, voiceChannelId) => {}`
+- `playerMove` ➡️ `(player, oldChannelId, newChannelId) => {}`
+  - Updating the voice channel is handled by the client automatically
+- `playerSocketClosed` ➡️ `(player, payload) => {}`
+
+> *Track / Manager related logs*
+- `trackStart` ➡️ `(player, track, payload) => {}`
+- `trackStuck` ➡️ `(player, track, payload) => {}`
+- `trackError` ➡️ `(player, track, payload) => {}`
+- `trackEnd` ➡️ `(player, track, payload) => {}`
+- `queueEnd` ➡️ `(player, track, payload) => {}`
+- `playerUpdate` ➡️ `(player) => {}`
+
+```js
+client.lavalink.on("create", (node, payload) => {
+  console.log(`The Lavalink Node #${node.id} connected`);
+});
+// for all node based errors:
+client.lavalink.on("error", (node, error, payload) => {
+  console.error(`The Lavalink Node #${node.id} errored: `, error);
+  console.error(`Error-Payload: `, payload)
+});
+```
+
+## On **Node-Manager**:
+- `raw` ➡️ `(node, payload) => {}`
+- `disconnect` ➡️ `(node, reason) => {}`
+- `connect` ➡️ `(node) => {}`
+- `reconnecting` ➡️ `(node) => {}`
+- `create` ➡️ `(node) => {}`
+- `destroy` ➡️ `(node) => {}`
+- `error` ➡️ `(node, error, payload) => {}`
+- `resumed` ➡️ `(node, payload, players) => {}`
+  - Resuming needs to be handled manually by you *(aka add the players to the manager)*
+- e.g. of listening to node events:
+```ts
+client.lavalink.nodeManager.on("create", (node, payload) => {
+  console.log(`The Lavalink Node #${node.id} connected`);
+});
+// for all node based errors:
+client.lavalink.nodeManager.on("error", (node, error, payload) => {
+  console.error(`The Lavalink Node #${node.id} errored: `, error);
+  console.error(`Error-Payload: `, payload)
+});
+```
+
+## How to log queue logs?
+> When creating the manager, add the option: `queueOptions.queueChangesWatcher: new myCustomWatcher(botClient)`
+> E.g:
+```ts
+import { QueueChangesWatcher, LavalinkManager } from "lavalink-client";
+
+class myCustomWatcher implements QueueChangesWatcher {
+    constructor(client) {
+        this.client = client;
+    }
+    shuffled(guildId, oldStoredQueue, newStoredQueue) {
+        console.log(`${this.client.guilds.cache.get(guildId)?.name || guildId}: Queue got shuffled`)
+    }
+    tracksAdd(guildId, tracks, position, oldStoredQueue, newStoredQueue) {
+        console.log(`${this.client.guilds.cache.get(guildId)?.name || guildId}: ${tracks.length} Tracks got added into the Queue at position #${position}`);
+    }
+    tracksRemoved(guildId, tracks, position, oldStoredQueue, newStoredQueue) {
+        console.log(`${this.client.guilds.cache.get(guildId)?.name || guildId}: ${tracks.length} Tracks got removed from the Queue at position #${position}`);
+    }
+}
+
+client.lavalink = new LavalinkManager({
+  // ... other options
+  queueOptions: {
+    queueChangesWatcher: new myCustomWatcher(client)
+  }
+})
+```
+
+## How to do resuming
+
+1. You need to enable resuming on a __connected__ Lavalink node : **` node.updateSession(true, 360e3) `**
+2. The NodeManager#resumed event will emit when the node resumes, you retrieves all fetchedPlayers (fetched by the client), and thus all you need to do is re-create all player instances (and possibly the queues too)
+  - For that is the queuestore useful
+  - To save the playerData you can utilize smt like playerUpdate event.
+
+## Resuming full Example
+Full code sample: can be found on the [Testbot in here](https://github.com/Tomato6966/lavalink-client/blob/main/testBot/Utils/handleResuming.ts)
+```js
+// but here is the schema:
+client.lavalink.nodeManager.on("connect", (node) => node.updateSession(true, 360e3));
+client.lavalink.nodeManager.on("resumed", (node, payload, fetchedPlayers) => {
+  // create players:
+  for(const fetchedPlayer of fetchedPlayers) {
+    // fetchedPlayer is the live data from lavalink
+    // saved Player data is the config you should save in a database / file or smt
+    const savedPlayerData = await getSavedPlayerData(fetchedPlayer.guildId);
+    const player = client.lavalink.createPlayer({
+       guildId: fetchedPlayer.guildId,
+    });
+    // if lavalink says the bot got disconnected, we can skip the resuming, or force reconnect whatever you want!, here we choose to not do anything and thus delete the saved player data
+    if(!data.state.connected) {
+        console.log("skipping resuming player, because it already disconnected");
+        await deletedSavedPlayerData(data.guildId);
+        continue;
+    }
+    // now you can create the player based on the live and saved data
+    const player = client.lavalink.createPlayer({
+        guildId: data.guildId,
+        node: node.id,
+        // you need to update the volume of the player by the volume of lavalink which might got decremented by the volume decrementer
+        volume: client.lavalink.options.playerOptions?.volumeDecrementer
+        ? Math.round(data.volume / client.lavalink.options.playerOptions.volumeDecrementer)
+        : data.volume,
+        // all of the following options are needed to be provided by some sort of player saving
+        voiceChannelId: dataOfSaving.voiceChannelId,
+        textChannelId: dataOfSaving.textChannelId,
+        // all of the following options can either be saved too, or you can use pre-defined defaults
+        selfDeaf: dataOfSaving.options?.selfDeaf || true,
+        selfMute: dataOfSaving.options?.selfMute || false,
+
+        applyVolumeAsFilter: dataOfSaving.options.applyVolumeAsFilter,
+        instaUpdateFiltersFix: dataOfSaving.options.instaUpdateFiltersFix,
+        vcRegion: dataOfSaving.options.vcRegion,
+    });
+
+    // player.voice = data.voice;
+    // normally just player.voice is enough, but if you restart the entire bot, you need to create a new connection, thus call player.connect();
+    await player.connect();
+
+    player.filterManager.data = data.filters; // override the filters data
+    await player.queue.utils.sync(true, false); // get the queue data including the current track (for the requester)
+    // override the current track with the data from lavalink
+    if(data.track) player.queue.current = client.lavalink.utils.buildTrack(data.track, player.queue.current?.requester || client.user);
+    // override the position of the player
+    player.lastPosition = data.state.position;
+    player.lastPositionChange = Date.now();
+    // you can also override the ping of the player, or wait about 30s till it's done automatically
+    player.ping.lavalink = data.state.ping;
+    // important to have skipping work correctly later
+    player.paused = data.paused;
+    player.playing = !data.paused && !!data.track;
+    // That's about it
+  }
+})
+client.lavalink.on("playerUpdate", (oldPlayer, newPlayer) => { // automatically sync player data on updates. if you don'T want to save everything you can instead also just save the data on playerCreate
+    setSavedPlayerData(newPlayer.toJSON());
+});
+// delete the player again
+client.lavalink.on("playerDestroy", (player) => {
+    deleteSavedPlayerData(player.guildId);
+})
+```

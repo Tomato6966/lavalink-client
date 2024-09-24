@@ -1,0 +1,188 @@
+---
+title: Setup Lavalink Server
+description: Learn how to setup a lavalink Server
+---
+
+
+## Lavalink Server
+
+In order to use lavalink-client, you need a Lavalink Server, you can host them yourself pretty easily.
+
+For that please follow the [**official Lavalink Guide**](https://lavalink.dev/getting-started/index.html) and their information about [**how to configure it**](https://lavalink.dev/configuration/index.html)
+
+If you want to use stuff like spotify, deezer, more filters, lyrics, new youtube ... then you need to also install [**plugins (to lavalink)**](https://lavalink.dev/plugins.html)
+
+## Sample Configuration (application.yaml)
+
+This sample configuration enables several plugins for additional sources, filters and lyrics
+
+```yaml
+server:
+  port: 2333
+  address: 0.0.0.0
+lavalink:
+  server:
+    sources:
+      youtube: false # disable youtube on lavalink to use youtube-source
+    password: "youshallnotpass"
+    bufferDurationMs: 225
+    frameBufferDurationMs: 5000
+    youtubePlaylistLoadLimit: 3
+    opusEncodingQuality: 5
+    resamplingQuality: MEDIUM
+    trackStuckThresholdMs: 5000
+    playerUpdateInterval: 3
+    useSeekGhosting: true
+    youtubeSearchEnabled: true
+    soundcloudSearchEnabled: true
+    gc-warnings: true
+  plugins:
+    - dependency: "com.github.topi314.lavasrc:lavasrc-plugin:4.2.0" # LavaSrc - extra sources like deezer, spotify, etc. https://github.com/topi314/LavaSrc
+      repository: "https://maven.lavalink.dev/releases"
+    - dependency: "com.github.topi314.lavasearch:lavasearch-plugin:1.0.0" # https://github.com/topi314/LavaSearch
+      repository: "https://maven.lavalink.dev/releases"
+    - dependency: "com.dunctebot:skybot-lavalink-plugin:1.7.0" # https://github.com/DuncteBot/skybot-lavalink-plugin
+      repository: "https://maven.lavalink.dev/releases"
+    - dependency: "com.github.devoxin:lavadspx-plugin:0.0.5" # https://github.com/devoxin/LavaDSPX-Plugin
+      repository: "https://jitpack.io"
+    - dependency: "dev.lavalink.youtube:youtube-plugin:1.8.2" # https://github.com/lavalink-devs/youtube-source
+      snapshot: false
+    - dependency: "com.github.topi314.lavalyrics:lavalyrics-plugin:1.0.0" # https://github.com/topi314/LavaLyrics
+      repository: "https://maven.lavalink.dev/releases"
+    - dependency: "me.duncte123:java-lyrics-plugin:1.6.5" # https://github.com/DuncteBot/java-timed-lyrics
+      repository: "https://maven.lavalink.dev/releases"
+plugins:
+  lyrics:
+    countryCode: de
+    geniusApiKey: "<insert>"
+  lavalyrics:
+    sources:
+      - genius
+      - spotify
+      - youtube
+      - deezer
+      - yandexMusic
+  youtube:
+    enabled: true
+    oauth:
+      enabled: false
+    allowSearch: true
+    allowDirectVideoIds: true
+    allowDirectPlaylistIds: true
+    clients:
+      - "ANDROID_MUSIC"
+      - "MUSIC"
+      - "WEB"
+      - "WEBEMBEDDED"
+      - "TVHTML5EMBEDDED"
+    ANDROID_MUSIC:
+      playlistLoading: false
+      videoLoading: true
+      searching: true
+      playback: true
+    MUSIC:
+      playlistLoading: false
+      videoLoading: true
+      searching: true
+      playback: false
+    WEB:
+      playlistLoading: false
+      videoLoading: true
+      searching: true
+      playback: true
+    WEBEMBEDDED:
+      playlistLoading: false
+      videoLoading: false
+      searching: false
+      playback: true
+    TVHTML5EMBEDDED:
+      playlistLoading: false
+      videoLoading: false
+      searching: false
+      playback: true
+  lavasrc:
+    providers:
+      - "ytsearch:\"%ISRC%\""
+      - "dzisrc:%ISRC%"
+      - "ytsearch:%QUERY%"
+      - "dzsearch:%QUERY%"
+      - "scsearch:%QUERY%"
+    sources:
+      spotify: true
+      applemusic: true
+      deezer: true
+      yandexmusic: true
+      flowerytts: true
+      youtube: true
+    lyrics-sources:
+      spotify: true # Enable Spotify lyrics source
+      deezer: true # Enable Deezer lyrics source
+      youtube: true # Enable YouTube lyrics source
+      yandexMusic: true
+    spotify:
+      clientId: "<insert>"
+      clientSecret: "<insert>"
+      spDc: "<insert>"
+      countryCode: "US"
+      playlistLoadLimit: 3 # The number of pages at 100 tracks each
+      albumLoadLimit: 2 # The number of pages at 50 tracks each
+      localFiles: true
+    applemusic:
+      countryCode: "US"
+      mediaAPIToken: "<insert>"
+      playlistLoadLimit: 3 # The number of pages at 300 tracks each
+      albumLoadLimit: 3 # The number of pages at 300 tracks each
+    deezer:
+      masterDecryptionKey: "<insert>"
+    youtube:
+      countryCode: "US"
+      playlistLoadLimit: 1 # The number of pages at 100 tracks each
+      albumLoadLimit: 1 # The number of pages at 50 tracks each
+      artistLoadLimit: 1 # The number of pages at 10 tracks each
+    yandexmusic:
+      accessToken: "<insert>"
+    flowerytts:
+      voice: "Olivia" # (case-sensitive) get default voice from here https://api.flowery.pw/v1/tts/voices
+      translate: false # whether to translate the text to the native language of voice
+      silence: 0 # the silence parameter is in milliseconds. Range is 0 to 10000. The default is 0.
+      speed: 1.0 # the speed parameter is a float between 0.5 and 10. The default is 1.0. (0.5 is half speed, 2.0 is double speed, etc.)
+      audioFormat: "mp3" # supported formats are: mp3, ogg_opus, ogg_vorbis, aac, wav, and flac. Default format is mp3
+  dunctebot:
+      ttsLanguage: "en-US"
+      sources:
+        getyarn: true # www.getyarn.io
+        clypit: true # www.clyp.it
+        tts: true # speak:Words to speak
+        pornhub: true # should be self-explanatory
+        reddit: true # should be self-explanatory
+        ocremix: true # www.ocremix.org
+        tiktok: true # tiktok.com
+        mixcloud: true # mixcloud.com
+        soundgasm: true # soundgasm.net
+metrics:
+  prometheus:
+    enabled: false
+    endpoint: /metrics
+sentry:
+  dsn: ""
+  environment: ""
+logging:
+  file:
+    max-history: 5
+    max-size: 10MB
+  path: ./logs/
+  level:
+    root: DEBUG
+    lavalink: DEBUG
+  request:
+    enabled: true
+    includeClientInfo: true
+    includeHeaders: true
+    includeQueryString: true
+    includePayload: true
+    maxPayloadLength: 10000
+  logback:
+    rollingpolicy:
+      max-file-size: 10MB
+      max-history: 5
+```

@@ -1,20 +1,31 @@
 {
   "name": "lavalink-client",
-  "version": "2.3.6",
+  "version": "2.4.0",
   "description": "Easy, flexible and feature-rich lavalink@v4 Client. Both for Beginners and Proficients.",
   "main": "dist/cjs/index.js",
   "module": "dist/esm/index.js",
   "types": "dist/types/index.d.js",
   "scripts": {
-    "build": "npm run build:cjs && npm run build:esm && npm run build:types",
-    "build:cjs": "node tools/cleanup cjs && tsc -p config/tsconfig.cjs.json && tsc-alias -p config/tsconfig.cjs.json && node tools/fixup cjs",
-    "build:esm": "node tools/cleanup esm && tsc -p config/tsconfig.esm.json && tsc-alias -p config/tsconfig.esm.json && node tools/fixup esm",
-    "build:types": "node tools/cleanup types && tsc -p config/tsconfig.types.json && tsc-alias -p config/tsconfig.types.json",
-    "clean": "node tools/cleanup",
+    "build": "npm run tool:clean && npm run build:all && npm run tool:fixbuild",
+
+    "build:bun": "bun run tool:clean && bun run build:all:bun && bun run tool:fixbuild",
+    "build:all:bun": "bun run build:cjs && bun run build:esm && bun run build:types",
+
+    "build:all": "npm run build:cjs && npm run build:esm && npm run build:types",
+    "build:cjs": "tsc -p tools/config/tsconfig.cjs.json && tsc-alias -p tools/config/tsconfig.cjs.json",
+    "build:esm": "tsc -p tools/config/tsconfig.esm.json && tsc-alias -p tools/config/tsconfig.esm.json",
+    "build:types": "tsc -p tools/config/tsconfig.types.json && tsc-alias -p tools/config/tsconfig.types.json",
+
+    "tool:clean": "node tools/cleanup.js",
+    "tool:fixbuild": "node tools/fixup.js",
+
     "lint": "eslint .",
     "lint:fix": "npm run lint -- --fix",
+
     "test": "node -v",
-    "docs": "npx typedoc"
+
+    "prepublishOnly": "npm run build",
+    "prepare": "npm run build"
   },
   "exports": {
     "require": "./dist/cjs/index.js",
@@ -51,7 +62,7 @@
   "bugs": {
     "url": "https://github.com/tomato6966/lavalink-client/issues"
   },
-  "homepage": "https://lc4.gitbook.io/lavalink-client/",
+  "homepage": "https://tomato6966.github.io/lavalink-client/",
   "devDependencies": {
     "@eslint/eslintrc": "^3.1.0",
     "@eslint/js": "^9.11.0",
@@ -61,8 +72,6 @@
     "@typescript-eslint/parser": "^8.6.0",
     "eslint": "^9.11.0",
     "tsc-alias": "^1.8.10",
-    "typedoc": "^0.26.7",
-    "typedoc-theme-hierarchy": "^5.0.3",
     "typescript": "^5.6.2"
   },
   "dependencies": {
