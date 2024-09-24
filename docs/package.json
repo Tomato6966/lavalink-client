@@ -1,7 +1,7 @@
 {
-  "name": "docs",
+  "name": "lavalink-client-docs",
   "type": "module",
-  "version": "0.0.1",
+  "version": "2.0.0",
   "scripts": {
     "dev": "astro dev",
     "start": "astro dev",
@@ -13,6 +13,7 @@
     "@astrojs/check": "^0.9.3",
     "@astrojs/starlight": "^0.28.2",
     "astro": "^4.15.3",
+    "marked": "^14.1.2",
     "sharp": "^0.32.5",
     "starlight-typedoc": "^0.16.0",
     "typedoc": "^0.26.7",

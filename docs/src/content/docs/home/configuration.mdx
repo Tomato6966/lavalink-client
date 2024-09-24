@@ -98,8 +98,8 @@ client.lavalink = new LavalinkManager({
     }
 });
 
-
-client.on("raw", d => client.lavalink.sendRawData(d)); // send raw data to lavalink-client to handle stuff
+// IMPORTANT- Send voice data to lavalink
+client.on("raw", d => client.lavalink.sendRawData(d));
 
 client.on("ready", () => {
     client.lavalink.init(client.user); // init lavalink
@@ -111,6 +111,7 @@ client.redis.connect();
 
 
 // Custom external queue Store
+// if queueStore is not provided on default it uses MiniMap
 export class myCustomStore implements QueueStoreManager {
     private redis:RedisClientType;
     constructor(redisClient:RedisClientType) {

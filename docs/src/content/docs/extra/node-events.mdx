@@ -10,29 +10,32 @@ description: "All Events of the Lavalink Node."
 
 > *Monitor and manage Lavalink nodes:*
 
-- **`raw`** ➡️ `(node, payload) => {}`  
+- **`raw`** ➡️ `(node, payload) => {}`
   *Triggered when raw data is received from the node.*
 
-- **`disconnect`** ➡️ `(node, reason) => {}`  
+- **`disconnect`** ➡️ `(node, reason) => {}`
   *Triggered when the node disconnects. Reason for disconnection is provided.*
 
-- **`connect`** ➡️ `(node) => {}`  
+- **`connect`** ➡️ `(node) => {}`
   *Triggered when the node successfully connects.*
 
-- **`reconnecting`** ➡️ `(node) => {}`  
+- **`reconnecting`** ➡️ `(node) => {}`
   *Triggered when the node is attempting to reconnect.*
 
-- **`create`** ➡️ `(node) => {}`  
+- **`reconnectinprogress`** ➡️ `(node) => {}`
+  *Triggered when the node reconnection process started (because of NodeOptions#retryDelay).*
+
+- **`create`** ➡️ `(node) => {}`
   *Triggered when a new node is created.*
 
-- **`destroy`** ➡️ `(node) => {}`  
+- **`destroy`** ➡️ `(node) => {}`
   *Triggered when a node is destroyed.*
 
-- **`error`** ➡️ `(node, error, payload) => {}`  
+- **`error`** ➡️ `(node, error, payload) => {}`
   *Triggered when an error occurs with the node.*
 
-- **`resumed`** ➡️ `(node, payload, players) => {}`  
-  *Triggered when the node resumes.*  
+- **`resumed`** ➡️ `(node, payload, players) => {}`
+  *Triggered when the node resumes.*
   *Resuming needs to be handled manually; ensure to add the players to the manager.*
 
 ## Example: Listening to Node Events

@@ -10,43 +10,82 @@ description: "All Events of the Lavalink Manager."
 
 > *Monitor player activities and changes:*
 
-- **`playerCreate`** ➡️ `(player) => {}`  
+- **`playerCreate`** ➡️ `(player) => {}`
   *Triggered when a player is created.*
 
-- **`playerDestroy`** ➡️ `(player, reason) => {}`  
+- **`playerDestroy`** ➡️ `(player, reason) => {}`
   *Triggered when a player is destroyed. Reason for destruction provided.*
 
-- **`playerDisconnect`** ➡️ `(player, voiceChannelId) => {}`  
+- **`playerDisconnect`** ➡️ `(player, voiceChannelId) => {}`
   *Triggered when a player disconnects from a voice channel.*
 
-- **`playerMove`** ➡️ `(player, oldChannelId, newChannelId) => {}`  
-  *Triggered when a player moves from one channel to another.*  
+- **`playerMove`** ➡️ `(player, oldChannelId, newChannelId) => {}`
+  *Triggered when a player moves from one channel to another.*
   *Updating the voice channel is handled automatically by the client.*
 
-- **`playerSocketClosed`** ➡️ `(player, payload) => {}`  
+- **`playerSocketClosed`** ➡️ `(player, payload) => {}`
   *Triggered when the player’s socket is closed.*
+
+- **`playerUpdate`** ➡️ `(player) => {}`
+  *Triggered when the player is updated.*
 
 ## Track / Manager Related Logs
 
 > *Handle track events and manage playback:*
 
-- **`trackStart`** ➡️ `(player, track, payload) => {}`  
+- **`trackStart`** ➡️ `(player, track, payload) => {}`
   *Triggered when a track starts playing.*
 
-- **`trackStuck`** ➡️ `(player, track, payload) => {}`  
+- **`trackStuck`** ➡️ `(player, track, payload) => {}`
   *Triggered when a track gets stuck (e.g., playback halts).*
 
-- **`trackError`** ➡️ `(player, track, payload) => {}`  
+- **`trackError`** ➡️ `(player, track, payload) => {}`
   *Triggered when an error occurs during track playback.*
 
-- **`trackEnd`** ➡️ `(player, track, payload) => {}`  
+- **`trackEnd`** ➡️ `(player, track, payload) => {}`
   *Triggered when a track finishes playing.*
 
-- **`queueEnd`** ➡️ `(player, track, payload) => {}`  
+- **`queueEnd`** ➡️ `(player, track, payload) => {}`
   *Triggered when the queue ends.*
 
-- **`playerUpdate`** ➡️ `(player) => {}`  
-  *Triggered when the player is updated.*
+## SponsorBlock Plugin Logs
+
+> *Events from the SponsorBlock plugin:*
+> *Only triggered when used with the Sponsorblock plugin*
+
+- **`SegmentsLoaded`** ➡️ `(player, track, payload) => {}`
+  *Triggered when segments are loaded for a track.*
+
+- **`SegmentSkipped`** ➡️ `(player, track, payload) => {}`
+  *Triggered when a specific segment is skipped.*
+
+- **`ChapterStarted`** ➡️ `(player, track, payload) => {}`
+  *Triggered when a specific chapter starts playing.*
+
+- **`ChaptersLoaded`** ➡️ `(player, track, payload) => {}`
+  *Triggered when chapters are loaded for a track.*
+
+## Lyrics Plugin Logs
+
+> *Events from the LavaLyrics plugin:*
+> *Only triggered when used with the latest snapshot of the lava-lyrics plugin*
+
+- **`LyricsLine`** ➡️ `(player, track, payload) => {}`
+  *Triggered when a new lyrics line is received.*
+
+- **`LyricsFound`** ➡️ `(player, track, payload) => {}`
+  *Triggered when lyrics for a track are found.*
+
+- **`LyricsNotFound`** ➡️ `(player, track, payload) => {}`
+  *Triggered when lyrics for a track are not found.*
+
+## Debug Logs
+
+> *Internal debugging events from the Lavalink client:*
+> *Only triggered when the **ManagerOptions#` advancedOptions.enableDebugEvents `** is set to **` true `***
+
+- **`debug`** ➡️ `(eventKey, eventData) => {}`
+  *Triggered for various debug logs and errors.*
 
 ## Examples
 
