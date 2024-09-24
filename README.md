@@ -24,7 +24,7 @@ Easy, flexible and feature-rich lavalink@v4 Client. Both for Beginners and Profi
 
 # Install
 
-Latest stable Version: **`v2.1.3`**
+Latest stable Version: **`v2.4.0`**
 
 <details><summary>👉 via NPM</summary>
 
@@ -36,7 +36,7 @@ npm install --save lavalink-client
 Dev Version: (Current)
 
 ```bash
-npm install tomato6966/lavalink-client
+npm install --save  tomato6966/lavalink-client
 ```
 
 </details>
@@ -58,8 +58,9 @@ yarn add tomato6966/lavalink-client
 # Documentation
 
 Check out the [Documentation](https://tomato6966.github.io/lavalink-client/)
-- See all [Manager-Events, e.g. for Track / player and general errors / logs](https://tomato6966.github.io/lavalink-client/interfaces/Types_Manager.LavalinkManagerEvents.html)
-- See all [NodeManager-Events e.g. for Node Errors / logs](https://tomato6966.github.io/lavalink-client/interfaces/Types_Node.NodeManagerEvents.html)
+- See all [Manager-Events, e.g. for Track / player and general errors / logs](https://tomato6966.github.io/lavalink-client/extra/manager-events)
+- See all [NodeManager-Events e.g. for Node Errors / logs](https://tomato6966.github.io/lavalink-client/extra/node-events)
+- See the Guide on [How to do resuming](https://tomato6966.github.io/lavalink-client/extra/resuming)
 
 # Used in:
 
