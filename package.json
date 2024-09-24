@@ -61,7 +61,7 @@
   "bugs": {
     "url": "https://github.com/tomato6966/lavalink-client/issues"
   },
-  "homepage": "https://lc4.gitbook.io/lavalink-client/",
+  "homepage": "https://tomato6966.github.io/lavalink-client/",
   "devDependencies": {
     "@eslint/eslintrc": "^3.1.0",
     "@eslint/js": "^9.11.0",

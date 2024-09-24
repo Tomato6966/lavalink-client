@@ -13,7 +13,7 @@ Easy, flexible and feature-rich lavalink@v4 Client. Both for Beginners and Profi
     <a href="https://www.npmjs.com/package/lavalink-client">
       <img src="https://img.shields.io/npm/dt/lavalink-client.svg?maxAge=3600&style=for-the-badge&logo=npm&logoColor=red" alt="NPM downloads" />
     </a>
-    <a href="https://lc4.gitbook.io/lavalink-client/">
+    <a href="https://tomato6966.github.io/lavalink-client/">
       <img src="https://img.shields.io/badge/Documation-%230288D1.svg?style=for-the-badge&logo=gitbook&logoColor=white" alt="Get Started Now">
     </a>
   </p>
@@ -748,4 +748,4 @@ if(previousTrack) {
 - Added PR Packages to install all commits / packages at once `https://pkg.pr.new/Tomato6966/lavalink-client`
 - Removed the dist folder, and added prepare Scripts
 - Added attributes for git linting
-- Removed the old (gitbook) documentation, and swapped it to a NEW TSDOC Themed Documentation
+- Removed the old (gitbook) documentation, and swapped it to a NEW TSDOC Themed Documentation via astro.dev and mdx
