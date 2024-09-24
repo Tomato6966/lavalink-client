@@ -303,9 +303,6 @@ export class ManagerUtils {
         if (SourceLinksRegexes.AllDeezerRegex.test(queryString) && !node.info?.sourceManagers?.includes("deezer")) {
             throw new Error("Query / Link Provided for this Source but Lavalink Node has not 'deezer' enabled");
         }
-        if (SourceLinksRegexes.AllDeezerRegex.test(queryString) && node.info?.sourceManagers?.includes("deezer") && !node.info?.sourceManagers?.includes("http")) {
-            throw new Error("Query / Link Provided for this Source but Lavalink Node has not 'http' enabled, which is required to have 'deezer' to work");
-        }
         if (SourceLinksRegexes.musicYandex.test(queryString) && !node.info?.sourceManagers?.includes("yandexmusic")) {
             throw new Error("Query / Link Provided for this Source but Lavalink Node has not 'yandexmusic' enabled");
         }
