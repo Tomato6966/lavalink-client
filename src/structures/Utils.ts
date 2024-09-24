@@ -367,9 +367,6 @@ export class ManagerUtils {
         if (source === "dzisrc" && node.info?.sourceManagers?.includes("deezer") && !node.info?.sourceManagers?.includes("http")) {
             throw new Error("Lavalink Node has not 'http' enabled, which is required to have 'dzisrc' to work");
         }
-        if (source === "dzsearch" && node.info?.sourceManagers?.includes("deezer") && !node.info?.sourceManagers?.includes("http")) {
-            throw new Error("Lavalink Node has not 'http' enabled, which is required to have 'dzsearch' to work");
-        }
         if(source === "jsrec" && !node.info?.sourceManagers?.includes("jiosaavn")) {
             throw new Error("Lavalink Node has not 'jiosaavn' (via jiosaavn-plugin) enabled, which is required to have 'jsrec' to work");
         }
