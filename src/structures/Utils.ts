@@ -303,9 +303,6 @@ export class ManagerUtils {
         if (SourceLinksRegexes.AllDeezerRegex.test(queryString) && !node.info?.sourceManagers?.includes("deezer")) {
             throw new Error("Query / Link Provided for this Source but Lavalink Node has not 'deezer' enabled");
         }
-        if (SourceLinksRegexes.AllDeezerRegex.test(queryString) && node.info?.sourceManagers?.includes("deezer") && !node.info?.sourceManagers?.includes("http")) {
-            throw new Error("Query / Link Provided for this Source but Lavalink Node has not 'http' enabled, which is required to have 'deezer' to work");
-        }
         if (SourceLinksRegexes.musicYandex.test(queryString) && !node.info?.sourceManagers?.includes("yandexmusic")) {
             throw new Error("Query / Link Provided for this Source but Lavalink Node has not 'yandexmusic' enabled");
         }
@@ -366,9 +363,6 @@ export class ManagerUtils {
         }
         if (source === "dzisrc" && node.info?.sourceManagers?.includes("deezer") && !node.info?.sourceManagers?.includes("http")) {
             throw new Error("Lavalink Node has not 'http' enabled, which is required to have 'dzisrc' to work");
-        }
-        if (source === "dzsearch" && node.info?.sourceManagers?.includes("deezer") && !node.info?.sourceManagers?.includes("http")) {
-            throw new Error("Lavalink Node has not 'http' enabled, which is required to have 'dzsearch' to work");
         }
         if(source === "jsrec" && !node.info?.sourceManagers?.includes("jiosaavn")) {
             throw new Error("Lavalink Node has not 'jiosaavn' (via jiosaavn-plugin) enabled, which is required to have 'jsrec' to work");
