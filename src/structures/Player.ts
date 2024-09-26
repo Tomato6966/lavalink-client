@@ -188,6 +188,7 @@ export class Player {
                     functionLayer: "Player > play()",
                 });
             }
+            this.LavalinkManager.emit("playerQueueEmptyCancel", this);
             clearTimeout(this.get("internal_queueempty"));
             this.set("internal_queueempty", undefined);
         }

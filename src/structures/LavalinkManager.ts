@@ -101,6 +101,9 @@ export class LavalinkManager extends EventEmitter {
                     autoPlayFunction: options?.playerOptions?.onEmptyQueue?.autoPlayFunction ?? null,
                     destroyAfterMs: options?.playerOptions?.onEmptyQueue?.destroyAfterMs ?? undefined
                 },
+                onEmptyPlayerVoice: {
+                    destroyAfterMs: options?.playerOptions?.onEmptyPlayerVoice?.destroyAfterMs ?? undefined
+                },
                 volumeDecrementer: options?.playerOptions?.volumeDecrementer ?? 1,
                 requesterTransformer: options?.playerOptions?.requesterTransformer ?? null,
                 useUnresolvedData: options?.playerOptions?.useUnresolvedData ?? false,
@@ -545,6 +548,7 @@ export class LavalinkManager extends EventEmitter {
                             player.set("internal_voiceempty", undefined);
                         }
                         player.set("internal_voiceempty", setTimeout(() => {
+                            player.set("internal_voiceempty", undefined);
                             if(player.voiceState.connectedMembers.size > 0) {
                                 if (this.options?.advancedOptions?.enableDebugEvents) {
                                     this.emit("debug", DebugEvents.PlayerVoiceEmpty, {
@@ -558,7 +562,10 @@ export class LavalinkManager extends EventEmitter {
                             this.emit("playerVoiceEmptyEnd", player);
                             player.destroy(DestroyReasons.VoiceEmpty);
                         }, this.options.playerOptions.onEmptyPlayerVoice?.destroyAfterMs))
-                    }
+                    } else console.log("empty voice not triggered",
+                        player.voiceState.connectedMembers,
+                        this.options?.playerOptions?.onEmptyPlayerVoice?.destroyAfterMs
+                    )
                 }
 
                 if (this.options?.advancedOptions?.enableDebugEvents) {

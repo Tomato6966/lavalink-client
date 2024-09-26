@@ -15,8 +15,6 @@ const client = new Client({
     intents: [
         GatewayIntentBits.Guilds,
         GatewayIntentBits.GuildVoiceStates,
-        GatewayIntentBits.MessageContent,
-        GatewayIntentBits.GuildMessages
     ]
 }) as BotClient;
 
@@ -47,15 +45,6 @@ console.log(LavalinkNodesOfEnv); // you can then provide the result of here in L
     // Player saver util class for saving the player data
     const playerSaver = new PlayerSaver();
     const nodeSessions = await playerSaver.getAllLastNodeSessions();
-
-    const client = new Client({
-        intents: [
-            GatewayIntentBits.Guilds,
-            GatewayIntentBits.GuildVoiceStates,
-            GatewayIntentBits.MessageContent,
-            GatewayIntentBits.GuildMessages
-        ]
-    }) as BotClient;
 
     client.lavalink = new LavalinkManager({
         nodes: [
@@ -103,8 +92,12 @@ console.log(LavalinkNodesOfEnv); // you can then provide the result of here in L
                 destroyPlayer: false // overrides autoReconnect and directly destroys the player if the bot disconnects from the vc
             },
             onEmptyQueue: {
-                destroyAfterMs: 30_000, // 0 === instantly destroy | don't provide the option, to don't destroy the player
+                destroyAfterMs: 30_000, // 1 === instantly destroy | don't provide the option, to don't destroy the player
                 autoPlayFunction: autoPlayFunction,
+            },
+            // handle empty player voice channel events
+            onEmptyPlayerVoice: {
+                destroyAfterMs: 30_000, // 1 === instantly destroy on empty player voice
             },
             useUnresolvedData: true,
         },

@@ -96,12 +96,6 @@ export interface LavalinkManagerEvents {
     "playerSuppressChange": (player: Player, suppress: boolean) => void;
 
     /**
-     * Emitted when the player's voiceChannel get's empty
-     * @event Manager#playerVoiceEmpty
-     */
-    "playerVoiceEmpty": (player: Player) => void;
-
-    /**
      * Emitted when the player's queue got empty, and the timeout started
      * @event Manager#playerQueueEmptyStart
      */
@@ -112,6 +106,12 @@ export interface LavalinkManagerEvents {
      * @event Manager#playerQueueEmptyEnd
      */
     "playerQueueEmptyEnd": (player: Player) => void;
+
+    /**
+     * Emitted when the player's queue got empty, and the timeout got cancelled becuase a track got re-added to it.
+     * @event Manager#playerQueueEmptyEnd
+     */
+    "playerQueueEmptyCancel": (player: Player) => void;
 
     /**
      * Emitted when the player's voice got empty, and the timeout started

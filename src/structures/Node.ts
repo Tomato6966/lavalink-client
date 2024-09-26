@@ -438,6 +438,7 @@ export class LavalinkNode {
 
         if (this.pingTimeout) clearTimeout(this.pingTimeout);
         this.pingTimeout = setTimeout(() => {
+            this.pingTimeout = null;
             if (!this.socket) {
                 if (this.NodeManager.LavalinkManager.options?.advancedOptions?.enableDebugEvents) {
                     this.NodeManager.LavalinkManager.emit("debug", DebugEvents.NoSocketOnDestroy, {
@@ -995,6 +996,7 @@ export class LavalinkNode {
             return;
         }
         this.reconnectTimeout = setTimeout(() => {
+            this.reconnectTimeout = null;
             if (this.reconnectAttempts >= this.options.retryAmount) {
                 const error = new Error(`Unable to connect after ${this.options.retryAmount} attempts.`)
                 this.NodeManager.emit("error", this, error);
@@ -1536,6 +1538,10 @@ export class LavalinkNode {
                 }
 
                 player.set("internal_queueempty", setTimeout(() => {
+                    player.set("internal_queueempty", undefined);
+                    if(player.queue.current) {
+                        return this.NodeManager.LavalinkManager.emit("playerQueueEmptyCancel", player);
+                    }
                     this.NodeManager.LavalinkManager.emit("playerQueueEmptyEnd", player);
                     player.destroy(DestroyReasons.QueueEmpty);
                 }, this.NodeManager.LavalinkManager.options.playerOptions.onEmptyQueue?.destroyAfterMs))
