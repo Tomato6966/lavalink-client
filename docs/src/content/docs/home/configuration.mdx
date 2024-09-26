@@ -66,8 +66,13 @@ client.lavalink = new LavalinkManager({
             autoReconnect: true, // automatically attempts a reconnect, if the bot disconnects from the voice channel, if it fails, it get's destroyed
             destroyPlayer: false // overrides autoReconnect and directly destroys the player if the bot disconnects from the vc
         },
+        onEmptyPlayerVoice: {
+            // will auto destroy the player after 30s when its voice got empty
+            destroyAfterMs: 30_000, // 1 === instantly destroy | don't provide to disable it
+        },
         onEmptyQueue: {
-            destroyAfterMs: 30_000, // 0 === instantly destroy | don't provide the option, to don't destroy the player
+            // will auto destroy the player after 30s if the queue got empty and autoplay function does not add smt to the queue
+            destroyAfterMs: 30_000, // 1 === instantly destroy | don't provide the option, to don't destroy the player
             autoPlayFunction: autoPlayFunction,
         },
         useUnresolvedData: true,
