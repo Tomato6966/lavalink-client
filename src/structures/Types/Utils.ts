@@ -506,6 +506,18 @@ export interface VoiceState {
     mute: boolean;
     /** Server Deaf status */
     deaf: boolean;
+    /** Self Deaf status */
+    self_deaf: boolean;
+    /** Self Mute status */
+    self_mute: boolean;
+    /** Self Video (Camera) status */
+    self_video: boolean;
+    /** Self Stream status */
+    self_stream: boolean;
+    /** Wether the user requests to speak (stage channel) */
+    request_to_speak_timestamp: boolean;
+    /** Self suppressed status (stage channel) */
+    suppress: boolean;
 }
 
 /** The Base64 decodes tring by lavalink */

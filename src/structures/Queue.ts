@@ -71,7 +71,7 @@ export class DefaultQueueStore implements QueueStoreManager {
      * @returns The queue for the guild
      */
     async get(guildId: string) {
-        return this.data.get(guildId) as string | StoredQueue;
+        return this.data.get(guildId);
     }
 
     /**
@@ -98,8 +98,8 @@ export class DefaultQueueStore implements QueueStoreManager {
      * @param value The queue to stringify
      * @returns The stringified queue
      */
-    async stringify(value: StoredQueue | string) {
-        return value as string; // JSON.stringify(value);
+    async stringify(value: StoredQueue) {
+        return value; // JSON.stringify(value);
     }
 
     /**
@@ -107,8 +107,8 @@ export class DefaultQueueStore implements QueueStoreManager {
      * @param value The queue to parse
      * @returns The parsed queue
      */
-    async parse(value: StoredQueue | string) {
-        return value as StoredQueue; // JSON.parse(value)
+    async parse(value: StoredQueue) {
+        return value; // JSON.parse(value)
     }
 }
 

@@ -71,6 +71,23 @@ export class Player {
         sessionId: null,
         token: null
     };
+    
+    public voiceState: {
+        selfDeaf: boolean,
+        selfMute: boolean,
+        serverDeaf: boolean,
+        serverMute: boolean,
+        suppress: boolean,
+        connectedMembers: Set<string>,
+    } = {
+        selfDeaf: false,
+        selfMute: false,
+        serverDeaf: false,
+        serverMute: false,
+        suppress: false,
+        connectedMembers: new Set()
+    }
+
     /** Custom data for the player */
     private readonly data: Record<string, unknown> = {};
 

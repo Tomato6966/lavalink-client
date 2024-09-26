@@ -78,17 +78,58 @@ export interface LavalinkManagerEvents {
     "playerUpdate": (oldPlayerJson: PlayerJson, newPlayer: Player) => void;
 
     /**
-     * Emitted when the player get server muted
-     * @event Manager#playerMute
+     * Emitted when the player's selfMuted or serverMuted state changed (true -> false | false -> true)
+     * @event Manager#playerMuteChange
      */
-    "playerMute": (player: Player, muted: boolean) => void;
+    "playerMuteChange": (player: Player, selfMuted: boolean, serverMuted: boolean) => void;
 
     /**
-     * Emitted when the player get server deafened
-     * @event Manager#playerDeaf
+     * Emitted when the player's selfDeafed or serverDeafed state changed (true -> false | false -> true)
+     * @event Manager#playerDeafChange
      */
-    "playerDeaf": (player: Player, deafen: boolean) => void;
+    "playerDeafChange": (player: Player, selfDeafed: boolean, serverDeafed: boolean) => void;
 
+    /**
+     * Emitted when the player's suppressed (true -> false | false -> true)
+     * @event Manager#playerSuppressChange
+     */
+    "playerSuppressChange": (player: Player, suppress: boolean) => void;
+
+    /**
+     * Emitted when the player's voiceChannel get's empty
+     * @event Manager#playerVoiceEmpty
+     */
+    "playerVoiceEmpty": (player: Player) => void;
+
+    /**
+     * Emitted when the player's queue got empty, and the timeout started
+     * @event Manager#playerQueueEmptyStart
+     */
+    "playerQueueEmptyStart": (player: Player, timeoutMs: number) => void;
+
+    /**
+     * Emitted when the player's queue got empty, and the timeout finished leading to destroying the player
+     * @event Manager#playerQueueEmptyEnd
+     */
+    "playerQueueEmptyEnd": (player: Player) => void;
+
+    /**
+     * Emitted when the player's voice got empty, and the timeout started
+     * @event Manager#playerQueueEmptyStart
+     */
+    "playerVoiceEmptyStart": (player: Player, timeoutMs: number) => void;
+
+    /**
+     * Emitted when the player's voice got empty, and the timeout finished leading to destroying the player
+     * @event Manager#playerQueueEmptyEnd
+     */
+    "playerVoiceEmptyEnd": (player: Player) => void;
+
+    /**
+     * Emitted when the player's voice got empty, and there was a timeout, but someone re-joined, causing the timeout to cancel
+     * @event Manager#playerVoiceEmptyCancel
+     */
+    "playerVoiceEmptyCancel": (player: Player, userId: string) => void;
     /**
      * SPONSORBLOCK-PLUGIN EVENT
      * Emitted when Segments are loaded
@@ -182,6 +223,10 @@ export interface ManagerPlayerOptions {
         /** Instantly destroy player (overrides autoReconnect) | Don't provide == disable feature*/
         destroyPlayer?: boolean;
     };
+    onEmptyPlayerVoice?: {
+        /* aut. destroy the player after x ms, If 1 it instantly destroys, don't provide or set to 0 to not destroy the player */
+        destroyAfterMs?: number;
+    }
     /** Minimum time to play the song before autoPlayFunction is executed (prevents error spamming) Set to 0 to disable it @default 10000 */
     minAutoPlayMs?: number;
     /** Allows you to declare how many tracks are allowed to error/stuck within a time-frame before player is destroyed @default "{threshold: 35000, maxAmount: 3 }" */
@@ -195,7 +240,7 @@ export interface ManagerPlayerOptions {
     onEmptyQueue?: {
         /** Get's executed onEmptyQueue -> You can do any track queue previous transformations, if you add a track to the queue -> it will play it, if not queueEnd will execute! */
         autoPlayFunction?: (player: Player, lastPlayedTrack: Track) => Promise<void>;
-        /* aut. destroy the player after x ms, if 0 it instantly destroys, don't provide to not destroy the player */
+        /* aut. destroy the player after x ms, if 1 it instantly destroys, don't provide or set to 0 to not destroy the player */
         destroyAfterMs?: number;
     };
     /* If to override the data from the Unresolved Track. for unresolved tracks */

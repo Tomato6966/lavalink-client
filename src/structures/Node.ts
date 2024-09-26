@@ -499,9 +499,11 @@ export class LavalinkNode {
 
     /**
      * Disconnects the Node-Connection (Websocket)
-     * @param disconnectReason Disconnect Reason to use when destroying Node
+     * @param disconnectReason Disconnect Reason to use when disconnecting Node
      * @returns void
      *
+     * Also the node will not get re-connected again.
+     * 
      * @example
      * ```ts
      * player.node.destroy("custom Player Destroy Reason", true);
@@ -530,8 +532,7 @@ export class LavalinkNode {
      * ```
      */
     public get connected(): boolean {
-        if (!this.socket) return false;
-        return this.socket.readyState === WebSocket.OPEN;
+        return this.socket && this.socket.readyState === WebSocket.OPEN;
     }
 
     isAlive: boolean = false;
@@ -1043,7 +1044,10 @@ export class LavalinkNode {
         if (this.pingTimeout) clearTimeout(this.pingTimeout);
         if (this.heartBeatInterval) clearInterval(this.heartBeatInterval);
         if (code === 1006 && !reason) reason = "Socket got terminated due to no ping connection";
+        if (code === 1000 && reason === "Node-Disconnect") return; // manually disconnected and already emitted the event.
+
         this.NodeManager.emit("disconnect", this, { code, reason });
+
         if (code !== 1000 || reason !== "Node-Destroy") this.reconnect();
     }
 
@@ -1305,28 +1309,12 @@ export class LavalinkNode {
             }
         }
 
-        this.NodeManager.LavalinkManager.emit("trackError", player, track || await this.getTrackOfPayload(payload), payload);
-        return; // get's handled by trackEnd
-        // If there are no songs in the queue
-        if (!player.queue.tracks.length && (player.repeatMode === "off" || player.get("internal_stopPlaying"))) return this.queueEnd(player, track || await this.getTrackOfPayload(payload), payload);
-        // remove the current track, and enqueue the next one
-        await queueTrackEnd(player);
-        // if no track available, end queue
-        if (!player.queue.current) return this.queueEnd(player, track || await this.getTrackOfPayload(payload), payload);
-        // play track if autoSkip is true
-        return (this.NodeManager.LavalinkManager.options.autoSkip && player.queue.current) && player.play({ noReplace: true });
+        return this.NodeManager.LavalinkManager.emit("trackError", player, track || await this.getTrackOfPayload(payload), payload);
     }
 
     /** @private util function for handling socketClosed event */
     private socketClosed(player: Player, payload: WebSocketClosedEvent) {
-        this.NodeManager.LavalinkManager.emit("playerSocketClosed", player, payload);
-
-        // i don't think this is needed.
-        // this.socket = null;
-        // // causing a socket reconnect
-        // this.connect();
-
-        return;
+        return this.NodeManager.LavalinkManager.emit("playerSocketClosed", player, payload);
     }
 
     /** @private util function for handling SponsorBlock Segmentloaded event */
@@ -1507,11 +1495,15 @@ export class LavalinkNode {
                         functionLayer: "LavalinkNode > queueEnd() > destroyAfterMs",
                     });
                 }
+
+                this.NodeManager.LavalinkManager.emit("playerQueueEmptyStart", player, this.NodeManager.LavalinkManager.options.playerOptions.onEmptyQueue?.destroyAfterMs);
+
                 if (player.get("internal_queueempty")) {
                     clearTimeout(player.get("internal_queueempty"));
                     player.set("internal_queueempty", undefined);
                 }
                 player.set("internal_queueempty", setTimeout(() => {
+                    this.NodeManager.LavalinkManager.emit("playerQueueEmptyEnd", player);
                     player.destroy(DestroyReasons.QueueEmpty);
                 }, this.NodeManager.LavalinkManager.options.playerOptions.onEmptyQueue?.destroyAfterMs))
             }

@@ -529,11 +529,45 @@ export class LavalinkManager extends EventEmitter {
 
             /* voice state update */
             if (update.user_id !== this.options?.client.id) {
-                this.emit("debug", DebugEvents.NoAudioDebug, {
-                    state: "warn",
-                    message: `voice update user is not equal to provided client id of the LavalinkManager.options.client.id :: user: "${update.user_id}" manager client id: "${this.options?.client.id}"`,
-                    functionLayer: "LavalinkManager > sendRawData()",
-                })
+                if(update.channel_id === player.voiceChannelId) {
+                    player.voiceState.connectedMembers.add(update.user_id);
+                    if (player.get("internal_voiceempty")) {
+                        clearTimeout(player.get("internal_voiceempty"));
+                        player.set("internal_voiceempty", undefined);
+                        this.emit("playerVoiceEmptyCancel", player, update.user_id);
+                    }
+                } else {
+                    player.voiceState.connectedMembers.delete(update.user_id);
+                }
+
+                if(player.voiceState.connectedMembers.size === 0 && this.options.playerOptions.onEmptyPlayerVoice?.destroyAfterMs) {
+                    this.emit("playerVoiceEmptyStart", player, this.options.playerOptions.onEmptyPlayerVoice?.destroyAfterMs);
+                    if (player.get("internal_voiceempty")) {
+                        clearTimeout(player.get("internal_voiceempty"));
+                        player.set("internal_voiceempty", undefined);
+                    }
+                    player.set("internal_voiceempty", setTimeout(() => {
+                        if(player.voiceState.connectedMembers.size > 0) {
+                            if (this.options?.advancedOptions?.enableDebugEvents) {
+                                this.emit("debug", DebugEvents.PlayerVoiceEmpty, {
+                                    state: "log",
+                                    message: `VoiceEmpty got timeout triggered, but since then players joined`,
+                                    functionLayer: "LavalinkManager > sendRawData()",
+                                });
+                            }
+                            return;
+                        } 
+                        this.emit("playerVoiceEmptyEnd", player);
+                        player.destroy(DestroyReasons.VoiceEmpty);
+                    }, this.options.playerOptions.onEmptyPlayerVoice?.destroyAfterMs))
+                }
+                if (this.options?.advancedOptions?.enableDebugEvents) {
+                    this.emit("debug", DebugEvents.NoAudioDebug, {
+                        state: "warn",
+                        message: `voice update user is not equal to provided client id of the LavalinkManager.options.client.id :: user: "${update.user_id}" manager client id: "${this.options?.client.id}"`,
+                        functionLayer: "LavalinkManager > sendRawData()",
+                    })
+                }
                 if (this.options?.advancedOptions?.debugOptions?.noAudio === true) console.debug("Lavalink-Client-Debug | NO-AUDIO [::] sendRawData function, voice update user is not equal to provided client id of the manageroptions#client#id", "user:", update.user_id, "manager client id:", this.options?.client.id);
                 return;
             }
@@ -543,17 +577,22 @@ export class LavalinkManager extends EventEmitter {
                 player.voice.sessionId = update.session_id;
                 player.voiceChannelId = update.channel_id;
 
-                if (update.mute === true) {
-                    this.emit("playerMute", player, true);
-                } else if (update.mute === false) {
-                    this.emit("playerMute", player, false);
-                }
+                const selfMuteChanged = typeof update.self_mute === "boolean" && player.voiceState.selfMute !== update.self_mute;
+                const serverMuteChanged = typeof update.mute === "boolean" && player.voiceState.serverMute !== update.mute;
+                const selfDeafChanged = typeof update.self_deaf === "boolean" && player.voiceState.selfDeaf !== update.self_deaf;
+                const serverDeafChanged = typeof update.deaf === "boolean" && player.voiceState.serverDeaf !== update.deaf;
+                const suppressChange = typeof update.suppress === "boolean" && player.voiceState.suppress !== update.suppress;
 
-                if (update.deaf === true) {
-                    this.emit("playerDeaf", player, true);
-                } else if (update.deaf === false) {
-                    this.emit("playerDeaf", player, false);
-                }
+                player.voiceState.selfDeaf = update.self_deaf ?? player.voiceState?.selfDeaf; 
+                player.voiceState.selfMute = update.self_mute ?? player.voiceState?.selfMute; 
+                player.voiceState.serverDeaf = update.deaf ?? player.voiceState?.serverDeaf; 
+                player.voiceState.serverMute = update.mute ?? player.voiceState?.serverMute; 
+                player.voiceState.suppress = update.suppress ?? player.voiceState?.suppress; 
+                
+                if(selfMuteChanged || serverMuteChanged) this.emit("playerMuteChange", player, player.voiceState.selfMute, player.voiceState.serverMute);
+                if(selfDeafChanged || serverDeafChanged) this.emit("playerDeafChange", player, player.voiceState.selfDeaf, player.voiceState.serverDeaf);
+                if(suppressChange) this.emit("playerSuppressChange", player, player.voiceState.suppress);
+
             } else {
                 if (this.options?.playerOptions?.onDisconnect?.destroyPlayer === true) {
                     return void await player.destroy(DestroyReasons.Disconnected);
@@ -565,11 +604,13 @@ export class LavalinkManager extends EventEmitter {
                     try {
                         const positionPrevios = player.position;
 
-                        this.emit("debug", DebugEvents.PlayerAutoReconnect, {
-                            state: "log",
-                            message: `Auto reconnecting player because LavalinkManager.options.playerOptions.onDisconnect.autoReconnect is true`,
-                            functionLayer: "LavalinkManager > sendRawData()",
-                        })
+                        if (this.options?.advancedOptions?.enableDebugEvents) {
+                            this.emit("debug", DebugEvents.PlayerAutoReconnect, {
+                                state: "log",
+                                message: `Auto reconnecting player because LavalinkManager.options.playerOptions.onDisconnect.autoReconnect is true`,
+                                functionLayer: "LavalinkManager > sendRawData()",
+                            });
+                        }
 
                         await player.connect();
                         // replay the current playing stream

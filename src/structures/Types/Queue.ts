@@ -14,7 +14,7 @@ export interface QueueStoreManager {
     /** @async Delete a Database Value based of it's guildId */
     delete: (guildId: string) => Promise<void | boolean>;
     /** @async Transform the value(s) inside of the QueueStoreManager (IF YOU DON'T NEED PARSING/STRINGIFY, then just return the value) */
-    stringify: (value: StoredQueue | string) => Promise<StoredQueue |string>;
+    stringify: (value: StoredQueue | string) => Promise<StoredQueue | string>;
     /** @async Parse the saved value back to the Queue (IF YOU DON'T NEED PARSING/STRINGIFY, then just return the value) */
     parse: (value: StoredQueue | string) => Promise<Partial<StoredQueue>>;
 }

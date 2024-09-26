@@ -50,7 +50,8 @@ export enum DebugEvents {
     PlayerDeleteInsteadOfDestroy = "PlayerDeleteInsteadOfDestroy",
     FailedToConnectToNodes = "FailedToConnectToNodes",
     NoAudioDebug = "NoAudioDebug",
-    PlayerAutoReconnect = "PlayerAutoReconnect"
+    PlayerAutoReconnect = "PlayerAutoReconnect",
+    PlayerVoiceEmpty = "PlayerVoiceEmpty",
 }
 
 export enum DestroyReasons {
@@ -64,6 +65,7 @@ export enum DestroyReasons {
     ChannelDeleted = "ChannelDeleted",
     DisconnectAllNodes = "DisconnectAllNodes",
     ReconnectAllNodes = "ReconnectAllNodes",
+    VoiceEmpty = "VoiceEmpty",
 
     TrackErrorMaxTracksErroredPerTime = "TrackErrorMaxTracksErroredPerTime",
     TrackStuckMaxTracksErroredPerTime = "TrackStuckMaxTracksErroredPerTime",
