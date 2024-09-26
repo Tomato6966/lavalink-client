@@ -62,7 +62,7 @@ export class QueueSaver {
 }
 
 export class DefaultQueueStore implements QueueStoreManager {
-    private data = new MiniMap();
+    private data = new MiniMap<string, StoredQueue>();
     constructor() { }
 
     /**
@@ -70,8 +70,8 @@ export class DefaultQueueStore implements QueueStoreManager {
      * @param guildId The guild ID
      * @returns The queue for the guild
      */
-    async get(guildId) {
-        return await this.data.get(guildId);
+    async get(guildId: string) {
+        return this.data.get(guildId);
     }
 
     /**
@@ -80,8 +80,8 @@ export class DefaultQueueStore implements QueueStoreManager {
      * @param valueToStringify The queue to set
      * @returns The queue for the guild
      */
-    async set(guildId, valueToStringify) {
-        return await this.data.set(guildId, valueToStringify)
+    async set(guildId: string, valueToStringify) {
+        return this.data.set(guildId, valueToStringify) ? true : false;
     }
 
     /**
@@ -89,8 +89,8 @@ export class DefaultQueueStore implements QueueStoreManager {
      * @param guildId The guild ID
      * @returns The queue for the guild
      */
-    async delete(guildId) {
-        return await this.data.delete(guildId);
+    async delete(guildId: string) {
+        return this.data.delete(guildId);
     }
 
     /**
@@ -98,7 +98,7 @@ export class DefaultQueueStore implements QueueStoreManager {
      * @param value The queue to stringify
      * @returns The stringified queue
      */
-    async stringify(value) {
+    async stringify(value: StoredQueue) {
         return value; // JSON.stringify(value);
     }
 
@@ -107,8 +107,8 @@ export class DefaultQueueStore implements QueueStoreManager {
      * @param value The queue to parse
      * @returns The parsed queue
      */
-    async parse(value) {
-        return value as Partial<StoredQueue>; // JSON.parse(value)
+    async parse(value: StoredQueue) {
+        return value; // JSON.parse(value)
     }
 }
 
@@ -178,14 +178,14 @@ export class Queue {
         /**
          * @returns {{current:Track|null, previous:Track[], tracks:Track[]}}The Queue, but in a raw State, which allows easier handling for the QueueStoreManager
          */
-        toJSON: () : StoredQueue=> {
+        toJSON: (): StoredQueue => {
             if (this.previous.length > this.options.maxPreviousTracks) this.previous.splice(this.options.maxPreviousTracks, this.previous.length);
             return {
                 current: this.current ? { ...this.current } : null,
                 previous: this.previous ? [...this.previous] : [],
                 tracks: this.tracks ? [...this.tracks] : [],
             };
-        } ,
+        },
 
         /**
          * Get the Total Duration of the Queue-Songs summed up

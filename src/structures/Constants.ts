@@ -50,9 +50,9 @@ export enum DebugEvents {
     PlayerDeleteInsteadOfDestroy = "PlayerDeleteInsteadOfDestroy",
     FailedToConnectToNodes = "FailedToConnectToNodes",
     NoAudioDebug = "NoAudioDebug",
-    PlayerAutoReconnect = "PlayerAutoReconnect"
+    PlayerAutoReconnect = "PlayerAutoReconnect",
+    PlayerVoiceEmpty = "PlayerVoiceEmpty",
 }
-
 
 export enum DestroyReasons {
     QueueEmpty = "QueueEmpty",
@@ -65,15 +65,18 @@ export enum DestroyReasons {
     ChannelDeleted = "ChannelDeleted",
     DisconnectAllNodes = "DisconnectAllNodes",
     ReconnectAllNodes = "ReconnectAllNodes",
+    VoiceEmpty = "VoiceEmpty",
 
     TrackErrorMaxTracksErroredPerTime = "TrackErrorMaxTracksErroredPerTime",
     TrackStuckMaxTracksErroredPerTime = "TrackStuckMaxTracksErroredPerTime",
 };
 
+export enum DisconnectReasons {
+    Disconnected = "Disconnected",
+    DisconnectAllNodes = "DisconnectAllNodes",
+}
 
 export const validSponsorBlocks = ["sponsor", "selfpromo", "interaction", "intro", "outro", "preview", "music_offtopic", "filler"];
-
-
 
 /**  The audio Outputs Data map declaration */
 export const audioOutputsData: Record<AudioOutputs, ChannelMixFilter> = {
@@ -102,7 +105,6 @@ export const audioOutputsData: Record<AudioOutputs, ChannelMixFilter> = {
         rightToRight: 1,
     },
 }
-
 
 export const EQList = {
     /** A Bassboost Equalizer, so high it distorts the audio */

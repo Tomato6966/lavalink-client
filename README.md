@@ -749,3 +749,35 @@ if(previousTrack) {
 - Removed the dist folder, and added prepare Scripts
 - Added attributes for git linting
 - Removed the old (gitbook) documentation, and swapped it to a NEW TSDOC Themed Documentation via astro.dev and mdx
+- Added new player events:
+    - **`playerMuteChange`**** ➡️ **`(player, selfMuted, serverMuted) => {}`
+    *Triggered when the player's voice state related to muting changed*
+
+    - **`playerDeafChange`** ➡️ `(player, selfDeafed, serverDeafed) => {}`
+    *Triggered when the player's voice state related to deafing changed*
+
+    - **`playerSuppressChange`** ➡️ `(player, suppress) => {}`
+    *Triggered when the player's voice state related to suppressing changed*
+
+    - **`playerQueueEmptyStart`** ➡️ `(player, timeoutMs) => {}`
+    *Triggered when the queue empty handler started (the timeout)*
+
+    - **`playerQueueEmptyEnd`** ➡️ `(player) => {}`
+    *Triggered when the queue empty handler finished (successfully) and thus destroyed the player*
+
+    - **`playerQueueEmptyCancel`** ➡️ `(player) => {}`
+    *Triggered when the queue empty handler cancelled (e.g. because a new track got added)*
+
+    - **`playerVoiceEmptyStart`** ➡️ `(player, timeoutMs) => {}`
+    *Triggered when the voice empty handler started (the timeout)*
+
+    - **`playerVoiceEmptyEnd`** ➡️ `(player) => {}`
+    *Triggered when the voice empty handler finished (successfully) and thus destroyed the player*
+
+    - **`playerVoiceEmptyCancel`** ➡️ `(player, userId) => {}`
+    *Triggered when the voice empty handler cancelled (e.g. when a user rejoined)*
+- Added new managerOption: `playerOption.onEmptyPlayerVoice.destroyAfterMs`
+  - When provided and bigger than 0, then the player get's destroyed after that ms when the voice get's empty
+  - Added voice state handling events for easier integration (suggested by @PeterGamez)
+
+- Added the new events and configuration to the docs

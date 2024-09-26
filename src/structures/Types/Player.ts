@@ -1,4 +1,4 @@
-import type { DestroyReasons } from "../Constants";
+import type { DestroyReasons, DisconnectReasons } from "../Constants";
 
 import type { LavalinkNode } from "../Node";
 import type { EQBand, FilterData, LavalinkFilterData } from "./Filters";
@@ -8,6 +8,8 @@ import type { Track, UnresolvedTrack } from "./Track";
 import type { Base64, LavalinkPlayerVoiceOptions } from "./Utils";
 
 export type DestroyReasonsType = keyof typeof DestroyReasons | string;
+
+export type DisconnectReasonsType = keyof typeof DisconnectReasons | string;
 
 export interface PlayerJson {
     /** Guild Id where the player was playing in */

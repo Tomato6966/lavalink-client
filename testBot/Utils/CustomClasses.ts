@@ -108,11 +108,8 @@ export class PlayerSaver extends JSONStore {
 
 export class myCustomStore implements QueueStoreManager {
     private redis:RedisClientType|MiniMap<string, string>|JSONStore;
-    private test: MiniMap<any, any>;
     constructor(redisClient:RedisClientType|MiniMap<string, string>|JSONStore) {
         this.redis = redisClient;
-        this.test = new MiniMap();
-        this.test.delete
     }
     async get(guildId): Promise<any> {
         return await this.redis.get(this.id(guildId));
@@ -127,10 +124,14 @@ export class myCustomStore implements QueueStoreManager {
         return await this.redis.del(this.id(guildId));
     }
     async parse(stringifiedQueueData): Promise<Partial<StoredQueue>> {
-        return JSON.parse(stringifiedQueueData);
+        return typeof stringifiedQueueData === "string"
+            ? JSON.parse(stringifiedQueueData)
+            : stringifiedQueueData;
     }
     async stringify(parsedQueueData): Promise<any> {
-        return JSON.stringify(parsedQueueData);
+        return typeof parsedQueueData === "object"
+          ? JSON.stringify(parsedQueueData)
+          : parsedQueueData;
     }
     // you can add more utils if you need to...
     private id(guildId) {

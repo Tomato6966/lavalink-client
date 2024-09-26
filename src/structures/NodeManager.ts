@@ -1,6 +1,6 @@
 import { EventEmitter } from "events";
 
-import { DestroyReasons } from "./Constants";
+import { DestroyReasons, DisconnectReasons } from "./Constants";
 import { LavalinkNode } from "./Node";
 import { MiniMap } from "./Utils";
 
@@ -82,15 +82,20 @@ export class NodeManager extends EventEmitter {
     /**
      * Disconnects all Nodes from lavalink ws sockets
      * @param deleteAllNodes if the nodes should also be deleted from nodeManager.nodes
+     * @param destroyPlayers if the players should be destroyed
      * @returns amount of disconnected Nodes
      */
-    public async disconnectAll(deleteAllNodes = false): Promise<number> {
+    public async disconnectAll(deleteAllNodes = false, destroyPlayers = true) {
         if (!this.nodes.size) throw new Error("There are no nodes to disconnect (no nodes in the nodemanager)");
         if (!this.nodes.filter(v => v.connected).size) throw new Error("There are no nodes to disconnect (all nodes disconnected)");
         let counter = 0;
         for (const node of this.nodes.values()) {
             if (!node.connected) continue;
-            await node.destroy(DestroyReasons.DisconnectAllNodes, deleteAllNodes);
+            if (destroyPlayers) {
+                await node.destroy(DestroyReasons.DisconnectAllNodes, deleteAllNodes);
+            } else {
+                await node.disconnect(DisconnectReasons.DisconnectAllNodes);
+            }
             counter++;
         }
         return counter;
