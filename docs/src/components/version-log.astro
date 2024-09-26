@@ -1,0 +1,20 @@
+---
+import fs from "fs";
+import matter from "gray-matter";
+
+import { marked } from "marked";
+
+const fileContents = fs.readFileSync("../README.md", "utf-8");
+
+const { content } = matter(fileContents);
+const startIndex = content.indexOf("# UpdateLog");
+
+let filteredContent = "";
+if (startIndex !== -1) {
+  filteredContent = content.slice(startIndex);
+}
+
+const markdownHtml = marked(filteredContent);
+---
+
+<div class="markdown" set:html={markdownHtml}></div>

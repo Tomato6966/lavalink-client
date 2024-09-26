@@ -2,6 +2,8 @@ import type { DestroyReasons, DisconnectReasons } from "../Constants";
 
 import type { LavalinkNode } from "../Node";
 import type { EQBand, FilterData, LavalinkFilterData } from "./Filters";
+import { StoredQueue } from "./Queue";
+
 import type { Track, UnresolvedTrack } from "./Track";
 import type { Base64, LavalinkPlayerVoiceOptions } from "./Utils";
 
@@ -51,6 +53,8 @@ export interface PlayerJson {
     nodeId?: string;
     /** The SessionId of the node */
     nodeSessionId?: string;
+    /** The stored queue */
+    queue?: StoredQueue;
 }
 
 export type RepeatMode = "queue" | "track" | "off";

@@ -71,7 +71,7 @@ export class Player {
         sessionId: null,
         token: null
     };
-    
+
     public voiceState: {
         selfDeaf: boolean,
         selfMute: boolean,
@@ -207,15 +207,15 @@ export class Player {
                             functionLayer: "Player > play() > resolve currentTrack",
                         });
                     }
-    
+
                     this.LavalinkManager.emit("trackError", this, this.queue.current, error);
-    
+
                     if (options && "clientTrack" in options) delete options.clientTrack;
                     if (options && "track" in options) delete options.track;
-    
+
                     // try to play the next track if possible
                     if (this.LavalinkManager.options?.autoSkipOnResolveError === true && this.queue.tracks[0]) return this.play(options);
-    
+
                     return this;
                 }
             }
@@ -621,6 +621,16 @@ export class Player {
      */
     public async destroy(reason?: DestroyReasons | string, disconnect: boolean = true) { //  [disconnect -> queue destroy -> cache delete -> lavalink destroy -> event emit]
         if (this.LavalinkManager.options.advancedOptions?.debugOptions.playerDestroy.debugLog) console.log(`Lavalink-Client-Debug | PlayerDestroy [::] destroy Function, [guildId ${this.guildId}] - Destroy-Reason: ${String(reason)}`);
+
+        if (this.get("internal_queueempty")) {
+            clearTimeout(this.get("internal_queueempty"));
+            this.set("internal_queueempty", undefined);
+        }
+        if (this.get("internal_voiceempty")) {
+            clearTimeout(this.get("internal_voiceempty"));
+            this.set("internal_voiceempty", undefined);
+        }
+
         if (this.get("internal_destroystatus") === true) {
 
             if(this.LavalinkManager.options?.advancedOptions?.enableDebugEvents) {
@@ -706,7 +716,7 @@ export class Player {
     public unsubscribeLyrics(guildId: string) {
         return this.node.lyrics.unsubscribe(guildId);
     }
-    
+
     /**
      * Move the player on a different Audio-Node
      * @param newNode New Node / New Node Id

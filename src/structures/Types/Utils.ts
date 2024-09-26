@@ -377,7 +377,8 @@ export interface LavalinkPlayerVoice {
     /** The Ping to the voice server */
     ping?: number
 }
-export interface LavalinkPlayerVoiceOptions extends Omit<LavalinkPlayerVoice, 'connected' | 'ping'> { }
+
+export type LavalinkPlayerVoiceOptions = Omit<LavalinkPlayerVoice, 'connected' | 'ping'>;
 
 export interface FailingAddress {
     /** The failing address */

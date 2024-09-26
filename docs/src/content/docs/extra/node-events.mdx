@@ -1,0 +1,52 @@
+---
+editUrl: false
+next: true
+prev: true
+title: Node Events
+description: "All Events of the Lavalink Node."
+---
+
+## Node-Manager Events
+
+> *Monitor and manage Lavalink nodes:*
+
+- **`raw`** ➡️ `(node, payload) => {}`
+  *Triggered when raw data is received from the node.*
+
+- **`disconnect`** ➡️ `(node, reason) => {}`
+  *Triggered when the node disconnects. Reason for disconnection is provided.*
+
+- **`connect`** ➡️ `(node) => {}`
+  *Triggered when the node successfully connects.*
+
+- **`reconnecting`** ➡️ `(node) => {}`
+  *Triggered when the node is attempting to reconnect.*
+
+- **`reconnectinprogress`** ➡️ `(node) => {}`
+  *Triggered when the node reconnection process started (because of NodeOptions#retryDelay).*
+
+- **`create`** ➡️ `(node) => {}`
+  *Triggered when a new node is created.*
+
+- **`destroy`** ➡️ `(node) => {}`
+  *Triggered when a node is destroyed.*
+
+- **`error`** ➡️ `(node, error, payload) => {}`
+  *Triggered when an error occurs with the node.*
+
+- **`resumed`** ➡️ `(node, payload, players) => {}`
+  *Triggered when the node resumes.*
+  *Resuming needs to be handled manually; ensure to add the players to the manager.*
+
+## Example: Listening to Node Events
+
+```js
+client.lavalink.nodeManager.on("create", (node, payload) => {
+  console.log(`The Lavalink Node #${node.id} connected`);
+});
+
+// For all node-based errors:
+client.lavalink.nodeManager.on("error", (node, error, payload) => {
+  console.error(`The Lavalink Node #${node.id} errored: `, error);
+  console.error(`Error Payload: `, payload);
+});

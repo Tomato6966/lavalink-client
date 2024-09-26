@@ -261,7 +261,7 @@ export class LavalinkManager extends EventEmitter {
      * ```
      * @returns
      */
-    public getPlayer(guildId: string) {
+    public getPlayer(guildId: string): Player | undefined {
         return this.players.get(guildId);
     }
 
@@ -289,7 +289,7 @@ export class LavalinkManager extends EventEmitter {
      * });
      * ```
      */
-    public createPlayer(options: PlayerOptions) {
+    public createPlayer(options: PlayerOptions): Player {
         const oldPlayer = this.getPlayer(options?.guildId)
         if (oldPlayer) return oldPlayer;
 
@@ -311,7 +311,7 @@ export class LavalinkManager extends EventEmitter {
      * // recommend to do it on the player tho: player.destroy("forcefully destroyed the player");
      * ```
      */
-    public destroyPlayer(guildId: string, destroyReason?: string) {
+    public destroyPlayer(guildId: string, destroyReason?: string): Promise<void | Player> {
         const oldPlayer = this.getPlayer(guildId);
         if (!oldPlayer) return;
         return oldPlayer.destroy(destroyReason);
@@ -328,7 +328,7 @@ export class LavalinkManager extends EventEmitter {
      * // shouldn't be used except you know what you are doing.
      * ```
      */
-    public deletePlayer(guildId: string) {
+    public deletePlayer(guildId: string): boolean | void {
         const oldPlayer = this.getPlayer(guildId);
         if (!oldPlayer) return;
         // oldPlayer.connected is operational. you could also do oldPlayer.voice?.token
@@ -354,7 +354,7 @@ export class LavalinkManager extends EventEmitter {
      * // continue with code e.g. createing a player and searching
      * ```
      */
-    public get useable() {
+    public get useable(): boolean {
         return this.nodeManager.nodes.filter(v => v.connected).size > 0;
     }
 
@@ -373,7 +373,7 @@ export class LavalinkManager extends EventEmitter {
      * });
      * ```
      */
-    public async init(clientData: BotClientOptions) {
+    public async init(clientData: BotClientOptions): Promise<LavalinkManager> {
         if (this.initiated) return this;
         clientData = clientData ?? {} as BotClientOptions;
         this.options.client = { ...(this.options?.client || {}), ...clientData };
@@ -538,29 +538,29 @@ export class LavalinkManager extends EventEmitter {
                     }
                 } else {
                     player.voiceState.connectedMembers.delete(update.user_id);
+                    if(player.voiceState.connectedMembers.size === 0 && this.options.playerOptions.onEmptyPlayerVoice?.destroyAfterMs) {
+                        this.emit("playerVoiceEmptyStart", player, this.options.playerOptions.onEmptyPlayerVoice?.destroyAfterMs);
+                        if (player.get("internal_voiceempty")) {
+                            clearTimeout(player.get("internal_voiceempty"));
+                            player.set("internal_voiceempty", undefined);
+                        }
+                        player.set("internal_voiceempty", setTimeout(() => {
+                            if(player.voiceState.connectedMembers.size > 0) {
+                                if (this.options?.advancedOptions?.enableDebugEvents) {
+                                    this.emit("debug", DebugEvents.PlayerVoiceEmpty, {
+                                        state: "log",
+                                        message: `VoiceEmpty got timeout triggered, but since then players joined`,
+                                        functionLayer: "LavalinkManager > sendRawData()",
+                                    });
+                                }
+                                return;
+                            }
+                            this.emit("playerVoiceEmptyEnd", player);
+                            player.destroy(DestroyReasons.VoiceEmpty);
+                        }, this.options.playerOptions.onEmptyPlayerVoice?.destroyAfterMs))
+                    }
                 }
 
-                if(player.voiceState.connectedMembers.size === 0 && this.options.playerOptions.onEmptyPlayerVoice?.destroyAfterMs) {
-                    this.emit("playerVoiceEmptyStart", player, this.options.playerOptions.onEmptyPlayerVoice?.destroyAfterMs);
-                    if (player.get("internal_voiceempty")) {
-                        clearTimeout(player.get("internal_voiceempty"));
-                        player.set("internal_voiceempty", undefined);
-                    }
-                    player.set("internal_voiceempty", setTimeout(() => {
-                        if(player.voiceState.connectedMembers.size > 0) {
-                            if (this.options?.advancedOptions?.enableDebugEvents) {
-                                this.emit("debug", DebugEvents.PlayerVoiceEmpty, {
-                                    state: "log",
-                                    message: `VoiceEmpty got timeout triggered, but since then players joined`,
-                                    functionLayer: "LavalinkManager > sendRawData()",
-                                });
-                            }
-                            return;
-                        } 
-                        this.emit("playerVoiceEmptyEnd", player);
-                        player.destroy(DestroyReasons.VoiceEmpty);
-                    }, this.options.playerOptions.onEmptyPlayerVoice?.destroyAfterMs))
-                }
                 if (this.options?.advancedOptions?.enableDebugEvents) {
                     this.emit("debug", DebugEvents.NoAudioDebug, {
                         state: "warn",
@@ -583,12 +583,12 @@ export class LavalinkManager extends EventEmitter {
                 const serverDeafChanged = typeof update.deaf === "boolean" && player.voiceState.serverDeaf !== update.deaf;
                 const suppressChange = typeof update.suppress === "boolean" && player.voiceState.suppress !== update.suppress;
 
-                player.voiceState.selfDeaf = update.self_deaf ?? player.voiceState?.selfDeaf; 
-                player.voiceState.selfMute = update.self_mute ?? player.voiceState?.selfMute; 
-                player.voiceState.serverDeaf = update.deaf ?? player.voiceState?.serverDeaf; 
-                player.voiceState.serverMute = update.mute ?? player.voiceState?.serverMute; 
-                player.voiceState.suppress = update.suppress ?? player.voiceState?.suppress; 
-                
+                player.voiceState.selfDeaf = update.self_deaf ?? player.voiceState?.selfDeaf;
+                player.voiceState.selfMute = update.self_mute ?? player.voiceState?.selfMute;
+                player.voiceState.serverDeaf = update.deaf ?? player.voiceState?.serverDeaf;
+                player.voiceState.serverMute = update.mute ?? player.voiceState?.serverMute;
+                player.voiceState.suppress = update.suppress ?? player.voiceState?.suppress;
+
                 if(selfMuteChanged || serverMuteChanged) this.emit("playerMuteChange", player, player.voiceState.selfMute, player.voiceState.serverMute);
                 if(selfDeafChanged || serverDeafChanged) this.emit("playerDeafChange", player, player.voiceState.selfDeaf, player.voiceState.serverDeaf);
                 if(suppressChange) this.emit("playerSuppressChange", player, player.voiceState.suppress);
