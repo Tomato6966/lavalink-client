@@ -2,7 +2,7 @@ import type { DestroyReasons, DisconnectReasons } from "../Constants";
 
 import type { LavalinkNode } from "../Node";
 import type { EQBand, FilterData, LavalinkFilterData } from "./Filters";
-import { StoredQueue } from "./Queue";
+import type { StoredQueue } from "./Queue";
 
 import type { Track, UnresolvedTrack } from "./Track";
 import type { Base64, LavalinkPlayerVoiceOptions } from "./Utils";
