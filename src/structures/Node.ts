@@ -118,7 +118,7 @@ export class LavalinkNode {
      * ```
      */
     private getRequestingUrl(url: URL, extraQueryUrlParams?: URLSearchParams): string {
-        if (!url.searchParams.size) return `${url.origin}${url.pathname}`;
+        if (!url.searchParams.size) return `${url.origin}${url.pathname}${url.search}`;
         const keysToAdd = [];
         for (const [paramKey, paramValue] of url.searchParams.entries()) {
             const decoded = decodeURIComponent(paramValue).trim(); // double decoding, once internally, a second time if decoded by provided user.
