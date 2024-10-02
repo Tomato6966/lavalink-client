@@ -95,10 +95,6 @@ console.log(LavalinkNodesOfEnv); // you can then provide the result of here in L
                 destroyAfterMs: 30_000, // 1 === instantly destroy | don't provide the option, to don't destroy the player
                 autoPlayFunction: autoPlayFunction,
             },
-            // handle empty player voice channel events
-            onEmptyPlayerVoice: {
-                destroyAfterMs: 30_000, // 1 === instantly destroy on empty player voice
-            },
             useUnresolvedData: true,
         },
         queueOptions: {

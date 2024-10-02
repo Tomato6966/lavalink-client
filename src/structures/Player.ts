@@ -78,14 +78,12 @@ export class Player {
         serverDeaf: boolean,
         serverMute: boolean,
         suppress: boolean,
-        connectedMembers: Set<string>,
     } = {
         selfDeaf: false,
         selfMute: false,
         serverDeaf: false,
         serverMute: false,
         suppress: false,
-        connectedMembers: new Set()
     }
 
     /** Custom data for the player */
@@ -626,10 +624,6 @@ export class Player {
         if (this.get("internal_queueempty")) {
             clearTimeout(this.get("internal_queueempty"));
             this.set("internal_queueempty", undefined);
-        }
-        if (this.get("internal_voiceempty")) {
-            clearTimeout(this.get("internal_voiceempty"));
-            this.set("internal_voiceempty", undefined);
         }
 
         if (this.get("internal_destroystatus") === true) {

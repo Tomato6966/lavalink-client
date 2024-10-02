@@ -98,42 +98,11 @@ export function PlayerEvents(client:BotClient) {
             })
         }
     })
-    .on("playerVoiceEmptyStart", async (player, delayMs) => {
-        logPlayer(client, player, "INFO: playerVoiceEmptyStart");
-        // you can also do a check if already voiceempty & queue empty, then insta disconnect
-        // you can e.g. edit the saved message
-        const msg = await sendPlayerMessage(client, player, {
-            embeds: [
-                new EmbedBuilder()
-                .setDescription(`Player voice Channel got empty, will disconnect <t:${Math.round((Date.now() + delayMs) / 1000)}:R>`)
-            ]
-        });
-        if(msg) messagesMap.set(`${player.guildId}_voiceempty`, msg);
-
+    .on("playerVoiceLeave", (player, userId) => {
+        logPlayer(client, player, "INFO: playerVoiceLeave: ", userId);
     })
-    .on("playerVoiceEmptyEnd", (player) => {
-        logPlayer(client, player, "INFO: playerVoiceEmptyEnd");
-        const msg = messagesMap.get(`${player.guildId}_voiceempty`);
-        if(msg?.editable) {
-            msg.edit({
-                embeds: [
-                    new EmbedBuilder()
-                        .setDescription(`Player got destroyed because of empty voice channel`)
-                ]
-            })
-        }
-    })
-    .on("playerVoiceEmptyCancel", (player, userId) => {
-        logPlayer(client, player, "INFO: playerVoiceEmptyCancel");
-        const msg = messagesMap.get(`${player.guildId}_voiceempty`);
-        if(msg?.editable) {
-            msg.edit({
-                embeds: [
-                    new EmbedBuilder()
-                        .setDescription(`Player empty voice channel timer got cancelled. Because <@${userId}> rejoined`)
-                ]
-            })
-        }
+    .on("playerVoiceJoin", (player, userId) => {
+        logPlayer(client, player, "INFO: playerVoiceJoin: ", userId);
     })
     .on("debug", (eventKey, eventData) => {
         // skip specific log

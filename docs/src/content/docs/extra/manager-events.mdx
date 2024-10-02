@@ -47,14 +47,13 @@ description: "All Events of the Lavalink Manager."
 - **`playerQueueEmptyCancel`** ➡️ `(player) => {}`
   *Triggered when the queue empty handler cancelled (e.g. because a new track got added)*
 
-- **`playerVoiceEmptyStart`** ➡️ `(player, timeoutMs) => {}`
-  *Triggered when the voice empty handler started (the timeout)*
+- **`playerVoiceJoin`** ➡️ `(player, userId) => {}`~~
+  *Added instead of the playerVoiceEmpty handler, emitted when a user joins the player-vc while there is a player*
+  *Allows you to inmplement a custom playerVoiceEmpty handler*
 
-- **`playerVoiceEmptyEnd`** ➡️ `(player) => {}`
-  *Triggered when the voice empty handler finished (successfully) and thus destroyed the player*
-
-- **`playerVoiceEmptyCancel`** ➡️ `(player, userId) => {}`
-  *Triggered when the voice empty handler cancelled (e.g. when a user rejoined)*
+- **`playerVoiceLeave`** ➡️ `(player, userId) => {}`~~
+  *Added instead of the playerVoiceEmpty handler, emitted when a user leaves (or. switches away) the player-vc while there is a player*
+  *Allows you to inmplement a custom playerVoiceEmpty handler*
 
 ## Track / Manager Related Logs
 

@@ -768,16 +768,24 @@ if(previousTrack) {
     - **`playerQueueEmptyCancel`** ➡️ `(player) => {}`
     *Triggered when the queue empty handler cancelled (e.g. because a new track got added)*
 
-    - **`playerVoiceEmptyStart`** ➡️ `(player, timeoutMs) => {}`
-    *Triggered when the voice empty handler started (the timeout)*
+    ~~- **`playerVoiceEmptyStart`** ➡️ `(player, timeoutMs) => {}`~~
+    ~~*Triggered when the voice empty handler started (the timeout)*~~
+    *Removed again because of memory overhall and not wanting to handle voice states*
 
-    - **`playerVoiceEmptyEnd`** ➡️ `(player) => {}`
-    *Triggered when the voice empty handler finished (successfully) and thus destroyed the player*
+    ~~- **`playerVoiceEmptyEnd`** ➡️ `(player) => {}`~~
+    ~~*Triggered when the voice empty handler finished (successfully) and thus destroyed the player*~~
+    *Removed again because of memory overhall and not wanting to handle voice states*
 
-    - **`playerVoiceEmptyCancel`** ➡️ `(player, userId) => {}`
-    *Triggered when the voice empty handler cancelled (e.g. when a user rejoined)*
-- Added new managerOption: `playerOption.onEmptyPlayerVoice.destroyAfterMs`
-  - When provided and bigger than 0, then the player get's destroyed after that ms when the voice get's empty
-  - Added voice state handling events for easier integration (suggested by @PeterGamez)
+    ~~- **`playerVoiceEmptyCancel`** ➡️ `(player, userId) => {}`~~
+    ~~*Triggered when the voice empty handler cancelled (e.g. when a user rejoined)*~~
+    *Removed again because of memory overhall and not wanting to handle voice states*
+
+    - **`playerVoiceJoin`** ➡️ `(player, userId) => {}`~~
+    *Added instead of the playerVoiceEmpty handler, emitted when a user joins the player-vc while there is a player*
+    *Allows you to inmplement a custom playerVoiceEmpty handler*
+
+    - **`playerVoiceLeave`** ➡️ `(player, userId) => {}`~~
+    *Added instead of the playerVoiceEmpty handler, emitted when a user leaves (or. switches away) the player-vc while there is a player*
+    *Allows you to inmplement a custom playerVoiceEmpty handler*
 
 - Added the new events and configuration to the docs

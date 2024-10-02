@@ -101,9 +101,6 @@ export class LavalinkManager extends EventEmitter {
                     autoPlayFunction: options?.playerOptions?.onEmptyQueue?.autoPlayFunction ?? null,
                     destroyAfterMs: options?.playerOptions?.onEmptyQueue?.destroyAfterMs ?? undefined
                 },
-                onEmptyPlayerVoice: {
-                    destroyAfterMs: options?.playerOptions?.onEmptyPlayerVoice?.destroyAfterMs ?? undefined
-                },
                 volumeDecrementer: options?.playerOptions?.volumeDecrementer ?? 1,
                 requesterTransformer: options?.playerOptions?.requesterTransformer ?? null,
                 useUnresolvedData: options?.playerOptions?.useUnresolvedData ?? false,
@@ -532,40 +529,8 @@ export class LavalinkManager extends EventEmitter {
 
             /* voice state update */
             if (update.user_id !== this.options?.client.id) {
-                if(update.channel_id === player.voiceChannelId) {
-                    player.voiceState.connectedMembers.add(update.user_id);
-                    if (player.get("internal_voiceempty")) {
-                        clearTimeout(player.get("internal_voiceempty"));
-                        player.set("internal_voiceempty", undefined);
-                        this.emit("playerVoiceEmptyCancel", player, update.user_id);
-                    }
-                } else {
-                    player.voiceState.connectedMembers.delete(update.user_id);
-                    if(player.voiceState.connectedMembers.size === 0 && this.options.playerOptions.onEmptyPlayerVoice?.destroyAfterMs) {
-                        this.emit("playerVoiceEmptyStart", player, this.options.playerOptions.onEmptyPlayerVoice?.destroyAfterMs);
-                        if (player.get("internal_voiceempty")) {
-                            clearTimeout(player.get("internal_voiceempty"));
-                            player.set("internal_voiceempty", undefined);
-                        }
-                        player.set("internal_voiceempty", setTimeout(() => {
-                            player.set("internal_voiceempty", undefined);
-                            if(player.voiceState.connectedMembers.size > 0) {
-                                if (this.options?.advancedOptions?.enableDebugEvents) {
-                                    this.emit("debug", DebugEvents.PlayerVoiceEmpty, {
-                                        state: "log",
-                                        message: `VoiceEmpty got timeout triggered, but since then players joined`,
-                                        functionLayer: "LavalinkManager > sendRawData()",
-                                    });
-                                }
-                                return;
-                            }
-                            this.emit("playerVoiceEmptyEnd", player);
-                            player.destroy(DestroyReasons.VoiceEmpty);
-                        }, this.options.playerOptions.onEmptyPlayerVoice?.destroyAfterMs))
-                    } else console.log("empty voice not triggered",
-                        player.voiceState.connectedMembers,
-                        this.options?.playerOptions?.onEmptyPlayerVoice?.destroyAfterMs
-                    )
+                if(update.user_id && player.voiceChannelId) {
+                    this.emit(update.channel_id === player.voiceChannelId ? "playerVoiceJoin" : "playerVoiceLeave", player, update.user_id);
                 }
 
                 if (this.options?.advancedOptions?.enableDebugEvents) {
@@ -575,6 +540,7 @@ export class LavalinkManager extends EventEmitter {
                         functionLayer: "LavalinkManager > sendRawData()",
                     })
                 }
+
                 if (this.options?.advancedOptions?.debugOptions?.noAudio === true) console.debug("Lavalink-Client-Debug | NO-AUDIO [::] sendRawData function, voice update user is not equal to provided client id of the manageroptions#client#id", "user:", update.user_id, "manager client id:", this.options?.client.id);
                 return;
             }

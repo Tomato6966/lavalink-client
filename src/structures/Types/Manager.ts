@@ -114,22 +114,17 @@ export interface LavalinkManagerEvents {
     "playerQueueEmptyCancel": (player: Player) => void;
 
     /**
-     * Emitted when the player's voice got empty, and the timeout started
+     * Emitted, when a user joins the voice channel, while there is a player existing
      * @event Manager#playerQueueEmptyStart
      */
-    "playerVoiceEmptyStart": (player: Player, timeoutMs: number) => void;
+    "playerVoiceJoin": (player: Player, userId: string) => void;
 
     /**
-     * Emitted when the player's voice got empty, and the timeout finished leading to destroying the player
+     * Emitted, when a user leaves the voice channel, while there is a player existing
      * @event Manager#playerQueueEmptyEnd
      */
-    "playerVoiceEmptyEnd": (player: Player) => void;
+    "playerVoiceLeave": (player: Player, userId: string) => void;
 
-    /**
-     * Emitted when the player's voice got empty, and there was a timeout, but someone re-joined, causing the timeout to cancel
-     * @event Manager#playerVoiceEmptyCancel
-     */
-    "playerVoiceEmptyCancel": (player: Player, userId: string) => void;
     /**
      * SPONSORBLOCK-PLUGIN EVENT
      * Emitted when Segments are loaded
@@ -223,10 +218,6 @@ export interface ManagerPlayerOptions {
         /** Instantly destroy player (overrides autoReconnect) | Don't provide == disable feature*/
         destroyPlayer?: boolean;
     };
-    onEmptyPlayerVoice?: {
-        /* aut. destroy the player after x ms, If 1 it instantly destroys, don't provide or set to 0 to not destroy the player */
-        destroyAfterMs?: number;
-    }
     /** Minimum time to play the song before autoPlayFunction is executed (prevents error spamming) Set to 0 to disable it @default 10000 */
     minAutoPlayMs?: number;
     /** Allows you to declare how many tracks are allowed to error/stuck within a time-frame before player is destroyed @default "{threshold: 35000, maxAmount: 3 }" */
