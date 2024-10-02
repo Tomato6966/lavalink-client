@@ -64,7 +64,6 @@ export enum DestroyReasons {
     ChannelDeleted = "ChannelDeleted",
     DisconnectAllNodes = "DisconnectAllNodes",
     ReconnectAllNodes = "ReconnectAllNodes",
-    VoiceEmpty = "VoiceEmpty",
 
     TrackErrorMaxTracksErroredPerTime = "TrackErrorMaxTracksErroredPerTime",
     TrackStuckMaxTracksErroredPerTime = "TrackStuckMaxTracksErroredPerTime",

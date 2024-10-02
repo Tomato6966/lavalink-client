@@ -62,7 +62,6 @@ export function PlayerEvents(client:BotClient) {
         // e.g. you could automatically unsuppress the bot so he's allowed to speak
     })
     .on("playerQueueEmptyStart", async (player, delayMs) => {
-        // you can also do a check if already voiceempty & queue empty, then insta disconnect
         logPlayer(client, player, "INFO: playerQueueEmptyStart");
         const msg = await sendPlayerMessage(client, player, {
             embeds: [
