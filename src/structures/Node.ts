@@ -517,11 +517,11 @@ export class LavalinkNode {
      *
      * @example
      * ```ts
-     * player.node.destroy("custom Player Destroy Reason", true);
+     * player.node.disconnect("custom Player Disconnect Reason");
      * ```
      */
     public disconnect(disconnectReason?: DisconnectReasonsType) {
-        if (!this.connected) return
+        if (!this.socket) return;
 
         this.socket.close(1000, "Node-Disconnect");
         this.socket.removeAllListeners();
