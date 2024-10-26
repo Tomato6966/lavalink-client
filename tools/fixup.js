@@ -1,7 +1,5 @@
-/* eslint-disable */
 const { existsSync, writeFileSync } = require('fs')
 const { join } = require('path')
-/* eslint-enable */
 
 const writePackageJson = (path) => {
   if (!existsSync(path)) return console.error("no path found for: ", path);
