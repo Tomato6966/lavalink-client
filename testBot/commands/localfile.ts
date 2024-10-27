@@ -3,29 +3,32 @@ import {
 	type GuildMember,
 	SlashCommandBuilder,
 	type VoiceChannel,
-} from 'discord.js';
+} from "discord.js";
 
-import type { Command } from '../types/Client';
+import type { Command } from "../types/Client";
 
 export default {
 	data: new SlashCommandBuilder()
-		.setName('localfile')
-		.setDescription('Play a local file')
+		.setName("localfile")
+		.setDescription("Play a local file")
 		.addStringOption(o =>
 			o
-				.setName('filepath')
-				.setDescription('Must be the path of the file on the server where lavalink is running')
+				.setName("filepath")
+				.setDescription("Must be the path of the file on the server where lavalink is running")
 				.setRequired(true),
 		),
 	execute: async (client, interaction) => {
 		if (!interaction.guildId) return;
 
 		const vcId = (interaction.member as GuildMember)?.voice?.channelId;
-		if (!vcId) return interaction.reply({ ephemeral: true, content: 'Join a Voice Channel ' });
+		if (!vcId) return interaction.reply({ ephemeral: true, content: "Join a Voice Channel " });
 
 		const vc = (interaction.member as GuildMember)?.voice?.channel as VoiceChannel;
 		if (!vc.joinable || !vc.speakable)
-			return interaction.reply({ ephemeral: true, content: 'I am not able to join your channel / speak in there.' });
+			return interaction.reply({
+				ephemeral: true,
+				content: "I am not able to join your channel / speak in there.",
+			});
 
 		const player = await client.lavalink.createPlayer({
 			guildId: interaction.guildId,
@@ -43,14 +46,17 @@ export default {
 
 		if (!connected) await player.connect();
 		if (player.voiceChannelId !== vcId)
-			return interaction.reply({ ephemeral: true, content: 'You need to be in my Voice Channel' });
+			return interaction.reply({
+				ephemeral: true,
+				content: "You need to be in my Voice Channel",
+			});
 
-		const filepath = (interaction.options as CommandInteractionOptionResolver).getString('filepath')!;
+		const filepath = (interaction.options as CommandInteractionOptionResolver).getString("filepath")!;
 
-		const response = await player.search({ query: filepath, source: 'local' }, interaction.user);
+		const response = await player.search({ query: filepath, source: "local" }, interaction.user);
 
 		if (!response || !response.tracks?.length)
-			return interaction.reply({ content: 'No Tracks found', ephemeral: true });
+			return interaction.reply({ content: "No Tracks found", ephemeral: true });
 
 		player.queue.add(response.tracks[0]);
 

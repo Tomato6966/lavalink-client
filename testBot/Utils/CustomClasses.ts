@@ -1,6 +1,6 @@
-import { readFileSync } from 'node:fs';
-import { writeFile } from 'node:fs/promises';
-import type { RedisClientType } from 'redis';
+import { readFileSync } from "node:fs";
+import { writeFile } from "node:fs/promises";
+import type { RedisClientType } from "redis";
 
 import {
 	type LavalinkManager,
@@ -9,9 +9,9 @@ import {
 	type QueueChangesWatcher,
 	type QueueStoreManager,
 	type StoredQueue,
-} from '../../src';
+} from "../../src";
 
-import type { BotClient } from '../types/Client';
+import type { BotClient } from "../types/Client";
 
 export class JSONStore {
 	public data = new MiniMap<string, string>();
@@ -24,7 +24,7 @@ export class JSONStore {
 	async initLoadData() {
 		try {
 			// important to do sync so it's loaded on the initialisation
-			this.data = new MiniMap(this.JSONtoMap(readFileSync(this.filePath, 'utf-8')));
+			this.data = new MiniMap(this.JSONtoMap(readFileSync(this.filePath, "utf-8")));
 		} catch (error) {
 			await writeFile(this.filePath, this.MapToJSON(this.data));
 		}
@@ -70,7 +70,7 @@ export class PlayerSaver extends JSONStore {
 	 * @param lavalink
 	 */
 	listenToEvents(lavalink: LavalinkManager) {
-		lavalink.on('playerUpdate', (oldPlayer, newPlayer) => {
+		lavalink.on("playerUpdate", (oldPlayer, newPlayer) => {
 			const newPlayerData = newPlayer.toJSON();
 			// we only save the data if anything changes of what we need later on
 			if (
@@ -125,14 +125,14 @@ export class myCustomStore implements QueueStoreManager {
 	}
 	async delete(guildId): Promise<any> {
 		// fallback for the JSONSTORe and the MINIMAP
-		if ('delete' in this.redis) return await this.redis.delete(this.id(guildId));
+		if ("delete" in this.redis) return await this.redis.delete(this.id(guildId));
 		return await this.redis.del(this.id(guildId));
 	}
 	async parse(stringifiedQueueData): Promise<Partial<StoredQueue>> {
-		return typeof stringifiedQueueData === 'string' ? JSON.parse(stringifiedQueueData) : stringifiedQueueData;
+		return typeof stringifiedQueueData === "string" ? JSON.parse(stringifiedQueueData) : stringifiedQueueData;
 	}
 	async stringify(parsedQueueData): Promise<any> {
-		return typeof parsedQueueData === 'object' ? JSON.stringify(parsedQueueData) : parsedQueueData;
+		return typeof parsedQueueData === "object" ? JSON.stringify(parsedQueueData) : parsedQueueData;
 	}
 	// you can add more utils if you need to...
 	private id(guildId) {

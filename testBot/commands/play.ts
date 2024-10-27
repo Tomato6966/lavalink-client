@@ -3,52 +3,58 @@ import {
 	type GuildMember,
 	SlashCommandBuilder,
 	type VoiceChannel,
-} from 'discord.js';
+} from "discord.js";
 
-import type { SearchPlatform, SearchResult, Track } from '../../src';
-import type { Command } from '../types/Client';
-import { formatMS_HHMMSS } from '../Utils/Time';
+import type { SearchPlatform, SearchResult, Track } from "../../src";
+import type { Command } from "../types/Client";
+import { formatMS_HHMMSS } from "../Utils/Time";
 
 const autocompleteMap = new Map();
 
 export default {
 	data: new SlashCommandBuilder()
-		.setName('play')
-		.setDescription('Play Music')
+		.setName("play")
+		.setDescription("Play Music")
 		.addStringOption(o =>
-			o.setName('source').setDescription('From which Source you want to play?').setRequired(true).setChoices(
-				{ name: 'Youtube', value: 'ytsearch' }, // Requires plugin on lavalink: https://github.com/lavalink-devs/youtube-source
-				{ name: 'Youtube Music', value: 'ytmsearch' }, // Requires plugin on lavalink: https://github.com/lavalink-devs/youtube-source
-				{ name: 'Soundcloud', value: 'scsearch' },
-				{ name: 'Deezer', value: 'dzsearch' }, // Requires plugin on lavalink: https://github.com/topi314/LavaSrc
-				{ name: 'Spotify', value: 'spsearch' }, // Requires plugin on lavalink: https://github.com/topi314/LavaSrc
-				{ name: 'Apple Music', value: 'amsearch' }, // Requires plugin on lavalink: https://github.com/topi314/LavaSrc
-				{ name: 'Bandcamp', value: 'bcsearch' },
-				{ name: 'Cornhub', value: 'phsearch' },
+			o.setName("source").setDescription("From which Source you want to play?").setRequired(true).setChoices(
+				{ name: "Youtube", value: "ytsearch" }, // Requires plugin on lavalink: https://github.com/lavalink-devs/youtube-source
+				{ name: "Youtube Music", value: "ytmsearch" }, // Requires plugin on lavalink: https://github.com/lavalink-devs/youtube-source
+				{ name: "Soundcloud", value: "scsearch" },
+				{ name: "Deezer", value: "dzsearch" }, // Requires plugin on lavalink: https://github.com/topi314/LavaSrc
+				{ name: "Spotify", value: "spsearch" }, // Requires plugin on lavalink: https://github.com/topi314/LavaSrc
+				{ name: "Apple Music", value: "amsearch" }, // Requires plugin on lavalink: https://github.com/topi314/LavaSrc
+				{ name: "Bandcamp", value: "bcsearch" },
+				{ name: "Cornhub", value: "phsearch" },
 			),
 		)
-		.addStringOption(o => o.setName('query').setDescription('What to play?').setAutocomplete(true).setRequired(true)),
+		.addStringOption(o => o.setName("query").setDescription("What to play?").setAutocomplete(true).setRequired(true)),
 	execute: async (client, interaction) => {
 		if (!interaction.guildId) return;
 
 		const vcId = (interaction.member as GuildMember)?.voice?.channelId;
-		if (!vcId) return interaction.reply({ ephemeral: true, content: 'Join a voice Channel' });
+		if (!vcId) return interaction.reply({ ephemeral: true, content: "Join a voice Channel" });
 
 		const vc = (interaction.member as GuildMember)?.voice?.channel as VoiceChannel;
 		if (!vc.joinable || !vc.speakable)
-			return interaction.reply({ ephemeral: true, content: 'I am not able to join your channel / speak in there.' });
+			return interaction.reply({
+				ephemeral: true,
+				content: "I am not able to join your channel / speak in there.",
+			});
 
-		const src = (interaction.options as CommandInteractionOptionResolver).getString('source') as
+		const src = (interaction.options as CommandInteractionOptionResolver).getString("source") as
 			| SearchPlatform
 			| undefined;
-		const query = (interaction.options as CommandInteractionOptionResolver).getString('query') as string;
+		const query = (interaction.options as CommandInteractionOptionResolver).getString("query") as string;
 
-		if (query === 'nothing_found') return interaction.reply({ content: 'No Tracks found', ephemeral: true });
-		if (query === 'join_vc')
-			return interaction.reply({ content: 'You joined a VC, but redo the Command please.', ephemeral: true });
+		if (query === "nothing_found") return interaction.reply({ content: "No Tracks found", ephemeral: true });
+		if (query === "join_vc")
+			return interaction.reply({
+				content: "You joined a VC, but redo the Command please.",
+				ephemeral: true,
+			});
 
 		const fromAutoComplete =
-			Number(query.replace('autocomplete_', '')) >= 0 &&
+			Number(query.replace("autocomplete_", "")) >= 0 &&
 			autocompleteMap.has(`${interaction.user.id}_res`) &&
 			autocompleteMap.get(`${interaction.user.id}_res`);
 		if (autocompleteMap.has(`${interaction.user.id}_res`)) {
@@ -78,23 +84,26 @@ export default {
 		if (!connected) await player.connect();
 
 		if (player.voiceChannelId !== vcId)
-			return interaction.reply({ ephemeral: true, content: 'You need to be in my Voice Channel' });
+			return interaction.reply({
+				ephemeral: true,
+				content: "You need to be in my Voice Channel",
+			});
 
 		const response = (fromAutoComplete ||
 			(await player.search({ query: query, source: src }, interaction.user))) as SearchResult;
 		if (!response || !response.tracks?.length)
-			return interaction.reply({ content: 'No Tracks found', ephemeral: true });
+			return interaction.reply({ content: "No Tracks found", ephemeral: true });
 
 		await player.queue.add(
-			response.loadType === 'playlist'
+			response.loadType === "playlist"
 				? response.tracks
-				: response.tracks[fromAutoComplete ? Number(query.replace('autocomplete_', '')) : 0],
+				: response.tracks[fromAutoComplete ? Number(query.replace("autocomplete_", "")) : 0],
 		);
 
 		await interaction.reply({
 			content:
-				response.loadType === 'playlist'
-					? `✅ Added [${response.tracks.length}] Tracks${response.playlist?.title ? ` - from the ${response.pluginInfo.type || 'Playlist'} ${response.playlist.uri ? `[\`${response.playlist.title}\`](<${response.playlist.uri}>)` : `\`${response.playlist.title}\``}` : ''} at \`#${player.queue.tracks.length - response.tracks.length}\``
+				response.loadType === "playlist"
+					? `✅ Added [${response.tracks.length}] Tracks${response.playlist?.title ? ` - from the ${response.pluginInfo.type || "Playlist"} ${response.playlist.uri ? `[\`${response.playlist.title}\`](<${response.playlist.uri}>)` : `\`${response.playlist.title}\``}` : ""} at \`#${player.queue.tracks.length - response.tracks.length}\``
 					: `✅ Added [\`${response.tracks[0].info.title}\`](<${response.tracks[0].info.uri}>) by \`${response.tracks[0].info.author}\` at \`#${player.queue.tracks.length}\``,
 		});
 
@@ -103,7 +112,7 @@ export default {
 	autocomplete: async (client, interaction) => {
 		if (!interaction.guildId) return;
 		const vcId = (interaction.member as GuildMember)?.voice?.channelId;
-		if (!vcId) return interaction.respond([{ name: 'Join a voice Channel', value: 'join_vc' }]);
+		if (!vcId) return interaction.respond([{ name: "Join a voice Channel", value: "join_vc" }]);
 
 		const focussedQuery = interaction.options.getFocused();
 		const player =
@@ -121,17 +130,20 @@ export default {
 		if (!player.connected) await player.connect();
 
 		if (player.voiceChannelId !== vcId)
-			return interaction.respond([{ name: 'You need to be in my Voice Channel', value: 'join_vc' }]);
+			return interaction.respond([{ name: "You need to be in my Voice Channel", value: "join_vc" }]);
 
 		if (!focussedQuery.trim().length)
-			return await interaction.respond([{ name: 'No Tracks found (enter a query)', value: 'nothing_found' }]);
+			return await interaction.respond([{ name: "No Tracks found (enter a query)", value: "nothing_found" }]);
 
 		const res = (await player.search(
-			{ query: focussedQuery, source: interaction.options.getString('source') as SearchPlatform },
+			{
+				query: focussedQuery,
+				source: interaction.options.getString("source") as SearchPlatform,
+			},
 			interaction.user,
 		)) as SearchResult;
 
-		if (!res.tracks.length) return await interaction.respond([{ name: 'No Tracks found', value: 'nothing_found' }]);
+		if (!res.tracks.length) return await interaction.respond([{ name: "No Tracks found", value: "nothing_found" }]);
 		// handle the res
 		if (autocompleteMap.has(`${interaction.user.id}_timeout`))
 			clearTimeout(autocompleteMap.get(`${interaction.user.id}_timeout`));
@@ -144,11 +156,16 @@ export default {
 			}, 25000),
 		);
 		await interaction.respond(
-			res.loadType === 'playlist'
-				? [{ name: `Playlist [${res.tracks.length} Tracks] - ${res.playlist?.title}`, value: 'autocomplete_0' }]
+			res.loadType === "playlist"
+				? [
+						{
+							name: `Playlist [${res.tracks.length} Tracks] - ${res.playlist?.title}`,
+							value: "autocomplete_0",
+						},
+					]
 				: res.tracks
 						.map((t: Track, i) => ({
-							name: `[${formatMS_HHMMSS(t.info.duration)}] ${t.info.title} (by ${t.info.author || 'Unknown-Author'})`.substring(
+							name: `[${formatMS_HHMMSS(t.info.duration)}] ${t.info.title} (by ${t.info.author || "Unknown-Author"})`.substring(
 								0,
 								100,
 							),

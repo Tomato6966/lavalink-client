@@ -1,1 +1,1 @@
-export { EQList } from '../../src';
+export { EQList } from "../../src";

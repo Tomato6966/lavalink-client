@@ -3,9 +3,9 @@ import {
 	type CommandInteractionOptionResolver,
 	Events,
 	type Interaction,
-} from 'discord.js';
+} from "discord.js";
 
-import type { Command, Event, SubCommand } from '../types/Client';
+import type { Command, Event, SubCommand } from "../types/Client";
 
 export default {
 	name: Events.InteractionCreate,
@@ -17,20 +17,20 @@ export default {
 		try {
 			if (interaction.isCommand()) {
 				if (subCommand) {
-					if (typeof (command as SubCommand).execute[subCommand] !== 'function')
+					if (typeof (command as SubCommand).execute[subCommand] !== "function")
 						return console.error(`[Command-Error] Sub-Command is missing property "execute#${subCommand}".`);
 					// execute subcommand
 					return await (command as SubCommand).execute[subCommand](
 						client,
-						interaction as ChatInputCommandInteraction<'cached'>,
+						interaction as ChatInputCommandInteraction<"cached">,
 					);
 				}
 				// execute command
-				return await (command as Command).execute(client, interaction as ChatInputCommandInteraction<'cached'>);
+				return await (command as Command).execute(client, interaction as ChatInputCommandInteraction<"cached">);
 			}
 			if (interaction.isAutocomplete()) {
 				if (subCommand) {
-					if (typeof (command as SubCommand).autocomplete?.[subCommand] !== 'function')
+					if (typeof (command as SubCommand).autocomplete?.[subCommand] !== "function")
 						return console.error(`[Command-Error] Sub-Command is missing property "autocomplete#${subCommand}".`);
 					// execute subcommand-autocomplete
 					return await (command as SubCommand).autocomplete?.[subCommand](client, interaction);
@@ -44,9 +44,15 @@ export default {
 			console.error(error);
 			if (interaction.isAutocomplete()) return;
 			if (interaction.replied || interaction.deferred) {
-				await interaction.followUp({ content: 'There was an error while executing this command!', ephemeral: true });
+				await interaction.followUp({
+					content: "There was an error while executing this command!",
+					ephemeral: true,
+				});
 			} else {
-				await interaction.reply({ content: 'There was an error while executing this command!', ephemeral: true });
+				await interaction.reply({
+					content: "There was an error while executing this command!",
+					ephemeral: true,
+				});
 			}
 		}
 	},

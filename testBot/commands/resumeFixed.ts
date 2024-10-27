@@ -1,24 +1,27 @@
-import { type GuildMember, SlashCommandBuilder } from 'discord.js';
+import { type GuildMember, SlashCommandBuilder } from "discord.js";
 
-import type { Command } from '../types/Client';
+import type { Command } from "../types/Client";
 
 export default {
-	data: new SlashCommandBuilder().setName('resume_with_fix').setDescription('Resume the player with the playback fix'),
+	data: new SlashCommandBuilder().setName("resume_with_fix").setDescription("Resume the player with the playback fix"),
 	execute: async (client, interaction) => {
 		if (!interaction.guildId) return;
 		const vcId = (interaction.member as GuildMember)?.voice?.channelId;
 		const player = client.lavalink.getPlayer(interaction.guildId);
 		if (!player) return interaction.reply({ ephemeral: true, content: "I'm not connected" });
-		if (!vcId) return interaction.reply({ ephemeral: true, content: 'Join a Voice Channel ' });
+		if (!vcId) return interaction.reply({ ephemeral: true, content: "Join a Voice Channel " });
 		if (player.voiceChannelId !== vcId)
-			return interaction.reply({ ephemeral: true, content: 'You need to be in my Voice Channel' });
-		if (!player.paused) return interaction.reply({ ephemeral: true, content: 'Not paused' });
+			return interaction.reply({
+				ephemeral: true,
+				content: "You need to be in my Voice Channel",
+			});
+		if (!player.paused) return interaction.reply({ ephemeral: true, content: "Not paused" });
 
 		if (!player.queue.current) {
 			await player.resume();
 			await interaction.reply({
 				ephemeral: true,
-				content: 'Resumed the player (without fix because tehre is no current)',
+				content: "Resumed the player (without fix because tehre is no current)",
 			});
 			return;
 		}
@@ -33,7 +36,7 @@ export default {
 				requester: player.queue.current.requester,
 				userData: {
 					...(player.queue.current.userData || {}), // pass previous userData or empty object
-					resumeSkipFix: 'true',
+					resumeSkipFix: "true",
 				},
 			},
 			paused: false,

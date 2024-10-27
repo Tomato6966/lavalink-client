@@ -1,8 +1,8 @@
-import { EmbedBuilder, type Message, type MessageCreateOptions, type TextChannel, type VoiceChannel } from 'discord.js';
+import { EmbedBuilder, type Message, type MessageCreateOptions, type TextChannel, type VoiceChannel } from "discord.js";
 
-import { DebugEvents, type Player } from '../../src';
-import type { BotClient, CustomRequester } from '../types/Client';
-import { formatMS_HHMMSS } from '../Utils/Time';
+import { DebugEvents, type Player } from "../../src";
+import type { BotClient, CustomRequester } from "../types/Client";
+import { formatMS_HHMMSS } from "../Utils/Time";
 
 const messagesMap = new Map<string, Message>();
 
@@ -11,64 +11,64 @@ export function PlayerEvents(client: BotClient) {
 	 * PLAYER EVENTS
 	 */
 	client.lavalink
-		.on('playerCreate', player => {
-			logPlayer(client, player, 'Created a Player :: ');
+		.on("playerCreate", player => {
+			logPlayer(client, player, "Created a Player :: ");
 		})
-		.on('playerDestroy', (player, reason) => {
-			logPlayer(client, player, 'Player got Destroyed :: ');
+		.on("playerDestroy", (player, reason) => {
+			logPlayer(client, player, "Player got Destroyed :: ");
 			sendPlayerMessage(client, player, {
 				embeds: [
 					new EmbedBuilder()
-						.setColor('Red')
-						.setTitle('❌ Player Destroyed')
-						.setDescription(`Reason: ${reason || 'Unknown'}`)
+						.setColor("Red")
+						.setTitle("❌ Player Destroyed")
+						.setDescription(`Reason: ${reason || "Unknown"}`)
 						.setTimestamp(),
 				],
 			});
 		})
-		.on('playerDisconnect', (player, voiceChannelId) => {
-			logPlayer(client, player, 'Player disconnected the Voice Channel :: ', voiceChannelId);
+		.on("playerDisconnect", (player, voiceChannelId) => {
+			logPlayer(client, player, "Player disconnected the Voice Channel :: ", voiceChannelId);
 		})
-		.on('playerMove', (player, oldVoiceChannelId, newVoiceChannelId) => {
+		.on("playerMove", (player, oldVoiceChannelId, newVoiceChannelId) => {
 			logPlayer(
 				client,
 				player,
-				'Player moved from Voice Channel :: ',
+				"Player moved from Voice Channel :: ",
 				oldVoiceChannelId,
-				' :: To ::',
+				" :: To ::",
 				newVoiceChannelId,
 			);
 		})
-		.on('playerSocketClosed', (player, payload) => {
-			logPlayer(client, player, 'Player socket got closed from lavalink :: ', payload);
+		.on("playerSocketClosed", (player, payload) => {
+			logPlayer(client, player, "Player socket got closed from lavalink :: ", payload);
 		})
-		.on('playerUpdate', player => {
+		.on("playerUpdate", player => {
 			// use this event to udpate the player in the your cache if you want to save the player's data(s) externally!
 			/**
 			 *
 			 */
 		})
-		.on('playerMuteChange', (player, selfMuted, serverMuted) => {
-			logPlayer(client, player, 'INFO: playerMuteChange', { selfMuted, serverMuted });
+		.on("playerMuteChange", (player, selfMuted, serverMuted) => {
+			logPlayer(client, player, "INFO: playerMuteChange", { selfMuted, serverMuted });
 			// e.g. what you could do is when the bot get's server muted, you could pause the player, and unpause it when unmuted again
 			if (serverMuted) {
-				player.set('paused_of_servermute', true);
+				player.set("paused_of_servermute", true);
 				player.pause();
-			} else if (player.get('paused_of_servermute') && player.paused) player.resume();
+			} else if (player.get("paused_of_servermute") && player.paused) player.resume();
 			// e.g. "unmute the player again"
 			// if(serverMuted === true)  client.guilds.cache.get(player.guildId)?.members.me?.voice.setMute(false, "Auto unmute the player");
 		})
-		.on('playerDeafChange', (player, selfDeaf, serverDeaf) => {
-			logPlayer(client, player, 'INFO: playerDeafChange');
+		.on("playerDeafChange", (player, selfDeaf, serverDeaf) => {
+			logPlayer(client, player, "INFO: playerDeafChange");
 			// e.g. "re-deaf the player" because ppl think this way the bot saves traffic
 			// if(serverDeaf === false) client.guilds.cache.get(player.guildId)?.members.me?.voice.setDeaf(true, "Auto re-deaf the player");
 		})
-		.on('playerSuppressChange', (player, suppress) => {
-			logPlayer(client, player, 'INFO: playerSuppressChange');
+		.on("playerSuppressChange", (player, suppress) => {
+			logPlayer(client, player, "INFO: playerSuppressChange");
 			// e.g. you could automatically unsuppress the bot so he's allowed to speak
 		})
-		.on('playerQueueEmptyStart', async (player, delayMs) => {
-			logPlayer(client, player, 'INFO: playerQueueEmptyStart');
+		.on("playerQueueEmptyStart", async (player, delayMs) => {
+			logPlayer(client, player, "INFO: playerQueueEmptyStart");
 			const msg = await sendPlayerMessage(client, player, {
 				embeds: [
 					new EmbedBuilder().setDescription(
@@ -78,46 +78,46 @@ export function PlayerEvents(client: BotClient) {
 			});
 			if (msg) messagesMap.set(`${player.guildId}_queueempty`, msg);
 		})
-		.on('playerQueueEmptyEnd', player => {
-			logPlayer(client, player, 'INFO: playerQueueEmptyEnd');
+		.on("playerQueueEmptyEnd", player => {
+			logPlayer(client, player, "INFO: playerQueueEmptyEnd");
 			// you can e.g. edit the saved message
 			const msg = messagesMap.get(`${player.guildId}_queueempty`);
 			if (msg?.editable) {
 				msg.edit({
-					embeds: [new EmbedBuilder().setDescription('Player got destroyed because of queue Empty')],
+					embeds: [new EmbedBuilder().setDescription("Player got destroyed because of queue Empty")],
 				});
 			}
 		})
-		.on('playerQueueEmptyCancel', player => {
-			logPlayer(client, player, 'INFO: playerQueueEmptyEnd');
+		.on("playerQueueEmptyCancel", player => {
+			logPlayer(client, player, "INFO: playerQueueEmptyEnd");
 			// you can e.g. edit the saved message
 			const msg = messagesMap.get(`${player.guildId}_queueempty`);
 			if (msg?.editable) {
 				msg.edit({
 					embeds: [
 						new EmbedBuilder().setDescription(
-							'Player queue empty timer got cancelled. Because i got enqueued a new track',
+							"Player queue empty timer got cancelled. Because i got enqueued a new track",
 						),
 					],
 				});
 			}
 		})
-		.on('playerVoiceLeave', (player, userId) => {
-			logPlayer(client, player, 'INFO: playerVoiceLeave: ', userId);
+		.on("playerVoiceLeave", (player, userId) => {
+			logPlayer(client, player, "INFO: playerVoiceLeave: ", userId);
 		})
-		.on('playerVoiceJoin', (player, userId) => {
-			logPlayer(client, player, 'INFO: playerVoiceJoin: ', userId);
+		.on("playerVoiceJoin", (player, userId) => {
+			logPlayer(client, player, "INFO: playerVoiceJoin: ", userId);
 		})
-		.on('debug', (eventKey, eventData) => {
+		.on("debug", (eventKey, eventData) => {
 			// skip specific log
-			if (eventKey === DebugEvents.NoAudioDebug && eventData.message === 'Manager is not initated yet') return;
+			if (eventKey === DebugEvents.NoAudioDebug && eventData.message === "Manager is not initated yet") return;
 			// skip specific event log of a log-level-state "log"
-			if (eventKey === DebugEvents.PlayerUpdateSuccess && eventData.state === 'log') return;
-			console.group('Lavalink-Client-Debug:');
-			console.log('-'.repeat(20));
+			if (eventKey === DebugEvents.PlayerUpdateSuccess && eventData.state === "log") return;
+			console.group("Lavalink-Client-Debug:");
+			console.log("-".repeat(20));
 			console.debug(`[${eventKey}]`);
 			console.debug(eventData);
-			console.log('-'.repeat(20));
+			console.log("-".repeat(20));
 			console.groupEnd();
 		});
 
@@ -125,21 +125,21 @@ export function PlayerEvents(client: BotClient) {
 	 * Queue/Track Events
 	 */
 	client.lavalink
-		.on('trackStart', (player, track) => {
+		.on("trackStart", (player, track) => {
 			const avatarURL = (track?.requester as CustomRequester)?.avatar || undefined;
 
 			logPlayer(
 				client,
 				player,
-				'Started Playing :: ',
+				"Started Playing :: ",
 				track?.info?.title,
-				'QUEUE:',
+				"QUEUE:",
 				player.queue.tracks.map(v => v.info.title),
 			);
 
 			const embeds = [
 				new EmbedBuilder()
-					.setColor('Blurple')
+					.setColor("Blurple")
 					.setTitle(`🎶 ${track?.info?.title}`.substring(0, 256))
 					.setThumbnail(track?.info?.artworkUrl || track?.pluginInfo?.artworkUrl || null)
 					.setDescription(
@@ -148,15 +148,15 @@ export function PlayerEvents(client: BotClient) {
 							`> - **Duration:** ${formatMS_HHMMSS(track?.info?.duration || 0)} | Ends <t:${Math.floor((Date.now() + (track?.info?.duration || 0)) / 1000)}:R>`,
 							`> - **Source:** ${track?.info?.sourceName}`,
 							`> - **Requester:** <@${(track?.requester as CustomRequester)?.id}>`,
-							track?.pluginInfo?.clientData?.fromAutoplay ? '> *From Autoplay* ✅' : undefined,
+							track?.pluginInfo?.clientData?.fromAutoplay ? "> *From Autoplay* ✅" : undefined,
 						]
-							.filter(v => typeof v === 'string' && v.length)
-							.join('\n')
+							.filter(v => typeof v === "string" && v.length)
+							.join("\n")
 							.substring(0, 4096),
 					)
 					.setFooter({
 						text: `Requested by ${(track?.requester as CustomRequester)?.username}`,
-						iconURL: /^https?:\/\//.test(avatarURL || '') ? avatarURL : undefined,
+						iconURL: /^https?:\/\//.test(avatarURL || "") ? avatarURL : undefined,
 					})
 					.setTimestamp(),
 			];
@@ -165,31 +165,31 @@ export function PlayerEvents(client: BotClient) {
 
 			sendPlayerMessage(client, player, { embeds });
 		})
-		.on('trackEnd', (player, track, payload) => {
-			logPlayer(client, player, 'Finished Playing :: ', track?.info?.title);
+		.on("trackEnd", (player, track, payload) => {
+			logPlayer(client, player, "Finished Playing :: ", track?.info?.title);
 		})
-		.on('trackError', (player, track, payload) => {
-			logPlayer(client, player, 'Errored while Playing :: ', track?.info?.title, ' :: ERROR DATA :: ', payload);
+		.on("trackError", (player, track, payload) => {
+			logPlayer(client, player, "Errored while Playing :: ", track?.info?.title, " :: ERROR DATA :: ", payload);
 		})
-		.on('trackStuck', (player, track, payload) => {
-			logPlayer(client, player, 'Got Stuck while Playing :: ', track?.info?.title, ' :: STUCKED DATA :: ', payload);
+		.on("trackStuck", (player, track, payload) => {
+			logPlayer(client, player, "Got Stuck while Playing :: ", track?.info?.title, " :: STUCKED DATA :: ", payload);
 		})
-		.on('queueEnd', (player, track, payload) => {
-			logPlayer(client, player, 'No more tracks in the queue, after playing :: ', track?.info?.title || track);
+		.on("queueEnd", (player, track, payload) => {
+			logPlayer(client, player, "No more tracks in the queue, after playing :: ", track?.info?.title || track);
 			sendPlayerMessage(client, player, {
-				embeds: [new EmbedBuilder().setColor('Red').setTitle('❌ Queue Ended').setTimestamp()],
+				embeds: [new EmbedBuilder().setColor("Red").setTitle("❌ Queue Ended").setTimestamp()],
 			});
 		});
 }
 
 // structured - grouped logging
 function logPlayer(client: BotClient, player: Player, ...messages) {
-	console.group('Player Event');
+	console.group("Player Event");
 	console.log(`| Guild: ${player.guildId} | ${client.guilds.cache.get(player.guildId)?.name}`);
 	console.log(
 		`| Voice Channel: #${(client.channels.cache.get(player.voiceChannelId!) as VoiceChannel)?.name || player.voiceChannelId}`,
 	);
-	console.group('| Info:');
+	console.group("| Info:");
 	console.log(...messages);
 	console.groupEnd();
 	console.groupEnd();

@@ -1,11 +1,11 @@
-import { envConfig } from '../config';
-import type { BotClient } from '../types/Client';
-import { delay } from './Time';
+import { envConfig } from "../config";
+import type { BotClient } from "../types/Client";
+import { delay } from "./Time";
 
 export async function testPlay(client: BotClient) {
 	await delay(150); // SHORT DELAY
-	if (!client.lavalink.useable) return console.log('NOT USEABLE ATM!');
-	const testGuild = client.guilds.cache.get('1070626568260562954')!;
+	if (!client.lavalink.useable) return console.log("NOT USEABLE ATM!");
+	const testGuild = client.guilds.cache.get("1070626568260562954")!;
 
 	const player = await client.lavalink.createPlayer({
 		guildId: testGuild.id,
@@ -20,7 +20,7 @@ export async function testPlay(client: BotClient) {
 
 	const res = await player.search(
 		{
-			query: 'Elton John',
+			query: "Elton John",
 		},
 		client.user,
 	);

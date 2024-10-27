@@ -3,25 +3,28 @@ import {
 	type GuildMember,
 	SlashCommandBuilder,
 	type VoiceChannel,
-} from 'discord.js';
+} from "discord.js";
 
-import type { Command } from '../types/Client';
+import type { Command } from "../types/Client";
 
 export default {
 	data: new SlashCommandBuilder()
-		.setName('ftts')
-		.setDescription('Use Flowery Text To Speech')
-		.addStringOption(o => o.setName('text').setDescription('The Text to translate').setRequired(true))
-		.addStringOption(o => o.setName('voice').setDescription('The Voice, and thus language to use').setRequired(false)),
+		.setName("ftts")
+		.setDescription("Use Flowery Text To Speech")
+		.addStringOption(o => o.setName("text").setDescription("The Text to translate").setRequired(true))
+		.addStringOption(o => o.setName("voice").setDescription("The Voice, and thus language to use").setRequired(false)),
 	execute: async (client, interaction) => {
 		if (!interaction.guildId) return;
 
 		const vcId = (interaction.member as GuildMember)?.voice?.channelId;
-		if (!vcId) return interaction.reply({ ephemeral: true, content: 'Join a Voice Channel ' });
+		if (!vcId) return interaction.reply({ ephemeral: true, content: "Join a Voice Channel " });
 
 		const vc = (interaction.member as GuildMember)?.voice?.channel as VoiceChannel;
 		if (!vc.joinable || !vc.speakable)
-			return interaction.reply({ ephemeral: true, content: 'I am not able to join your channel / speak in there.' });
+			return interaction.reply({
+				ephemeral: true,
+				content: "I am not able to join your channel / speak in there.",
+			});
 
 		const player = await client.lavalink.createPlayer({
 			guildId: interaction.guildId,
@@ -39,25 +42,28 @@ export default {
 
 		if (!connected) await player.connect();
 		if (player.voiceChannelId !== vcId)
-			return interaction.reply({ ephemeral: true, content: 'You need to be in my Voice Channel' });
+			return interaction.reply({
+				ephemeral: true,
+				content: "You need to be in my Voice Channel",
+			});
 
-		const query = (interaction.options as CommandInteractionOptionResolver).getString('text')!;
-		const voice = (interaction.options as CommandInteractionOptionResolver).getString('voice')!;
+		const query = (interaction.options as CommandInteractionOptionResolver).getString("text")!;
+		const voice = (interaction.options as CommandInteractionOptionResolver).getString("voice")!;
 
 		const extraParams = new URLSearchParams();
-		if (voice) extraParams.append('voice', voice);
+		if (voice) extraParams.append("voice", voice);
 
 		const response = await player.search(
 			{
 				query: `${query}`,
 				extraQueryUrlParams: extraParams,
-				source: 'ftts',
+				source: "ftts",
 			},
 			interaction.user,
 		);
 
 		if (!response || !response.tracks?.length)
-			return interaction.reply({ content: 'No Tracks found', ephemeral: true });
+			return interaction.reply({ content: "No Tracks found", ephemeral: true });
 
 		player.queue.add(response.tracks[0]);
 

@@ -1,9 +1,9 @@
-import { type GuildMember, SlashCommandBuilder } from 'discord.js';
+import { type GuildMember, SlashCommandBuilder } from "discord.js";
 
-import type { Command } from '../types/Client';
+import type { Command } from "../types/Client";
 
 export default {
-	data: new SlashCommandBuilder().setName('stop').setDescription('Stops the player & leaves the voice'),
+	data: new SlashCommandBuilder().setName("stop").setDescription("Stops the player & leaves the voice"),
 	execute: async (client, interaction) => {
 		if (!interaction.guildId) return;
 		const vcId = (interaction.member as GuildMember)?.voice?.channelId;
@@ -14,6 +14,6 @@ export default {
 		await player.destroy(`${interaction.user.username} stopped the Player`);
 
 		// and it is good again!
-		interaction.reply({ content: 'Stopped the player' });
+		interaction.reply({ content: "Stopped the player" });
 	},
 } as Command;

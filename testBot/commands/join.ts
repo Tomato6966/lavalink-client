@@ -1,18 +1,21 @@
-import { type GuildMember, SlashCommandBuilder, type VoiceChannel } from 'discord.js';
+import { type GuildMember, SlashCommandBuilder, type VoiceChannel } from "discord.js";
 
-import type { Command } from '../types/Client';
+import type { Command } from "../types/Client";
 
 export default {
-	data: new SlashCommandBuilder().setName('join').setDescription('Joins a Voice Channel'),
+	data: new SlashCommandBuilder().setName("join").setDescription("Joins a Voice Channel"),
 	execute: async (client, interaction) => {
 		if (!interaction.guildId) return;
 
 		const vcId = (interaction.member as GuildMember)?.voice?.channelId;
-		if (!vcId) return interaction.reply({ ephemeral: true, content: 'Join a Voice Channel ' });
+		if (!vcId) return interaction.reply({ ephemeral: true, content: "Join a Voice Channel " });
 
 		const vc = (interaction.member as GuildMember)?.voice?.channel as VoiceChannel;
 		if (!vc.joinable || !vc.speakable)
-			return interaction.reply({ ephemeral: true, content: 'I am not able to join your channel / speak in there.' });
+			return interaction.reply({
+				ephemeral: true,
+				content: "I am not able to join your channel / speak in there.",
+			});
 
 		const player = client.lavalink.getPlayer(interaction.guildId);
 		if (player?.voiceChannelId && player.connected)
@@ -36,7 +39,7 @@ export default {
 		});
 		await newPlayer.connect();
 		await interaction.reply({
-			content: 'Joined your Voice Channel',
+			content: "Joined your Voice Channel",
 			ephemeral: true,
 		});
 	},

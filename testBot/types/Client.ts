@@ -6,13 +6,13 @@ import type {
 	SlashCommandSubcommandBuilder,
 	SlashCommandSubcommandGroupBuilder,
 	SlashCommandSubcommandsOnlyBuilder,
-} from 'discord.js';
-import type { RedisClientType } from 'redis';
+} from "discord.js";
+import type { RedisClientType } from "redis";
 
-import type { LavalinkManager, MiniMap } from '../../src';
-import type { JSONStore } from '../Utils/CustomClasses';
+import type { LavalinkManager, MiniMap } from "../../src";
+import type { JSONStore } from "../Utils/CustomClasses";
 
-declare type InteractionExecuteFN = (client: BotClient, interaction: ChatInputCommandInteraction<'cached'>) => any;
+declare type InteractionExecuteFN = (client: BotClient, interaction: ChatInputCommandInteraction<"cached">) => any;
 declare type AutoCompleteExecuteFN = (client: BotClient, interaction: AutocompleteInteraction) => any;
 
 export interface CustomRequester {

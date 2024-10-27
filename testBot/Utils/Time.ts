@@ -10,11 +10,11 @@ export function formatMS_HHMMSS(num: number) {
 		.map((v, i) =>
 			i <= 1 && v === 0
 				? undefined
-				: [i === 4 ? '.' : '', v < 10 ? `0${v}` : v, [' Days, ', ':', ':', '', ''][i]].join(''),
+				: [i === 4 ? "." : "", v < 10 ? `0${v}` : v, [" Days, ", ":", ":", "", ""][i]].join(""),
 		)
 		.filter(Boolean)
 		.slice(0, -1)
-		.join('');
+		.join("");
 }
 
 export const delay = async (ms: number) => new Promise(resolve => setTimeout(() => resolve(true), ms));

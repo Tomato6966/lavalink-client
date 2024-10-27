@@ -1,15 +1,15 @@
-import { Client, GatewayIntentBits } from 'discord.js';
-import { createClient } from 'redis';
+import { Client, GatewayIntentBits } from "discord.js";
+import { createClient } from "redis";
 
-import { LavalinkManager, type ManagerOptions, MiniMap, parseLavalinkConnUrl } from '../src';
-import { envConfig } from './config';
-import { loadCommands } from './handler/commandLoader';
-import { loadEvents } from './handler/eventsLoader';
-import { loadLavalinkEvents } from './lavalinkEvents';
-import type { BotClient } from './types/Client';
-import { JSONStore, myCustomStore, myCustomWatcher, PlayerSaver } from './Utils/CustomClasses';
-import { handleResuming } from './Utils/handleResuming';
-import { autoPlayFunction, requesterTransformer } from './Utils/OptionalFunctions';
+import { LavalinkManager, type ManagerOptions, MiniMap, parseLavalinkConnUrl } from "../src";
+import { envConfig } from "./config";
+import { loadCommands } from "./handler/commandLoader";
+import { loadEvents } from "./handler/eventsLoader";
+import { loadLavalinkEvents } from "./lavalinkEvents";
+import type { BotClient } from "./types/Client";
+import { JSONStore, myCustomStore, myCustomWatcher, PlayerSaver } from "./Utils/CustomClasses";
+import { handleResuming } from "./Utils/handleResuming";
+import { autoPlayFunction, requesterTransformer } from "./Utils/OptionalFunctions";
 
 const client = new Client({
 	intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildVoiceStates],
@@ -17,9 +17,12 @@ const client = new Client({
 
 if (envConfig.redis.url && 1 < 0) {
 	// little invalid if statement so the redis doesn't happen for testing purposes
-	client.redis = createClient({ url: envConfig.redis.url, password: envConfig.redis.password });
+	client.redis = createClient({
+		url: envConfig.redis.url,
+		password: envConfig.redis.password,
+	});
 	client.redis.connect(); // @ts-ignore
-	client.redis.on('error', err => console.log('Redis Client Error', err));
+	client.redis.on("error", err => console.log("Redis Client Error", err));
 } else if (envConfig.useJSONStore) {
 	client.redis = new JSONStore();
 } else client.redis = new MiniMap<string, string>();
@@ -35,7 +38,7 @@ client.defaultVolume = 100;
  *       (   do it in nodejs via: encodeURIComponent("verySpecialPassword#1")   )
  *          you can also use this website to encode your password: https://www.url-encode-decode.com/
  */
-const LavalinkNodesOfEnv = process.env.LAVALINKNODES?.split(' ')
+const LavalinkNodesOfEnv = process.env.LAVALINKNODES?.split(" ")
 	.filter(v => v.length)
 	.map(url => parseLavalinkConnUrl(url));
 console.log(LavalinkNodesOfEnv); // you can then provide the result of here in LavalinkManagerOptions#nodes, or transform the result for further data.
@@ -48,11 +51,11 @@ console.log(LavalinkNodesOfEnv); // you can then provide the result of here in L
 	client.lavalink = new LavalinkManager({
 		nodes: [
 			{
-				authorization: 'chrissy_localhost',
-				host: 'localhost',
+				authorization: "chrissy_localhost",
+				host: "localhost",
 				port: 2333,
-				id: 'testnode',
-				sessionId: nodeSessions.get('testnode'),
+				id: "testnode",
+				sessionId: nodeSessions.get("testnode"),
 				// or add it manually like this:
 				// sessionId: "lsvunq8h8bxx0m9w", // add the sessionId in order to resume the session for the node, and then to recover the players listen to nodeManager#resumed.
 				requestSignalTimeoutMS: 3000,
@@ -69,7 +72,7 @@ console.log(LavalinkNodesOfEnv); // you can then provide the result of here in L
 		client: {
 			// client: client.user
 			id: envConfig.clientId, // REQUIRED! (at least after the .init)
-			username: 'TESTBOT',
+			username: "TESTBOT",
 		},
 		autoSkipOnResolveError: true, // skip song, if resolving an unresolved song fails
 		emitNewSongsOnly: true, // don't emit "looping songs"
@@ -84,7 +87,7 @@ console.log(LavalinkNodesOfEnv); // you can then provide the result of here in L
 
 			applyVolumeAsFilter: false,
 			clientBasedPositionUpdateInterval: 50, // in ms to up-calc player.position
-			defaultSearchPlatform: 'ytmsearch',
+			defaultSearchPlatform: "ytmsearch",
 			volumeDecrementer: 0.75, // on client 100% == on lavalink 75%
 			requesterTransformer: requesterTransformer,
 			onDisconnect: {

@@ -1,24 +1,24 @@
-import type { TextChannel } from 'discord.js';
+import type { TextChannel } from "discord.js";
 
-import type { BotClient } from '../types/Client';
-import type { PlayerSaver } from './CustomClasses';
+import type { BotClient } from "../types/Client";
+import type { PlayerSaver } from "./CustomClasses";
 
 export async function handleResuming(client: BotClient, playerSaver: PlayerSaver) {
 	client.lavalink.nodeManager
-		.on('connect', node => {
+		.on("connect", node => {
 			node.updateSession(true, 360e3); // enable resuming for playback of up to 360s
 		})
-		.on('resumed', async (node, payload, players) => {
-			if (!Array.isArray(players)) return console.error('Players is not an array', players);
+		.on("resumed", async (node, payload, players) => {
+			if (!Array.isArray(players)) return console.error("Players is not an array", players);
 			for (const data of players) {
 				const dataOfSaving = await playerSaver.getPlayer(data.guildId);
 				if (!dataOfSaving) {
-					console.error('player is not saved!');
+					console.error("player is not saved!");
 					continue;
 				}
-				console.log('resuming player:', data.guildId);
+				console.log("resuming player:", data.guildId);
 				if (!data.state.connected) {
-					console.log('skipping resuming player, because it already disconnected');
+					console.log("skipping resuming player, because it already disconnected");
 					// lavalink already disconnected the player, now you have 2 options:
 					// - stay disconnected or reconnect and re-play the saved queue
 					// i prefer disconnection, cause that means it's the resuming delay got "outreached"
@@ -62,19 +62,19 @@ export async function handleResuming(client: BotClient, playerSaver: PlayerSaver
 				// important to have skipping work correctly later
 				player.paused = data.paused;
 				player.playing = !data.paused && !!data.track;
-				console.log('finished resuming the player');
+				console.log("finished resuming the player");
 				// optional send info for example
 				if (player.textChannelId) {
 					const channel = client.channels.cache.get(player.textChannelId) as TextChannel;
 					if (channel) {
-						channel.send('Player resumed ;) you can now control it again!');
+						channel.send("Player resumed ;) you can now control it again!");
 					}
 				}
 			}
 		});
 
 	// delete the player on destroy
-	client.lavalink.on('playerDestroy', player => {
+	client.lavalink.on("playerDestroy", player => {
 		playerSaver.delPlayer(player.guildId);
 	});
 	// listen to events

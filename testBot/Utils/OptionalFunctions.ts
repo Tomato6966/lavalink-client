@@ -1,12 +1,12 @@
-import type { CustomRequester } from '../types/Client';
+import type { CustomRequester } from "../types/Client";
 
 export const requesterTransformer = (requester: any): CustomRequester => {
-	if (!requester) return { id: 'unknown', username: 'unknown', avatar: undefined };
+	if (!requester) return { id: "unknown", username: "unknown", avatar: undefined };
 	// if it's already the transformed requester
-	if (typeof requester === 'object' && 'avatar' in requester && Object.keys(requester).length === 3)
+	if (typeof requester === "object" && "avatar" in requester && Object.keys(requester).length === 3)
 		return requester as CustomRequester;
 	// if it's still a discord.js User
-	if (typeof requester === 'object' && 'displayAvatarURL' in requester) {
+	if (typeof requester === "object" && "displayAvatarURL" in requester) {
 		// it's a user
 		return {
 			id: requester.id,
@@ -14,29 +14,29 @@ export const requesterTransformer = (requester: any): CustomRequester => {
 			avatar: requester.displayAvatarURL(),
 		};
 	}
-	if (typeof requester === 'object') return { ...requester };
+	if (typeof requester === "object") return { ...requester };
 	// if it's non of the above
-	return { id: requester!.toString(), username: 'unknown' }; // reteurn something that makes sense for you!
+	return { id: requester!.toString(), username: "unknown" }; // reteurn something that makes sense for you!
 };
 
 export const autoPlayFunction = async (player, lastPlayedTrack) => {
-	console.log('AUTOPLAY');
+	console.log("AUTOPLAY");
 	// just do player.set("autoplay_disabled", true) if you want to "disable" autoplay
 	// and do player.set("autoplay_disabled", false) if you want to "enable" it again (it's enabled on default)
-	if (player.get('autoplay_disabled') === true) return;
+	if (player.get("autoplay_disabled") === true) return;
 	if (!lastPlayedTrack) return;
 
-	if (lastPlayedTrack.info.sourceName === 'spotify') {
-		const filtered = player.queue.previous.filter(v => v.info.sourceName === 'spotify').slice(0, 5);
+	if (lastPlayedTrack.info.sourceName === "spotify") {
+		const filtered = player.queue.previous.filter(v => v.info.sourceName === "spotify").slice(0, 5);
 		const ids = filtered.map(
-			v => v.info.identifier || v.info.uri.split('/')?.reverse()?.[0] || v.info.uri.split('/')?.reverse()?.[1],
+			v => v.info.identifier || v.info.uri.split("/")?.reverse()?.[0] || v.info.uri.split("/")?.reverse()?.[1],
 		);
 		if (ids.length >= 2) {
 			const res = await player
 				.search(
 					{
-						query: `seed_tracks=${ids.join(',')}`, //`seed_artists=${artistIds.join(",")}&seed_genres=${genre.join(",")}&seed_tracks=${trackIds.join(",")}`;
-						source: 'sprec',
+						query: `seed_tracks=${ids.join(",")}`, //`seed_artists=${artistIds.join(",")}&seed_genres=${genre.join(",")}&seed_tracks=${trackIds.join(",")}`;
+						source: "sprec",
 					},
 					lastPlayedTrack.requester,
 				)
@@ -49,19 +49,22 @@ export const autoPlayFunction = async (player, lastPlayedTrack) => {
 				await player.queue.add(
 					res.tracks.slice(0, 5).map(track => {
 						// transform the track plugininfo so you can figure out if the track is from autoplay or not.
-						track.pluginInfo.clientData = { ...(track.pluginInfo.clientData || {}), fromAutoplay: true };
+						track.pluginInfo.clientData = {
+							...(track.pluginInfo.clientData || {}),
+							fromAutoplay: true,
+						};
 						return track;
 					}),
 				);
 		}
 		return;
 	}
-	if (lastPlayedTrack.info.sourceName === 'youtube' || lastPlayedTrack.info.sourceName === 'youtubemusic') {
+	if (lastPlayedTrack.info.sourceName === "youtube" || lastPlayedTrack.info.sourceName === "youtubemusic") {
 		const res = await player
 			.search(
 				{
 					query: `https://www.youtube.com/watch?v=${lastPlayedTrack.info.identifier}&list=RD${lastPlayedTrack.info.identifier}`,
-					source: 'youtube',
+					source: "youtube",
 				},
 				lastPlayedTrack.requester,
 			)
@@ -74,7 +77,10 @@ export const autoPlayFunction = async (player, lastPlayedTrack) => {
 			await player.queue.add(
 				res.tracks.slice(0, 5).map(track => {
 					// transform the track plugininfo so you can figure out if the track is from autoplay or not.
-					track.pluginInfo.clientData = { ...(track.pluginInfo.clientData || {}), fromAutoplay: true };
+					track.pluginInfo.clientData = {
+						...(track.pluginInfo.clientData || {}),
+						fromAutoplay: true,
+					};
 					return track;
 				}),
 			);

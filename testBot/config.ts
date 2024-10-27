@@ -1,4 +1,4 @@
-import { config } from 'dotenv';
+import { config } from "dotenv";
 
 config();
 
@@ -10,7 +10,7 @@ export const envConfig = {
 		password: process.env.REDIS_PASSWORD as string,
 	},
 	useJSONStore: !process.env.REDIS_URL,
-	devGuild: '1180208273958375524',
-	voiceChannelId: '1180208281407463448',
-	textChannelId: '1192771980513005598',
+	devGuild: "1180208273958375524",
+	voiceChannelId: "1180208281407463448",
+	textChannelId: "1192771980513005598",
 };
