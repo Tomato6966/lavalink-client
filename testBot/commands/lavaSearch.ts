@@ -8,18 +8,7 @@ export default {
 	data: new SlashCommandBuilder()
 		.setName("lavasearch")
 		.setDescription("Play Music filtered via lava-search plugin")
-		.addStringOption(o =>
-			o
-				.setName("filter")
-				.setDescription("What are you looking for?")
-				.setChoices(
-					{ name: "Tracks", value: "track" },
-					{ name: "Albums", value: "album" },
-					{ name: "Artists", value: "artist" },
-					{ name: "Playlists", value: "playlist" },
-				)
-				.setRequired(true),
-		)
+		.addStringOption(o => o.setName("filter").setDescription("What are you looking for?").setChoices({ name: "Tracks", value: "track" }, { name: "Albums", value: "album" }, { name: "Artists", value: "artist" }, { name: "Playlists", value: "playlist" }).setRequired(true))
 		.addStringOption(o =>
 			o.setName("source").setDescription("From which Source you want to play?").setRequired(true).setChoices(
 				// { name: "Youtube", value: "ytsearch" },
@@ -58,10 +47,7 @@ export default {
 				ephemeral: true,
 			});
 
-		const fromAutoComplete =
-			Number(query.replace("autocomplete_", "")) >= 0 &&
-			autocompleteMap.has(`${interaction.user.id}_res`) &&
-			autocompleteMap.get(`${interaction.user.id}_res`);
+		const fromAutoComplete = Number(query.replace("autocomplete_", "")) >= 0 && autocompleteMap.has(`${interaction.user.id}_res`) && autocompleteMap.get(`${interaction.user.id}_res`);
 		if (autocompleteMap.has(`${interaction.user.id}_res`)) {
 			if (autocompleteMap.has(`${interaction.user.id}_timeout`)) clearTimeout(autocompleteMap.get(`${interaction.user.id}_timeout`));
 			autocompleteMap.delete(`${interaction.user.id}_res`);
@@ -72,8 +58,7 @@ export default {
 				ephemeral: true,
 				content: "You have to use autocomplete",
 			});
-		if (!fromAutoComplete[Number(query.replace("autocomplete_", ""))]?.pluginInfo?.url)
-			return interaction.reply({ ephemeral: true, content: "Nothing found" });
+		if (!fromAutoComplete[Number(query.replace("autocomplete_", ""))]?.pluginInfo?.url) return interaction.reply({ ephemeral: true, content: "Nothing found" });
 		const player =
 			client.lavalink.getPlayer(interaction.guildId) ||
 			(await client.lavalink.createPlayer({
@@ -167,10 +152,7 @@ export default {
 		await interaction.respond(
 			res[`${type}s`]
 				.map((t: LavaSearchFilteredResponse, i) => ({
-					name: `[${t.pluginInfo.totalTracks || Number.NaN} Tracks] ${t.info.title || t.info.name} (by ${t.pluginInfo.author || "Unknown-Author"})`.substring(
-						0,
-						100,
-					),
+					name: `[${t.pluginInfo.totalTracks || Number.NaN} Tracks] ${t.info.title || t.info.name} (by ${t.pluginInfo.author || "Unknown-Author"})`.substring(0, 100),
 					value: `autocomplete_${i}`,
 				}))
 				.slice(0, 25),

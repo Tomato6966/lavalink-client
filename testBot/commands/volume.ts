@@ -5,16 +5,8 @@ export default {
 	data: new SlashCommandBuilder()
 		.setName("volume")
 		.setDescription("Change the Volume of the Player")
-		.addIntegerOption(o =>
-			o.setName("percentage").setDescription("To what Volume do you want to change").setMaxValue(200).setMinValue(0).setRequired(true),
-		)
-		.addStringOption(o =>
-			o
-				.setName("ignoredecrementer")
-				.setDescription("Should the Decrementer be ignored?")
-				.setRequired(false)
-				.setChoices({ name: "True", value: "true" }, { name: "False", value: "false" }),
-		),
+		.addIntegerOption(o => o.setName("percentage").setDescription("To what Volume do you want to change").setMaxValue(200).setMinValue(0).setRequired(true))
+		.addStringOption(o => o.setName("ignoredecrementer").setDescription("Should the Decrementer be ignored?").setRequired(false).setChoices({ name: "True", value: "true" }, { name: "False", value: "false" })),
 	execute: async (client, interaction) => {
 		if (!interaction.guildId) return;
 		const vcId = (interaction.member as GuildMember)?.voice?.channelId;
@@ -41,10 +33,7 @@ export default {
 				content: "I'm not playing anything",
 			});
 
-		await player.setVolume(
-			(interaction.options as CommandInteractionOptionResolver).getInteger("percentage") as number,
-			((interaction.options as CommandInteractionOptionResolver).getString("ignoredecrementer") as string) === "true",
-		);
+		await player.setVolume((interaction.options as CommandInteractionOptionResolver).getInteger("percentage") as number, ((interaction.options as CommandInteractionOptionResolver).getString("ignoredecrementer") as string) === "true");
 
 		await interaction.reply({
 			ephemeral: true,

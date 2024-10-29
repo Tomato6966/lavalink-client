@@ -39,9 +39,7 @@ export default {
 
 		await interaction.reply({
 			ephemeral: true,
-			content: current
-				? `Skipped [\`${current?.info.title}\`](<${current?.info.uri}>) -> [\`${nextTrack?.info.title}\`](<${nextTrack?.info.uri}>)`
-				: `Skipped to [\`${nextTrack?.info.title}\`](<${nextTrack?.info.uri}>)`,
+			content: current ? `Skipped [\`${current?.info.title}\`](<${current?.info.uri}>) -> [\`${nextTrack?.info.title}\`](<${nextTrack?.info.uri}>)` : `Skipped to [\`${nextTrack?.info.title}\`](<${nextTrack?.info.uri}>)`,
 		});
 	},
 } as Command;

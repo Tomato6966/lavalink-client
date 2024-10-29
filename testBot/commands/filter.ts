@@ -54,16 +54,12 @@ export default {
 			}
 			case "nightcore": {
 				await player.filterManager.toggleNightcore();
-				string = player.filterManager.filters.nightcore
-					? "Applied Nightcore Filter-Effect, ||disabled Vaporwave (if it was active)||"
-					: "Disabled Nightcore Filter-Effect";
+				string = player.filterManager.filters.nightcore ? "Applied Nightcore Filter-Effect, ||disabled Vaporwave (if it was active)||" : "Disabled Nightcore Filter-Effect";
 				break;
 			}
 			case "vaporwave": {
 				await player.filterManager.toggleVaporwave();
-				string = player.filterManager.filters.vaporwave
-					? "Applied Vaporwave Filter-Effect, ||disabled Nightcore (if it was active)||"
-					: "Disabled Vaporwave Filter-Effect";
+				string = player.filterManager.filters.vaporwave ? "Applied Vaporwave Filter-Effect, ||disabled Nightcore (if it was active)||" : "Disabled Vaporwave Filter-Effect";
 				break;
 			}
 			case "karaoke": {
@@ -108,9 +104,7 @@ export default {
 			}
 			case "normalization": {
 				await player.filterManager.lavalinkLavaDspxPlugin.toggleNormalization();
-				string = player.filterManager.filters.lavalinkLavaDspxPlugin.normalization
-					? "Applied Normalization Filter-Effect"
-					: "Disabled Normalization Filter-Effect";
+				string = player.filterManager.filters.lavalinkLavaDspxPlugin.normalization ? "Applied Normalization Filter-Effect" : "Disabled Normalization Filter-Effect";
 				break;
 			}
 		}

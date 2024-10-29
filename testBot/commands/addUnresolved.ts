@@ -17,14 +17,7 @@ export default {
 				.setName("source")
 				.setDescription("From which Source you want to add?")
 				.setRequired(false)
-				.setChoices(
-					{ name: "Youtube", value: "ytsearch" },
-					{ name: "Youtube Music", value: "ytmsearch" },
-					{ name: "Soundcloud", value: "scsearch" },
-					{ name: "Deezer", value: "dzsearch" },
-					{ name: "Spotify", value: "spsearch" },
-					{ name: "Apple Music", value: "amsearch" },
-				),
+				.setChoices({ name: "Youtube", value: "ytsearch" }, { name: "Youtube Music", value: "ytmsearch" }, { name: "Soundcloud", value: "scsearch" }, { name: "Deezer", value: "dzsearch" }, { name: "Spotify", value: "spsearch" }, { name: "Apple Music", value: "amsearch" }),
 		),
 	execute: async (client, interaction) => {
 		if (!interaction.guildId) return;

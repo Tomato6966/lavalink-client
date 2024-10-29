@@ -40,9 +40,7 @@ export default {
 						name: `${interaction.user.username}`,
 						iconURL: `${interaction.user.avatarURL()}`,
 					})
-					.setDescription(
-						`### Input \n\`\`\`js\n${input.substring(0, 500)}\n\`\`\`\n## Output\n\`\`\`js\n${string.substring(0, 4096 - input.substring(0, 500).length - 100)}\n\`\`\``,
-					),
+					.setDescription(`### Input \n\`\`\`js\n${input.substring(0, 500)}\n\`\`\`\n## Output\n\`\`\`js\n${string.substring(0, 4096 - input.substring(0, 500).length - 100)}\n\`\`\``),
 			],
 		});
 	},

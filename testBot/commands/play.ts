@@ -50,10 +50,7 @@ export default {
 				ephemeral: true,
 			});
 
-		const fromAutoComplete =
-			Number(query.replace("autocomplete_", "")) >= 0 &&
-			autocompleteMap.has(`${interaction.user.id}_res`) &&
-			autocompleteMap.get(`${interaction.user.id}_res`);
+		const fromAutoComplete = Number(query.replace("autocomplete_", "")) >= 0 && autocompleteMap.has(`${interaction.user.id}_res`) && autocompleteMap.get(`${interaction.user.id}_res`);
 		if (autocompleteMap.has(`${interaction.user.id}_res`)) {
 			if (autocompleteMap.has(`${interaction.user.id}_timeout`)) clearTimeout(autocompleteMap.get(`${interaction.user.id}_timeout`));
 			autocompleteMap.delete(`${interaction.user.id}_res`);
@@ -88,9 +85,7 @@ export default {
 		const response = (fromAutoComplete || (await player.search({ query: query, source: src }, interaction.user))) as SearchResult;
 		if (!response || !response.tracks?.length) return interaction.reply({ content: "No Tracks found", ephemeral: true });
 
-		await player.queue.add(
-			response.loadType === "playlist" ? response.tracks : response.tracks[fromAutoComplete ? Number(query.replace("autocomplete_", "")) : 0],
-		);
+		await player.queue.add(response.loadType === "playlist" ? response.tracks : response.tracks[fromAutoComplete ? Number(query.replace("autocomplete_", "")) : 0]);
 
 		await interaction.reply({
 			content:

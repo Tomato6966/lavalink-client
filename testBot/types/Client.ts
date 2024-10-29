@@ -1,12 +1,4 @@
-import type {
-	AutocompleteInteraction,
-	ChatInputCommandInteraction,
-	Client,
-	SlashCommandBuilder,
-	SlashCommandSubcommandBuilder,
-	SlashCommandSubcommandGroupBuilder,
-	SlashCommandSubcommandsOnlyBuilder,
-} from "discord.js";
+import type { AutocompleteInteraction, ChatInputCommandInteraction, Client, SlashCommandBuilder, SlashCommandSubcommandBuilder, SlashCommandSubcommandGroupBuilder, SlashCommandSubcommandsOnlyBuilder } from "discord.js";
 import type { RedisClientType } from "redis";
 
 import type { LavalinkManager, MiniMap } from "../../src";

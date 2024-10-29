@@ -6,9 +6,7 @@ export default {
 	data: new SlashCommandBuilder()
 		.setName("localfile")
 		.setDescription("Play a local file")
-		.addStringOption(o =>
-			o.setName("filepath").setDescription("Must be the path of the file on the server where lavalink is running").setRequired(true),
-		),
+		.addStringOption(o => o.setName("filepath").setDescription("Must be the path of the file on the server where lavalink is running").setRequired(true)),
 	execute: async (client, interaction) => {
 		if (!interaction.guildId) return;
 

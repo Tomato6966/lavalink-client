@@ -143,13 +143,9 @@ export class myCustomWatcher implements QueueChangesWatcher {
 		console.log(`${this.client.guilds.cache.get(guildId)?.name || guildId}: Queue got shuffled`);
 	}
 	tracksAdd(guildId, tracks, position, oldStoredQueue, newStoredQueue) {
-		console.log(
-			`${this.client.guilds.cache.get(guildId)?.name || guildId}: ${tracks.length} Tracks got added into the Queue at position #${position}`,
-		);
+		console.log(`${this.client.guilds.cache.get(guildId)?.name || guildId}: ${tracks.length} Tracks got added into the Queue at position #${position}`);
 	}
 	tracksRemoved(guildId, tracks, position, oldStoredQueue, newStoredQueue) {
-		console.log(
-			`${this.client.guilds.cache.get(guildId)?.name || guildId}: ${tracks.length} Tracks got removed from the Queue at position #${position}`,
-		);
+		console.log(`${this.client.guilds.cache.get(guildId)?.name || guildId}: ${tracks.length} Tracks got removed from the Queue at position #${position}`);
 	}
 }

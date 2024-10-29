@@ -33,9 +33,7 @@ export async function handleResuming(client: BotClient, playerSaver: PlayerSaver
 					selfDeaf: dataOfSaving.options?.selfDeaf ?? true,
 					selfMute: dataOfSaving.options?.selfMute ?? false,
 					// you need to update the volume of the player by the volume of lavalink which might got decremented by the volume decrementer
-					volume: client.lavalink.options.playerOptions?.volumeDecrementer
-						? Math.round(data.volume / client.lavalink.options.playerOptions.volumeDecrementer)
-						: data.volume,
+					volume: client.lavalink.options.playerOptions?.volumeDecrementer ? Math.round(data.volume / client.lavalink.options.playerOptions.volumeDecrementer) : data.volume,
 					node: node.id,
 					applyVolumeAsFilter: dataOfSaving.options.applyVolumeAsFilter,
 					instaUpdateFiltersFix: dataOfSaving.options.instaUpdateFiltersFix,

@@ -19,10 +19,7 @@ export default {
 			});
 
 		// example to apply a filter!
-		await player.stopPlaying(
-			interaction.options?.getBoolean?.("clear_queue") ?? true,
-			interaction.options?.getBoolean?.("execute_autoplay") ?? false,
-		);
+		await player.stopPlaying(interaction.options?.getBoolean?.("clear_queue") ?? true, interaction.options?.getBoolean?.("execute_autoplay") ?? false);
 
 		// and it is good again!
 		interaction.reply({ content: "Stopped the player without leaving" });

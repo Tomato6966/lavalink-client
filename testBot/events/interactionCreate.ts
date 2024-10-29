@@ -12,8 +12,7 @@ export default {
 		try {
 			if (interaction.isCommand()) {
 				if (subCommand) {
-					if (typeof (command as SubCommand).execute[subCommand] !== "function")
-						return console.error(`[Command-Error] Sub-Command is missing property "execute#${subCommand}".`);
+					if (typeof (command as SubCommand).execute[subCommand] !== "function") return console.error(`[Command-Error] Sub-Command is missing property "execute#${subCommand}".`);
 					// execute subcommand
 					return await (command as SubCommand).execute[subCommand](client, interaction as ChatInputCommandInteraction<"cached">);
 				}
@@ -22,8 +21,7 @@ export default {
 			}
 			if (interaction.isAutocomplete()) {
 				if (subCommand) {
-					if (typeof (command as SubCommand).autocomplete?.[subCommand] !== "function")
-						return console.error(`[Command-Error] Sub-Command is missing property "autocomplete#${subCommand}".`);
+					if (typeof (command as SubCommand).autocomplete?.[subCommand] !== "function") return console.error(`[Command-Error] Sub-Command is missing property "autocomplete#${subCommand}".`);
 					// execute subcommand-autocomplete
 					return await (command as SubCommand).autocomplete?.[subCommand](client, interaction);
 				}

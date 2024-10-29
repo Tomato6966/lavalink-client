@@ -34,11 +34,7 @@ export default {
 
 			// reply
 			await interaction.reply({
-				content:
-					`### Old Queue: \n${oldQueue.join("\n") || "> - Nothing"}\n### New Queue:\n${player.queue.tracks.map(v => `> - ${v.info.title}`).join("\n") || "> - Nothing"}`.substring(
-						0,
-						1000,
-					),
+				content: `### Old Queue: \n${oldQueue.join("\n") || "> - Nothing"}\n### New Queue:\n${player.queue.tracks.map(v => `> - ${v.info.title}`).join("\n") || "> - Nothing"}`.substring(0, 1000),
 			});
 		},
 		clear_queue_sync: async (client, interaction) => {

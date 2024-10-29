@@ -5,13 +5,7 @@ export default {
 	data: new SlashCommandBuilder()
 		.setName("loop")
 		.setDescription("Set the Repeat Mode")
-		.addStringOption(o =>
-			o
-				.setName("repeatmode")
-				.setDescription("What do you want to do?")
-				.setRequired(true)
-				.setChoices({ name: "Off", value: "off" }, { name: "Track", value: "track" }, { name: "Queue", value: "queue" }),
-		),
+		.addStringOption(o => o.setName("repeatmode").setDescription("What do you want to do?").setRequired(true).setChoices({ name: "Off", value: "off" }, { name: "Track", value: "track" }, { name: "Queue", value: "queue" })),
 	execute: async (client, interaction) => {
 		if (!interaction.guildId) return;
 		const vcId = (interaction.member as GuildMember)?.voice?.channelId;
