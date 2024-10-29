@@ -11,9 +11,9 @@
   "license": "MIT",
   "dependencies": {
     "@redis/client": "^1.6.0",
-    "@types/node": "^22.5.5",
+    "@types/node": "^22.8.2",
     "@types/ws": "^8.5.12",
-    "discord.js": "^14.16.2",
+    "discord.js": "^14.16.3",
     "dotenv": "^16.4.5",
     "lavalink-client": "github:tomato6966/lavalink-client",
     "redis": "^4.7.0",
@@ -22,7 +22,7 @@
   },
   "devDependencies": {
     "tsconfig-paths": "^4.2.0",
-    "tslib": "^2.7.0",
-    "typescript": "^5.6.2"
+    "tslib": "^2.8.0",
+    "typescript": "^5.6.3"
   }
 }
