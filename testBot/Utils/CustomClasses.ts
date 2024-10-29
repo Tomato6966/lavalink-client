@@ -2,14 +2,7 @@ import { readFileSync } from "node:fs";
 import { writeFile } from "node:fs/promises";
 import type { RedisClientType } from "redis";
 
-import {
-	type LavalinkManager,
-	MiniMap,
-	type PlayerJson,
-	type QueueChangesWatcher,
-	type QueueStoreManager,
-	type StoredQueue,
-} from "../../src";
+import { type LavalinkManager, MiniMap, type PlayerJson, type QueueChangesWatcher, type QueueStoreManager, type StoredQueue } from "../../src";
 
 import type { BotClient } from "../types/Client";
 

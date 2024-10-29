@@ -7,9 +7,7 @@ export default {
 	data: new SlashCommandBuilder()
 		.setName("examples")
 		.setDescription("Example Commands for tests")
-		.addSubcommand(s =>
-			s.setName("remote_queue_change").setDescription("e.g. when you change the queue on the dashboard"),
-		)
+		.addSubcommand(s => s.setName("remote_queue_change").setDescription("e.g. when you change the queue on the dashboard"))
 		.addSubcommand(s => s.setName("clear_queue_sync").setDescription("Clear Queue")),
 	execute: {
 		remote_queue_change: async (client, interaction) => {
@@ -18,7 +16,11 @@ export default {
 			// get the guild's player
 			const player = client.lavalink.getPlayer(interaction.guildId);
 			// return if no player
-			if (!player) return interaction.reply({ ephemeral: true, content: "I'm not connected" });
+			if (!player)
+				return interaction.reply({
+					ephemeral: true,
+					content: "I'm not connected",
+				});
 			// get old queue for difference
 			const oldQueue = player.queue.tracks.map(v => `> - ${v.info.title}`);
 
@@ -45,7 +47,11 @@ export default {
 			// get the guild's player
 			const player = client.lavalink.getPlayer(interaction.guildId);
 			// return if no player
-			if (!player) return interaction.reply({ ephemeral: true, content: "I'm not connected" });
+			if (!player)
+				return interaction.reply({
+					ephemeral: true,
+					content: "I'm not connected",
+				});
 			// remove tracks
 			await player.queue.splice(0, player.queue.tracks.length);
 			// respond

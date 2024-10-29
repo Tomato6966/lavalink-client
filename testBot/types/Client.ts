@@ -28,7 +28,9 @@ export interface Command {
 }
 
 type subCommandExecute = { [subCommandName: string]: InteractionExecuteFN };
-type subCommandAutocomplete = { [subCommandName: string]: AutoCompleteExecuteFN };
+type subCommandAutocomplete = {
+	[subCommandName: string]: AutoCompleteExecuteFN;
+};
 export interface SubCommand {
 	data: SlashCommandSubcommandBuilder | SlashCommandSubcommandGroupBuilder | SlashCommandSubcommandsOnlyBuilder;
 	execute: subCommandExecute;

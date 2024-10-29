@@ -1,9 +1,4 @@
-import {
-	type CommandInteractionOptionResolver,
-	type GuildMember,
-	SlashCommandBuilder,
-	type VoiceChannel,
-} from "discord.js";
+import { type CommandInteractionOptionResolver, type GuildMember, SlashCommandBuilder, type VoiceChannel } from "discord.js";
 
 import type { SearchPlatform, SearchResult, Track } from "../../src";
 import type { Command } from "../types/Client";
@@ -32,7 +27,11 @@ export default {
 		if (!interaction.guildId) return;
 
 		const vcId = (interaction.member as GuildMember)?.voice?.channelId;
-		if (!vcId) return interaction.reply({ ephemeral: true, content: "Join a voice Channel" });
+		if (!vcId)
+			return interaction.reply({
+				ephemeral: true,
+				content: "Join a voice Channel",
+			});
 
 		const vc = (interaction.member as GuildMember)?.voice?.channel as VoiceChannel;
 		if (!vc.joinable || !vc.speakable)
@@ -41,9 +40,7 @@ export default {
 				content: "I am not able to join your channel / speak in there.",
 			});
 
-		const src = (interaction.options as CommandInteractionOptionResolver).getString("source") as
-			| SearchPlatform
-			| undefined;
+		const src = (interaction.options as CommandInteractionOptionResolver).getString("source") as SearchPlatform | undefined;
 		const query = (interaction.options as CommandInteractionOptionResolver).getString("query") as string;
 
 		if (query === "nothing_found") return interaction.reply({ content: "No Tracks found", ephemeral: true });
@@ -58,8 +55,7 @@ export default {
 			autocompleteMap.has(`${interaction.user.id}_res`) &&
 			autocompleteMap.get(`${interaction.user.id}_res`);
 		if (autocompleteMap.has(`${interaction.user.id}_res`)) {
-			if (autocompleteMap.has(`${interaction.user.id}_timeout`))
-				clearTimeout(autocompleteMap.get(`${interaction.user.id}_timeout`));
+			if (autocompleteMap.has(`${interaction.user.id}_timeout`)) clearTimeout(autocompleteMap.get(`${interaction.user.id}_timeout`));
 			autocompleteMap.delete(`${interaction.user.id}_res`);
 			autocompleteMap.delete(`${interaction.user.id}_timeout`);
 		}
@@ -89,15 +85,11 @@ export default {
 				content: "You need to be in my Voice Channel",
 			});
 
-		const response = (fromAutoComplete ||
-			(await player.search({ query: query, source: src }, interaction.user))) as SearchResult;
-		if (!response || !response.tracks?.length)
-			return interaction.reply({ content: "No Tracks found", ephemeral: true });
+		const response = (fromAutoComplete || (await player.search({ query: query, source: src }, interaction.user))) as SearchResult;
+		if (!response || !response.tracks?.length) return interaction.reply({ content: "No Tracks found", ephemeral: true });
 
 		await player.queue.add(
-			response.loadType === "playlist"
-				? response.tracks
-				: response.tracks[fromAutoComplete ? Number(query.replace("autocomplete_", "")) : 0],
+			response.loadType === "playlist" ? response.tracks : response.tracks[fromAutoComplete ? Number(query.replace("autocomplete_", "")) : 0],
 		);
 
 		await interaction.reply({
@@ -129,11 +121,9 @@ export default {
 
 		if (!player.connected) await player.connect();
 
-		if (player.voiceChannelId !== vcId)
-			return interaction.respond([{ name: "You need to be in my Voice Channel", value: "join_vc" }]);
+		if (player.voiceChannelId !== vcId) return interaction.respond([{ name: "You need to be in my Voice Channel", value: "join_vc" }]);
 
-		if (!focussedQuery.trim().length)
-			return await interaction.respond([{ name: "No Tracks found (enter a query)", value: "nothing_found" }]);
+		if (!focussedQuery.trim().length) return await interaction.respond([{ name: "No Tracks found (enter a query)", value: "nothing_found" }]);
 
 		const res = (await player.search(
 			{
@@ -145,8 +135,7 @@ export default {
 
 		if (!res.tracks.length) return await interaction.respond([{ name: "No Tracks found", value: "nothing_found" }]);
 		// handle the res
-		if (autocompleteMap.has(`${interaction.user.id}_timeout`))
-			clearTimeout(autocompleteMap.get(`${interaction.user.id}_timeout`));
+		if (autocompleteMap.has(`${interaction.user.id}_timeout`)) clearTimeout(autocompleteMap.get(`${interaction.user.id}_timeout`));
 		autocompleteMap.set(`${interaction.user.id}_res`, res);
 		autocompleteMap.set(
 			`${interaction.user.id}_timeout`,
@@ -165,10 +154,7 @@ export default {
 					]
 				: res.tracks
 						.map((t: Track, i) => ({
-							name: `[${formatMS_HHMMSS(t.info.duration)}] ${t.info.title} (by ${t.info.author || "Unknown-Author"})`.substring(
-								0,
-								100,
-							),
+							name: `[${formatMS_HHMMSS(t.info.duration)}] ${t.info.title} (by ${t.info.author || "Unknown-Author"})`.substring(0, 100),
 							value: `autocomplete_${i}`,
 						}))
 						.slice(0, 25),

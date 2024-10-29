@@ -7,11 +7,7 @@ export function formatMS_HHMMSS(num: number) {
 	}, []);
 
 	return results
-		.map((v, i) =>
-			i <= 1 && v === 0
-				? undefined
-				: [i === 4 ? "." : "", v < 10 ? `0${v}` : v, [" Days, ", ":", ":", "", ""][i]].join(""),
-		)
+		.map((v, i) => (i <= 1 && v === 0 ? undefined : [i === 4 ? "." : "", v < 10 ? `0${v}` : v, [" Days, ", ":", ":", "", ""][i]].join("")))
 		.filter(Boolean)
 		.slice(0, -1)
 		.join("");

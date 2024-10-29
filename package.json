@@ -19,7 +19,9 @@
     "lint:fix": "npm run lint -- --fix",
     "test": "node -v",
     "prepublishOnly": "npm run build",
-    "prepare": "npm run build"
+    "prepare": "npm run build",
+    "blint": "biome lint --write",
+    "bformat": "biome format --write"
   },
   "exports": {
     "require": "./dist/cjs/index.js",
@@ -58,6 +60,7 @@
   },
   "homepage": "https://tomato6966.github.io/lavalink-client/",
   "devDependencies": {
+    "@biomejs/biome": "^1.9.4",
     "@eslint/eslintrc": "^3.1.0",
     "@eslint/js": "^9.13.0",
     "@types/node": "^22.8.2",

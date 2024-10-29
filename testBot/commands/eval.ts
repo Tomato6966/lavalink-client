@@ -27,7 +27,11 @@ export default {
 
 		const string = inspect(evaled).replace(new RegExp(client.token!, "igu"), "✗".repeat(client.token!.length));
 
-		if (string.includes(client.token!)) return interaction.reply({ ephemeral: true, content: "No token grabbing" });
+		if (string.includes(client.token!))
+			return interaction.reply({
+				ephemeral: true,
+				content: "No token grabbing",
+			});
 
 		interaction.reply({
 			embeds: [

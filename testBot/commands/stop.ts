@@ -8,7 +8,11 @@ export default {
 		if (!interaction.guildId) return;
 		const vcId = (interaction.member as GuildMember)?.voice?.channelId;
 		const player = client.lavalink.getPlayer(interaction.guildId);
-		if (!player) return interaction.reply({ ephemeral: true, content: "I'm not connected" });
+		if (!player)
+			return interaction.reply({
+				ephemeral: true,
+				content: "I'm not connected",
+			});
 
 		// example to apply a filter!
 		await player.destroy(`${interaction.user.username} stopped the Player`);

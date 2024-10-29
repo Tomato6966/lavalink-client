@@ -8,8 +8,6 @@ export default {
 		console.log("[Discord Bot] Ready to be used!");
 		await client.lavalink.init({ ...client.user!, shards: "auto" }); //VERY IMPORTANT!
 
-		client.guilds.cache
-			.get(envConfig.devGuild)
-			?.commands.set(client.commands.map(v => v.data.toJSON()) as ApplicationCommandDataResolvable[]);
+		client.guilds.cache.get(envConfig.devGuild)?.commands.set(client.commands.map(v => v.data.toJSON()) as ApplicationCommandDataResolvable[]);
 	},
 } as Event;

@@ -30,14 +30,7 @@ export function PlayerEvents(client: BotClient) {
 			logPlayer(client, player, "Player disconnected the Voice Channel :: ", voiceChannelId);
 		})
 		.on("playerMove", (player, oldVoiceChannelId, newVoiceChannelId) => {
-			logPlayer(
-				client,
-				player,
-				"Player moved from Voice Channel :: ",
-				oldVoiceChannelId,
-				" :: To ::",
-				newVoiceChannelId,
-			);
+			logPlayer(client, player, "Player moved from Voice Channel :: ", oldVoiceChannelId, " :: To ::", newVoiceChannelId);
 		})
 		.on("playerSocketClosed", (player, payload) => {
 			logPlayer(client, player, "Player socket got closed from lavalink :: ", payload);
@@ -49,7 +42,10 @@ export function PlayerEvents(client: BotClient) {
 			 */
 		})
 		.on("playerMuteChange", (player, selfMuted, serverMuted) => {
-			logPlayer(client, player, "INFO: playerMuteChange", { selfMuted, serverMuted });
+			logPlayer(client, player, "INFO: playerMuteChange", {
+				selfMuted,
+				serverMuted,
+			});
 			// e.g. what you could do is when the bot get's server muted, you could pause the player, and unpause it when unmuted again
 			if (serverMuted) {
 				player.set("paused_of_servermute", true);
@@ -70,11 +66,7 @@ export function PlayerEvents(client: BotClient) {
 		.on("playerQueueEmptyStart", async (player, delayMs) => {
 			logPlayer(client, player, "INFO: playerQueueEmptyStart");
 			const msg = await sendPlayerMessage(client, player, {
-				embeds: [
-					new EmbedBuilder().setDescription(
-						`Player queue got empty, will disconnect <t:${Math.round((Date.now() + delayMs) / 1000)}:R>`,
-					),
-				],
+				embeds: [new EmbedBuilder().setDescription(`Player queue got empty, will disconnect <t:${Math.round((Date.now() + delayMs) / 1000)}:R>`)],
 			});
 			if (msg) messagesMap.set(`${player.guildId}_queueempty`, msg);
 		})
@@ -94,11 +86,7 @@ export function PlayerEvents(client: BotClient) {
 			const msg = messagesMap.get(`${player.guildId}_queueempty`);
 			if (msg?.editable) {
 				msg.edit({
-					embeds: [
-						new EmbedBuilder().setDescription(
-							"Player queue empty timer got cancelled. Because i got enqueued a new track",
-						),
-					],
+					embeds: [new EmbedBuilder().setDescription("Player queue empty timer got cancelled. Because i got enqueued a new track")],
 				});
 			}
 		})
@@ -186,9 +174,7 @@ export function PlayerEvents(client: BotClient) {
 function logPlayer(client: BotClient, player: Player, ...messages) {
 	console.group("Player Event");
 	console.log(`| Guild: ${player.guildId} | ${client.guilds.cache.get(player.guildId)?.name}`);
-	console.log(
-		`| Voice Channel: #${(client.channels.cache.get(player.voiceChannelId!) as VoiceChannel)?.name || player.voiceChannelId}`,
-	);
+	console.log(`| Voice Channel: #${(client.channels.cache.get(player.voiceChannelId!) as VoiceChannel)?.name || player.voiceChannelId}`);
 	console.group("| Info:");
 	console.log(...messages);
 	console.groupEnd();

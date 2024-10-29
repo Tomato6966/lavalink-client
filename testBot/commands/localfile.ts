@@ -1,9 +1,4 @@
-import {
-	type CommandInteractionOptionResolver,
-	type GuildMember,
-	SlashCommandBuilder,
-	type VoiceChannel,
-} from "discord.js";
+import { type CommandInteractionOptionResolver, type GuildMember, SlashCommandBuilder, type VoiceChannel } from "discord.js";
 
 import type { Command } from "../types/Client";
 
@@ -12,16 +7,17 @@ export default {
 		.setName("localfile")
 		.setDescription("Play a local file")
 		.addStringOption(o =>
-			o
-				.setName("filepath")
-				.setDescription("Must be the path of the file on the server where lavalink is running")
-				.setRequired(true),
+			o.setName("filepath").setDescription("Must be the path of the file on the server where lavalink is running").setRequired(true),
 		),
 	execute: async (client, interaction) => {
 		if (!interaction.guildId) return;
 
 		const vcId = (interaction.member as GuildMember)?.voice?.channelId;
-		if (!vcId) return interaction.reply({ ephemeral: true, content: "Join a Voice Channel " });
+		if (!vcId)
+			return interaction.reply({
+				ephemeral: true,
+				content: "Join a Voice Channel ",
+			});
 
 		const vc = (interaction.member as GuildMember)?.voice?.channel as VoiceChannel;
 		if (!vc.joinable || !vc.speakable)
@@ -55,8 +51,7 @@ export default {
 
 		const response = await player.search({ query: filepath, source: "local" }, interaction.user);
 
-		if (!response || !response.tracks?.length)
-			return interaction.reply({ content: "No Tracks found", ephemeral: true });
+		if (!response || !response.tracks?.length) return interaction.reply({ content: "No Tracks found", ephemeral: true });
 
 		player.queue.add(response.tracks[0]);
 

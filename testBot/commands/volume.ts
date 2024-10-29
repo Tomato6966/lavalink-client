@@ -6,12 +6,7 @@ export default {
 		.setName("volume")
 		.setDescription("Change the Volume of the Player")
 		.addIntegerOption(o =>
-			o
-				.setName("percentage")
-				.setDescription("To what Volume do you want to change")
-				.setMaxValue(200)
-				.setMinValue(0)
-				.setRequired(true),
+			o.setName("percentage").setDescription("To what Volume do you want to change").setMaxValue(200).setMinValue(0).setRequired(true),
 		)
 		.addStringOption(o =>
 			o
@@ -24,15 +19,27 @@ export default {
 		if (!interaction.guildId) return;
 		const vcId = (interaction.member as GuildMember)?.voice?.channelId;
 		const player = client.lavalink.getPlayer(interaction.guildId);
-		if (!player) return interaction.reply({ ephemeral: true, content: "I'm not connected" });
-		if (!vcId) return interaction.reply({ ephemeral: true, content: "Join a Voice Channel " });
+		if (!player)
+			return interaction.reply({
+				ephemeral: true,
+				content: "I'm not connected",
+			});
+		if (!vcId)
+			return interaction.reply({
+				ephemeral: true,
+				content: "Join a Voice Channel ",
+			});
 		if (player.voiceChannelId !== vcId)
 			return interaction.reply({
 				ephemeral: true,
 				content: "You need to be in my Voice Channel",
 			});
 
-		if (!player.queue.current) return interaction.reply({ ephemeral: true, content: "I'm not playing anything" });
+		if (!player.queue.current)
+			return interaction.reply({
+				ephemeral: true,
+				content: "I'm not playing anything",
+			});
 
 		await player.setVolume(
 			(interaction.options as CommandInteractionOptionResolver).getInteger("percentage") as number,

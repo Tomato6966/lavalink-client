@@ -1,9 +1,4 @@
-import {
-	type CommandInteractionOptionResolver,
-	type GuildMember,
-	SlashCommandBuilder,
-	type VoiceChannel,
-} from "discord.js";
+import { type CommandInteractionOptionResolver, type GuildMember, SlashCommandBuilder, type VoiceChannel } from "discord.js";
 import type { Command } from "../types/Client";
 import type { SearchPlatform, UnresolvedQuery } from "../../src";
 
@@ -35,7 +30,11 @@ export default {
 		if (!interaction.guildId) return;
 
 		const vcId = (interaction.member as GuildMember)?.voice?.channelId;
-		if (!vcId) return interaction.reply({ ephemeral: true, content: "Join a voice Channel" });
+		if (!vcId)
+			return interaction.reply({
+				ephemeral: true,
+				content: "Join a voice Channel",
+			});
 
 		const vc = (interaction.member as GuildMember)?.voice?.channel as VoiceChannel;
 		if (!vc.joinable || !vc.speakable)
@@ -44,9 +43,7 @@ export default {
 				content: "I am not able to join your channel / speak in there.",
 			});
 
-		const src = (interaction.options as CommandInteractionOptionResolver).getString("source") as
-			| SearchPlatform
-			| undefined;
+		const src = (interaction.options as CommandInteractionOptionResolver).getString("source") as SearchPlatform | undefined;
 		const title = (interaction.options as CommandInteractionOptionResolver).getString("title") as string;
 		const author = (interaction.options as CommandInteractionOptionResolver).getString("author") as string;
 		const uri = (interaction.options as CommandInteractionOptionResolver).getString("uri") as string;

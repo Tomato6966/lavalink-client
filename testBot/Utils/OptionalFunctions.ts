@@ -3,8 +3,7 @@ import type { CustomRequester } from "../types/Client";
 export const requesterTransformer = (requester: any): CustomRequester => {
 	if (!requester) return { id: "unknown", username: "unknown", avatar: undefined };
 	// if it's already the transformed requester
-	if (typeof requester === "object" && "avatar" in requester && Object.keys(requester).length === 3)
-		return requester as CustomRequester;
+	if (typeof requester === "object" && "avatar" in requester && Object.keys(requester).length === 3) return requester as CustomRequester;
 	// if it's still a discord.js User
 	if (typeof requester === "object" && "displayAvatarURL" in requester) {
 		// it's a user
@@ -28,9 +27,7 @@ export const autoPlayFunction = async (player, lastPlayedTrack) => {
 
 	if (lastPlayedTrack.info.sourceName === "spotify") {
 		const filtered = player.queue.previous.filter(v => v.info.sourceName === "spotify").slice(0, 5);
-		const ids = filtered.map(
-			v => v.info.identifier || v.info.uri.split("/")?.reverse()?.[0] || v.info.uri.split("/")?.reverse()?.[1],
-		);
+		const ids = filtered.map(v => v.info.identifier || v.info.uri.split("/")?.reverse()?.[0] || v.info.uri.split("/")?.reverse()?.[1]);
 		if (ids.length >= 2) {
 			const res = await player
 				.search(

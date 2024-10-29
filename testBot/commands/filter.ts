@@ -24,8 +24,16 @@ export default {
 		if (!interaction.guildId) return;
 		const vcId = (interaction.member as GuildMember)?.voice?.channelId;
 		const player = client.lavalink.getPlayer(interaction.guildId);
-		if (!player) return interaction.reply({ ephemeral: true, content: "I'm not connected" });
-		if (!vcId) return interaction.reply({ ephemeral: true, content: "Join a Voice Channel " });
+		if (!player)
+			return interaction.reply({
+				ephemeral: true,
+				content: "I'm not connected",
+			});
+		if (!vcId)
+			return interaction.reply({
+				ephemeral: true,
+				content: "Join a Voice Channel ",
+			});
 		if (player.voiceChannelId !== vcId)
 			return interaction.reply({
 				ephemeral: true,
@@ -41,9 +49,7 @@ export default {
 			}
 			case "lowpass": {
 				await player.filterManager.toggleLowPass();
-				string = player.filterManager.filters.lowPass
-					? "Applied Lowpass Filter-Effect"
-					: "Disabled Lowpass Filter-Effect";
+				string = player.filterManager.filters.lowPass ? "Applied Lowpass Filter-Effect" : "Disabled Lowpass Filter-Effect";
 				break;
 			}
 			case "nightcore": {
@@ -62,30 +68,22 @@ export default {
 			}
 			case "karaoke": {
 				await player.filterManager.toggleKaraoke();
-				string = player.filterManager.filters.karaoke
-					? "Applied Karaoke Filter-Effect"
-					: "Disabled Karaoke Filter-Effect";
+				string = player.filterManager.filters.karaoke ? "Applied Karaoke Filter-Effect" : "Disabled Karaoke Filter-Effect";
 				break;
 			}
 			case "rotation": {
 				await player.filterManager.toggleRotation();
-				string = player.filterManager.filters.rotation
-					? "Applied Rotation Filter-Effect"
-					: "Disabled Rotation Filter-Effect";
+				string = player.filterManager.filters.rotation ? "Applied Rotation Filter-Effect" : "Disabled Rotation Filter-Effect";
 				break;
 			}
 			case "tremolo": {
 				await player.filterManager.toggleTremolo();
-				string = player.filterManager.filters.tremolo
-					? "Applied Tremolo Filter-Effect"
-					: "Disabled Tremolo Filter-Effect";
+				string = player.filterManager.filters.tremolo ? "Applied Tremolo Filter-Effect" : "Disabled Tremolo Filter-Effect";
 				break;
 			}
 			case "vibrato": {
 				await player.filterManager.toggleVibrato();
-				string = player.filterManager.filters.vibrato
-					? "Applied Vibrato Filter-Effect"
-					: "Disabled Vibrato Filter-Effect";
+				string = player.filterManager.filters.vibrato ? "Applied Vibrato Filter-Effect" : "Disabled Vibrato Filter-Effect";
 				break;
 			}
 			// you could also use the lavalinKFilter plugin instead, however it does not work currently (12.2023)
@@ -95,23 +93,17 @@ export default {
 			//           repository: "https://jitpack.io"
 			case "echo": {
 				await player.filterManager.lavalinkLavaDspxPlugin.toggleEcho();
-				string = player.filterManager.filters.lavalinkLavaDspxPlugin.echo
-					? "Applied Echo Filter-Effect"
-					: "Disabled Echo Filter-Effect";
+				string = player.filterManager.filters.lavalinkLavaDspxPlugin.echo ? "Applied Echo Filter-Effect" : "Disabled Echo Filter-Effect";
 				break;
 			}
 			case "highPass": {
 				await player.filterManager.lavalinkLavaDspxPlugin.toggleHighPass();
-				string = player.filterManager.filters.lavalinkLavaDspxPlugin.highPass
-					? "Applied HighPass Filter-Effect"
-					: "Disabled HighPass Filter-Effect";
+				string = player.filterManager.filters.lavalinkLavaDspxPlugin.highPass ? "Applied HighPass Filter-Effect" : "Disabled HighPass Filter-Effect";
 				break;
 			}
 			case "lowPass": {
 				await player.filterManager.lavalinkLavaDspxPlugin.toggleLowPass();
-				string = player.filterManager.filters.lavalinkLavaDspxPlugin.lowPass
-					? "Applied LowPass Filter-Effect"
-					: "Disabled LowPass Filter-Effect";
+				string = player.filterManager.filters.lavalinkLavaDspxPlugin.lowPass ? "Applied LowPass Filter-Effect" : "Disabled LowPass Filter-Effect";
 				break;
 			}
 			case "normalization": {

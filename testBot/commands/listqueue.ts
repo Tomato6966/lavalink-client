@@ -8,8 +8,16 @@ export default {
 		if (!interaction.guildId) return;
 		const vcId = (interaction.member as GuildMember)?.voice?.channelId;
 		const player = client.lavalink.getPlayer(interaction.guildId);
-		if (!player) return interaction.reply({ ephemeral: true, content: "I'm not connected" });
-		if (!vcId) return interaction.reply({ ephemeral: true, content: "Join a Voice Channel " });
+		if (!player)
+			return interaction.reply({
+				ephemeral: true,
+				content: "I'm not connected",
+			});
+		if (!vcId)
+			return interaction.reply({
+				ephemeral: true,
+				content: "Join a Voice Channel ",
+			});
 		if (player.voiceChannelId !== vcId)
 			return interaction.reply({
 				ephemeral: true,
@@ -19,7 +27,11 @@ export default {
 		const current = player.queue.current;
 		const nextTrack = player.queue.tracks[0];
 
-		if (!nextTrack) return interaction.reply({ ephemeral: true, content: "No Tracks to list" });
+		if (!nextTrack)
+			return interaction.reply({
+				ephemeral: true,
+				content: "No Tracks to list",
+			});
 
 		await interaction.reply({
 			ephemeral: true,
