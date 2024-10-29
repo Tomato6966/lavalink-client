@@ -131,7 +131,7 @@ export class ManagerUtils {
             }
         }
 
-        if (!this.isUnresolvedTrack(unresolvedTrack)) throw SyntaxError("Could not build Unresolved Track");
+        if (!this.isUnresolvedTrack(unresolvedTrack)) throw new SyntaxError("Could not build Unresolved Track");
 
         Object.defineProperty(unresolvedTrack, UnresolvedTrackSymbol, { configurable: true, value: true });
         return unresolvedTrack as UnresolvedTrack;
@@ -175,16 +175,16 @@ export class ManagerUtils {
     isNodeOptions(data: LavalinkNodeOptions) {
         if (!data || typeof data !== "object" || Array.isArray(data)) return false;
         if (typeof data.host !== "string" || !data.host.length) return false;
-        if (typeof data.port !== "number" || isNaN(data.port) || data.port < 0 || data.port > 65535) return false;
+        if (typeof data.port !== "number" || Number.isNaN(data.port) || data.port < 0 || data.port > 65535) return false;
         if (typeof data.authorization !== "string" || !data.authorization.length) return false;
         if ("secure" in data && typeof data.secure !== "boolean" && data.secure !== undefined) return false;
         if ("sessionId" in data && typeof data.sessionId !== "string" && data.sessionId !== undefined) return false;
         if ("id" in data && typeof data.id !== "string" && data.id !== undefined) return false;
         if ("regions" in data && (!Array.isArray(data.regions) || !data.regions.every(v => typeof v === "string") && data.regions !== undefined)) return false;
         if ("poolOptions" in data && typeof data.poolOptions !== "object" && data.poolOptions !== undefined) return false;
-        if ("retryAmount" in data && (typeof data.retryAmount !== "number" || isNaN(data.retryAmount) || data.retryAmount <= 0 && data.retryAmount !== undefined)) return false;
-        if ("retryDelay" in data && (typeof data.retryDelay !== "number" || isNaN(data.retryDelay) || data.retryDelay <= 0 && data.retryDelay !== undefined)) return false;
-        if ("requestTimeout" in data && (typeof data.requestTimeout !== "number" || isNaN(data.requestTimeout) || data.requestTimeout <= 0 && data.requestTimeout !== undefined)) return false;
+        if ("retryAmount" in data && (typeof data.retryAmount !== "number" || Number.isNaN(data.retryAmount) || data.retryAmount <= 0 && data.retryAmount !== undefined)) return false;
+        if ("retryDelay" in data && (typeof data.retryDelay !== "number" || Number.isNaN(data.retryDelay) || data.retryDelay <= 0 && data.retryDelay !== undefined)) return false;
+        if ("requestTimeout" in data && (typeof data.requestTimeout !== "number" || Number.isNaN(data.requestTimeout) || data.requestTimeout <= 0 && data.requestTimeout !== undefined)) return false;
         return true;
     }
     /**
@@ -237,9 +237,9 @@ export class ManagerUtils {
         if (!node.info) throw new Error("No Lavalink Node was provided");
         if (!node.info.sourceManagers?.length) throw new Error("Lavalink Node, has no sourceManagers enabled");
 
-        if(!queryString.trim().length) throw new Error(`Query string is empty, please provide a valid query string.`)
+        if(!queryString.trim().length) throw new Error("Query string is empty, please provide a valid query string.")
 
-        if (sourceString === "speak" && queryString.length > 100) throw new Error(`Query is speak, which is limited to 100 characters.`)
+        if (sourceString === "speak" && queryString.length > 100) throw new Error("Query is speak, which is limited to 100 characters.")
 
         // checks for blacklisted links / domains / queries
         if (this.LavalinkManager.options?.linksBlacklist?.length > 0) {
@@ -251,12 +251,12 @@ export class ManagerUtils {
                 });
             }
             if(this.LavalinkManager.options?.linksBlacklist.some(v => (typeof v === "string" && (queryString.toLowerCase().includes(v.toLowerCase()) || v.toLowerCase().includes(queryString.toLowerCase()))) || isRegExp(v) && v.test(queryString))) {
-                throw new Error(`Query string contains a link / word which is blacklisted.`)
+                throw new Error("Query string contains a link / word which is blacklisted.")
             }
         }
 
         if (!/^https?:\/\//.test(queryString)) return;
-        else if (this.LavalinkManager.options?.linksAllowed === false) throw new Error("Using links to make a request is not allowed.")
+        if (this.LavalinkManager.options?.linksAllowed === false) throw new Error("Using links to make a request is not allowed.")
 
         // checks for if the query is whitelisted (should only work for links, so it skips the check for no link queries)
         if (this.LavalinkManager.options?.linksWhitelist?.length > 0) {
@@ -346,7 +346,7 @@ export class ManagerUtils {
     }
 
     validateSourceString(node: LavalinkNode, sourceString: SearchPlatform) {
-        if (!sourceString) throw new Error(`No SourceString was provided`);
+        if (!sourceString) throw new Error("No SourceString was provided");
         const source = DefaultSources[sourceString.toLowerCase().trim()] as LavalinkSearchPlatform;
         if (!source) throw new Error(`Lavalink Node SearchQuerySource: '${sourceString}' is not available`);
 
@@ -491,7 +491,7 @@ export async function queueTrackEnd(player: Player) {
             player.LavalinkManager.emit("debug", DebugEvents.PlayerPlayUnresolvedTrackFailed, {
                 state: "error",
                 error: error,
-                message: `queueTrackEnd Util was called, tried to resolve the next track, but failed to find the closest matching song`,
+                message: "queueTrackEnd Util was called, tried to resolve the next track, but failed to find the closest matching song",
                 functionLayer: "Player > play() > resolve currentTrack",
             });
         }
@@ -514,7 +514,7 @@ async function applyUnresolvedData(resTrack: Track, data: UnresolvedTrack, utils
         if (data.info.title?.length) resTrack.info.title = data.info.title;
         if (data.info.author?.length) resTrack.info.author = data.info.author;
     } else { // only overwrite if undefined / invalid
-        if ((resTrack.info.title === 'Unknown title' || resTrack.info.title === "Unspecified description") && resTrack.info.title != data.info.title) resTrack.info.title = data.info.title;
+        if ((resTrack.info.title === 'Unknown title' || resTrack.info.title === "Unspecified description") && resTrack.info.title !== data.info.title) resTrack.info.title = data.info.title;
         if (resTrack.info.author !== data.info.author) resTrack.info.author = data.info.author;
         if (resTrack.info.artworkUrl !== data.info.artworkUrl) resTrack.info.artworkUrl = data.info.artworkUrl;
     }
@@ -545,7 +545,7 @@ async function getClosestTrack(data: UnresolvedTrack, player: Player): Promise<T
     return await player.search({
         query, source: sourceName !== "twitch" && sourceName !== "flowery-tts" ? sourceName : player.LavalinkManager.options?.playerOptions?.defaultSearchPlatform,
     }, data.requester).then((res: SearchResult) => {
-        let trackToUse = null;
+        let trackToUse: Track | null = null;
         // try to find via author name
         if (data.info.author && !trackToUse) trackToUse = res.tracks.find(track => [data.info?.author || "", `${data.info?.author} - Topic`].some(name => new RegExp(`^${escapeRegExp(name)}$`, "i").test(track.info?.author)) || new RegExp(`^${escapeRegExp(data.info?.title)}$`, "i").test(track.info?.title));
         // try to find via duration

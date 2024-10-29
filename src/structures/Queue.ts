@@ -63,7 +63,6 @@ export class QueueSaver {
 
 export class DefaultQueueStore implements QueueStoreManager {
     private data = new MiniMap<string, StoredQueue>();
-    constructor() { }
 
     /**
      * Get the queue for a guild
@@ -81,7 +80,7 @@ export class DefaultQueueStore implements QueueStoreManager {
      * @returns The queue for the guild
      */
     async set(guildId: string, valueToStringify) {
-        return this.data.set(guildId, valueToStringify) ? true : false;
+        return !!this.data.set(guildId, valueToStringify)
     }
 
     /**
@@ -307,34 +306,34 @@ export class Queue {
         if (typeof removeQueryTrack === "number") {
             const toRemove = this.tracks[removeQueryTrack];
             if (!toRemove) return null;
-
-            const removed = this.tracks.splice(removeQueryTrack, 1);
+    
+            const removed: (Track | UnresolvedTrack)[] = this.tracks.splice(removeQueryTrack, 1);
             // Log if available
             if (typeof this.queueChanges?.tracksRemoved === "function") try { this.queueChanges.tracksRemoved(this.guildId, removed, removeQueryTrack, oldStored, this.utils.toJSON()) } catch (e) { /* */ }
-
+    
             await this.utils.save();
-
+    
             return { removed }
         }
-
+    
         if (Array.isArray(removeQueryTrack)) {
             if (removeQueryTrack.every(v => typeof v === "number")) {
-                const removed = [];
+                const removed: (Track | UnresolvedTrack)[] = [];
                 for (const i of removeQueryTrack) {
                     if (this.tracks[i]) {
                         removed.push(...this.tracks.splice(i, 1))
                     }
                 }
                 if (!removed.length) return null;
-
+    
                 // Log if available
                 if (typeof this.queueChanges?.tracksRemoved === "function") try { this.queueChanges.tracksRemoved(this.guildId, removed, removeQueryTrack as number[], oldStored, this.utils.toJSON()) } catch (e) { /* */ }
-
+    
                 await this.utils.save();
-
+    
                 return { removed };
             }
-
+    
             const tracksToRemove = this.tracks.map((v, i) => ({ v, i })).filter(({ v, i }) => removeQueryTrack.find(t =>
                 typeof t === "number" && (t === i) ||
                 typeof t === "object" && (
@@ -346,11 +345,11 @@ export class Queue {
                     t.info?.artworkUrl && t.info.artworkUrl === v.info?.artworkUrl
                 )
             ));
-
+    
             if (!tracksToRemove.length) return null;
-
-            const removed = [];
-
+    
+            const removed: (Track | UnresolvedTrack)[] = [];
+    
             for (const { i } of tracksToRemove) {
                 if (this.tracks[i]) {
                     removed.push(...this.tracks.splice(i, 1))
@@ -358,9 +357,9 @@ export class Queue {
             }
             // Log if available
             if (typeof this.queueChanges?.tracksRemoved === "function") try { this.queueChanges.tracksRemoved(this.guildId, removed, tracksToRemove.map(v => v.i), oldStored, this.utils.toJSON()) } catch (e) { /* */ }
-
+    
             await this.utils.save();
-
+    
             return { removed };
         }
         const toRemove = this.tracks.findIndex((v) =>
@@ -371,17 +370,17 @@ export class Queue {
             removeQueryTrack.info?.isrc && removeQueryTrack.info.isrc === v.info?.isrc ||
             removeQueryTrack.info?.artworkUrl && removeQueryTrack.info.artworkUrl === v.info?.artworkUrl
         );
-
+    
         if (toRemove < 0) return null;
-
-        const removed = this.tracks.splice(toRemove, 1);
+    
+        const removed: (Track | UnresolvedTrack)[] = this.tracks.splice(toRemove, 1);
         // Log if available
         if (typeof this.queueChanges?.tracksRemoved === "function") try { this.queueChanges.tracksRemoved(this.guildId, removed, toRemove, oldStored, this.utils.toJSON()) } catch (e) { /* */ }
-
+    
         await this.utils.save();
-
+    
         return { removed };
-    }
+    }    
 
     /**
      * Shifts the previous array, to return the last previous track & thus remove it from the previous queue

@@ -1,5 +1,5 @@
-const { readdirSync, existsSync, lstatSync, rmdirSync, unlinkSync } = require("fs");
-const { join } = require("path");
+const { readdirSync, existsSync, lstatSync, rmdirSync, unlinkSync } = require("node:fs");
+const { join } = require("node:path");
 
 const deleteFolderRecursive = path => {
 	if (!existsSync(path)) return console.error("No Path found for: ", path);

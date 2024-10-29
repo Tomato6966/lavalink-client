@@ -11,7 +11,7 @@ export class FilterManager {
     /** The Equalizer bands currently applied to the Lavalink Server */
     public equalizerBands: EQBand[] = [];
     /** Private Util for the instaFix Filters option */
-    public filterUpdatedState: boolean = false;
+    public filterUpdatedState = false;
     /** All "Active" / "disabled" Player Filters */
     public filters: PlayerFilters = {
         volume: false,
@@ -302,7 +302,7 @@ export class FilterManager {
      */
     public async setAudioOutput(type: AudioOutputs): Promise<AudioOutputs> {
         if (this.player.node.info && !this.player.node.info?.filters?.includes("channelMix")) throw new Error("Node#Info#filters does not include the 'channelMix' Filter (Node has it not enable)")
-        if (!type || !audioOutputsData[type]) throw "Invalid audio type added, must be 'mono' / 'stereo' / 'left' / 'right'"
+        if (!type || !audioOutputsData[type]) throw new Error("Invalid audio type added, must be 'mono' / 'stereo' / 'left' / 'right'")
         this.data.channelMix = audioOutputsData[type];
         this.filters.audioOutput = type;
         await this.applyPlayerFilters();
@@ -500,7 +500,7 @@ export class FilterManager {
          * @param {boolean} [adaptive=true] - Whether to use adaptive normalization or not.
          * @returns {Promise<boolean>} - The state of the filter after execution.
          */
-        toggleNormalization: async (maxAmplitude: number = 0.75, adaptive: boolean = true): Promise<boolean> => {
+        toggleNormalization: async (maxAmplitude = 0.75, adaptive = true): Promise<boolean> => {
             if (this.player.node.info && !this.player.node.info?.plugins?.find(v => v.name === "lavadspx-plugin")) throw new Error("Node#Info#plugins does not include the lavadspx plugin")
             if (this.player.node.info && !this.player.node.info?.filters?.includes("normalization")) throw new Error("Node#Info#filters does not include the 'normalization' Filter (Node has it not enable)")
 
@@ -526,7 +526,7 @@ export class FilterManager {
          * @param {number} [echoLength=0.5] - The length of the echo effect.
          * @returns {Promise<boolean>} - The state of the filter after execution.
          */
-        toggleEcho: async (decay: number = 0.5, echoLength: number = 0.5): Promise<boolean> => {
+        toggleEcho: async (decay = 0.5, echoLength = 0.5): Promise<boolean> => {
             if (this.player.node.info && !this.player.node.info?.plugins?.find(v => v.name === "lavadspx-plugin")) throw new Error("Node#Info#plugins does not include the lavadspx plugin")
             if (this.player.node.info && !this.player.node.info?.filters?.includes("echo")) throw new Error("Node#Info#filters does not include the 'echo' Filter (Node has it not enable)")
 
