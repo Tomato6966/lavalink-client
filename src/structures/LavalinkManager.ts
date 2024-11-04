@@ -507,17 +507,24 @@ export class LavalinkManager extends EventEmitter {
             if ("token" in update) {
                 if (!player.node?.sessionId) throw new Error("Lavalink Node is either not ready or not up to date");
                 const sessionId2Use = player.voice?.sessionId || ("sessionId" in update ? update.sessionId as string : undefined);
-                if(sessionId2Use) {
-                    await player.node.updatePlayer({
-                        guildId: player.guildId,
-                        playerOptions: {
-                            voice: {
-                                token: update.token,
-                                endpoint: update.endpoint,
-                                sessionId: sessionId2Use,
-                            }
-                        }
+                if(!sessionId2Use) {
+                    this.emit("debug", DebugEvents.NoAudioDebug, {
+                        state: "error",
+                        message: `Can't send updatePlayer for voice token session - Missing sessionId :: ${JSON.stringify({ voice: { token: update.token, endpoint: update.endpoint, sessionId: sessionId2Use, }, update, playerVoice: player.voice }, null, 2)}`,
+                        functionLayer: "LavalinkManager > sendRawData()",
                     });
+                if (this.options?.advancedOptions?.debugOptions?.noAudio === true) console.debug("Lavalink-Client-Debug | NO-AUDIO [::] sendRawData function, Sent updatePlayer for voice token session", { voice: { token: update.token, endpoint: update.endpoint, sessionId: sessionId2Use, }, playerVoice: player.voice, update });
+                await player.node.updatePlayer({
+                    guildId: player.guildId,
+                    playerOptions: {
+                        voice: {
+                            token: update.token,
+                            endpoint: update.endpoint,
+                            sessionId: sessionId2Use,
+                        }
+                    }
+                });
+                } else {
                     if (this.options?.advancedOptions?.enableDebugEvents) {
                         this.emit("debug", DebugEvents.NoAudioDebug, {
                             state: "log",
@@ -526,13 +533,6 @@ export class LavalinkManager extends EventEmitter {
                         })
                     }
                     if (this.options?.advancedOptions?.debugOptions?.noAudio === true) console.debug("Lavalink-Client-Debug | NO-AUDIO [::] sendRawData function, Can't send updatePlayer for voice token session - Missing sessionId", { voice: { token: update.token, endpoint: update.endpoint, sessionId: sessionId2Use, } });
-                } else {
-                    this.emit("debug", DebugEvents.NoAudioDebug, {
-                        state: "error",
-                        message: `Can't send updatePlayer for voice token session - Missing sessionId :: ${JSON.stringify({ voice: { token: update.token, endpoint: update.endpoint, sessionId: sessionId2Use, }, update, playerVoice: player.voice }, null, 2)}`,
-                        functionLayer: "LavalinkManager > sendRawData()",
-                    });
-                    if (this.options?.advancedOptions?.debugOptions?.noAudio === true) console.debug("Lavalink-Client-Debug | NO-AUDIO [::] sendRawData function, Sent updatePlayer for voice token session", { voice: { token: update.token, endpoint: update.endpoint, sessionId: sessionId2Use, }, playerVoice: player.voice, update });
                 }
                 return
             }
@@ -591,8 +591,8 @@ export class LavalinkManager extends EventEmitter {
 
             } else {
                 if (this.options?.playerOptions?.onDisconnect?.destroyPlayer === true) {
-                    await player.destroy(DestroyReasons.Disconnected);
-                    return 
+                    await player.destroy(DestroyReasons.Disconnected); 
+                    return
                 }
 
                 this.emit("playerDisconnect", player, player.voiceChannelId);

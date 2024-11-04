@@ -80,7 +80,7 @@ export class DefaultQueueStore implements QueueStoreManager {
      * @returns The queue for the guild
      */
     async set(guildId: string, valueToStringify) {
-        return !!this.data.set(guildId, valueToStringify)
+        return this.data.set(guildId, valueToStringify) ? true : false;
     }
 
     /**

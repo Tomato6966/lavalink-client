@@ -21,14 +21,13 @@ export const bandCampSearch = async (player: Player, query: string, requestUser:
 
         const json = await data.json() as { results: { [key: string]: string }[] };
 
-        tracks = json?.results?.filter(x => !!x && typeof x === "object" && "type" in x && x.type === "t")
-            .map(item => player.LavalinkManager.utils.buildUnresolvedTrack({
-                uri: item.url || item.uri,
-                artworkUrl: item.img,
-                author: item.band_name,
-                title: item.name,
-                identifier: item.id ? `${item.id}` : item.url?.split("/").reverse()[0],
-            }, requestUser));
+        tracks = json?.results?.filter(x => !!x && typeof x === "object" && "type" in x && x.type === "t").map?.(item => player.LavalinkManager.utils.buildUnresolvedTrack({
+            uri: item.url || item.uri,
+            artworkUrl: item.img,
+            author: item.band_name,
+            title: item.name,
+            identifier: item.id ? `${item.id}` : item.url?.split("/").reverse()[0],
+        }, requestUser));
             
     } catch (e) {
         error = e as Error;

@@ -17,18 +17,18 @@ import type {
  * Lavalink Node creator class
  */
 export class LavalinkNode {
-    private heartBeatPingTimestamp = 0;
-    private heartBeatPongTimestamp = 0;
+    private heartBeatPingTimestamp: number = 0;
+    private heartBeatPongTimestamp: number = 0;
     public get heartBeatPing() {
         return this.heartBeatPongTimestamp - this.heartBeatPingTimestamp;
     }
     private heartBeatInterval?: NodeJS.Timeout;
     private pingTimeout?: NodeJS.Timeout;
-    public isAlive = false;
+    public isAlive: boolean = false;
     /** The provided Options of the Node */
     public options: LavalinkNodeOptions;
     /** The amount of rest calls the node has made. */
-    public calls = 0;
+    public : number = 0;
     /** Stats from lavalink, will be updated via an interval by lavalink. */
     public stats: NodeStats = {
         players: 0,
@@ -212,7 +212,7 @@ export class LavalinkNode {
      * player.node.search({ query: "https://deezer.com/track/123456789" }, interaction.user);
      * ```
      */
-    public async search(query: SearchQuery, requestUser: unknown, throwOnEmpty = false): Promise<SearchResult> {
+    public async search(query: SearchQuery, requestUser: unknown, throwOnEmpty:boolean = false): Promise<SearchResult> {
         const Query = this.NodeManager.LavalinkManager.utils.transformQuery(query);
 
         this.NodeManager.LavalinkManager.utils.validateQueryString(this, Query.query, Query.source);
@@ -286,7 +286,7 @@ export class LavalinkNode {
      * player.node.lavaSearch({ types: ["playlist", "album"], query: "Rick Astley", source: "spotify" }, interaction.user);
      * ```
      */
-    async lavaSearch(query:LavaSearchQuery, requestUser: unknown, throwOnEmpty = false): Promise<LavaSearchResponse|SearchResult> {
+    async lavaSearch(query:LavaSearchQuery, requestUser: unknown, throwOnEmpty:boolean = false): Promise<LavaSearchResponse|SearchResult> {
         const Query = this.NodeManager.LavalinkManager.utils.transformLavaSearchQuery(query);
 
         if (Query.source) this.NodeManager.LavalinkManager.utils.validateSourceString(this, Query.source);
@@ -684,7 +684,7 @@ export class LavalinkNode {
          * // const lyrics = await player.getLyrics(track, true);
          * ```
          */
-        get: async (track: Track, skipTrackSource = false): Promise<LyricsResult|null> => {
+        get: async (track: Track, skipTrackSource: boolean = false): Promise<LyricsResult|null> => {
             if (!this.sessionId) throw new Error("the Lavalink-Node is either not ready, or not up to date!");
 
             if (
@@ -712,7 +712,7 @@ export class LavalinkNode {
          * // const lyrics = await player.getCurrentLyrics();
          * ```
          */
-        getCurrent: async (guildId: string, skipTrackSource = false): Promise<LyricsResult | null> => {
+        getCurrent: async (guildId: string, skipTrackSource: boolean = false): Promise<LyricsResult | null> => {
             if (!this.sessionId) throw new Error("the Lavalink-Node is either not ready, or not up to date!");
 
             if (

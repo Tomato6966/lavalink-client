@@ -514,7 +514,7 @@ async function applyUnresolvedData(resTrack: Track, data: UnresolvedTrack, utils
         if (data.info.title?.length) resTrack.info.title = data.info.title;
         if (data.info.author?.length) resTrack.info.author = data.info.author;
     } else { // only overwrite if undefined / invalid
-        if ((resTrack.info.title === 'Unknown title' || resTrack.info.title === "Unspecified description") && resTrack.info.title !== data.info.title) resTrack.info.title = data.info.title;
+        if ((resTrack.info.title === 'Unknown title' || resTrack.info.title === "Unspecified description") && resTrack.info.title != data.info.title) resTrack.info.title = data.info.title;
         if (resTrack.info.author !== data.info.author) resTrack.info.author = data.info.author;
         if (resTrack.info.artworkUrl !== data.info.artworkUrl) resTrack.info.artworkUrl = data.info.artworkUrl;
     }
