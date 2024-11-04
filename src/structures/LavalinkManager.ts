@@ -1,4 +1,4 @@
-import { EventEmitter } from "node:events";
+import { EventEmitter } from "events";
 
 import { DebugEvents, DestroyReasons } from "./Constants";
 import { NodeManager } from "./NodeManager";
@@ -71,7 +71,7 @@ export class LavalinkManager extends EventEmitter {
     /** LavalinkManager's Utils Class */
     public utils: ManagerUtils;
     /** Wether the manager was initiated or not */
-    public initiated = false;
+    public initiated: boolean = false;
     /** All Players stored in a MiniMap */
     public readonly players: MiniMap<string, Player> = new MiniMap();
 

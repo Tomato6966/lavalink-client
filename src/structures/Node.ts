@@ -1,4 +1,4 @@
-import { isAbsolute } from "node:path";
+import { isAbsolute } from "path";
 import WebSocket from "ws";
 
 import { DebugEvents, DestroyReasons, validSponsorBlocks } from "./Constants";

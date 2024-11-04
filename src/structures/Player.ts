@@ -32,9 +32,9 @@ export class Player {
     /** The Text Channel Id of the Player */
     public textChannelId: string | null = null;
     /** States if the Bot is supposed to be outputting audio */
-    public playing = false;
+    public playing: boolean = false;
     /** States if the Bot is paused or not */
-    public paused = false;
+    public paused: boolean = false;
     /** Repeat Mode of the Player */
     public repeatMode: RepeatMode = "off";
     /** Player's ping */
@@ -46,9 +46,9 @@ export class Player {
     };
 
     /** The Display Volume */
-    public volume = 100;
+    public volume: number = 100;
     /** The Volume Lavalink actually is outputting */
-    public lavalinkVolume = 100;
+    public lavalinkVolume: number = 100;
 
     /** The current Positin of the player (Calculated) */
     public get position() {
@@ -57,9 +57,9 @@ export class Player {
     /** The timestamp when the last position change update happened */
     public lastPositionChange: number = null;
     /** The current Positin of the player (from Lavalink) */
-    public lastPosition = 0;
+    public lastPosition: number = 0;
 
-    public lastSavedPosition = 0;
+    public lastSavedPosition: number = 0;
 
     /** When the player was created [Timestamp in Ms] (from lavalink) */
     public createdTimeStamp: number;
@@ -361,7 +361,7 @@ export class Player {
      * @param volume The Volume in percent
      * @param ignoreVolumeDecrementer If it should ignore the volumedecrementer option
      */
-    async setVolume(volume: number, ignoreVolumeDecrementer = false) {
+    async setVolume(volume: number, ignoreVolumeDecrementer: boolean = false) {
         volume = Number(volume);
 
         if (Number.isNaN(volume)) throw new TypeError("Volume must be a number.");
@@ -396,7 +396,7 @@ export class Player {
      * @param throwOnEmpty If an error should be thrown if no track is found
      * @returns The search result
      */
-    async lavaSearch(query: LavaSearchQuery, requestUser: unknown, throwOnEmpty = false) {
+    async lavaSearch(query: LavaSearchQuery, requestUser: unknown, throwOnEmpty: boolean = false) {
         return this.node.lavaSearch(query, requestUser, throwOnEmpty);
     }
     /**
@@ -423,7 +423,7 @@ export class Player {
      * @param query Query for your data
      * @param requestUser
      */
-    async search(query: SearchQuery, requestUser: unknown, throwOnEmpty = false) {
+    async search(query: SearchQuery, requestUser: unknown, throwOnEmpty: boolean = false) {
         const Query = this.LavalinkManager.utils.transformQuery(query);
 
         if (["bcsearch", "bandcamp"].includes(Query.source) && !this.node.info.sourceManagers.includes("bandcamp")) {
@@ -504,7 +504,7 @@ export class Player {
      * Skip the current song, or a specific amount of songs
      * @param amount provide the index of the next track to skip to
      */
-    async skip(skipTo = 0, throwError = true) {
+    async skip(skipTo: number = 0, throwError: boolean = true) {
         if (!this.queue.tracks.length && (throwError || (typeof skipTo === "boolean" && skipTo === true))) throw new RangeError("Can't skip more than the queue size");
 
         if (typeof skipTo === "number" && skipTo > 1) {
@@ -530,7 +530,7 @@ export class Player {
      * Clears the queue and stops playing. Does not destroy the Player and not leave the channel
      * @returns
      */
-    async stopPlaying(clearQueue = true, executeAutoplay = false) {
+    async stopPlaying(clearQueue: boolean = true, executeAutoplay: boolean = false) {
         // use internal_stopPlaying on true, so that it doesn't utilize current loop states. on trackEnd event
         this.set("internal_stopPlaying", true);
 
@@ -600,7 +600,7 @@ export class Player {
      * @param force If false it throws an error, if player thinks it's already disconnected
      * @returns
      */
-    public async disconnect(force = false) {
+    public async disconnect(force: boolean = false) {
         if (!force && !this.options.voiceChannelId) throw new RangeError("No Voice Channel id has been set. (player.options.voiceChannelId)");
 
         await this.LavalinkManager.options.sendToShard(this.guildId, {
@@ -621,7 +621,7 @@ export class Player {
     /**
      * Destroy the player and disconnect from the voice channel
      */
-    public async destroy(reason?: DestroyReasons | string, disconnect = true) { //  [disconnect -> queue destroy -> cache delete -> lavalink destroy -> event emit]
+    public async destroy(reason?: DestroyReasons | string, disconnect: boolean = true) { //  [disconnect -> queue destroy -> cache delete -> lavalink destroy -> event emit]
         if (this.LavalinkManager.options.advancedOptions?.debugOptions.playerDestroy.debugLog) console.log(`Lavalink-Client-Debug | PlayerDestroy [::] destroy Function, [guildId ${this.guildId}] - Destroy-Reason: ${String(reason)}`);
 
         if (this.get("internal_queueempty")) {
