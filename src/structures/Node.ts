@@ -28,7 +28,7 @@ export class LavalinkNode {
     /** The provided Options of the Node */
     public options: LavalinkNodeOptions;
     /** The amount of rest calls the node has made. */
-    public : number = 0;
+    public calls: number = 0;
     /** Stats from lavalink, will be updated via an interval by lavalink. */
     public stats: NodeStats = {
         players: 0,

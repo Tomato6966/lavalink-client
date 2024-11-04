@@ -306,13 +306,10 @@ export class Queue {
         if (typeof removeQueryTrack === "number") {
             const toRemove = this.tracks[removeQueryTrack];
             if (!toRemove) return null;
-    
             const removed: (Track | UnresolvedTrack)[] = this.tracks.splice(removeQueryTrack, 1);
             // Log if available
             if (typeof this.queueChanges?.tracksRemoved === "function") try { this.queueChanges.tracksRemoved(this.guildId, removed, removeQueryTrack, oldStored, this.utils.toJSON()) } catch (e) { /* */ }
-    
             await this.utils.save();
-    
             return { removed }
         }
     
@@ -325,12 +322,9 @@ export class Queue {
                     }
                 }
                 if (!removed.length) return null;
-    
                 // Log if available
                 if (typeof this.queueChanges?.tracksRemoved === "function") try { this.queueChanges.tracksRemoved(this.guildId, removed, removeQueryTrack as number[], oldStored, this.utils.toJSON()) } catch (e) { /* */ }
-    
                 await this.utils.save();
-    
                 return { removed };
             }
     
@@ -347,7 +341,6 @@ export class Queue {
             ));
     
             if (!tracksToRemove.length) return null;
-    
             const removed: (Track | UnresolvedTrack)[] = [];
     
             for (const { i } of tracksToRemove) {
@@ -357,11 +350,10 @@ export class Queue {
             }
             // Log if available
             if (typeof this.queueChanges?.tracksRemoved === "function") try { this.queueChanges.tracksRemoved(this.guildId, removed, tracksToRemove.map(v => v.i), oldStored, this.utils.toJSON()) } catch (e) { /* */ }
-    
             await this.utils.save();
-    
             return { removed };
         }
+
         const toRemove = this.tracks.findIndex((v) =>
             removeQueryTrack.encoded && removeQueryTrack.encoded === v.encoded ||
             removeQueryTrack.info?.identifier && removeQueryTrack.info.identifier === v.info?.identifier ||
@@ -372,13 +364,10 @@ export class Queue {
         );
     
         if (toRemove < 0) return null;
-    
         const removed: (Track | UnresolvedTrack)[] = this.tracks.splice(toRemove, 1);
         // Log if available
         if (typeof this.queueChanges?.tracksRemoved === "function") try { this.queueChanges.tracksRemoved(this.guildId, removed, toRemove, oldStored, this.utils.toJSON()) } catch (e) { /* */ }
-    
         await this.utils.save();
-    
         return { removed };
     }    
 

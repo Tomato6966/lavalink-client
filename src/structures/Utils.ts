@@ -1,7 +1,7 @@
 
 
-import { URL } from "url";
-import { isRegExp } from "util/types";
+import { URL } from "node:url";
+import { isRegExp } from "node:util/types";
 
 import { DebugEvents } from "./Constants";
 import { DefaultSources, LavalinkPlugins, SourceLinksRegexes } from "./LavalinkManagerStatics";
