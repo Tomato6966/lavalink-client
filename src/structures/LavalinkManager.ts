@@ -525,6 +525,13 @@ export class LavalinkManager extends EventEmitter {
                             }
                         }
                     });
+
+                    player.voice = {
+                        token: update.token,
+                        endpoint: update.endpoint,
+                        sessionId: sessionId2Use,
+                    }
+
                     if (this.options?.advancedOptions?.enableDebugEvents) {
                         this.emit("debug", DebugEvents.NoAudioDebug, {
                             state: "log",
