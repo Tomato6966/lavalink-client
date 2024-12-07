@@ -1,7 +1,7 @@
 // @ts-check
 import { defineConfig } from "astro/config";
 import starlight from "@astrojs/starlight";
-import starlightTypeDoc, { typeDocSidebarGroup } from "starlight-typedoc"
+import starlightTypeDoc, { typeDocSidebarGroup } from "starlight-typedoc";
 
 // https://astro.build/config
 export default defineConfig({
@@ -12,8 +12,8 @@ export default defineConfig({
 			title: "Lavalink Client",
 			social: {
 				github: "https://github.com/Tomato6966/lavalink-client",
-                discord: "https://discord.gg/AsgD3gtPnb",
-                email: "mailto:chrissy@mivator.com",
+				discord: "https://discord.gg/AsgD3gtPnb",
+				email: "mailto:chrissy@mivator.com",
 			},
 			editLink: {
 				baseUrl: "https://github.com/Tomato6966/lavalink-client/tree/main",
@@ -61,10 +61,10 @@ export default defineConfig({
 							label: "Sample Configuration",
 							link: "/home/configuration",
 						},
-                        {
-                            label: "Checkout Docs (Manager-Class)",
-                            link: "/api/lavalinkmanager/classes/lavalinkmanager"
-                        },
+						{
+							label: "Checkout Docs (Manager-Class)",
+							link: "/api/lavalinkmanager/classes/lavalinkmanager",
+						},
 					],
 				},
 				{
@@ -86,8 +86,8 @@ export default defineConfig({
 						{
 							label: "Version-Update-Log",
 							link: "/extra/version-log",
-						}
-					]
+						},
+					],
 				},
 				typeDocSidebarGroup,
 				{
@@ -102,14 +102,14 @@ export default defineConfig({
 					label: "Example Bot",
 					link: "https://github.com/Tomato6966/lavalink-client/tree/main/testBot",
 				},
-                {
-                    label: "Official Lavalink-Discord",
-                    link: "https://discord.gg/lavalink-1082302532421943407"
-                },
-                {
-                    label: "Official Lavalink-Web",
-                    link: "https://lavalink.dev"
-                }
+				{
+					label: "Official Lavalink-Discord",
+					link: "https://discord.gg/lavalink-1082302532421943407",
+				},
+				{
+					label: "Official Lavalink-Web",
+					link: "https://lavalink.dev",
+				},
 			],
 		}),
 	],

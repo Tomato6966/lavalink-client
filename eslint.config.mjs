@@ -8,43 +8,35 @@ import { FlatCompat } from "@eslint/eslintrc";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const compat = new FlatCompat({
-    baseDirectory: __dirname,
-    recommendedConfig: js.configs.recommended,
-    allConfig: js.configs.all
+	baseDirectory: __dirname,
+	recommendedConfig: js.configs.recommended,
+	allConfig: js.configs.all,
 });
 
-
 export default [
-    {
-        ignores: [
-            "**/dist",
-            "**/docs",
-            "**/node_modules",
-            "**/testBot",
-            "**/tools",
-            "eslint.config.mjs",
-        ],
-    },
-    ...compat.extends("plugin:@typescript-eslint/recommended"),
-    {
-        plugins: {
-            "@typescript-eslint": typescriptEslint,
-        },
-        languageOptions: {
-            globals: {},
-            parser: tsParser,
-            ecmaVersion: "latest",
-            sourceType: "module",
-            parserOptions: {
-                project: true,
-                tsconfigRootDir: __dirname,
-            },
-        },
-        rules: {
-            "@typescript-eslint/consistent-type-imports": "error",
-            "@typescript-eslint/no-explicit-any": 1,
-            "@typescript-eslint/no-unsafe-declaration-merging": 1,
-            "@typescript-eslint/no-unused-vars": 1,
-        },
-    }
+	{
+		ignores: ["**/dist", "**/docs", "**/node_modules", "**/testBot", "**/tools", "eslint.config.mjs"],
+	},
+	...compat.extends("plugin:@typescript-eslint/recommended"),
+	{
+		plugins: {
+			"@typescript-eslint": typescriptEslint,
+		},
+		languageOptions: {
+			globals: {},
+			parser: tsParser,
+			ecmaVersion: "latest",
+			sourceType: "module",
+			parserOptions: {
+				project: true,
+				tsconfigRootDir: __dirname,
+			},
+		},
+		rules: {
+			"@typescript-eslint/consistent-type-imports": "error",
+			"@typescript-eslint/no-explicit-any": 1,
+			"@typescript-eslint/no-unsafe-declaration-merging": 1,
+			"@typescript-eslint/no-unused-vars": 1,
+		},
+	},
 ];

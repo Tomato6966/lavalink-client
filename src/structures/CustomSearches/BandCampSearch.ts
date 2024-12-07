@@ -1,11 +1,14 @@
 import type { Player } from "../Player";
 import type { UnresolvedSearchResult } from "../Types/Utils";
+import type { UnresolvedTrack } from "../Types/Track";
 
 export const bandCampSearch = async (player: Player, query: string, requestUser: unknown) => {
     let error = null;
-    let tracks = [];
+    let tracks: UnresolvedTrack[] = [];
 
-    if (player.LavalinkManager.options.advancedOptions.debugOptions.logCustomSearches) console.log(`Lavalink-Client-Debug | SEARCHING | - ${query} on lavalink-client`)
+    if (player.LavalinkManager.options.advancedOptions.debugOptions.logCustomSearches) {
+        console.log(`Lavalink-Client-Debug | SEARCHING | - ${query} on lavalink-client`);
+    }
     player.LavalinkManager.utils.validateQueryString(player.node, query);
 
     try {
@@ -25,8 +28,10 @@ export const bandCampSearch = async (player: Player, query: string, requestUser:
             title: item.name,
             identifier: item.id ? `${item.id}` : item.url?.split("/").reverse()[0],
         }, requestUser));
-
-    } catch (e) { error = e; }
+            
+    } catch (e) {
+        error = e as Error;
+    }
 
     return {
         loadType: "search",

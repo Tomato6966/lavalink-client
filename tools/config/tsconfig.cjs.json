@@ -1,7 +1,7 @@
 {
-    "extends": "../../tsconfig",
-    "compilerOptions": {
-      "module": "CommonJS",
-      "outDir": "../../dist/cjs"
-    }
-  }
+	"extends": "../../tsconfig",
+	"compilerOptions": {
+		"module": "CommonJS",
+		"outDir": "../../dist/cjs"
+	}
+}

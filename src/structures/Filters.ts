@@ -302,7 +302,7 @@ export class FilterManager {
      */
     public async setAudioOutput(type: AudioOutputs): Promise<AudioOutputs> {
         if (this.player.node.info && !this.player.node.info?.filters?.includes("channelMix")) throw new Error("Node#Info#filters does not include the 'channelMix' Filter (Node has it not enable)")
-        if (!type || !audioOutputsData[type]) throw "Invalid audio type added, must be 'mono' / 'stereo' / 'left' / 'right'"
+        if (!type || !audioOutputsData[type]) throw new Error("Invalid audio type added, must be 'mono' / 'stereo' / 'left' / 'right'")
         this.data.channelMix = audioOutputsData[type];
         this.filters.audioOutput = type;
         await this.applyPlayerFilters();
