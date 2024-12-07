@@ -247,5 +247,5 @@ export interface NodeManagerEvents {
      * Aka for that you need to be able to save player data like vc channel + text channel in a db and then sync it again
      * @event Manager.nodeManager#nodeResumed
      */
-    "resumed": (node:LavalinkNode, paylaod: { resumed: true, sessionId: string, op: "ready" }, players:LavalinkPlayer[] | InvalidLavalinkRestRequest)  => void;
+    "resumed": (node:LavalinkNode, payload: { resumed: true, sessionId: string, op: "ready" }, players:LavalinkPlayer[] | InvalidLavalinkRestRequest)  => void;
 }
