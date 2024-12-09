@@ -191,27 +191,38 @@ export class FilterManager {
      * @returns
      */
     checkFiltersState(oldFilterTimescale?: Partial<TimescaleFilter>) {
+        // Check basic filters
         this.filters.rotation = this.data.rotation.rotationHz !== 0;
         this.filters.vibrato = this.data.vibrato.frequency !== 0 || this.data.vibrato.depth !== 0;
         this.filters.tremolo = this.data.tremolo.frequency !== 0 || this.data.tremolo.depth !== 0;
 
-        const lavalinkFilterData = (this.data.pluginFilters?.["lavalink-filter-plugin"] || { echo: { decay: this.data.pluginFilters?.echo?.decay && !this.data.pluginFilters?.echo?.echoLength ? this.data.pluginFilters.echo.decay : 0, delay: (this.data.pluginFilters?.echo as { decay: number, delay: number })?.delay || 0 }, reverb: { gains: [], delays: [], ...(((this.data.pluginFilters as { reverb: { gains: number[], delays: number[] } }).reverb) || {}) } });
-        this.filters.lavalinkFilterPlugin.echo = lavalinkFilterData.echo.decay !== 0 || lavalinkFilterData.echo.delay !== 0;
-        this.filters.lavalinkFilterPlugin.reverb = lavalinkFilterData.reverb?.delays?.length !== 0 || lavalinkFilterData.reverb?.gains?.length !== 0;
+        // Handle plugin filters with fallback values
+        const { echo = {}, reverb = {} } = this.data.pluginFilters?.["lavalink-filter-plugin"] || {};
+        this.filters.lavalinkFilterPlugin.echo = echo.decay !== 0 || echo.delay !== 0;
+        this.filters.lavalinkFilterPlugin.reverb = reverb?.delays?.length > 0 || reverb?.gains?.length > 0;
+
+        // Check LavaDspxPlugin filters
         this.filters.lavalinkLavaDspxPlugin.highPass = Object.values(this.data.pluginFilters["high-pass"] || {}).length > 0;
         this.filters.lavalinkLavaDspxPlugin.lowPass = Object.values(this.data.pluginFilters["low-pass"] || {}).length > 0;
         this.filters.lavalinkLavaDspxPlugin.normalization = Object.values(this.data.pluginFilters.normalization || {}).length > 0;
-        this.filters.lavalinkLavaDspxPlugin.echo = Object.values(this.data.pluginFilters.echo || {}).length > 0 && typeof (this.data.pluginFilters?.echo as { decay: number, delay: number })?.delay === "undefined";
+        this.filters.lavalinkLavaDspxPlugin.echo = Object.values(this.data.pluginFilters.echo || {}).length > 0 && typeof echo.delay === "undefined";
 
+        // Additional filters
         this.filters.lowPass = this.data.lowPass.smoothing !== 0;
         this.filters.karaoke = Object.values(this.data.karaoke).some(v => v !== 0);
+
+        // Handle custom filters like nightcore and vaporwave
         if ((this.filters.nightcore || this.filters.vaporwave) && oldFilterTimescale) {
-            if (oldFilterTimescale.pitch !== this.data.timescale.pitch || oldFilterTimescale.rate !== this.data.timescale.rate || oldFilterTimescale.speed !== this.data.timescale.speed) {
+            const { pitch, rate, speed } = this.data.timescale;
+            const { pitch: oldPitch, rate: oldRate, speed: oldSpeed } = oldFilterTimescale;
+
+            if (oldPitch !== pitch || oldRate !== rate || oldSpeed !== speed) {
                 this.filters.custom = Object.values(this.data.timescale).some(v => v !== 1);
                 this.filters.nightcore = false;
                 this.filters.vaporwave = false;
             }
         }
+
         return true;
     }
 
