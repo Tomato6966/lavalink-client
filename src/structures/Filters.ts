@@ -117,52 +117,70 @@ export class FilterManager {
         const sendData = { ...this.data } as LavalinkFilterData & { equalizer: EQBand[] };
         this.checkFiltersState();
 
-        if (!this.filters.volume) delete sendData.volume;
-        if (!this.filters.tremolo) delete sendData.tremolo;
-        if (!this.filters.vibrato) delete sendData.vibrato;
+        // Remove disabled filters
+        Object.keys(this.filters).forEach(key => {
+            if (!this.filters[key]) {
+                delete sendData[key];
+            }
+        });
 
-        if (!this.filters.lavalinkFilterPlugin.echo) delete sendData.pluginFilters?.["lavalink-filter-plugin"]?.echo;
-        if (!this.filters.lavalinkFilterPlugin.reverb) delete sendData.pluginFilters?.["lavalink-filter-plugin"]?.reverb;
+        // Clean up empty pluginFilters
+        if (this.filters.lavalinkFilterPlugin) {
+            if (!this.filters.lavalinkFilterPlugin.echo) delete sendData.pluginFilters?.["lavalink-filter-plugin"]?.echo;
+            if (!this.filters.lavalinkFilterPlugin.reverb) delete sendData.pluginFilters?.["lavalink-filter-plugin"]?.reverb;
+        }
 
-        if (!this.filters.lavalinkLavaDspxPlugin.echo) delete sendData.pluginFilters?.echo;
-        if (!this.filters.lavalinkLavaDspxPlugin.normalization) delete sendData.pluginFilters?.normalization;
-        if (!this.filters.lavalinkLavaDspxPlugin.highPass) delete sendData.pluginFilters?.["high-pass"];
-        if (!this.filters.lavalinkLavaDspxPlugin.lowPass) delete sendData.pluginFilters?.["low-pass"];
+        if (this.filters.lavalinkLavaDspxPlugin) {
+            if (!this.filters.lavalinkLavaDspxPlugin.echo) delete sendData.pluginFilters?.echo;
+            if (!this.filters.lavalinkLavaDspxPlugin.normalization) delete sendData.pluginFilters?.normalization;
+            if (!this.filters.lavalinkLavaDspxPlugin.highPass) delete sendData.pluginFilters?.["high-pass"];
+            if (!this.filters.lavalinkLavaDspxPlugin.lowPass) delete sendData.pluginFilters?.["low-pass"];
+        }
 
-        if (sendData.pluginFilters?.["lavalink-filter-plugin"] && Object.values(sendData.pluginFilters?.["lavalink-filter-plugin"]).length === 0) delete sendData.pluginFilters["lavalink-filter-plugin"];
-        if (sendData.pluginFilters && Object.values(sendData.pluginFilters).length === 0) delete sendData.pluginFilters;
-        if (!this.filters.lowPass) delete sendData.lowPass;
-        if (!this.filters.karaoke) delete sendData.karaoke;
-        if (!this.filters.rotation) delete sendData.rotation;
-        if (this.filters.audioOutput === "stereo") delete sendData.channelMix;
+        // Remove empty pluginFilters objects
+        if (sendData.pluginFilters?.["lavalink-filter-plugin"] && Object.keys(sendData.pluginFilters["lavalink-filter-plugin"]).length === 0) {
+            delete sendData.pluginFilters["lavalink-filter-plugin"];
+        }
+        if (sendData.pluginFilters && Object.keys(sendData.pluginFilters).length === 0) delete sendData.pluginFilters;
 
-        if (Object.values(this.data.timescale).every(v => v === 1)) delete sendData.timescale;
-
-        if (!this.player.node.sessionId) throw new Error("The Lavalink-Node is either not ready or not up to date");
-
+        // Handle equalizer
         sendData.equalizer = [...this.equalizerBands];
         if (sendData.equalizer.length === 0) delete sendData.equalizer;
 
-        for (const key of [...Object.keys(sendData)]) {
-            // delete disabled filters
-            if (key === "pluginFilters") {
-                // for(const key of [...Object.keys(sendData.pluginFilters)]) {
-                //     // if (this.player.node.info && !this.player.node.info?.plugins?.find?.(v => v.name === key)) delete sendData[key];
-                // }
-            } else if (this.player.node.info && !this.player.node.info?.filters?.includes?.(key)) delete sendData[key];
+        // Delete filters that are not enabled
+        Object.keys(sendData).forEach(key => {
+            if (key !== "pluginFilters" && this.player.node.info && !this.player.node.info?.filters?.includes?.(key)) {
+                delete sendData[key];
+            }
+        });
+
+        // Handle empty timescale
+        if (Object.values(this.data.timescale).every(v => v === 1)) delete sendData.timescale;
+
+        // Check if sessionId is available
+        if (!this.player.node.sessionId) {
+            throw new Error("The Lavalink-Node is either not ready or not up to date");
         }
 
         const now = performance.now();
 
-        if (this.player.options.instaUpdateFiltersFix === true) this.filterUpdatedState = true;
+        // Insta update filter fix state
+        if (this.player.options.instaUpdateFiltersFix === true) {
+            this.filterUpdatedState = true;
+        }
 
-        await this.player.node.updatePlayer({
-            guildId: this.player.guildId,
-            playerOptions: {
-                filters: sendData,
-            }
-        })
+        try {
+            // Send updated player filters to Lavalink
+            await this.player.node.updatePlayer({
+                guildId: this.player.guildId,
+                playerOptions: { filters: sendData },
+            });
+        } catch (error) {
+            console.error(`Error applying player filters: ${error.message}`);
+            throw error; // Optionally handle more gracefully
+        }
 
+        // Update Lavalink ping
         this.player.ping.lavalink = Math.round((performance.now() - now) / 10) / 100;
         return;
     }
