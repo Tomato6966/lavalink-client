@@ -536,24 +536,29 @@ export class Player {
     }
 
     /**
-     * Clears the queue and stops playing. Does not destroy the Player and not leave the channel
-     * @returns
+     * Clears the queue and stops playing. Does not destroy the Player or leave the channel.
+     * @param clearQueue - If true, clears the entire queue. Default is true.
+     * @param executeAutoplay - If true, resumes autoplay after stopping. Default is false.
+     * @returns The current instance for chaining.
      */
     async stopPlaying(clearQueue: boolean = true, executeAutoplay: boolean = false) {
-        // use internal_stopPlaying on true, so that it doesn't utilize current loop states. on trackEnd event
+        // Set internal state to stop playing without affecting loop states
         this.set("internal_stopPlaying", true);
 
-        // remove tracks from the queue
-        if (this.queue.tracks.length && clearQueue === true) await this.queue.splice(0, this.queue.tracks.length);
+        // Clear the queue if needed
+        if (clearQueue) {
+            await this.queue.splice(0, this.queue.tracks.length); // Assumed splice is synchronous
+        }
 
-        if (executeAutoplay === false) this.set("internal_autoplayStopPlaying", true);
-        else this.set("internal_autoplayStopPlaying", undefined);
+        // Control autoplay behavior
+        this.set("internal_autoplayStopPlaying", executeAutoplay ? undefined : false);
 
         const now = performance.now();
 
-        // send to lavalink, that it should stop playing
+        // Notify Lavalink to stop playing
         await this.node.updatePlayer({ guildId: this.guildId, playerOptions: { track: { encoded: null } } });
 
+        // Calculate and store ping duration
         this.ping.lavalink = Math.round((performance.now() - now) / 10) / 100;
 
         return this;
