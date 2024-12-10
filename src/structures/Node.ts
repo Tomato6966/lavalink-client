@@ -931,7 +931,7 @@ export class LavalinkNode {
             }
 
             if (typeof data.playerOptions.filters !== "undefined") {
-                const oldFilterTimescale = { ...(player.filterManager.data.timescale || {}) };
+                const oldFilterTimescale = { ...player.filterManager.data.timescale };
                 Object.freeze(oldFilterTimescale);
                 if (data.playerOptions.filters.timescale) player.filterManager.data.timescale = data.playerOptions.filters.timescale;
                 if (data.playerOptions.filters.distortion) player.filterManager.data.distortion = data.playerOptions.filters.distortion;
