@@ -904,7 +904,7 @@ export class LavalinkNode {
      * @returns boolean
      */
     private syncPlayerData(data: Partial<PlayerUpdateInfo>, res?: LavalinkPlayer):void {
-        if (typeof data === "object" && typeof data?.guildId === "string" && typeof data.playerOptions === "object" && Object.keys(data.playerOptions).length > 1) {
+        if (typeof data === "object" && typeof data?.guildId === "string" && typeof data.playerOptions === "object" && Object.keys(data.playerOptions).length > 0) {
             const player = this.NodeManager.LavalinkManager.getPlayer(data.guildId);
             if (!player) return;
 
@@ -931,7 +931,7 @@ export class LavalinkNode {
             }
 
             if (typeof data.playerOptions.filters !== "undefined") {
-                const oldFilterTimescale = { ...(player.filterManager.data.timescale || {}) };
+                const oldFilterTimescale = { ...player.filterManager.data.timescale };
                 Object.freeze(oldFilterTimescale);
                 if (data.playerOptions.filters.timescale) player.filterManager.data.timescale = data.playerOptions.filters.timescale;
                 if (data.playerOptions.filters.distortion) player.filterManager.data.distortion = data.playerOptions.filters.distortion;

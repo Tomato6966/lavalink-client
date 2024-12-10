@@ -50,7 +50,7 @@ export class ManagerUtils {
     buildPluginInfo(data: any, clientData: any = {}) {
         return {
             clientData: clientData,
-            ...(data.pluginInfo || (data as any).plugin || {})
+            ...(data.pluginInfo || (data as any).plugin),
         }
     }
 
@@ -82,7 +82,7 @@ export class ManagerUtils {
                     isrc: data.info.isrc,
                 },
                 userData: {
-                    ...(data.userData || {}),
+                    ...data.userData,
                     requester: transformedRequester
                 },
                 pluginInfo: this.buildPluginInfo(data, "clientData" in data ? data.clientData : {}),
@@ -462,7 +462,7 @@ export class MiniMap<K, V> extends Map<K, V> {
         const iter = this.entries();
         return Array.from({ length: this.size }, (): T => {
             const [key, value] = iter.next().value;
-             
+
             return fn(value, key, this);
         });
     }
