@@ -334,7 +334,7 @@ export class LavalinkManager extends EventEmitter {
         // oldPlayer.connected is operational. you could also do oldPlayer.voice?.token
         if (oldPlayer.voiceChannelId === "string" && oldPlayer.connected && !oldPlayer.get("internal_destroywithoutdisconnect")) {
             if (!this.options?.advancedOptions?.debugOptions?.playerDestroy?.dontThrowError) throw new Error(`Use Player#destroy() not LavalinkManager#deletePlayer() to stop the Player ${JSON.stringify(oldPlayer.toJSON?.())}`)
-            else if (this.options?.advancedOptions?.enableDebugEvents) {
+            if (this.options?.advancedOptions?.enableDebugEvents) {
                 this.emit("debug", DebugEvents.PlayerDeleteInsteadOfDestroy, {
                     state: "warn",
                     message: "Use Player#destroy() not LavalinkManager#deletePlayer() to stop the Player",
@@ -444,11 +444,11 @@ export class LavalinkManager extends EventEmitter {
         }
 
         // for channel Delete
-        if ("CHANNEL_DELETE" === data.t) {
+        if (data.t === "CHANNEL_DELETE") {
             const update = "d" in data ? data.d : data;
             if (!update.guild_id) return;
             const player = this.getPlayer(update.guild_id);
-            if (player && player.voiceChannelId === update.id) return void player.destroy(DestroyReasons.ChannelDeleted);
+            if (player && player.voiceChannelId === update.id) await player.destroy(DestroyReasons.ChannelDeleted); return
         }
 
         // for voice updates
@@ -591,7 +591,8 @@ export class LavalinkManager extends EventEmitter {
 
             } else {
                 if (this.options?.playerOptions?.onDisconnect?.destroyPlayer === true) {
-                    return void await player.destroy(DestroyReasons.Disconnected);
+                    await player.destroy(DestroyReasons.Disconnected); 
+                    return
                 }
 
                 this.emit("playerDisconnect", player, player.voiceChannelId);
@@ -603,7 +604,7 @@ export class LavalinkManager extends EventEmitter {
                         if (this.options?.advancedOptions?.enableDebugEvents) {
                             this.emit("debug", DebugEvents.PlayerAutoReconnect, {
                                 state: "log",
-                                message: `Auto reconnecting player because LavalinkManager.options.playerOptions.onDisconnect.autoReconnect is true`,
+                                message: "Auto reconnecting player because LavalinkManager.options.playerOptions.onDisconnect.autoReconnect is true",
                                 functionLayer: "LavalinkManager > sendRawData()",
                             });
                         }
@@ -617,7 +618,8 @@ export class LavalinkManager extends EventEmitter {
                         });
                     } catch (e) {
                         console.error(e);
-                        return void await player.destroy(DestroyReasons.PlayerReconnectFail);
+                        await player.destroy(DestroyReasons.PlayerReconnectFail);
+                        return
                     }
                 }
 
