@@ -904,7 +904,7 @@ export class LavalinkNode {
      * @returns boolean
      */
     private syncPlayerData(data: Partial<PlayerUpdateInfo>, res?: LavalinkPlayer):void {
-        if (typeof data === "object" && typeof data?.guildId === "string" && typeof data.playerOptions === "object" && Object.keys(data.playerOptions).length > 1) {
+        if (typeof data === "object" && typeof data?.guildId === "string" && typeof data.playerOptions === "object" && Object.keys(data.playerOptions).length >= 1) {
             const player = this.NodeManager.LavalinkManager.getPlayer(data.guildId);
             if (!player) return;
 
