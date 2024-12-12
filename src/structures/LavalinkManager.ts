@@ -95,7 +95,8 @@ export class LavalinkManager extends EventEmitter {
                 defaultSearchPlatform: options?.playerOptions?.defaultSearchPlatform ?? "ytsearch",
                 onDisconnect: {
                     destroyPlayer: options?.playerOptions?.onDisconnect?.destroyPlayer ?? true,
-                    autoReconnect: options?.playerOptions?.onDisconnect?.autoReconnect ?? false
+                    autoReconnect: options?.playerOptions?.onDisconnect?.autoReconnect ?? false,
+                    autoReconnectOnlyWithTracks: options?.playerOptions?.onDisconnect?.autoReconnectOnlyWithTracks ?? false,
                 },
                 onEmptyQueue: {
                     autoPlayFunction: options?.playerOptions?.onEmptyQueue?.autoPlayFunction ?? null,
@@ -590,15 +591,21 @@ export class LavalinkManager extends EventEmitter {
                 if(suppressChange) this.emit("playerSuppressChange", player, player.voiceState.suppress);
 
             } else {
-                if (this.options?.playerOptions?.onDisconnect?.destroyPlayer === true) {
+
+                const {
+                    autoReconnectOnlyWithTracks,
+                    destroyPlayer,
+                    autoReconnect
+                } = this.options?.playerOptions?.onDisconnect ?? {};
+
+                if (destroyPlayer === true) {
                     return void await player.destroy(DestroyReasons.Disconnected);
                 }
 
-                this.emit("playerDisconnect", player, player.voiceChannelId);
-
-                if (this.options?.playerOptions?.onDisconnect?.autoReconnect === true) {
+                if (autoReconnect === true) {
                     try {
-                        const positionPrevios = player.position;
+                        const previousPosition = player.position;
+                        const previousPaused = player.paused;
 
                         if (this.options?.advancedOptions?.enableDebugEvents) {
                             this.emit("debug", DebugEvents.PlayerAutoReconnect, {
@@ -608,18 +615,31 @@ export class LavalinkManager extends EventEmitter {
                             });
                         }
 
-                        await player.connect();
+                        // connect if there are tracks & autoReconnectOnlyWithTracks = true or autoReconnectOnlyWithTracks is false
+                        if(!autoReconnectOnlyWithTracks || (autoReconnectOnlyWithTracks && (player.queue.current || player.queue.tracks.length))) {
+                            await player.connect();
+                        }
                         // replay the current playing stream
-                        await player.play({
-                            position: positionPrevios,
-                            paused: player.paused,
-                            clientTrack: player.queue.current,
+                        if(player.queue.current) {
+                            return void await player.play({ position: previousPosition, paused: previousPaused, clientTrack: player.queue.current, });
+                        }
+                        // try to play the next track
+                        if(player.queue.tracks.length) {
+                            return void await player.play({ paused: previousPaused });
+                        }
+                        // debug log if nothing was possible
+                        this.emit("debug", DebugEvents.PlayerAutoReconnect, {
+                            state: "log",
+                            message: `Auto reconnected, but nothing to play`,
+                            functionLayer: "LavalinkManager > sendRawData()",
                         });
                     } catch (e) {
                         console.error(e);
                         return void await player.destroy(DestroyReasons.PlayerReconnectFail);
                     }
                 }
+
+                this.emit("playerDisconnect", player, player.voiceChannelId);
 
                 player.voiceChannelId = null;
                 player.voice = Object.assign({});
