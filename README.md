@@ -790,10 +790,21 @@ if(previousTrack) {
 
 - Added the new events and configuration to the docs
 
+## **Version 2.4.1**
+
+- Did some cleanup and comment removal + removed the playerVoiceEmptyStart because it would mean i'd need to add voice-state tracking, which wasn't the plan of doing by the client.
+
+## **Verison 2.4.2**
+
+- Merged [PR#78](https://github.com/Tomato6966/lavalink-client/pull/78) from @hwangsihu - Added the configs to eslint ignore
+- Merged [PR#80](https://github.com/Tomato6966/lavalink-client/pull/80) from @EvilG-MC - Argument Typo fix in resume event type declaration
+- Merged [PR#83](https://github.com/Tomato6966/lavalink-client/pull/83) from @EvilG-MC - Fix if statement in Node#syncPlayerData() to allow syncing of "single entry objects"
+- Some minor improvements by removing unnecessary spreading
+
 ## **Version 2.4.3**
 - `managerOptions#playerOptions.onDisconnect.autoReconnect`:
   - Added the option `managerOptions#playerOptions.onDisconnect.autoReconnectOnlyWithTracks` to control wether to try reconnecting only when there are tracks in the queue / current track or not
   - Added a new debug log for that
   - Added the try to play the next track if there is no current track
-  - *There was a problem trying to auto-reconnect on "empty-queue" events, which caused the player to get destroyed by that and log the error in console "`There is no Track in the Queue, nor provided in the PlayOptions`"*
-  - *Now you have to handle that case manually if you want to or set autoReconnectOnlyWithTracks to false (default)*
+    - *There was a problem trying to auto-reconnect on-Disconnect while the queue was empty, which caused the player to get destroyed by that and log the error in console "`There is no Track in the Queue, nor provided in the PlayOptions`"*
+    - *Now you have to handle that case manually if you want to or set autoReconnectOnlyWithTracks to false (default)*
