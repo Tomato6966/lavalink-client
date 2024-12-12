@@ -789,3 +789,11 @@ if(previousTrack) {
     *Allows you to inmplement a custom playerVoiceEmpty handler*
 
 - Added the new events and configuration to the docs
+
+## **Version 2.4.3**
+- `managerOptions#playerOptions.onDisconnect.autoReconnect`:
+  - Added the option `managerOptions#playerOptions.onDisconnect.autoReconnectOnlyWithTracks` to control wether to try reconnecting only when there are tracks in the queue / current track or not
+  - Added a new debug log for that
+  - Added the try to play the next track if there is no current track
+  - *There was a problem trying to auto-reconnect on "empty-queue" events, which caused the player to get destroyed by that and log the error in console "`There is no Track in the Queue, nor provided in the PlayOptions`"*
+  - *Now you have to handle that case manually if you want to or set autoReconnectOnlyWithTracks to false (default)*

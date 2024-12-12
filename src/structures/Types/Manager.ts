@@ -215,6 +215,8 @@ export interface ManagerPlayerOptions {
     onDisconnect?: {
         /** Try to reconnect? -> If fails -> Destroy */
         autoReconnect?: boolean;
+        /** Only try to reconnect if there are tracks in the queue */
+        autoReconnectOnlyWithTracks?: boolean;
         /** Instantly destroy player (overrides autoReconnect) | Don't provide == disable feature*/
         destroyPlayer?: boolean;
     };
