@@ -1231,6 +1231,7 @@ export class LavalinkNode {
 
     /** @private util function for handling trackEnd event */
     private async trackEnd(player: Player, track: Track, payload: TrackEndEvent): Promise<void> {
+        if (player.get('internal_nodeChanging') === true) return; // Check if nodeChange is in Progress than stop the trackEnd Event from being triggered.
         const trackToUse = track || this.getTrackOfPayload(payload);
         // If a track was forcibly played
         if (payload.reason === "replaced") {
