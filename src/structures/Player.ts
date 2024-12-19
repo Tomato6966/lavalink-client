@@ -719,9 +719,18 @@ export class Player {
     public async changeNode(newNode: LavalinkNode | string) {
         const updateNode = typeof newNode === "string" ? this.LavalinkManager.nodeManager.nodes.get(newNode) : newNode;
         if (!updateNode) throw new Error("Could not find the new Node");
-        if (!updateNode.isAlive) throw new Error("The provided Node is not active or disconnected");
+        if (!updateNode.connected) throw new Error("The provided Node is not active or disconnected");
         if (this.node.id === updateNode.id) throw new Error("Player is already on the provided Node");
         if (this.get("internal_nodeChanging") === true) throw new Error("Player is already changing the node please wait");
+        // Check if all queued track sources are supported by the new node
+        if (this.queue.current || this.queue.tracks.length) {
+            const allTracks = this.queue.current ? [...this.queue.tracks, this.queue.current] : this.queue.tracks;
+            const trackSources = [...new Set(allTracks.map(track => track.info.sourceName))];
+            const missingSources = trackSources.filter(source => !updateNode.info.sourceManagers.includes(source));  
+            if (missingSources.length) {
+                throw new RangeError(`Sources missing for Node ${updateNode.id}: ${missingSources.join(', ')}`);
+            }
+        }
 
         if (this.LavalinkManager.options?.advancedOptions?.enableDebugEvents) {
             this.LavalinkManager.emit("debug", DebugEvents.PlayerChangeNode, {
