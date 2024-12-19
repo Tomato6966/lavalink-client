@@ -748,7 +748,7 @@ export class Player {
             !voiceData.token)
             throw new Error("Voice Data is missing, can't change the node");
         this.set("internal_nodeChanging", true); // This will stop execution of trackEnd or queueEnd event while changing the node
-        await this.node.destroyPlayer(this.guildId);
+        if (this.node.connected) await this.node.destroyPlayer(this.guildId); // destroy the player on the currentNode if it's connected
         this.node = updateNode;
         const now = performance.now();
         try {
