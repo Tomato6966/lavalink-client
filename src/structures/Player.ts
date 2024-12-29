@@ -512,13 +512,14 @@ export class Player {
             await this.queue.splice(0, skipTo - 1);
         }
 
-        if (!this.playing) return (this.play(), this);
-
         const now = performance.now();
         this.set("internal_skipped", true);
         await this.node.updatePlayer({ guildId: this.guildId, playerOptions: { track: { encoded: null } } });
 
         this.ping.lavalink = Math.round((performance.now() - now) / 10) / 100;
+
+        // Resume playback if paused
+        if (this.paused) this.paused = false;
 
         return this;
     }
