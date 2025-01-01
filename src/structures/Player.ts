@@ -721,9 +721,6 @@ export class Player {
         if (!updateNode.connected) throw new Error("The provided Node is not active or disconnected");
         if (this.node.id === updateNode.id) throw new Error("Player is already on the provided Node");
         if (this.get("internal_nodeChanging") === true) throw new Error("Player is already changing the node please wait");
-        //check if defaultSource is available on the new node
-        if (!updateNode.info.sourceManagers.includes(this.LavalinkManager.options.playerOptions.defaultSearchPlatform))
-            throw new RangeError(`Default Source "${this.LavalinkManager.options.playerOptions.defaultSearchPlatform}" is not available on the new Node`);
         // Check if all queued track sources are supported by the new node
         if (this.queue.current || this.queue.tracks.length) {
             const trackSources = new Set([this.queue.current, ...this.queue.tracks].map(track => track.info.sourceName));
