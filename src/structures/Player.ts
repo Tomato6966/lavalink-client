@@ -512,14 +512,12 @@ export class Player {
             await this.queue.splice(0, skipTo - 1);
         }
 
+        if (!this.playing && !this.queue.current) return (this.play(), this);
         const now = performance.now();
         this.set("internal_skipped", true);
-        await this.node.updatePlayer({ guildId: this.guildId, playerOptions: { track: { encoded: null } } });
+        await this.node.updatePlayer({ guildId: this.guildId, playerOptions: { track: { encoded: null }, paused: false } });
 
         this.ping.lavalink = Math.round((performance.now() - now) / 10) / 100;
-
-        // Resume playback if paused
-        if (this.paused) this.paused = false;
 
         return this;
     }
@@ -725,9 +723,9 @@ export class Player {
         if (this.get("internal_nodeChanging") === true) throw new Error("Player is already changing the node please wait");
         // Check if all queued track sources are supported by the new node
         if (this.queue.current || this.queue.tracks.length) {
-            const allTracks = this.queue.current ? [...this.queue.tracks, this.queue.current] : this.queue.tracks;
-            const trackSources = [...new Set(allTracks.map(track => track.info.sourceName))];
-            const missingSources = trackSources.filter(source => !updateNode.info.sourceManagers.includes(source));  
+            const trackSources = new Set([this.queue.current, ...this.queue.tracks].map(track => track.info.sourceName));
+            const missingSources = [...trackSources].filter(
+                source => !updateNode.info.sourceManagers.includes(source));
             if (missingSources.length) {
                 throw new RangeError(`Sources missing for Node ${updateNode.id}: ${missingSources.join(', ')}`);
             }
