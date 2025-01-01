@@ -714,21 +714,28 @@ export class Player {
     /**
      * Move the player on a different Audio-Node
      * @param newNode New Node / New Node Id
+     * @param checkSources If it should check if the sources are supported by the new node
      */
-    public async changeNode(newNode: LavalinkNode | string) {
+    public async changeNode(newNode: LavalinkNode | string, checkSources: boolean = true) {
         const updateNode = typeof newNode === "string" ? this.LavalinkManager.nodeManager.nodes.get(newNode) : newNode;
         if (!updateNode) throw new Error("Could not find the new Node");
         if (!updateNode.connected) throw new Error("The provided Node is not active or disconnected");
         if (this.node.id === updateNode.id) throw new Error("Player is already on the provided Node");
         if (this.get("internal_nodeChanging") === true) throw new Error("Player is already changing the node please wait");
-        // Check if all queued track sources are supported by the new node
-        if (this.queue.current || this.queue.tracks.length) {
-            const trackSources = new Set([this.queue.current, ...this.queue.tracks].map(track => track.info.sourceName));
-            const missingSources = [...trackSources].filter(
-                source => !updateNode.info.sourceManagers.includes(source));
-            if (missingSources.length) {
-                throw new RangeError(`Sources missing for Node ${updateNode.id}: ${missingSources.join(', ')}`);
-            }
+        if (checkSources) {
+            const isDefaultSource = (): boolean => { // check if defaultSearchPlatform is enabled on newNode
+                try {
+                    this.LavalinkManager.utils.validateSourceString(updateNode, this.LavalinkManager.options.playerOptions.defaultSearchPlatform);
+                    return true;
+                } catch { return false }
+            };
+            if (!isDefaultSource()) throw new RangeError(`defaultSearchPlatform "${this.LavalinkManager.options.playerOptions.defaultSearchPlatform}" is not supported by the newNode`);
+            if (this.queue.current || this.queue.tracks.length) { // Check if all queued track sources are supported by the new node
+                const trackSources = new Set([this.queue.current, ...this.queue.tracks].map(track => track.info.sourceName));
+                const missingSources = [...trackSources].filter(
+                    source => !updateNode.info.sourceManagers.includes(source));
+                if (missingSources.length)
+                    throw new RangeError(`Sources missing for Node ${updateNode.id}: ${missingSources.join(', ')}`)}
         }
 
         if (this.LavalinkManager.options?.advancedOptions?.enableDebugEvents) {
