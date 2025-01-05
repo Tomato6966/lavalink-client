@@ -1503,7 +1503,7 @@ export class LavalinkNode {
         }
 
         player.set("internal_skipped", false);
-        player.set("internal_autoplayStopPlaying", Date.now());
+        player.set("internal_autoplayStopPlaying", undefined);
 
         if (track && !track?.pluginInfo?.clientData?.previousTrack) { // If there was a current Track already and repeatmode === true, add it to the queue.
             player.queue.previous.unshift(track);
