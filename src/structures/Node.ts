@@ -161,16 +161,14 @@ export class LavalinkNode {
 
         const urlToUse = this.getRequestingUrl(url, options?.extraQueryUrlParams);
 
-        const originalOptions = structuredClone(options);
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { path, extraQueryUrlParams, ...fetchOptions } = options; // destructure fetch only options
 
-        delete options.path;
-        delete options.extraQueryUrlParams;
-
-        const response = await fetch(urlToUse, options);
+        const response = await fetch(urlToUse, fetchOptions);
 
         this.calls++;
 
-        return { response, options: originalOptions };
+        return { response, options: options };
     }
     /**
      * Makes an API call to the Node. Should only be used for manual parsing like for not supported plugins
