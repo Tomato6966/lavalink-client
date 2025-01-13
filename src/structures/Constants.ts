@@ -61,6 +61,7 @@ export enum DestroyReasons {
     NodeReconnectFail = "NodeReconnectFail",
     Disconnected = "Disconnected",
     PlayerReconnectFail = "PlayerReconnectFail",
+    PlayerChangeNodeFail = "PlayerChangeNodeFail",
     ChannelDeleted = "ChannelDeleted",
     DisconnectAllNodes = "DisconnectAllNodes",
     ReconnectAllNodes = "ReconnectAllNodes",
