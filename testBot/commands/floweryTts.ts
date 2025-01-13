@@ -1,8 +1,7 @@
-import {
-	CommandInteractionOptionResolver, GuildMember, SlashCommandBuilder, VoiceChannel
-} from "discord.js";
+import { SlashCommandBuilder } from "discord.js";
 
-import { Command } from "../types/Client";
+import type { CommandInteractionOptionResolver, GuildMember, VoiceChannel } from "discord.js";
+import type { Command } from "../types/Client";
 
 export default {
     data: new SlashCommandBuilder()
@@ -10,19 +9,19 @@ export default {
         .addStringOption(o => o.setName("text").setDescription("The Text to translate").setRequired(true))
         .addStringOption(o => o.setName("voice").setDescription("The Voice, and thus language to use").setRequired(false)),
     execute: async (client, interaction) => {
-        if(!interaction.guildId) return;
-        
+        if (!interaction.guildId) return;
+
         const vcId = (interaction.member as GuildMember)?.voice?.channelId;
-        if(!vcId) return interaction.reply({ ephemeral: true, content: "Join a Voice Channel "});
-        
+        if (!vcId) return interaction.reply({ ephemeral: true, content: "Join a Voice Channel " });
+
         const vc = (interaction.member as GuildMember)?.voice?.channel as VoiceChannel;
-        if(!vc.joinable || !vc.speakable) return interaction.reply({ ephemeral: true, content: "I am not able to join your channel / speak in there." });
-        
+        if (!vc.joinable || !vc.speakable) return interaction.reply({ ephemeral: true, content: "I am not able to join your channel / speak in there." });
+
         const player = await client.lavalink.createPlayer({
-            guildId: interaction.guildId, 
-            voiceChannelId: vcId, 
-            textChannelId: interaction.channelId, 
-            selfDeaf: true, 
+            guildId: interaction.guildId,
+            voiceChannelId: vcId,
+            textChannelId: interaction.channelId,
+            selfDeaf: true,
             selfMute: false,
             volume: 100,  // default volume
             instaUpdateFiltersFix: true, // optional
@@ -32,22 +31,22 @@ export default {
         });
         const connected = player.connected;
 
-        if(!connected) await player.connect();
-        if(player.voiceChannelId !== vcId) return interaction.reply({ ephemeral: true, content: "You need to be in my Voice Channel" });
-        
-        const query = (interaction.options as CommandInteractionOptionResolver ).getString("text")!;
-        const voice = (interaction.options as CommandInteractionOptionResolver ).getString("voice")!
-        
+        if (!connected) await player.connect();
+        if (player.voiceChannelId !== vcId) return interaction.reply({ ephemeral: true, content: "You need to be in my Voice Channel" });
+
+        const query = (interaction.options as CommandInteractionOptionResolver).getString("text")!;
+        const voice = (interaction.options as CommandInteractionOptionResolver).getString("voice")!
+
         const extraParams = new URLSearchParams();
-        if(voice) extraParams.append(`voice`, voice);
-        
-        const response = await player.search({ 
+        if (voice) extraParams.append(`voice`, voice);
+
+        const response = await player.search({
             query: `${query}`,
-            extraQueryUrlParams: extraParams, 
+            extraQueryUrlParams: extraParams,
             source: "ftts"
         }, interaction.user);
 
-        if(!response || !response.tracks?.length) return interaction.reply({ content: `No Tracks found`, ephemeral: true });
+        if (!response || !response.tracks?.length) return interaction.reply({ content: `No Tracks found`, ephemeral: true });
 
         player.queue.add(response.tracks[0]);
 
@@ -56,6 +55,6 @@ export default {
             ephemeral: true,
         });
 
-        if(!player.playing) await player.play(connected ? { volume: client.defaultVolume, paused: false } : undefined);
+        if (!player.playing) await player.play(connected ? { volume: client.defaultVolume, paused: false } : undefined);
     }
 } as Command;

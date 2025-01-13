@@ -189,7 +189,7 @@ export class NodeManager extends EventEmitter {
      * @param node The node to delete
      * @returns
      */
-    deleteNode(node: LavalinkNodeIdentifier | LavalinkNode):void {
+    deleteNode(node: LavalinkNodeIdentifier | LavalinkNode): void {
         const decodeNode = typeof node === "string" ? this.nodes.get(node) : node || this.leastUsedNodes()[0];
         if (!decodeNode) throw new Error("Node was not found");
         decodeNode.destroy(DestroyReasons.NodeDeleted);

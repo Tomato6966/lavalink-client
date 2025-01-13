@@ -1,5 +1,6 @@
 import { Events } from "discord.js";
-import { Event } from "../types/Client";
+
+import type { Event } from "../types/Client";
 
 export default {
     name: Events.Raw,

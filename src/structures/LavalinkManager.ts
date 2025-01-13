@@ -508,7 +508,7 @@ export class LavalinkManager extends EventEmitter {
             if ("token" in update) {
                 if (!player.node?.sessionId) throw new Error("Lavalink Node is either not ready or not up to date");
                 const sessionId2Use = player.voice?.sessionId || ("sessionId" in update ? update.sessionId as string : undefined);
-                if(!sessionId2Use) {
+                if (!sessionId2Use) {
                     this.emit("debug", DebugEvents.NoAudioDebug, {
                         state: "error",
                         message: `Can't send updatePlayer for voice token session - Missing sessionId :: ${JSON.stringify({ voice: { token: update.token, endpoint: update.endpoint, sessionId: sessionId2Use, }, update, playerVoice: player.voice }, null, 2)}`,
@@ -540,7 +540,7 @@ export class LavalinkManager extends EventEmitter {
 
             /* voice state update */
             if (update.user_id !== this.options?.client.id) {
-                if(update.user_id && player.voiceChannelId) {
+                if (update.user_id && player.voiceChannelId) {
                     this.emit(update.channel_id === player.voiceChannelId ? "playerVoiceJoin" : "playerVoiceLeave", player, update.user_id);
                 }
 
@@ -561,7 +561,7 @@ export class LavalinkManager extends EventEmitter {
 
                 player.voice.sessionId = update.session_id || player.voice.sessionId;
 
-                if(!player.voice.sessionId) {
+                if (!player.voice.sessionId) {
                     if (this.options?.advancedOptions?.enableDebugEvents) {
                         this.emit("debug", DebugEvents.NoAudioDebug, {
                             state: "warn",
@@ -586,9 +586,9 @@ export class LavalinkManager extends EventEmitter {
                 player.voiceState.serverMute = update.mute ?? player.voiceState?.serverMute;
                 player.voiceState.suppress = update.suppress ?? player.voiceState?.suppress;
 
-                if(selfMuteChanged || serverMuteChanged) this.emit("playerMuteChange", player, player.voiceState.selfMute, player.voiceState.serverMute);
-                if(selfDeafChanged || serverDeafChanged) this.emit("playerDeafChange", player, player.voiceState.selfDeaf, player.voiceState.serverDeaf);
-                if(suppressChange) this.emit("playerSuppressChange", player, player.voiceState.suppress);
+                if (selfMuteChanged || serverMuteChanged) this.emit("playerMuteChange", player, player.voiceState.selfMute, player.voiceState.serverMute);
+                if (selfDeafChanged || serverDeafChanged) this.emit("playerDeafChange", player, player.voiceState.selfDeaf, player.voiceState.serverDeaf);
+                if (suppressChange) this.emit("playerSuppressChange", player, player.voiceState.suppress);
 
             } else {
 
@@ -616,15 +616,15 @@ export class LavalinkManager extends EventEmitter {
                         }
 
                         // connect if there are tracks & autoReconnectOnlyWithTracks = true or autoReconnectOnlyWithTracks is false
-                        if(!autoReconnectOnlyWithTracks || (autoReconnectOnlyWithTracks && (player.queue.current || player.queue.tracks.length))) {
+                        if (!autoReconnectOnlyWithTracks || (autoReconnectOnlyWithTracks && (player.queue.current || player.queue.tracks.length))) {
                             await player.connect();
                         }
                         // replay the current playing stream
-                        if(player.queue.current) {
+                        if (player.queue.current) {
                             return void await player.play({ position: previousPosition, paused: previousPaused, clientTrack: player.queue.current, });
                         }
                         // try to play the next track
-                        if(player.queue.tracks.length) {
+                        if (player.queue.tracks.length) {
                             return void await player.play({ paused: previousPaused });
                         }
                         // debug log if nothing was possible

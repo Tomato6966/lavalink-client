@@ -1,6 +1,6 @@
 import { EmbedBuilder, Message, MessageCreateOptions, TextChannel, VoiceChannel } from "discord.js";
+import { DebugEvents, Player } from "lavalink-client";
 
-import { DebugEvents, Player } from "../../src";
 import { BotClient, CustomRequester } from "../types/Client";
 import { delay, formatMS_HHMMSS } from "../Utils/Time";
 

@@ -1,16 +1,15 @@
 import { Client, GatewayIntentBits } from "discord.js";
+import { LavalinkManager, MiniMap, parseLavalinkConnUrl } from "lavalink-client";
 import { createClient } from "redis";
 
-import { LavalinkManager, ManagerOptions, MiniMap, parseLavalinkConnUrl } from "../src";
 import { envConfig } from "./config";
-import { loadCommands } from "./handler/commandLoader";
-import { loadEvents } from "./handler/eventsLoader";
-import { loadLavalinkEvents } from "./lavalinkEvents";
-import { BotClient } from "./types/Client";
+import { loadCommands, loadEvents, loadLavalinkEvents } from "./handler";
 import { JSONStore, myCustomStore, myCustomWatcher, PlayerSaver } from "./Utils/CustomClasses";
 import { handleResuming } from "./Utils/handleResuming";
 import { autoPlayFunction, requesterTransformer } from "./Utils/OptionalFunctions";
 
+import type { ManagerOptions } from "lavalink-client";
+import type { BotClient } from "./types/Client";
 const client = new Client({
     intents: [
         GatewayIntentBits.Guilds,
@@ -18,11 +17,11 @@ const client = new Client({
     ]
 }) as BotClient;
 
-if(envConfig.redis.url && 1 < 0) { // little invalid if statement so the redis doesn't happen for testing purposes
+if (envConfig.redis.url && 1 < 0) { // little invalid if statement so the redis doesn't happen for testing purposes
     client.redis = createClient({ url: envConfig.redis.url, password: envConfig.redis.password });
     client.redis.connect(); // @ts-ignore
     client.redis.on("error", (err) => console.log('Redis Client Error', err));
-} else if(envConfig.useJSONStore) {
+} else if (envConfig.useJSONStore) {
     client.redis = new JSONStore();
 } else client.redis = new MiniMap<string, string>();
 

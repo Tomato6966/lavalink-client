@@ -3,19 +3,19 @@ import { TextChannel } from "discord.js";
 import type { BotClient } from "../types/Client";
 import type { PlayerSaver } from "./CustomClasses";
 
-export async function handleResuming(client: BotClient, playerSaver:PlayerSaver) {
+export async function handleResuming(client: BotClient, playerSaver: PlayerSaver) {
     client.lavalink.nodeManager.on("connect", (node) => {
         node.updateSession(true, 360e3); // enable resuming for playback of up to 360s
     }).on("resumed", async (node, payload, players) => {
-        if(!Array.isArray(players)) return console.error("Players is not an array", players);
-        for(const data of players) {
+        if (!Array.isArray(players)) return console.error("Players is not an array", players);
+        for (const data of players) {
             const dataOfSaving = await playerSaver.getPlayer(data.guildId);
-            if(!dataOfSaving) {
+            if (!dataOfSaving) {
                 console.error("player is not saved!")
                 continue;
             }
             console.log("resuming player:", data.guildId)
-            if(!data.state.connected) {
+            if (!data.state.connected) {
                 console.log("skipping resuming player, because it already disconnected");
                 // lavalink already disconnected the player, now you have 2 options:
                 // - stay disconnected or reconnect and re-play the saved queue
@@ -32,8 +32,8 @@ export async function handleResuming(client: BotClient, playerSaver:PlayerSaver)
                 selfMute: dataOfSaving.options?.selfMute || false,
                 // you need to update the volume of the player by the volume of lavalink which might got decremented by the volume decrementer
                 volume: client.lavalink.options.playerOptions?.volumeDecrementer
-                ? Math.round(data.volume / client.lavalink.options.playerOptions.volumeDecrementer)
-                : data.volume,
+                    ? Math.round(data.volume / client.lavalink.options.playerOptions.volumeDecrementer)
+                    : data.volume,
                 node: node.id,
                 applyVolumeAsFilter: dataOfSaving.options.applyVolumeAsFilter,
                 instaUpdateFiltersFix: dataOfSaving.options.instaUpdateFiltersFix,
@@ -48,7 +48,7 @@ export async function handleResuming(client: BotClient, playerSaver:PlayerSaver)
             // get the queue data including the current track (for the requester)
             await player.queue.utils.sync(true, false);
             // override the current track with the data from lavalink
-            if(data.track) player.queue.current = client.lavalink.utils.buildTrack(data.track, player.queue.current?.requester || client.user);
+            if (data.track) player.queue.current = client.lavalink.utils.buildTrack(data.track, player.queue.current?.requester || client.user);
             // override the position of the player
             player.lastPosition = data.state.position;
             player.lastPositionChange = Date.now();
@@ -58,9 +58,9 @@ export async function handleResuming(client: BotClient, playerSaver:PlayerSaver)
             player.playing = !data.paused && !!data.track;
             console.log("finished resuming the player")
             // optional send info for example
-            if(player.textChannelId) {
+            if (player.textChannelId) {
                 const channel = client.channels.cache.get(player.textChannelId) as TextChannel;
-                if(channel) {
+                if (channel) {
                     channel.send("Player resumed ;) you can now control it again!");
                 }
             }

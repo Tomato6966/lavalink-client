@@ -1,7 +1,7 @@
 import { SlashCommandBuilder } from "discord.js";
 
-import { StoredQueue } from "../../src";
-import { SubCommand } from "../types/Client";
+import type { StoredQueue } from "lavalink-client";
+import type { SubCommand } from "../types/Client";
 
 export default {
     data: new SlashCommandBuilder()
@@ -21,13 +21,13 @@ export default {
             const oldQueue = player.queue.tracks.map(v => "> - " + v.info.title);
 
             // clear old queue
-            if("delete" in client.redis) client.redis.delete("lavalinkqueue_1015301715886624778")
+            if ("delete" in client.redis) client.redis.delete("lavalinkqueue_1015301715886624778")
             else await client.redis.del("lavalinkqueue_1015301715886624778");
             // override it
             await client.redis.set("lavalinkqueue_1015301715886624778", JSON.stringify(getExampleQueue()));
             // sync the queue
             await player.queue.utils.sync(true);
-            
+
             // reply
             await interaction.reply({
                 content: `### Old Queue: \n${oldQueue.join("\n") || "> - Nothing"}\n### New Queue:\n${player.queue.tracks.map(v => "> - " + v.info.title).join("\n") || "> - Nothing"}`.substring(0, 1000)
@@ -45,7 +45,7 @@ export default {
             // respond
             await interaction.reply({
                 content: `There are now ${player.queue.tracks.length} Tracks`
-            })
+            });
         }
     }
 } as SubCommand;
@@ -148,5 +148,5 @@ function getExampleQueue() {
                 }
             }
         ]
-    } as StoredQueue
+    } as StoredQueue;
 }

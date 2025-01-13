@@ -62,7 +62,7 @@ export class ManagerUtils {
                 ? this.getTransformedRequester(requester)
                 : undefined;
 
-            if(!transformedRequester && typeof data?.userData?.requester === "object" && data.userData.requester !== null) {
+            if (!transformedRequester && typeof data?.userData?.requester === "object" && data.userData.requester !== null) {
                 transformedRequester = this.getTransformedRequester(data.userData.requester);
             }
 
@@ -91,7 +91,7 @@ export class ManagerUtils {
             Object.defineProperty(r, TrackSymbol, { configurable: true, value: true });
             return r;
         } catch (error) {
-            if(this.LavalinkManager?.options?.advancedOptions?.enableDebugEvents) {
+            if (this.LavalinkManager?.options?.advancedOptions?.enableDebugEvents) {
                 this.LavalinkManager?.emit("debug", DebugEvents.BuildTrackError, {
                     error: error,
                     functionLayer: "ManagerUtils > buildTrack()",
@@ -157,7 +157,7 @@ export class ManagerUtils {
                 ? this.LavalinkManager?.options?.playerOptions?.requesterTransformer(requester)
                 : requester;
         } catch (e) {
-            if(this.LavalinkManager?.options?.advancedOptions?.enableDebugEvents) {
+            if (this.LavalinkManager?.options?.advancedOptions?.enableDebugEvents) {
                 this.LavalinkManager?.emit("debug", DebugEvents.TransformRequesterFunctionFailed, {
                     error: e,
                     functionLayer: "ManagerUtils > getTransformedRequester()",
@@ -220,7 +220,7 @@ export class ManagerUtils {
         try {
             return getClosestTrack(data, player);
         } catch (e) {
-            if(this.LavalinkManager?.options?.advancedOptions?.enableDebugEvents) {
+            if (this.LavalinkManager?.options?.advancedOptions?.enableDebugEvents) {
                 this.LavalinkManager?.emit("debug", DebugEvents.GetClosestTrackFailed, {
                     error: e,
                     functionLayer: "ManagerUtils > getClosestTrack()",
@@ -237,20 +237,20 @@ export class ManagerUtils {
         if (!node.info) throw new Error("No Lavalink Node was provided");
         if (!node.info.sourceManagers?.length) throw new Error("Lavalink Node, has no sourceManagers enabled");
 
-        if(!queryString.trim().length) throw new Error(`Query string is empty, please provide a valid query string.`)
+        if (!queryString.trim().length) throw new Error(`Query string is empty, please provide a valid query string.`)
 
         if (sourceString === "speak" && queryString.length > 100) throw new Error(`Query is speak, which is limited to 100 characters.`)
 
         // checks for blacklisted links / domains / queries
         if (this.LavalinkManager.options?.linksBlacklist?.length > 0) {
-            if(this.LavalinkManager.options?.advancedOptions?.enableDebugEvents) {
+            if (this.LavalinkManager.options?.advancedOptions?.enableDebugEvents) {
                 this.LavalinkManager.emit("debug", DebugEvents.ValidatingBlacklistLinks, {
                     state: "log",
                     message: `Validating Query against LavalinkManager.options.linksBlacklist, query: "${queryString}"`,
                     functionLayer: "(LavalinkNode > node | player) > search() > validateQueryString()",
                 });
             }
-            if(this.LavalinkManager.options?.linksBlacklist.some(v => (typeof v === "string" && (queryString.toLowerCase().includes(v.toLowerCase()) || v.toLowerCase().includes(queryString.toLowerCase()))) || isRegExp(v) && v.test(queryString))) {
+            if (this.LavalinkManager.options?.linksBlacklist.some(v => (typeof v === "string" && (queryString.toLowerCase().includes(v.toLowerCase()) || v.toLowerCase().includes(queryString.toLowerCase()))) || isRegExp(v) && v.test(queryString))) {
                 throw new Error(`Query string contains a link / word which is blacklisted.`)
             }
         }
@@ -260,14 +260,14 @@ export class ManagerUtils {
 
         // checks for if the query is whitelisted (should only work for links, so it skips the check for no link queries)
         if (this.LavalinkManager.options?.linksWhitelist?.length > 0) {
-            if(this.LavalinkManager.options?.advancedOptions?.enableDebugEvents) {
+            if (this.LavalinkManager.options?.advancedOptions?.enableDebugEvents) {
                 this.LavalinkManager.emit("debug", DebugEvents.ValidatingWhitelistLinks, {
                     state: "log",
                     message: `Link was provided to the Query, validating against LavalinkManager.options.linksWhitelist, query: "${queryString}"`,
                     functionLayer: "(LavalinkNode > node | player) > search() > validateQueryString()",
                 });
             }
-            if(!this.LavalinkManager.options?.linksWhitelist.some(v => (typeof v === "string" && (queryString.toLowerCase().includes(v.toLowerCase()) || v.toLowerCase().includes(queryString.toLowerCase()))) || isRegExp(v) && v.test(queryString))) {
+            if (!this.LavalinkManager.options?.linksWhitelist.some(v => (typeof v === "string" && (queryString.toLowerCase().includes(v.toLowerCase()) || v.toLowerCase().includes(queryString.toLowerCase()))) || isRegExp(v) && v.test(queryString))) {
                 throw new Error(`Query string contains a link / word which isn't whitelisted.`)
             }
         }
@@ -306,7 +306,7 @@ export class ManagerUtils {
         if (SourceLinksRegexes.musicYandex.test(queryString) && !node.info?.sourceManagers?.includes("yandexmusic")) {
             throw new Error("Query / Link Provided for this Source but Lavalink Node has not 'yandexmusic' enabled");
         }
-        if(SourceLinksRegexes.jiosaavn.test(queryString) && !node.info?.sourceManagers?.includes("jiosaavn")) {
+        if (SourceLinksRegexes.jiosaavn.test(queryString) && !node.info?.sourceManagers?.includes("jiosaavn")) {
             throw new Error("Query / Link Provided for this Source but Lavalink Node has not 'jiosaavn' (via jiosaavn-plugin) enabled");
         }
         return;
@@ -364,10 +364,10 @@ export class ManagerUtils {
         if (source === "dzisrc" && node.info?.sourceManagers?.includes("deezer") && !node.info?.sourceManagers?.includes("http")) {
             throw new Error("Lavalink Node has not 'http' enabled, which is required to have 'dzisrc' to work");
         }
-        if(source === "jsrec" && !node.info?.sourceManagers?.includes("jiosaavn")) {
+        if (source === "jsrec" && !node.info?.sourceManagers?.includes("jiosaavn")) {
             throw new Error("Lavalink Node has not 'jiosaavn' (via jiosaavn-plugin) enabled, which is required to have 'jsrec' to work");
         }
-        if(source === "jssearch" && !node.info?.sourceManagers?.includes("jiosaavn")) {
+        if (source === "jssearch" && !node.info?.sourceManagers?.includes("jiosaavn")) {
             throw new Error("Lavalink Node has not 'jiosaavn' (via jiosaavn-plugin) enabled, which is required to have 'jssearch' to work");
         }
         if (source === "scsearch" && !node.info?.sourceManagers?.includes("soundcloud")) {
@@ -487,7 +487,7 @@ export async function queueTrackEnd(player: Player) {
         // save it in the DB
         await player.queue.utils.save()
     } catch (error) {
-        if(player.LavalinkManager.options?.advancedOptions?.enableDebugEvents) {
+        if (player.LavalinkManager.options?.advancedOptions?.enableDebugEvents) {
             player.LavalinkManager.emit("debug", DebugEvents.PlayerPlayUnresolvedTrackFailed, {
                 state: "error",
                 error: error,

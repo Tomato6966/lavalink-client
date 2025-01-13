@@ -735,7 +735,8 @@ export class Player {
                 const missingSources = [...trackSources].filter(
                     source => !updateNode.info.sourceManagers.includes(source));
                 if (missingSources.length)
-                    throw new RangeError(`Sources missing for Node ${updateNode.id}: ${missingSources.join(', ')}`)}
+                    throw new RangeError(`Sources missing for Node ${updateNode.id}: ${missingSources.join(', ')}`)
+            }
         }
 
         if (this.LavalinkManager.options?.advancedOptions?.enableDebugEvents) {
@@ -759,7 +760,7 @@ export class Player {
         const now = performance.now();
         try {
             await this.connect();
-            const endpoint = `/sessions/${this.node.sessionId}/players/${this.guildId}`;  //Send the VoiceData to the newly connected node. 
+            const endpoint = `/sessions/${this.node.sessionId}/players/${this.guildId}`;  //Send the VoiceData to the newly connected node.
             await this.node.request(endpoint, r => {
                 r.method = "PATCH";
                 r.headers["Content-Type"] = "application/json";

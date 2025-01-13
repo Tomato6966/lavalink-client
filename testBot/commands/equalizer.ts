@@ -1,8 +1,11 @@
-import { CommandInteractionOptionResolver, GuildMember, SlashCommandBuilder } from "discord.js";
-import { Command } from "../types/Client";
+import { SlashCommandBuilder } from "discord.js";
+
 import { EQList } from "../Utils/EQList";
 
-export default { 
+import type { CommandInteractionOptionResolver, GuildMember } from "discord.js";
+import type { Command } from "../types/Client";
+
+export default {
     data: new SlashCommandBuilder()
         .setName("equalizers")
         .setDescription("Apply a specific Equalizer")
@@ -16,15 +19,17 @@ export default {
             { name: "Classic", value: "classic" },
         )),
     execute: async (client, interaction) => {
-        if(!interaction.guildId) return;
+        if (!interaction.guildId) return;
+
         const vcId = (interaction.member as GuildMember)?.voice?.channelId;
+        if (!vcId) return interaction.reply({ ephemeral: true, content: "Join a Voice Channel " });
+
         const player = client.lavalink.getPlayer(interaction.guildId);
-        if(!player) return interaction.reply({ ephemeral: true, content: "I'm not connected" });
-        if(!vcId) return interaction.reply({ ephemeral: true, content: "Join a Voice Channel "});
-        if(player.voiceChannelId !== vcId) return interaction.reply({ ephemeral: true, content: "You need to be in my Voice Channel" })
-        
+        if (!player) return interaction.reply({ ephemeral: true, content: "I'm not connected" });
+        if (player.voiceChannelId !== vcId) return interaction.reply({ ephemeral: true, content: "You need to be in my Voice Channel" })
+
         let string = "";
-        switch((interaction.options as CommandInteractionOptionResolver).getString("equalizer")) {
+        switch ((interaction.options as CommandInteractionOptionResolver).getString("equalizer")) {
             case "clear": await player.filterManager.clearEQ(); string = "Cleared all Equalizers"; break;
             case "bass_high": await player.filterManager.setEQ(EQList.BassboostHigh); string = "Applied the 'High Bassboost' Equalizer"; break;
             case "bass_medium": await player.filterManager.setEQ(EQList.BassboostMedium); string = "Applied the 'Medium Bassboost' Equalizer"; break;
@@ -35,7 +40,7 @@ export default {
         }
         await interaction.reply({
             content: `✅ ${string}`
-        })
+        });
     }
 
 } as Command;

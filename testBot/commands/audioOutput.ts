@@ -1,8 +1,10 @@
-import { CommandInteractionOptionResolver, GuildMember, SlashCommandBuilder } from "discord.js";
-import { Command } from "../types/Client";
-import { AudioOutputs } from "../../src";
+import { SlashCommandBuilder } from "discord.js";
+import { AudioOutputs } from "lavalink-client";
 
-export default { 
+import type { CommandInteractionOptionResolver, GuildMember } from "discord.js";
+import type { Command } from "../types/Client";
+
+export default {
     data: new SlashCommandBuilder()
         .setName("audio_output")
         .setDescription("Set the audio output channel")
@@ -13,13 +15,15 @@ export default {
             { name: "Stereo", value: "stereo" },
         )),
     execute: async (client, interaction) => {
-        if(!interaction.guildId) return;
+        if (!interaction.guildId) return;
+
         const vcId = (interaction.member as GuildMember)?.voice?.channelId;
+        if (!vcId) return interaction.reply({ ephemeral: true, content: "Join a Voice Channel " });
+
         const player = client.lavalink.getPlayer(interaction.guildId);
-        if(!player) return interaction.reply({ ephemeral: true, content: "I'm not connected" });
-        if(!vcId) return interaction.reply({ ephemeral: true, content: "Join a Voice Channel "});
-        if(player.voiceChannelId !== vcId) return interaction.reply({ ephemeral: true, content: "You need to be in my Voice Channel" })
-        
+        if (!player) return interaction.reply({ ephemeral: true, content: "I'm not connected" });
+        if (player.voiceChannelId !== vcId) return interaction.reply({ ephemeral: true, content: "You need to be in my Voice Channel" })
+
         await player.filterManager.setAudioOutput((interaction.options as CommandInteractionOptionResolver).getString("channel") as AudioOutputs);
 
         await interaction.reply({

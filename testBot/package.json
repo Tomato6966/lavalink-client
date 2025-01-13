@@ -1,28 +1,54 @@
 {
-  "name": "testbot",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.ts",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "npx ts-node index.ts"
-  },
-  "author": "Tomato6966",
-  "license": "MIT",
-  "dependencies": {
-    "@redis/client": "^1.6.0",
-    "@types/node": "^22.5.5",
-    "@types/ws": "^8.5.12",
-    "discord.js": "^14.16.2",
-    "dotenv": "^16.4.5",
-    "lavalink-client": "github:tomato6966/lavalink-client",
-    "redis": "^4.7.0",
-    "ts-node": "^10.9.2",
-    "ws": "^8.18.0"
-  },
-  "devDependencies": {
-    "tsconfig-paths": "^4.2.0",
-    "tslib": "^2.7.0",
-    "typescript": "^5.6.2"
-  }
+    "name": "testbot",
+    "version": "1.0.0",
+    "description": "",
+    "main": "index.ts",
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1",
+        "start": "npx ts-node index.ts"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/tomato6966/lavalink-client.git"
+    },
+    "keywords": [
+        "lavalink",
+        "client",
+        "lavalink-v4",
+        "music",
+        "discord",
+        "bot",
+        "advanced",
+        "typescript"
+    ],
+    "author": {
+        "name": "Tomato6966",
+        "url": "https://github.com/tomato6966/"
+    },
+    "contributers": [],
+    "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/tomato6966/lavalink-client/issues"
+    },
+    "homepage": "https://tomato6966.github.io/lavalink-client/",
+    "dependencies": {
+        "@redis/client": "^1.6.0",
+        "@types/node": "^22.10.5",
+        "@types/ws": "^8.5.13",
+        "discord.js": "^14.17.3",
+        "dotenv": "^16.4.7",
+        "lavalink-client": "^2.4.4",
+        "redis": "^4.7.0",
+        "ts-node": "^10.9.2",
+        "ws": "^8.18.0"
+    },
+    "devDependencies": {
+        "tsconfig-paths": "^4.2.0",
+        "tslib": "^2.8.1",
+        "typescript": "^5.7.3"
+    },
+    "engines": {
+        "node": ">=18.0.0",
+        "bun": ">=1.1.27"
+    }
 }

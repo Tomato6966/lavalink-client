@@ -1,6 +1,7 @@
-import { GuildMember, SlashCommandBuilder } from "discord.js";
+import { SlashCommandBuilder } from "discord.js";
 
-import { Command } from "../types/Client";
+import type { GuildMember } from "discord.js";
+import type { Command } from "../types/Client";
 
 export default {
     data: new SlashCommandBuilder()
@@ -9,14 +10,16 @@ export default {
         .addBooleanOption(o => o.setName("execute_autoplay").setDescription("Should autoplay function be executed? (default false)").setRequired(false)),
     execute: async (client, interaction) => {
         if(!interaction.guildId) return;
+
         const vcId = (interaction.member as GuildMember)?.voice?.channelId;
+        if (!vcId) return interaction.reply({ ephemeral: true, content: "Join a Voice Channel " });
+
         const player = client.lavalink.getPlayer(interaction.guildId);
-        if(!player) return interaction.reply({ ephemeral: true, content: "I'm not connected" });
-        
-        // example to apply a filter!
+        if (!player) return interaction.reply({ ephemeral: true, content: "I'm not connected" });
+        if (player.voiceChannelId !== vcId) return interaction.reply({ ephemeral: true, content: "You need to be in my Voice Channel" })
+
         await player.stopPlaying(interaction.options?.getBoolean?.("clear_queue") ?? true, interaction.options?.getBoolean?.("execute_autoplay") ?? false);
 
-        // and it is good again!
         interaction.reply({ content: "Stopped the player without leaving" });
     }
 } as Command;

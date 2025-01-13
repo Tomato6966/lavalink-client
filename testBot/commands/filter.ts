@@ -1,8 +1,9 @@
-import { CommandInteractionOptionResolver, GuildMember, SlashCommandBuilder } from "discord.js";
+import { SlashCommandBuilder } from "discord.js";
 
-import { Command } from "../types/Client";
+import type { CommandInteractionOptionResolver, GuildMember } from "discord.js";
+import type { Command } from "../types/Client";
 
-export default { 
+export default {
     data: new SlashCommandBuilder()
         .setName("filters")
         .setDescription("Toggle Filters")
@@ -19,15 +20,17 @@ export default {
             { name: "Reverb (N/A)", value: "reverb" }, // available in lavalink-filters lavalink-plugin (currently not working in lavalink-v4)
         )),
     execute: async (client, interaction) => {
-        if(!interaction.guildId) return;
+        if (!interaction.guildId) return;
+
         const vcId = (interaction.member as GuildMember)?.voice?.channelId;
+        if (!vcId) return interaction.reply({ ephemeral: true, content: "Join a Voice Channel " });
+
         const player = client.lavalink.getPlayer(interaction.guildId);
-        if(!player) return interaction.reply({ ephemeral: true, content: "I'm not connected" });
-        if(!vcId) return interaction.reply({ ephemeral: true, content: "Join a Voice Channel "});
-        if(player.voiceChannelId !== vcId) return interaction.reply({ ephemeral: true, content: "You need to be in my Voice Channel" })
-        
+        if (!player) return interaction.reply({ ephemeral: true, content: "I'm not connected" });
+        if (player.voiceChannelId !== vcId) return interaction.reply({ ephemeral: true, content: "You need to be in my Voice Channel" })
+
         let string = "";
-        switch((interaction.options as CommandInteractionOptionResolver).getString("filter")) {
+        switch ((interaction.options as CommandInteractionOptionResolver).getString("filter")) {
             case "clear": await player.filterManager.resetFilters(); string = "Disabled all Filter-Effects"; break;
             case "lowpass": await player.filterManager.toggleLowPass(); string = player.filterManager.filters.lowPass ? "Applied Lowpass Filter-Effect" : "Disabled Lowpass Filter-Effect"; break;
             case "nightcore": await player.filterManager.toggleNightcore(); string = player.filterManager.filters.nightcore ? "Applied Nightcore Filter-Effect, ||disabled Vaporwave (if it was active)||" : "Disabled Nightcore Filter-Effect"; break;
@@ -39,8 +42,8 @@ export default {
             // you could also use the lavalinKFilter plugin instead, however it does not work currently (12.2023)
             // case "echo": await player.filterManager.lavalinkFilterPlugin.toggleEcho(); string = player.filterManager.filters.lavalinkFilterPlugin.echo ? "Applied Echo Filter-Effect" : "Disabled Echo Filter-Effect"; break;
             // Following filters are available if you install them via https://github.com/devoxin/LavaDSPX-Plugin or in lavalink:
-    //         - dependency: "com.github.devoxin:lavadspx-plugin:0.0.3"
-    //           repository: "https://jitpack.io"
+            //         - dependency: "com.github.devoxin:lavadspx-plugin:0.0.3"
+            //           repository: "https://jitpack.io"
             case "echo": await player.filterManager.lavalinkLavaDspxPlugin.toggleEcho(); string = player.filterManager.filters.lavalinkLavaDspxPlugin.echo ? "Applied Echo Filter-Effect" : "Disabled Echo Filter-Effect"; break;
             case "highPass": await player.filterManager.lavalinkLavaDspxPlugin.toggleHighPass(); string = player.filterManager.filters.lavalinkLavaDspxPlugin.highPass ? "Applied HighPass Filter-Effect" : "Disabled HighPass Filter-Effect"; break;
             case "lowPass": await player.filterManager.lavalinkLavaDspxPlugin.toggleLowPass(); string = player.filterManager.filters.lavalinkLavaDspxPlugin.lowPass ? "Applied LowPass Filter-Effect" : "Disabled LowPass Filter-Effect"; break;
@@ -48,7 +51,7 @@ export default {
         }
         await interaction.reply({
             content: `✅ ${string}`
-        })
+        });
     }
 
 } as Command;
