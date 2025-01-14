@@ -189,6 +189,16 @@ export class NodeManager extends EventEmitter {
      * @param node The node to delete
      * @param movePlayers whether to movePlayers to different connected node before deletion. @default false
      * @returns
+     * 
+     * @example
+     * Deletes the node
+     * ```ts
+     * client.lavalink.nodeManager.deleteNode("nodeId to delete");
+     * ```
+     * Moves players to a different node before deleting
+     * ```ts
+     * client.lavalink.nodeManager.deleteNode("nodeId to delete", true);
+     * ```
      */
     deleteNode(node: LavalinkNodeIdentifier | LavalinkNode, movePlayers: boolean = false): void {
         const decodeNode = typeof node === "string" ? this.nodes.get(node) : node || this.leastUsedNodes()[0];

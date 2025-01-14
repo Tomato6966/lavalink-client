@@ -479,8 +479,13 @@ export class LavalinkNode {
      * @returns void
      *
      * @example
+     * Destroys node and its players
      * ```ts
      * player.node.destroy("custom Player Destroy Reason", true);
+     * ```
+     * destroys only the node and moves its players to different connected node.
+     * ```ts
+     * player.node.destroy("custom Player Destroy Reason", true, true);
      * ```
      */
     public destroy(destroyReason?: DestroyReasonsType, deleteNode: boolean = true, movePlayers: boolean = false): void {
@@ -491,7 +496,7 @@ export class LavalinkNode {
             const enableDebugEvents = this.NodeManager.LavalinkManager.options?.advancedOptions?.enableDebugEvents;
             const handlePlayerOperations = () => {
                 if (movePlayers) {
-                    const nodeToMove = Array.from(this.NodeManager.nodes.values())
+                    const nodeToMove = Array.from(this.NodeManager.leastUsedNodes("playingPlayers"))
                         .find(n => n.connected && n.options.id !== this.id);
 
                     if (nodeToMove) {
@@ -511,7 +516,7 @@ export class LavalinkNode {
                         ));
                     } else {
                         return Promise.allSettled(Array.from(players.values()).map(player =>
-                            player.destroy("No eligible node found to move player.")
+                            player.destroy(DestroyReasons.PlayerChangeNodeFailNoEligibleNode)
                                 .catch(error => {
                                     if (enableDebugEvents) {
                                         console.error(`Node > destroy() Failed to destroy player ${player.guildId}: ${error.message}`);
@@ -1121,10 +1126,8 @@ export class LavalinkNode {
         this.NodeManager.emit("disconnect", this, { code, reason });
 
         if (code !== 1000 || reason !== "Node-Destroy") {
-            if (code !== 1000 || reason !== "Node-Destroy") {
-                if (this.NodeManager.nodes.has(this.id)) { // try to reconnect only when the node is still in the nodeManager.nodes list
-                    this.reconnect();
-                }
+            if (this.NodeManager.nodes.has(this.id)) { // try to reconnect only when the node is still in the nodeManager.nodes list
+                this.reconnect();
             }
         }
     }
