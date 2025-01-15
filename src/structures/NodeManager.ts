@@ -187,12 +187,24 @@ export class NodeManager extends EventEmitter {
     /**
      * Delete a node from the nodeManager and destroy it
      * @param node The node to delete
+     * @param movePlayers whether to movePlayers to different connected node before deletion. @default false
      * @returns
+     * 
+     * @example
+     * Deletes the node
+     * ```ts
+     * client.lavalink.nodeManager.deleteNode("nodeId to delete");
+     * ```
+     * Moves players to a different node before deleting
+     * ```ts
+     * client.lavalink.nodeManager.deleteNode("nodeId to delete", true);
+     * ```
      */
-    deleteNode(node: LavalinkNodeIdentifier | LavalinkNode): void {
+    deleteNode(node: LavalinkNodeIdentifier | LavalinkNode, movePlayers: boolean = false): void {
         const decodeNode = typeof node === "string" ? this.nodes.get(node) : node || this.leastUsedNodes()[0];
         if (!decodeNode) throw new Error("Node was not found");
-        decodeNode.destroy(DestroyReasons.NodeDeleted);
+        if (movePlayers) decodeNode.destroy(DestroyReasons.NodeDeleted, true, true);
+        else decodeNode.destroy(DestroyReasons.NodeDeleted);
         this.nodes.delete(decodeNode.id);
         return;
     }
