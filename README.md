@@ -808,3 +808,14 @@ if(previousTrack) {
   - Added the try to play the next track if there is no current track
     - *There was a problem trying to auto-reconnect on-Disconnect while the queue was empty, which caused the player to get destroyed by that and log the error in console "`There is no Track in the Queue, nor provided in the PlayOptions`"*
     - *Now you have to handle that case manually if you want to or set autoReconnectOnlyWithTracks to false (default)*
+
+
+## **Version 2.4.4 - Version 2.4.6**
+- `player.changeNode()` is fixed and works - thanks to @PandaIN95
+- The code got re-formatted and re-structured, no code-changes are needed to be made, but it's now cleaner & more readable in some areas
+- The same for the testbot Folder(s), also it imports lavalink-client directly, so you can just copy it and move on from it.
+- Some minor Fixess:
+  - Autoplay sometimes doesn't get called when previousAutoplay call failed.
+  - remove structuredClone so that it works in bun more stable
+  - Player Options Validation also allows single property objects
+  - Some typos were fixed
