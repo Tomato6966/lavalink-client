@@ -846,9 +846,7 @@ export class LavalinkNode {
                 !this.info.plugins.find(v => v.name === "java-lyrics-plugin")
             ) throw new RangeError(`there is no lyrics source (via lavasrc-plugin / java-lyrics-plugin) available in the lavalink node (required for lyrics): ${this.id}`);
 
-            return await this.request(`/sessions/${this.sessionId}/players/${guildId}/lyrics/unsubscribe`, (options) => {
-                options.method = "DELETE";
-            });
+            return await this.request(`/sessions/${this.sessionId}/players/${guildId}/unsubscribe`);
         },
     };
 
