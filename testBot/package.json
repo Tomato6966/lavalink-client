@@ -33,11 +33,11 @@
     "homepage": "https://tomato6966.github.io/lavalink-client/",
     "dependencies": {
         "@redis/client": "^1.6.0",
-        "@types/node": "^22.10.5",
-        "@types/ws": "^8.5.13",
+        "@types/node": "^22.13.1",
+        "@types/ws": "^8.5.14",
         "discord.js": "^14.17.3",
         "dotenv": "^16.4.7",
-        "lavalink-client": "^2.4.4",
+        "lavalink-client": "^2.4.7",
         "redis": "^4.7.0",
         "ts-node": "^10.9.2",
         "ws": "^8.18.0"
