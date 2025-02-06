@@ -37,7 +37,7 @@
         "@types/ws": "^8.5.14",
         "discord.js": "^14.17.3",
         "dotenv": "^16.4.7",
-        "lavalink-client": "^2.4.7",
+        "lavalink-client": "^2.4.8",
         "redis": "^4.7.0",
         "ts-node": "^10.9.2",
         "ws": "^8.18.0"
