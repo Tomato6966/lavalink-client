@@ -35,7 +35,7 @@
         "@redis/client": "^1.6.0",
         "@types/node": "^22.13.1",
         "@types/ws": "^8.5.14",
-        "discord.js": "^14.17.3",
+        "discord.js": "^14.18.0",
         "dotenv": "^16.4.7",
         "lavalink-client": "^2.4.8",
         "redis": "^4.7.0",
