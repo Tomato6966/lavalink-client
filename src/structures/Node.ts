@@ -4,11 +4,11 @@ import WebSocket from "ws";
 import { DebugEvents, DestroyReasons, validSponsorBlocks } from "./Constants";
 import { NodeSymbol, queueTrackEnd } from "./Utils";
 
-import type { NodeManager } from "./NodeManager";
 import type { Player } from "./Player";
 import type { DestroyReasonsType, DisconnectReasonsType } from "./Types/Player";
 import type { LavalinkTrack, PluginInfo, Track } from "./Types/Track";
 import type { Base64, InvalidLavalinkRestRequest, LavalinkPlayer, LavaSearchQuery, LavaSearchResponse, LoadTypes, LyricsFoundEvent, LyricsLineEvent, LyricsNotFoundEvent, PlayerEvents, PlayerEventType, PlayerUpdateInfo, RoutePlanner, SearchQuery, SearchResult, Session, SponsorBlockChaptersLoaded, SponsorBlockChapterStarted, SponsorBlockSegmentSkipped, SponsorBlockSegmentsLoaded, TrackEndEvent, TrackExceptionEvent, TrackStartEvent, TrackStuckEvent, WebSocketClosedEvent } from "./Types/Utils";
+import type { NodeManager } from "./NodeManager";
 
 import type {
     BaseNodeStats, LavalinkInfo, LavalinkNodeOptions, LyricsResult, ModifyRequest, NodeStats, SponsorBlockSegment
