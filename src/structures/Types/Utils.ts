@@ -20,6 +20,7 @@ export type LavaSrcSearchPlatformBase =
     "amsearch" |
     "dzsearch" |
     "dzisrc" |
+    "dzrec" |
     "ymsearch";
 export type LavaSrcSearchPlatform = LavaSrcSearchPlatformBase | "ftts";
 
