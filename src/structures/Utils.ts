@@ -325,6 +325,7 @@ export class ManagerUtils {
             Query.source = DefaultSources[foundSource]; // set the source to ytsearch:
             Query.query = Query.query.slice(`${foundSource}:`.length, Query.query.length); // remove ytsearch: from the query
         }
+        Query.query = encodeURIComponent(Query.query)
         return Query;
     }
 
