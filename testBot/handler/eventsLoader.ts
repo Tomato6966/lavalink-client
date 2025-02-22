@@ -11,7 +11,8 @@ export async function loadEvents(client: BotClient) {
         const cmd = await import(filePath).then(v => v.default) as Event;
 
         if ("name" in cmd && "execute" in cmd) {
-            return client.on(cmd.name, cmd.execute.bind(null, client))
+            client.on(cmd.name, cmd.execute.bind(null, client))
+            continue;
         }
 
         console.warn(`[WARNING] The Event at ${filePath} is missing a required "name" or "execute" property.`)

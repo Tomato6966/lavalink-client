@@ -42,7 +42,7 @@ export function parseLavalinkConnUrl(connectionUrl: string) {
 }
 
 export class ManagerUtils {
-    public LavalinkManager: LavalinkManager | null = null;
+    public LavalinkManager: LavalinkManager | undefined = undefined;
     constructor(LavalinkManager?: LavalinkManager) {
         this.LavalinkManager = LavalinkManager;
     }

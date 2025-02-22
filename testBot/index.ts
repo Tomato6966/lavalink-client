@@ -122,10 +122,15 @@ console.log(LavalinkNodesOfEnv); // you can then provide the result of here in L
 
     // all what you need to do to enable resuming
     handleResuming(client, playerSaver);
-
     loadCommands(client);
     loadEvents(client);
     loadLavalinkEvents(client);
+
+    // IF you ever need to debug djs not connecting the bto, you need to do tit like this
+
+    // client.on("error", console.error);
+    // client.on("debug", console.debug);
+    // client.rest.on('rateLimited', console.debug)
 
     client.login(envConfig.token);
 

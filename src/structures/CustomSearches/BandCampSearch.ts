@@ -9,7 +9,9 @@ export const bandCampSearch = async (player: Player, query: string, requestUser:
     player.LavalinkManager.utils.validateQueryString(player.node, query);
 
     try {
-        const data = await fetch(`https://bandcamp.com/api/nusearch/2/autocomplete?q=${encodeURIComponent(query)}`, {
+        const requestUrl = new URL("https://bandcamp.com/api/nusearch/2/autocomplete");
+        requestUrl.searchParams.append("q", query);
+        const data = await fetch(requestUrl.toString(), {
             headers: {
                 'User-Agent': 'android-async-http/1.4.1 (http://loopj.com/android-async-http)',
                 'Cookie': '$Version=1'
