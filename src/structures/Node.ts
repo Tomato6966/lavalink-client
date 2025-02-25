@@ -220,17 +220,18 @@ export class LavalinkNode {
             throw new Error("Bandcamp Search only works on the player (lavaplayer version < 2.2.0!");
         }
 
-        let uri = `/loadtracks?identifier=`;
+        const requestUrl = new URL(`${this.restAddress}/loadtracks`);
+
         if (/^https?:\/\//.test(Query.query) || ["http", "https", "link", "uri"].includes(Query.source)) { // if it's a link simply encode it
-            const url = encodeURIComponent(Query.query);
-            uri += url;
+            requestUrl.searchParams.append("identifier", Query.query);
         } else { // if not make a query out of it
-            if (Query.source !== "local") uri += `${Query.source}:`; // only add the query source string if it's not a local track
-            if (Query.source === "ftts") uri += `//${encodeURIComponent(Query.query)}`;
-            else uri += encodeURIComponent(Query.query);
+            const prefix = Query.source !== "local" ? `${Query.source}:` : "";
+            requestUrl.searchParams.append("identifier", `${prefix}${Query.source === "ftts" ? `//${encodeURIComponent(Query.query)}` : Query.query}`)
         }
 
-        const res = await this.request(uri, (options) => {
+        const requestPathAndSearch = requestUrl.pathname + requestUrl.search;
+
+        const res = await this.request(requestPathAndSearch, (options) => {
             if (typeof query === "object" && typeof query.extraQueryUrlParams?.size === "number" && query.extraQueryUrlParams?.size > 0) {
                 options.extraQueryUrlParams = query.extraQueryUrlParams;
             }

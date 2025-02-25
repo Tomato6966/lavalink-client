@@ -40,11 +40,18 @@ export const DefaultSources: Record<SearchPlatform, LavalinkSearchPlatform | Cli
     "dz": "dzsearch",
     "dzsearch": "dzsearch",
     "dzisrc": "dzisrc",
+    "dzrec": "dzrec",
     // yandexmusic
     "yandex music": "ymsearch",
     "yandexmusic": "ymsearch",
     "yandex": "ymsearch",
     "ymsearch": "ymsearch",
+    "ymrec": "ymrec",
+    // VK Music (lavasrc)
+    "vksearch": "vksearch",
+    "vkmusic": "vksearch",
+    "vk music": "vksearch",
+    "vkrec": "vkrec",
     // speak PLUGIN
     "speak": "speak",
     "tts": "tts",

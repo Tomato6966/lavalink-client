@@ -46,7 +46,7 @@ export async function handleResuming(client: BotClient, playerSaver: PlayerSaver
             // override the filters data
             player.filterManager.data = data.filters;
             // get the queue data including the current track (for the requester)
-            await player.queue.utils.sync(true, false);
+            await player.queue.utils.sync(true, false).catch(console.warn);
             // override the current track with the data from lavalink
             if (data.track) player.queue.current = client.lavalink.utils.buildTrack(data.track, player.queue.current?.requester || client.user);
             // override the position of the player
