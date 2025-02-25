@@ -1560,7 +1560,7 @@ export class LavalinkNode {
                 }
                 if (player.queue.current) {
                     if (payload.type === "TrackEndEvent") this.NodeManager.LavalinkManager.emit("trackEnd", player, track, payload);
-                    return player.play({ noReplace: true, paused: false });
+                    if (this.NodeManager.LavalinkManager.options.autoSkip) return player.play({ noReplace: true, paused: false });
                 }
             } else {
                 if (this.NodeManager.LavalinkManager.options?.advancedOptions?.enableDebugEvents) {
