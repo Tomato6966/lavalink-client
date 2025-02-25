@@ -95,6 +95,8 @@ export class Player {
      * @param LavalinkManager
      */
     constructor(options: PlayerOptions, LavalinkManager: LavalinkManager) {
+        if(typeof options?.customData === "object") for(const [key, value] of Object.entries(options.customData)) this.set(key, value);
+
         this.options = options;
         this.filterManager = new FilterManager(this);
         this.LavalinkManager = LavalinkManager;
@@ -513,8 +515,10 @@ export class Player {
         }
 
         if (!this.playing && !this.queue.current) return (this.play(), this);
+
         const now = performance.now();
         this.set("internal_skipped", true);
+
         await this.node.updatePlayer({ guildId: this.guildId, playerOptions: { track: { encoded: null }, paused: false } });
 
         this.ping.lavalink = Math.round((performance.now() - now) / 10) / 100;

@@ -107,32 +107,6 @@ export class LavalinkNode {
     }
 
     /**
-     * Parse url params correctly for lavalink requests, including support for urls and uris.
-     * @param url input url object
-     * @param extraQueryUrlParams UrlSearchParams to use in a encodedURI, useful for example for flowertts
-     * @returns the url as a valid string
-     *
-     * @example
-     * ```ts
-     * player.node.getRequestingUrl(new URL(`http://localhost:2333/v4/loadtracks?identifier=Never gonna give you up`));
-     * ```
-     */
-    private getRequestingUrl(url: URL, extraQueryUrlParams?: URLSearchParams): string {
-        if (!url.searchParams.size) return `${url.origin}${url.pathname}`;
-        const keysToAdd = [];
-        for (const [paramKey, paramValue] of url.searchParams.entries()) {
-            const decoded = decodeURIComponent(paramValue).trim(); // double decoding, once internally, a second time if decoded by provided user.
-            if (decoded.includes("://") && !/^https?:\/\//.test(decoded)) { // uri, but not url.
-                const [key, ...values] = decoded.split("://");
-                keysToAdd.push(`${paramKey}=${encodeURI(`${key}://${encodeURIComponent(values.join("://"))}${extraQueryUrlParams && extraQueryUrlParams?.size > 0 ? `?${extraQueryUrlParams.toString()}` : ""}`)}`);
-                continue;
-            }
-            keysToAdd.push(`${paramKey}=${encodeURIComponent(decoded)}`);
-        }
-        return `${url.origin}${url.pathname}?${keysToAdd.join("&")}`;
-    }
-
-    /**
      * Raw Request util function
      * @param endpoint endpoint string
      * @param modify modify the request
@@ -146,7 +120,7 @@ export class LavalinkNode {
      */
     private async rawRequest(endpoint: string, modify?: ModifyRequest): Promise<{ response: Response, options: RequestInit & { path: string, extraQueryUrlParams?: URLSearchParams } }> {
         const options: RequestInit & { path: string, extraQueryUrlParams?: URLSearchParams } = {
-            path: `/${this.version}/${endpoint.replace(/^\//gm, "")}`,
+            path: `/${this.version}/${endpoint.startsWith("/") ? endpoint.slice(1) : endpoint}`,
             method: "GET",
             headers: {
                 "Authorization": this.options.authorization
@@ -159,7 +133,13 @@ export class LavalinkNode {
         const url = new URL(`${this.restAddress}${options.path}`);
         url.searchParams.append("trace", "true");
 
-        const urlToUse = this.getRequestingUrl(url, options?.extraQueryUrlParams);
+        if(options.extraQueryUrlParams && options.extraQueryUrlParams?.size > 0) {
+            for (const [ paramKey, paramValue ] of options.extraQueryUrlParams.entries()) {
+                url.searchParams.append(paramKey, paramValue)
+            }
+        }
+
+        const urlToUse = url.toString();
 
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const { path, extraQueryUrlParams, ...fetchOptions } = options; // destructure fetch only options
@@ -225,8 +205,9 @@ export class LavalinkNode {
         if (/^https?:\/\//.test(Query.query) || ["http", "https", "link", "uri"].includes(Query.source)) { // if it's a link simply encode it
             requestUrl.searchParams.append("identifier", Query.query);
         } else { // if not make a query out of it
-            const prefix = Query.source !== "local" ? `${Query.source}:` : "";
-            requestUrl.searchParams.append("identifier", `${prefix}${Query.source === "ftts" ? `//${encodeURIComponent(Query.query)}` : Query.query}`)
+            const fttsPrefix = Query.source === "ftts" ? "//" : "";
+            const prefix = Query.source !== "local" ? `${Query.source}:${fttsPrefix}` : "";
+            requestUrl.searchParams.append("identifier", `${prefix}${Query.query}`)
         }
 
         const requestPathAndSearch = requestUrl.pathname + requestUrl.search;
@@ -266,7 +247,8 @@ export class LavalinkNode {
                 thumbnail: (res.data.info?.artworkUrl) || (res.data.pluginInfo?.artworkUrl) || ((typeof res.data?.info?.selectedTrack !== "number" || res.data?.info?.selectedTrack === -1) ? null : resTracks[res.data?.info?.selectedTrack] ? (resTracks[res.data?.info?.selectedTrack]?.info?.artworkUrl || resTracks[res.data?.info?.selectedTrack]?.info?.pluginInfo?.artworkUrl) : null) || null,
                 uri: res.data.info?.url || res.data.info?.uri || res.data.info?.link || res.data.pluginInfo?.url || res.data.pluginInfo?.uri || res.data.pluginInfo?.link || null,
                 selectedTrack: typeof res.data?.info?.selectedTrack !== "number" || res.data?.info?.selectedTrack === -1 ? null : resTracks[res.data?.info?.selectedTrack] ? this.NodeManager.LavalinkManager.utils.buildTrack(resTracks[res.data?.info?.selectedTrack], requestUser) : null,
-                duration: resTracks.length ? resTracks.reduce((acc, cur) => acc + (cur?.info?.length || 0), 0) : 0,
+                duration: resTracks.length ? resTracks.reduce((acc: number, cur: Track & { info: Track["info"] & { length?: number }}) => acc + (cur?.info?.duration || cur?.info?.length || 0), 0) : 0,
+
             } : null,
             tracks: (resTracks.length ? resTracks.map(t => this.NodeManager.LavalinkManager.utils.buildTrack(t, requestUser)) : []) as Track[]
         };
@@ -1187,7 +1169,7 @@ export class LavalinkNode {
 
                 if (!player.createdTimeStamp && payload.state.time) player.createdTimeStamp = payload.state.time;
 
-                if (player.filterManager.filterUpdatedState === true && ((player.queue.current?.info?.duration || 0) <= (player.LavalinkManager.options.advancedOptions.maxFilterFixDuration || 600_000) || isAbsolute(player.queue.current?.info?.uri))) {
+                if (player.filterManager.filterUpdatedState === true && ((player.queue.current?.info?.duration || 0) <= (player.LavalinkManager.options.advancedOptions.maxFilterFixDuration || 600_000) || (player.queue.current?.info?.uri && isAbsolute(player.queue.current?.info?.uri)))) {
                     player.filterManager.filterUpdatedState = false;
 
                     if (this.NodeManager.LavalinkManager.options?.advancedOptions?.enableDebugEvents) {
@@ -1408,31 +1390,31 @@ export class LavalinkNode {
     }
 
     /** @private util function for handling socketClosed event */
-    private socketClosed(player: Player, payload: WebSocketClosedEvent): Promise<void> {
+    private socketClosed(player: Player, payload: WebSocketClosedEvent): void {
         this.NodeManager.LavalinkManager.emit("playerSocketClosed", player, payload);
         return;
     }
 
     /** @private util function for handling SponsorBlock Segmentloaded event */
-    private async SponsorBlockSegmentLoaded(player: Player, track: Track, payload: SponsorBlockSegmentsLoaded): Promise<void> {
+    private SponsorBlockSegmentLoaded(player: Player, track: Track, payload: SponsorBlockSegmentsLoaded): void {
         this.NodeManager.LavalinkManager.emit("SegmentsLoaded", player, track || this.getTrackOfPayload(payload), payload);
         return;
     }
 
     /** @private util function for handling SponsorBlock SegmentSkipped event */
-    private async SponsorBlockSegmentSkipped(player: Player, track: Track, payload: SponsorBlockSegmentSkipped): Promise<void> {
+    private SponsorBlockSegmentSkipped(player: Player, track: Track, payload: SponsorBlockSegmentSkipped): void {
         this.NodeManager.LavalinkManager.emit("SegmentSkipped", player, track || this.getTrackOfPayload(payload), payload);
         return;
     }
 
     /** @private util function for handling SponsorBlock Chaptersloaded event */
-    private async SponsorBlockChaptersLoaded(player: Player, track: Track, payload: SponsorBlockChaptersLoaded): Promise<void> {
+    private SponsorBlockChaptersLoaded(player: Player, track: Track, payload: SponsorBlockChaptersLoaded): void {
         this.NodeManager.LavalinkManager.emit("ChaptersLoaded", player, track || this.getTrackOfPayload(payload), payload);
         return;
     }
 
     /** @private util function for handling SponsorBlock Chaptersstarted event */
-    private async SponsorBlockChapterStarted(player: Player, track: Track, payload: SponsorBlockChapterStarted): Promise<void> {
+    private SponsorBlockChapterStarted(player: Player, track: Track, payload: SponsorBlockChapterStarted): void {
         this.NodeManager.LavalinkManager.emit("ChapterStarted", player, track || this.getTrackOfPayload(payload), payload);
         return;
     }
