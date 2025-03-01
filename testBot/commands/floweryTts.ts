@@ -7,7 +7,9 @@ export default {
     data: new SlashCommandBuilder()
         .setName("ftts").setDescription("Use Flowery Text To Speech")
         .addStringOption(o => o.setName("text").setDescription("The Text to translate").setRequired(true))
-        .addStringOption(o => o.setName("voice").setDescription("The Voice, and thus language to use").setRequired(false)),
+        .addStringOption(o => o.setName("voice").setDescription("The Voice, and thus language to use").setRequired(false))
+        .addStringOption(o => o.setName("speed").setDescription("Speed (float number e.g.   1.5  )").setRequired(false)),
+
     execute: async (client, interaction) => {
         if (!interaction.guildId) return;
 
@@ -35,14 +37,19 @@ export default {
         if (player.voiceChannelId !== vcId) return interaction.reply({ ephemeral: true, content: "You need to be in my Voice Channel" });
 
         const query = (interaction.options as CommandInteractionOptionResolver).getString("text")!;
-        const voice = (interaction.options as CommandInteractionOptionResolver).getString("voice")!
+        const voice = (interaction.options as CommandInteractionOptionResolver).getString("voice")! || "Ava";
+        const speed = (interaction.options as CommandInteractionOptionResolver).getString("speed")! || "1.0";
 
-        const extraParams = new URLSearchParams();
-        if (voice) extraParams.append(`voice`, voice);
+        const fttsParams = new URLSearchParams();
+        if(voice) fttsParams.append("voice", voice);
+        if(speed) fttsParams.append("speed", speed);
 
         const response = await player.search({
-            query: `${query}`,
-            extraQueryUrlParams: extraParams,
+            // e.g. query "Hello World How are you?"
+            // for flowerytts you need to send a URL
+            // and if you want to add optiojns, this is how you add the params to the query..
+            query: `${encodeURI(query)}${fttsParams.size ? `?${fttsParams.toString()}` : ""}`,
+            // extraQueryUrlParams: fttsParams, // don't use this for flowerytts, this is url params for LAVALINK not for song url
             source: "ftts"
         }, interaction.user);
 

@@ -819,3 +819,27 @@ if(previousTrack) {
   - remove structuredClone so that it works in bun more stable
   - Player Options Validation also allows single property objects
   - Some typos were fixed
+
+
+
+## **Version 2.5.0**
+- Deps got updated
+- Handling of parsing url got updated to use the URL object
+- Flowerytts requests needs to be changed now:
+
+```js
+const query = "Hello World How are you?";
+const voice = "Ava";
+const speed = "1.0";
+
+const fttsParams = new URLSearchParams();
+if(voice) fttsParams.append("voice", voice);
+if(speed) fttsParams.append("speed", speed);
+
+const response = await player.search({
+    // For flowerytts you need to send a URL
+    // and if you want to add optiojns, this is how you add the params to the query..
+    query: `${encodeURI(query)}${fttsParams.size ? `?${fttsParams.toString()}` : ""}`,
+    source: "ftts"
+}, interaction.user);
+```
