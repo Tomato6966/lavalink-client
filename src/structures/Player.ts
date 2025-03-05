@@ -753,6 +753,7 @@ export class Player {
 
         const data = this.toJSON();
         const currentTrack = this.queue.current;
+        const segments = await this.getSponsorBlock().catch(() => []);
         const voiceData = this.voice;
         if (!voiceData.endpoint ||
             !voiceData.sessionId ||
@@ -776,6 +777,32 @@ export class Player {
                     }
                 });
             });
+            const hasSponsorBlock = this.node.info?.plugins?.find(v => v.name === "sponsorblock-plugin");
+                if (hasSponsorBlock) {
+                    if (segments.length) {
+                        await this.setSponsorBlock(segments).catch(error => { 
+                            if (this.LavalinkManager.options?.advancedOptions?.enableDebugEvents) {
+                                this.LavalinkManager.emit("debug", DebugEvents.PlayerChangeNode, {
+                                    state: "error",
+                                    error: error,
+                                    message: `Player > changeNode() Unable to set SponsorBlock Segments`,
+                                    functionLayer: "Player > changeNode()",
+                                });
+                            }
+                        });
+                    } else {
+                        await this.setSponsorBlock().catch(error => {
+                            if (this.LavalinkManager.options?.advancedOptions?.enableDebugEvents) {
+                                this.LavalinkManager.emit("debug", DebugEvents.PlayerChangeNode, {
+                                    state: "error",
+                                    error: error,
+                                    message: `Player > changeNode() Unable to set SponsorBlock Segments`,
+                                    functionLayer: "Player > changeNode()",
+                                });
+                            }
+                        });
+                    }
+                }
             if (currentTrack) { // If there is a current track, send it to the new node.
                 await this.node.updatePlayer({
                     guildId: this.guildId,
@@ -789,6 +816,8 @@ export class Player {
                     }
                 });
             }
+            this.paused = data.paused;
+            this.playing = data.playing;
             this.ping.lavalink = Math.round((performance.now() - now) / 10) / 100;
             return this.node.id;
         } catch (error) {
