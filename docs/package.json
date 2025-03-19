@@ -11,13 +11,13 @@
   },
   "dependencies": {
     "@astrojs/check": "^0.9.4",
-    "@astrojs/starlight": "^0.32.2",
-    "astro": "^5.5.2",
+    "@astrojs/starlight": "^0.32.3",
+    "astro": "^5.5.3",
     "marked": "^15.0.7",
     "sharp": "^0.33.5",
     "starlight-typedoc": "^0.20.0",
     "typedoc": "^0.28.0",
-    "typedoc-plugin-markdown": "^4.5.0",
+    "typedoc-plugin-markdown": "^4.5.2",
     "typescript": "^5.8.2"
   }
 }
