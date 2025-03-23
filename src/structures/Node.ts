@@ -605,7 +605,7 @@ export class LavalinkNode {
      * ```
      */
     public get connectionStatus(): string {
-        if (!this.socket) throw new Error("no websockthis.NodeManager.emit("destroy", this, destroyReason);et was initialized yet");
+        if (!this.socket) throw new Error("no websocket was initialized yet");
         return ["CONNECTING", "OPEN", "CLOSING", "CLOSED"][this.socket.readyState] || "UNKNOWN";
     }
 
