@@ -42,7 +42,7 @@ export function parseLavalinkConnUrl(connectionUrl: string) {
 }
 
 export class ManagerUtils {
-    public LavalinkManager: LavalinkManager | undefined = undefined;
+    public LavalinkManager: LavalinkManager | null = null;
     constructor(LavalinkManager?: LavalinkManager) {
         this.LavalinkManager = LavalinkManager;
     }
@@ -50,7 +50,7 @@ export class ManagerUtils {
     buildPluginInfo(data: any, clientData: any = {}) {
         return {
             clientData: clientData,
-            ...(data.pluginInfo || (data as any).plugin),
+            ...(data.pluginInfo || (data as any).plugin || {})
         }
     }
 
@@ -82,7 +82,7 @@ export class ManagerUtils {
                     isrc: data.info.isrc,
                 },
                 userData: {
-                    ...data.userData,
+                    ...(data.userData || {}),
                     requester: transformedRequester
                 },
                 pluginInfo: this.buildPluginInfo(data, "clientData" in data ? data.clientData : {}),
@@ -131,7 +131,7 @@ export class ManagerUtils {
             }
         }
 
-        if (!this.isUnresolvedTrack(unresolvedTrack)) throw SyntaxError("Could not build Unresolved Track");
+        if (!this.isUnresolvedTrack(unresolvedTrack)) throw new SyntaxError("Could not build Unresolved Track");
 
         Object.defineProperty(unresolvedTrack, UnresolvedTrackSymbol, { configurable: true, value: true });
         return unresolvedTrack as UnresolvedTrack;
@@ -175,16 +175,16 @@ export class ManagerUtils {
     isNodeOptions(data: LavalinkNodeOptions) {
         if (!data || typeof data !== "object" || Array.isArray(data)) return false;
         if (typeof data.host !== "string" || !data.host.length) return false;
-        if (typeof data.port !== "number" || isNaN(data.port) || data.port < 0 || data.port > 65535) return false;
+        if (typeof data.port !== "number" || Number.isNaN(data.port) || data.port < 0 || data.port > 65535) return false;
         if (typeof data.authorization !== "string" || !data.authorization.length) return false;
         if ("secure" in data && typeof data.secure !== "boolean" && data.secure !== undefined) return false;
         if ("sessionId" in data && typeof data.sessionId !== "string" && data.sessionId !== undefined) return false;
         if ("id" in data && typeof data.id !== "string" && data.id !== undefined) return false;
         if ("regions" in data && (!Array.isArray(data.regions) || !data.regions.every(v => typeof v === "string") && data.regions !== undefined)) return false;
         if ("poolOptions" in data && typeof data.poolOptions !== "object" && data.poolOptions !== undefined) return false;
-        if ("retryAmount" in data && (typeof data.retryAmount !== "number" || isNaN(data.retryAmount) || data.retryAmount <= 0 && data.retryAmount !== undefined)) return false;
-        if ("retryDelay" in data && (typeof data.retryDelay !== "number" || isNaN(data.retryDelay) || data.retryDelay <= 0 && data.retryDelay !== undefined)) return false;
-        if ("requestTimeout" in data && (typeof data.requestTimeout !== "number" || isNaN(data.requestTimeout) || data.requestTimeout <= 0 && data.requestTimeout !== undefined)) return false;
+        if ("retryAmount" in data && (typeof data.retryAmount !== "number" || Number.isNaN(data.retryAmount) || data.retryAmount <= 0 && data.retryAmount !== undefined)) return false;
+        if ("retryDelay" in data && (typeof data.retryDelay !== "number" || Number.isNaN(data.retryDelay) || data.retryDelay <= 0 && data.retryDelay !== undefined)) return false;
+        if ("requestTimeout" in data && (typeof data.requestTimeout !== "number" || Number.isNaN(data.requestTimeout) || data.requestTimeout <= 0 && data.requestTimeout !== undefined)) return false;
         return true;
     }
     /**
@@ -256,7 +256,7 @@ export class ManagerUtils {
         }
 
         if (!/^https?:\/\//.test(queryString)) return;
-        else if (this.LavalinkManager.options?.linksAllowed === false) throw new Error("Using links to make a request is not allowed.")
+        if (this.LavalinkManager.options?.linksAllowed === false) throw new Error("Using links to make a request is not allowed.")
 
         // checks for if the query is whitelisted (should only work for links, so it skips the check for no link queries)
         if (this.LavalinkManager.options?.linksWhitelist?.length > 0) {
@@ -390,6 +390,18 @@ export class ManagerUtils {
         }
         if (source === "ytsearch" && !node.info?.sourceManagers?.includes("youtube")) {
             throw new Error("Lavalink Node has not 'youtube' enabled, which is required to have 'ytsearch' work");
+        }
+        if (source === "vksearch" && !node.info?.sourceManagers?.includes("vkmusic")) {
+            throw new Error("Lavalink Node has not 'vk' enabled, which is required to have 'vksearch' work");
+        }
+        if (source === "vkrec" && !node.info?.sourceManagers?.includes("vkmusic")) {
+            throw new Error("Lavalink Node has not 'vk' enabled, which is required to have 'vkrec' work");
+        }
+        if (source === "tdsearch" && !node.info?.sourceManagers?.includes("tidal")) {
+            throw new Error("Lavalink Node has not 'tidal' enabled, which is required to have 'tdsearch' work");
+        }
+        if (source === "tdrec" && !node.info?.sourceManagers?.includes("tidal")) {
+            throw new Error("Lavalink Node has not 'tidal' enabled, which is required to have 'tdrec' work");
         }
         return;
     }
@@ -545,7 +557,7 @@ async function getClosestTrack(data: UnresolvedTrack, player: Player): Promise<T
     return await player.search({
         query, source: sourceName !== "twitch" && sourceName !== "flowery-tts" ? sourceName : player.LavalinkManager.options?.playerOptions?.defaultSearchPlatform,
     }, data.requester).then((res: SearchResult) => {
-        let trackToUse = null;
+        let trackToUse: Track | null = null;
         // try to find via author name
         if (data.info.author && !trackToUse) trackToUse = res.tracks.find(track => [data.info?.author || "", `${data.info?.author} - Topic`].some(name => new RegExp(`^${escapeRegExp(name)}$`, "i").test(track.info?.author)) || new RegExp(`^${escapeRegExp(data.info?.title)}$`, "i").test(track.info?.title));
         // try to find via duration

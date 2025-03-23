@@ -52,6 +52,7 @@ export const DefaultSources: Record<SearchPlatform, LavalinkSearchPlatform | Cli
     "vkmusic": "vksearch",
     "vk music": "vksearch",
     "vkrec": "vkrec",
+    "vk": "vksearch",
     // speak PLUGIN
     "speak": "speak",
     "tts": "tts",
@@ -78,7 +79,13 @@ export const DefaultSources: Record<SearchPlatform, LavalinkSearchPlatform | Cli
     "jiosaavn": "jssearch",
     "js": "jssearch",
     "jssearch": "jssearch",
-    "jsrec": "jsrec"
+    "jsrec": "jsrec",
+
+    // tidal
+    "tdsearch": "tdsearch",
+    "tidal": "tdsearch",
+    "tidal music": "tdsearch",
+    "tdrec": "tdrec"
 }
 
 /** Lavalink Plugins definiton */

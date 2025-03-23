@@ -385,7 +385,7 @@ export class LavalinkManager extends EventEmitter {
         let success = 0;
         for (const node of [...this.nodeManager.nodes.values()]) {
             try {
-                await node.connect();
+                node.connect();
                 success++;
             }
             catch (err) {
@@ -513,18 +513,28 @@ export class LavalinkManager extends EventEmitter {
                         state: "error",
                         message: `Can't send updatePlayer for voice token session - Missing sessionId :: ${JSON.stringify({ voice: { token: update.token, endpoint: update.endpoint, sessionId: sessionId2Use, }, update, playerVoice: player.voice }, null, 2)}`,
                         functionLayer: "LavalinkManager > sendRawData()",
-                    });
-                    if (this.options?.advancedOptions?.debugOptions?.noAudio === true) console.debug("Lavalink-Client-Debug | NO-AUDIO [::] sendRawData function, Sent updatePlayer for voice token session", { voice: { token: update.token, endpoint: update.endpoint, sessionId: sessionId2Use, }, playerVoice: player.voice, update });
-                } else {
-                    await player.node.updatePlayer({
-                        guildId: player.guildId,
-                        playerOptions: {
+                    })
+                    if (this.options?.advancedOptions?.debugOptions?.noAudio === true) console.debug("Lavalink-Client-Debug | NO-AUDIO [::] sendRawData function, Sent updatePlayer for voice token session",
+                        {
                             voice: {
                                 token: update.token,
                                 endpoint: update.endpoint,
                                 sessionId: sessionId2Use,
-                            }
+                            },
+                                playerVoice: player.voice,
+                                update,
                         }
+                        );
+                    } else {
+                    await player.node.updatePlayer({
+                        guildId: player.guildId,
+                        playerOptions: {
+                        voice: {
+                            token: update.token,
+                            endpoint: update.endpoint,
+                            sessionId: sessionId2Use,
+                        },
+                        },
                     });
                     if (this.options?.advancedOptions?.enableDebugEvents) {
                         this.emit("debug", DebugEvents.NoAudioDebug, {
@@ -599,7 +609,7 @@ export class LavalinkManager extends EventEmitter {
                 } = this.options?.playerOptions?.onDisconnect ?? {};
 
                 if (destroyPlayer === true) {
-                    return void await player.destroy(DestroyReasons.Disconnected);
+                    return void (await player.destroy(DestroyReasons.Disconnected));
                 }
 
                 if (autoReconnect === true) {
@@ -621,11 +631,11 @@ export class LavalinkManager extends EventEmitter {
                         }
                         // replay the current playing stream
                         if (player.queue.current) {
-                            return void await player.play({ position: previousPosition, paused: previousPaused, clientTrack: player.queue.current, });
+                            return void (await player.play({position: previousPosition, paused: previousPaused, clientTrack: player.queue.current,}));
                         }
                         // try to play the next track
                         if (player.queue.tracks.length) {
-                            return void await player.play({ paused: previousPaused });
+                            return void (await player.play({ paused: previousPaused }));
                         }
                         // debug log if nothing was possible
                         this.emit("debug", DebugEvents.PlayerAutoReconnect, {
@@ -635,7 +645,7 @@ export class LavalinkManager extends EventEmitter {
                         });
                     } catch (e) {
                         console.error(e);
-                        return void await player.destroy(DestroyReasons.PlayerReconnectFail);
+                        return void (await player.destroy(DestroyReasons.PlayerReconnectFail));
                     }
                 }
 
