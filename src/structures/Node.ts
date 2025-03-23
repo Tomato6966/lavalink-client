@@ -527,6 +527,7 @@ export class LavalinkNode {
                 clearTimeout(this.reconnectTimeout);
 
                 if (deleteNode) {
+                    this.NodeManager.emit("destroy", this, destroyReason);
                     this.NodeManager.nodes.delete(this.id);
                     clearInterval(this.heartBeatInterval);
                     clearTimeout(this.pingTimeout);

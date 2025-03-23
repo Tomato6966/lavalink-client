@@ -507,7 +507,7 @@ export class LavalinkManager extends EventEmitter {
 
             if ("token" in update) {
                 if (!player.node?.sessionId) throw new Error("Lavalink Node is either not ready or not up to date");
-                const sessionId2Use = player.voice?.sessionId || ("sessionId" in update ? update.sessionId as string : undefined);
+                const sessionId2Use = player.voice?.sessionId || ("sessionId" in update ? (update.sessionId as string) : undefined);
                 if (!sessionId2Use) {
                     this.emit("debug", DebugEvents.NoAudioDebug, {
                         state: "error",
