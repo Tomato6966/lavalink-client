@@ -95,6 +95,8 @@ export class Player {
      * @param LavalinkManager
      */
     constructor(options: PlayerOptions, LavalinkManager: LavalinkManager) {
+        if(typeof options?.customData === "object") for(const [key, value] of Object.entries(options.customData)) this.set(key, value);
+
         this.options = options;
         this.filterManager = new FilterManager(this);
         this.LavalinkManager = LavalinkManager;
@@ -516,12 +518,12 @@ export class Player {
             await this.queue.splice(0, skipTo - 1);
         }
 
-        if (!this.playing) {this.play(); return this;
-        }
+        if (!this.playing && !this.queue.current) return (this.play(), this);
 
         const now = performance.now();
         this.set("internal_skipped", true);
-        await this.node.updatePlayer({ guildId: this.guildId, playerOptions: { track: { encoded: null } } });
+
+        await this.node.updatePlayer({ guildId: this.guildId, playerOptions: { track: { encoded: null }, paused: false } });
 
         this.ping.lavalink = Math.round((performance.now() - now) / 10) / 100;
 
@@ -720,10 +722,30 @@ export class Player {
     /**
      * Move the player on a different Audio-Node
      * @param newNode New Node / New Node Id
+     * @param checkSources If it should check if the sources are supported by the new node
      */
-    public async changeNode(newNode: LavalinkNode | string) {
+    public async changeNode(newNode: LavalinkNode | string, checkSources: boolean = true) {
         const updateNode = typeof newNode === "string" ? this.LavalinkManager.nodeManager.nodes.get(newNode) : newNode;
         if (!updateNode) throw new Error("Could not find the new Node");
+        if (!updateNode.connected) throw new Error("The provided Node is not active or disconnected");
+        if (this.node.id === updateNode.id) throw new Error("Player is already on the provided Node");
+        if (this.get("internal_nodeChanging") === true) throw new Error("Player is already changing the node please wait");
+        if (checkSources) {
+            const isDefaultSource = (): boolean => { // check if defaultSearchPlatform is enabled on newNode
+                try {
+                    this.LavalinkManager.utils.validateSourceString(updateNode, this.LavalinkManager.options.playerOptions.defaultSearchPlatform);
+                    return true;
+                } catch { return false }
+            };
+            if (!isDefaultSource()) throw new RangeError(`defaultSearchPlatform "${this.LavalinkManager.options.playerOptions.defaultSearchPlatform}" is not supported by the newNode`);
+            if (this.queue.current || this.queue.tracks.length) { // Check if all queued track sources are supported by the new node
+                const trackSources = new Set([this.queue.current, ...this.queue.tracks].map(track => track.info.sourceName));
+                const missingSources = [...trackSources].filter(
+                    source => !updateNode.info.sourceManagers.includes(source));
+                if (missingSources.length)
+                    throw new RangeError(`Sources missing for Node ${updateNode.id}: ${missingSources.join(', ')}`)
+            }
+        }
 
         if (this.LavalinkManager.options?.advancedOptions?.enableDebugEvents) {
             this.LavalinkManager.emit("debug", DebugEvents.PlayerChangeNode, {
@@ -735,30 +757,57 @@ export class Player {
 
         const data = this.toJSON();
         const currentTrack = this.queue.current;
-
-        await this.node.destroyPlayer(this.guildId);
-
+        const voiceData = this.voice;
+        if (!voiceData.endpoint ||
+            !voiceData.sessionId ||
+            !voiceData.token)
+            throw new Error("Voice Data is missing, can't change the node");
+        this.set("internal_nodeChanging", true); // This will stop execution of trackEnd or queueEnd event while changing the node
+        if (this.node.connected) await this.node.destroyPlayer(this.guildId); // destroy the player on the currentNode if it's connected
         this.node = updateNode;
-
         const now = performance.now();
-
-        await this.connect();
-
-        await this.node.updatePlayer({
-            guildId: this.guildId,
-            noReplace: false,
-            playerOptions: {
-                position: data.position,
-                volume: Math.round(Math.max(Math.min(data.volume, 1000), 0)),
-                paused: data.paused,
-                filters: { ...data.filters, equalizer: data.equalizer },
-                track: currentTrack ?? undefined
-            },
-        });
-
-        this.ping.lavalink = Math.round((performance.now() - now) / 10) / 100;
-
-        return this.node.id;
+        try {
+            await this.connect();
+            const endpoint = `/sessions/${this.node.sessionId}/players/${this.guildId}`;  //Send the VoiceData to the newly connected node.
+            await this.node.request(endpoint, r => {
+                r.method = "PATCH";
+                r.headers["Content-Type"] = "application/json";
+                r.body = JSON.stringify({
+                    voice: {
+                        token: voiceData.token,
+                        endpoint: voiceData.endpoint,
+                        sessionId: voiceData.sessionId
+                    }
+                });
+            });
+            if (currentTrack) { // If there is a current track, send it to the new node.
+                await this.node.updatePlayer({
+                    guildId: this.guildId,
+                    noReplace: false,
+                    playerOptions: {
+                        track: currentTrack ?? null,
+                        position: currentTrack ? data.position : 0,
+                        volume: data.lavalinkVolume,
+                        paused: data.paused,
+                        //filters: { ...data.filters, equalizer: data.equalizer }, Sending filters on nodeChange causes issues (player gets dicsonnected)
+                    }
+                });
+            }
+            this.ping.lavalink = Math.round((performance.now() - now) / 10) / 100;
+            return this.node.id;
+        } catch (error) {
+            if (this.LavalinkManager.options?.advancedOptions?.enableDebugEvents) {
+                this.LavalinkManager.emit("debug", DebugEvents.PlayerChangeNode, {
+                    state: "error",
+                    error: error,
+                    message: `Player.changeNode() execution failed`,
+                    functionLayer: "Player > changeNode()",
+                });
+            }
+            throw new Error(`Failed to change the node: ${error}`);
+        } finally {
+            this.set("internal_nodeChanging", undefined);
+        }
     }
 
     /** Converts the Player including Queue to a Json state */

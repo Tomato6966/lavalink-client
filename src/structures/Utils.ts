@@ -42,7 +42,7 @@ export function parseLavalinkConnUrl(connectionUrl: string) {
 }
 
 export class ManagerUtils {
-    public LavalinkManager: LavalinkManager | null = null;
+    public LavalinkManager: LavalinkManager | undefined = undefined;
     constructor(LavalinkManager?: LavalinkManager) {
         this.LavalinkManager = LavalinkManager;
     }
@@ -50,7 +50,7 @@ export class ManagerUtils {
     buildPluginInfo(data: any, clientData: any = {}) {
         return {
             clientData: clientData,
-            ...(data.pluginInfo || (data as any).plugin || {})
+            ...(data.pluginInfo || (data as any).plugin),
         }
     }
 
@@ -82,7 +82,7 @@ export class ManagerUtils {
                     isrc: data.info.isrc,
                 },
                 userData: {
-                    ...(data.userData || {}),
+                    ...data.userData,
                     requester: transformedRequester
                 },
                 pluginInfo: this.buildPluginInfo(data, "clientData" in data ? data.clientData : {}),
@@ -131,7 +131,7 @@ export class ManagerUtils {
             }
         }
 
-        if (!this.isUnresolvedTrack(unresolvedTrack)) throw new SyntaxError("Could not build Unresolved Track");
+        if (!this.isUnresolvedTrack(unresolvedTrack)) throw SyntaxError("Could not build Unresolved Track");
 
         Object.defineProperty(unresolvedTrack, UnresolvedTrackSymbol, { configurable: true, value: true });
         return unresolvedTrack as UnresolvedTrack;
@@ -256,7 +256,7 @@ export class ManagerUtils {
         }
 
         if (!/^https?:\/\//.test(queryString)) return;
-        if (this.LavalinkManager.options?.linksAllowed === false) throw new Error("Using links to make a request is not allowed.")
+        else if (this.LavalinkManager.options?.linksAllowed === false) throw new Error("Using links to make a request is not allowed.")
 
         // checks for if the query is whitelisted (should only work for links, so it skips the check for no link queries)
         if (this.LavalinkManager.options?.linksWhitelist?.length > 0) {
@@ -403,7 +403,6 @@ export class ManagerUtils {
         if (source === "tdrec" && !node.info?.sourceManagers?.includes("tidal")) {
             throw new Error("Lavalink Node has not 'tidal' enabled, which is required to have 'tdrec' work");
         }
-        return;
     }
 }
 
@@ -557,7 +556,7 @@ async function getClosestTrack(data: UnresolvedTrack, player: Player): Promise<T
     return await player.search({
         query, source: sourceName !== "twitch" && sourceName !== "flowery-tts" ? sourceName : player.LavalinkManager.options?.playerOptions?.defaultSearchPlatform,
     }, data.requester).then((res: SearchResult) => {
-        let trackToUse: Track | null = null;
+        let trackToUse = null;
         // try to find via author name
         if (data.info.author && !trackToUse) trackToUse = res.tracks.find(track => [data.info?.author || "", `${data.info?.author} - Topic`].some(name => new RegExp(`^${escapeRegExp(name)}$`, "i").test(track.info?.author)) || new RegExp(`^${escapeRegExp(data.info?.title)}$`, "i").test(track.info?.title));
         // try to find via duration
