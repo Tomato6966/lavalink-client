@@ -385,7 +385,7 @@ export class LavalinkManager extends EventEmitter {
         let success = 0;
         for (const node of [...this.nodeManager.nodes.values()]) {
             try {
-                node.connect();
+                await node.connect()
                 success++;
             }
             catch (err) {
