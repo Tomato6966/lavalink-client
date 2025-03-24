@@ -175,16 +175,16 @@ export class ManagerUtils {
     isNodeOptions(data: LavalinkNodeOptions) {
         if (!data || typeof data !== "object" || Array.isArray(data)) return false;
         if (typeof data.host !== "string" || !data.host.length) return false;
-        if (typeof data.port !== "number" || Number.isNaN(data.port) || data.port < 0 || data.port > 65535) return false;
+        if (typeof data.port !== "number" || isNaN(data.port) || data.port < 0 || data.port > 65535) return false;
         if (typeof data.authorization !== "string" || !data.authorization.length) return false;
         if ("secure" in data && typeof data.secure !== "boolean" && data.secure !== undefined) return false;
         if ("sessionId" in data && typeof data.sessionId !== "string" && data.sessionId !== undefined) return false;
         if ("id" in data && typeof data.id !== "string" && data.id !== undefined) return false;
         if ("regions" in data && (!Array.isArray(data.regions) || !data.regions.every(v => typeof v === "string") && data.regions !== undefined)) return false;
         if ("poolOptions" in data && typeof data.poolOptions !== "object" && data.poolOptions !== undefined) return false;
-        if ("retryAmount" in data && (typeof data.retryAmount !== "number" || Number.isNaN(data.retryAmount) || data.retryAmount <= 0 && data.retryAmount !== undefined)) return false;
-        if ("retryDelay" in data && (typeof data.retryDelay !== "number" || Number.isNaN(data.retryDelay) || data.retryDelay <= 0 && data.retryDelay !== undefined)) return false;
-        if ("requestTimeout" in data && (typeof data.requestTimeout !== "number" || Number.isNaN(data.requestTimeout) || data.requestTimeout <= 0 && data.requestTimeout !== undefined)) return false;
+        if ("retryAmount" in data && (typeof data.retryAmount !== "number" || isNaN(data.retryAmount) || data.retryAmount <= 0 && data.retryAmount !== undefined)) return false;
+        if ("retryDelay" in data && (typeof data.retryDelay !== "number" || isNaN(data.retryDelay) || data.retryDelay <= 0 && data.retryDelay !== undefined)) return false;
+        if ("requestTimeout" in data && (typeof data.requestTimeout !== "number" || isNaN(data.requestTimeout) || data.requestTimeout <= 0 && data.requestTimeout !== undefined)) return false;
         return true;
     }
     /**
