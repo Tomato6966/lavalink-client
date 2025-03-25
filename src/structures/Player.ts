@@ -452,6 +452,8 @@ export class Player {
         const now = performance.now();
         await this.node.updatePlayer({ guildId: this.guildId, playerOptions: { paused: true } });
         this.ping.lavalink = Math.round((performance.now() - now) / 10) / 100;
+        // emit the event
+        this.LavalinkManager.emit("playerPaused", this, this.queue.current);
         return this;
     }
 
@@ -464,6 +466,8 @@ export class Player {
         const now = performance.now();
         await this.node.updatePlayer({ guildId: this.guildId, playerOptions: { paused: false } });
         this.ping.lavalink = Math.round((performance.now() - now) / 10) / 100;
+        // emit the event
+        this.LavalinkManager.emit("playerResumed", this, this.queue.current);
         return this;
     }
 

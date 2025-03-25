@@ -212,11 +212,11 @@ export class LavalinkNode {
 
         const requestPathAndSearch = requestUrl.pathname + requestUrl.search;
 
-        const res = await this.request(requestPathAndSearch, (options) => {
+        const res = (await this.request(requestPathAndSearch, (options) => {
             if (typeof query === "object" && typeof query.extraQueryUrlParams?.size === "number" && query.extraQueryUrlParams?.size > 0) {
                 options.extraQueryUrlParams = query.extraQueryUrlParams;
             }
-        }) as {
+        })) as {
             loadType: LoadTypes,
             data: any,
             pluginInfo: PluginInfo,
@@ -247,8 +247,7 @@ export class LavalinkNode {
                 thumbnail: (res.data.info?.artworkUrl) || (res.data.pluginInfo?.artworkUrl) || ((typeof res.data?.info?.selectedTrack !== "number" || res.data?.info?.selectedTrack === -1) ? null : resTracks[res.data?.info?.selectedTrack] ? (resTracks[res.data?.info?.selectedTrack]?.info?.artworkUrl || resTracks[res.data?.info?.selectedTrack]?.info?.pluginInfo?.artworkUrl) : null) || null,
                 uri: res.data.info?.url || res.data.info?.uri || res.data.info?.link || res.data.pluginInfo?.url || res.data.pluginInfo?.uri || res.data.pluginInfo?.link || null,
                 selectedTrack: typeof res.data?.info?.selectedTrack !== "number" || res.data?.info?.selectedTrack === -1 ? null : resTracks[res.data?.info?.selectedTrack] ? this.NodeManager.LavalinkManager.utils.buildTrack(resTracks[res.data?.info?.selectedTrack], requestUser) : null,
-                duration: resTracks.length ? resTracks.reduce((acc: number, cur: Track & { info: Track["info"] & { length?: number }}) => acc + (cur?.info?.duration || cur?.info?.length || 0), 0) : 0,
-
+                duration: resTracks.length ? resTracks.reduce((acc: number, cur: Track & { info: Track["info"] & { length?: number }}) => acc + (cur?.info?.duration || cur?.info?.length || 0), 0) : 0, 
             } : null,
             tracks: (resTracks.length ? resTracks.map(t => this.NodeManager.LavalinkManager.utils.buildTrack(t, requestUser)) : []) as Track[]
         };
@@ -1145,7 +1144,7 @@ export class LavalinkNode {
             case "stats":
                 if (this.options.enablePingOnStatsCheck) this.heartBeat(); // lavalink doesn'T send "ping" periodically, therefore we use the stats message to check for a ping
                 delete payload.op;
-                this.stats = ({ ...payload } as unknown) as NodeStats;
+                this.stats = { ...payload } as unknown as NodeStats;
                 break;
             case "playerUpdate": {
                 const player = this.NodeManager.LavalinkManager.getPlayer(payload.guildId);
@@ -1271,8 +1270,8 @@ export class LavalinkNode {
                         message: `Trackstart emitted but there is no track on player.queue.current, trying to get the track of the payload failed too.`,
                         functionLayer: "LavalinkNode > trackStart()",
                     });
-                }
             }
+        }
         }
         this.NodeManager.LavalinkManager.emit("trackStart", player, player.queue.current, payload);
         return;

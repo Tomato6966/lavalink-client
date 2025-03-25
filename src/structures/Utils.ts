@@ -391,7 +391,18 @@ export class ManagerUtils {
         if (source === "ytsearch" && !node.info?.sourceManagers?.includes("youtube")) {
             throw new Error("Lavalink Node has not 'youtube' enabled, which is required to have 'ytsearch' work");
         }
-        return;
+        if (source === "vksearch" && !node.info?.sourceManagers?.includes("vkmusic")) {
+            throw new Error("Lavalink Node has not 'vk' enabled, which is required to have 'vksearch' work");
+        }
+        if (source === "vkrec" && !node.info?.sourceManagers?.includes("vkmusic")) {
+            throw new Error("Lavalink Node has not 'vk' enabled, which is required to have 'vkrec' work");
+        }
+        if (source === "tdsearch" && !node.info?.sourceManagers?.includes("tidal")) {
+            throw new Error("Lavalink Node has not 'tidal' enabled, which is required to have 'tdsearch' work");
+        }
+        if (source === "tdrec" && !node.info?.sourceManagers?.includes("tidal")) {
+            throw new Error("Lavalink Node has not 'tidal' enabled, which is required to have 'tdrec' work");
+        }
     }
 }
 
