@@ -398,6 +398,13 @@ export class ManagerUtils {
         if (source === "ytsearch" && !node.info?.sourceManagers?.includes("youtube")) {
             throw new Error("Lavalink Node has not 'youtube' enabled, which is required to have 'ytsearch' work");
         }
+        if (source === "vksearch" && !node.info?.sourceManagers?.includes("vkmusic")) {
+            throw new Error("Lavalink Node has not 'vk' enabled, which is required to have 'vksearch' work");
+        }
+        if (source === "vkrec" && !node.info?.sourceManagers?.includes("vkmusic")) {
+            throw new Error("Lavalink Node has not 'vk' enabled, which is required to have 'vkrec' work");
+        }
+
         return;
     }
 }

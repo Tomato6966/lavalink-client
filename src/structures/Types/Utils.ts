@@ -60,7 +60,7 @@ export type ClientSearchPlatform =
     "am" | "apple music" | "applemusic" | "apple" | "musicapple" | "music apple" |
     "sp" | "spsuggestion" | "spotify" | "spotify.com" | "spotifycom" |
     "dz" | "deezer" |
-    "yandex" | "yandex music" | "yandexmusic" | "vk music" | "vkmusic" |
+    "yandex" | "yandex music" | "yandexmusic" | "vk" | "vk music" | "vkmusic" | "tidal" | "tidal music" |
     "flowerytts" | "flowery" | "flowery.tts" | LavalinkClientSearchPlatformResolve | LavalinkClientSearchPlatform | "js" | "jiosaavn" | "td" | "tidal" | "tdrec";
 
 export type SearchPlatform = LavalinkSearchPlatform | ClientSearchPlatform;
