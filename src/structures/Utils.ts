@@ -307,6 +307,9 @@ export class ManagerUtils {
         if (SourceLinksRegexes.jiosaavn.test(queryString) && !node.info?.sourceManagers?.includes("jiosaavn")) {
             throw new Error("Query / Link Provided for this Source but Lavalink Node has not 'jiosaavn' (via jiosaavn-plugin) enabled");
         }
+        if (SourceLinksRegexes.tidal.test(queryString) && !node.info?.sourceManagers?.includes("tidal")) {
+            throw new Error("Query / Link Provided for this Source but Lavalink Node has not 'tidal' enabled");
+        }
         return;
     }
 
