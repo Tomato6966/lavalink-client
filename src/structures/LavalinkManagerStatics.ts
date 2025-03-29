@@ -74,6 +74,11 @@ export const DefaultSources: Record<SearchPlatform, LavalinkSearchPlatform | Cli
     "https": "https",
     "link": "link",
     "uri": "uri",
+    // tidal
+    "tidal": "tdsearch",
+    "td": "tdsearch",
+    "tdsearch": "tdsearch",
+    "tdrec": "tdrec",
     // jiosaavn
     "jiosaavn": "jssearch",
     "js": "jssearch",
@@ -133,6 +138,9 @@ export const SourceLinksRegexes: Record<SourcesRegex, RegExp> = {
     AllSpotifyRegex: /(https?:\/\/)(www\.)?open\.spotify\.com\/((?<region>[a-zA-Z-]+)\/)?(user\/(?<user>[a-zA-Z0-9-_]+)\/)?(?<type>track|album|playlist|artist|episode|show)\/(?<identifier>[a-zA-Z0-9-_]+)/,
 
     appleMusic: /https?:\/\/?(?:www\.)?music\.apple\.com\/(\S+)/,
+
+    /** From tidal */
+    tidal: /https?:\/\/?(?:www\.)?(?:tidal|listen)\.tidal\.com\/(?<type>track|album|playlist|artist)\/(?<identifier>[a-zA-Z0-9-_]+)/,
 
     /** From jiosaavn-plugin */
     jiosaavn: /(https?:\/\/)(www\.)?jiosaavn\.com\/(?<type>song|album|featured|artist)\/([a-zA-Z0-9-_\/,]+)/,

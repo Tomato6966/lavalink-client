@@ -107,6 +107,7 @@ plugins:
       - "ytsearch:%QUERY%"
       - "dzsearch:%QUERY%"
       - "scsearch:%QUERY%"
+      - "tdsearch:%QUERY%"
     sources:
       spotify: true
       applemusic: true
@@ -114,6 +115,7 @@ plugins:
       yandexmusic: true
       flowerytts: true
       youtube: true
+      tidal: true
     lyrics-sources:
       spotify: true # Enable Spotify lyrics source
       deezer: true # Enable Deezer lyrics source
@@ -141,6 +143,9 @@ plugins:
       artistLoadLimit: 1 # The number of pages at 10 tracks each
     yandexmusic:
       accessToken: "<insert>"
+    tidal:
+      countryCode: "US"
+      token: "<insert>"
     flowerytts:
       voice: "Olivia" # (case-sensitive) get default voice from here https://api.flowery.pw/v1/tts/voices
       translate: false # whether to translate the text to the native language of voice
