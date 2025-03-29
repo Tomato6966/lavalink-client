@@ -1,5 +1,3 @@
-
-
 import { URL } from "node:url";
 import { isRegExp } from "node:util/types";
 
@@ -375,6 +373,9 @@ export class ManagerUtils {
         }
         if (source === "speak" && !node.info?.plugins?.find(c => c.name.toLowerCase().includes(LavalinkPlugins.DuncteBot_Plugin.toLowerCase()))) {
             throw new Error("Lavalink Node has not 'speak' enabled, which is required to have 'speak' work");
+        }
+        if (source === "tdsearch" && !node.info?.sourceManagers?.includes("tidal")) {
+            throw new Error("Lavalink Node has not 'tidal' enabled, which is required to have 'tdsearch' work");
         }
         if (source === "tts" && !node.info?.plugins?.find(c => c.name.toLowerCase().includes(LavalinkPlugins.GoogleCloudTTS.toLowerCase()))) {
             throw new Error("Lavalink Node has not 'tts' enabled, which is required to have 'tts' work");
