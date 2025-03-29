@@ -78,6 +78,7 @@ export const DefaultSources: Record<SearchPlatform, LavalinkSearchPlatform | Cli
     "tidal": "tdsearch",
     "td": "tdsearch",
     "tdsearch": "tdsearch",
+    "tdrec": "tdrec",
     // jiosaavn
     "jiosaavn": "jssearch",
     "js": "jssearch",

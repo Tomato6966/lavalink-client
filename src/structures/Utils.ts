@@ -377,6 +377,9 @@ export class ManagerUtils {
         if (source === "tdsearch" && !node.info?.sourceManagers?.includes("tidal")) {
             throw new Error("Lavalink Node has not 'tidal' enabled, which is required to have 'tdsearch' work");
         }
+        if (source === "tdrec" && !node.info?.sourceManagers?.includes("tidal")) {
+            throw new Error("Lavalink Node has not 'tidal' enabled, which is required to have 'tdrec' work");
+        }
         if (source === "tts" && !node.info?.plugins?.find(c => c.name.toLowerCase().includes(LavalinkPlugins.GoogleCloudTTS.toLowerCase()))) {
             throw new Error("Lavalink Node has not 'tts' enabled, which is required to have 'tts' work");
         }
