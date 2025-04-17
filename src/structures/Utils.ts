@@ -405,13 +405,13 @@ export class ManagerUtils {
             throw new Error("Lavalink Node has not 'vk' enabled, which is required to have 'vkrec' work");
         }
         if (source === "qbsearch" && !node.info?.sourceManagers?.includes("qobuz")) {
-            throw new Error("Lavalink Node has not 'vk' enabled, which is required to have 'qbsearch' work");
+            throw new Error("Lavalink Node has not 'qobuz' enabled, which is required to have 'qbsearch' work");
         }
         if (source === "qbisrc" && !node.info?.sourceManagers?.includes("qobuz")) {
-            throw new Error("Lavalink Node has not 'vk' enabled, which is required to have 'qbisrc' work");
+            throw new Error("Lavalink Node has not 'qobuz' enabled, which is required to have 'qbisrc' work");
         }
         if (source === "qbrec" && !node.info?.sourceManagers?.includes("qobuz")) {
-            throw new Error("Lavalink Node has not 'vk' enabled, which is required to have 'qbrec' work");
+            throw new Error("Lavalink Node has not 'qobuz' enabled, which is required to have 'qbrec' work");
         }
 
         return;
