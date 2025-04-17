@@ -52,6 +52,12 @@ export const DefaultSources: Record<SearchPlatform, LavalinkSearchPlatform | Cli
     "vkmusic": "vksearch",
     "vk music": "vksearch",
     "vkrec": "vkrec",
+    "vk": "vksearch",
+    // Qobuz (lavasrc)
+    "qbsearch": "qbsearch",
+    "qobuz": "qbsearch",
+    "qbisrc": "qbisrc",
+    "qbrec": "qbrec",
     // speak PLUGIN
     "speak": "speak",
     "tts": "tts",
@@ -77,6 +83,7 @@ export const DefaultSources: Record<SearchPlatform, LavalinkSearchPlatform | Cli
     // tidal
     "tidal": "tdsearch",
     "td": "tdsearch",
+    "tidal music": "tdsearch",
     "tdsearch": "tdsearch",
     "tdrec": "tdrec",
     // jiosaavn

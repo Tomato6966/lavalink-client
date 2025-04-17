@@ -186,6 +186,10 @@ export interface LavalinkManagerEvents {
      * @event Manager#LyricsNotFound
      */
     "LyricsNotFound": (player: Player, track: Track | UnresolvedTrack | null, payload: LyricsNotFoundEvent) => void;
+
+    "playerResumed": (player: Player, track: Track | UnresolvedTrack | null) => void;
+
+    "playerPaused": (player: Player, track: Track | UnresolvedTrack | null) => void;
 }
 /**
  * The Bot client Options needed for the manager
