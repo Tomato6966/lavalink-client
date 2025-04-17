@@ -53,6 +53,11 @@ export const DefaultSources: Record<SearchPlatform, LavalinkSearchPlatform | Cli
     "vk music": "vksearch",
     "vkrec": "vkrec",
     "vk": "vksearch",
+    // Qobuz (lavasrc)
+    "qbsearch": "qbsearch",
+    "qobuz": "qbsearch",
+    "qbisrc": "qbisrc",
+    "qbrec": "qbrec",
     // speak PLUGIN
     "speak": "speak",
     "tts": "tts",
