@@ -399,10 +399,10 @@ export class ManagerUtils {
             throw new Error("Lavalink Node has not 'youtube' enabled, which is required to have 'ytsearch' work");
         }
         if (source === "vksearch" && !node.info?.sourceManagers?.includes("vkmusic")) {
-            throw new Error("Lavalink Node has not 'vk' enabled, which is required to have 'vksearch' work");
+            throw new Error("Lavalink Node has not 'vkmusic' enabled, which is required to have 'vksearch' work");
         }
         if (source === "vkrec" && !node.info?.sourceManagers?.includes("vkmusic")) {
-            throw new Error("Lavalink Node has not 'vk' enabled, which is required to have 'vkrec' work");
+            throw new Error("Lavalink Node has not 'vkmusic' enabled, which is required to have 'vkrec' work");
         }
         if (source === "qbsearch" && !node.info?.sourceManagers?.includes("qobuz")) {
             throw new Error("Lavalink Node has not 'qobuz' enabled, which is required to have 'qbsearch' work");
