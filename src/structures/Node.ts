@@ -1348,7 +1348,14 @@ export class LavalinkNode {
         }
         this.NodeManager.LavalinkManager.emit("trackStuck", player, track || this.getTrackOfPayload(payload), payload);
         // If there are no songs in the queue
-        if (!player.queue.tracks.length && (player.repeatMode === "off" || player.get("internal_stopPlaying"))) return this.queueEnd(player, track || this.getTrackOfPayload(payload), payload);
+        if (!player.queue.tracks.length && (player.repeatMode === "off" || player.get("internal_stopPlaying"))) {
+            try { //Sometimes the trackStuck event triggers from the Lavalink server, but the track continues playing or resumes after. We explicitly end the track in such cases
+                await player.node.updatePlayer({ guildId: player.guildId, playerOptions: { track: { encoded: null } } });  //trackEnd -> queueEnd 
+                return;
+            } catch {
+                return this.queueEnd(player, track || this.getTrackOfPayload(payload), payload);
+            }
+        }
         // remove the current track, and enqueue the next one
         await queueTrackEnd(player);
         // if no track available, end queue
@@ -1357,7 +1364,7 @@ export class LavalinkNode {
         }
         // play track if autoSkip is true
         if (this.NodeManager.LavalinkManager.options.autoSkip && player.queue.current) {
-            player.play({ noReplace: true });
+            player.play({ track: player.queue.current, noReplace: false }); // Replace the stuck track with the new track.
         }
         return;
     }
