@@ -517,7 +517,7 @@ export class LavalinkManager extends EventEmitter {
                     if (this.options?.advancedOptions?.debugOptions?.noAudio === true) console.debug("Lavalink-Client-Debug | NO-AUDIO [::] sendRawData function, Can't send updatePlayer for voice token session - Missing sessionId", {
                         voice: { token: update.token, endpoint: update.endpoint, sessionId: sessionId2Use, }, playerVoice: player.voice,
                         update,
-                    });
+                    })
                 } else {
                     await player.node.updatePlayer({
                         guildId: player.guildId,
