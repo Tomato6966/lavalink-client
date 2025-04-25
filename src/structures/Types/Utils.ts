@@ -189,14 +189,14 @@ export interface TrackEndEvent extends PlayerEvent {
 export interface TrackExceptionEvent extends PlayerEvent {
     type: "TrackExceptionEvent";
     exception?: Exception;
-    tracK: LavalinkTrack;
+    track: LavalinkTrack;
     error: string;
 }
 
 export interface TrackStuckEvent extends PlayerEvent {
     type: "TrackStuckEvent";
     thresholdMs: number;
-    tracK: LavalinkTrack;
+    track: LavalinkTrack;
 }
 
 export interface WebSocketClosedEvent extends PlayerEvent {
