@@ -491,7 +491,7 @@ export class MiniMap<K, V> extends Map<K, V> {
     }
 }
 
-export async function queueTrackEnd(player: Player) {
+export async function queueTrackEnd(player: Player, dontShiftQueue: boolean = false) {
     if (player.queue.current && !player.queue.current?.pluginInfo?.clientData?.previousTrack) { // If there was a current Track already and repeatmode === true, add it to the queue.
         player.queue.previous.unshift(player.queue.current);
         if (player.queue.previous.length > player.queue.options.maxPreviousTracks) player.queue.previous.splice(player.queue.options.maxPreviousTracks, player.queue.previous.length);
@@ -500,13 +500,13 @@ export async function queueTrackEnd(player: Player) {
 
     // and if repeatMode == queue, add it back to the queue!
     if (player.repeatMode === "queue" && player.queue.current) player.queue.tracks.push(player.queue.current)
-    // change the current Track to the next upcoming one
-    const nextSong = player.queue.tracks.shift();
+    // change the current Track to the next upcoming one 
+    const nextSong = dontShiftQueue ? null : player.queue.tracks.shift() as Track;
 
     try {
-        if (player.LavalinkManager.utils.isUnresolvedTrack(nextSong)) await (nextSong as UnresolvedTrack).resolve(player);
+        if (nextSong && player.LavalinkManager.utils.isUnresolvedTrack(nextSong)) await (nextSong as UnresolvedTrack).resolve(player);
 
-        player.queue.current = (nextSong as Track) || null;
+        player.queue.current = nextSong || null;
         // save it in the DB
         await player.queue.utils.save()
     } catch (error) {
@@ -522,7 +522,7 @@ export async function queueTrackEnd(player: Player) {
         player.LavalinkManager.emit("trackError", player, player.queue.current, error);
 
         // try to play the next track if possible
-        if (player.LavalinkManager.options?.autoSkipOnResolveError === true && player.queue.tracks[0]) return queueTrackEnd(player);
+        if (!dontShiftQueue && player.LavalinkManager.options?.autoSkipOnResolveError === true && player.queue.tracks[0]) return queueTrackEnd(player);
     }
 
     // return the new current Track
