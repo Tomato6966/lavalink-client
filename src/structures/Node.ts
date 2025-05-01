@@ -1298,6 +1298,8 @@ export class LavalinkNode {
         if (!player.queue.tracks.length && (player.repeatMode === "off" || player.get("internal_stopPlaying"))) return this.queueEnd(player, track, payload);
         // If a track had an error while starting
         if (["loadFailed", "cleanup"].includes(payload.reason)) {
+            //Dont add tracks if the player is already destroying.
+            if (player.get("internal_destroystatus") === true) return;
             await queueTrackEnd(player);
             // if no track available, end queue
             if (!player.queue.current) return this.queueEnd(player, trackToUse, payload);
