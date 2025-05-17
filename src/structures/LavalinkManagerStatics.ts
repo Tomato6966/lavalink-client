@@ -150,7 +150,7 @@ export const SourceLinksRegexes: Record<SourcesRegex, RegExp> = {
     tidal: /https?:\/\/?(?:www\.)?(?:tidal|listen)\.tidal\.com\/(?<type>track|album|playlist|artist)\/(?<identifier>[a-zA-Z0-9-_]+)/,
 
     /** From jiosaavn-plugin */
-    jiosaavn: /(https?:\/\/)(www\.)?jiosaavn\.com\/(?<type>song|album|featured|artist)\/([a-zA-Z0-9-_\/,]+)/,
+    jiosaavn: /(https?:\/\/)(www\.)?jiosaavn\.com\/(?<type>song|album|featured|artist)\/([a-zA-Z0-9-_/,]+)/,
 
     /** FROM DUNCTE BOT PLUGIN */
     tiktok: /https:\/\/www\.tiktok\.com\//,

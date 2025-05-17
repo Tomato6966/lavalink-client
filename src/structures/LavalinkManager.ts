@@ -4,15 +4,13 @@ import { DebugEvents, DestroyReasons } from "./Constants";
 import { NodeManager } from "./NodeManager";
 import { Player } from "./Player";
 import { DefaultQueueStore } from "./Queue";
-import { ManagerUtils, MiniMap } from "./Utils";
+import { ManagerUtils, MiniMap, safeStringify } from "./Utils";
 
+import type {
+	ChannelDeletePacket, VoicePacket, VoiceServer, VoiceState
+} from "./Types/Utils";
 import type { BotClientOptions, LavalinkManagerEvents, ManagerOptions } from "./Types/Manager";
 import type { PlayerOptions } from "./Types/Player";
-import type {
-    ChannelDeletePacket, VoicePacket, VoiceServer, VoiceState
-} from "./Types/Utils";
-
-
 export class LavalinkManager extends EventEmitter {
     /**
      * Emit an event
@@ -83,7 +81,7 @@ export class LavalinkManager extends EventEmitter {
     private applyOptions(options: ManagerOptions) {
         this.options = {
             client: {
-                ...(options?.client || {}),
+                ...options?.client,
                 id: options?.client?.id,
                 username: options?.client?.username ?? "lavalink-client"
             },
@@ -334,7 +332,7 @@ export class LavalinkManager extends EventEmitter {
         if (!oldPlayer) return;
         // oldPlayer.connected is operational. you could also do oldPlayer.voice?.token
         if (oldPlayer.voiceChannelId === "string" && oldPlayer.connected && !oldPlayer.get("internal_destroywithoutdisconnect")) {
-            if (!this.options?.advancedOptions?.debugOptions?.playerDestroy?.dontThrowError) throw new Error(`Use Player#destroy() not LavalinkManager#deletePlayer() to stop the Player ${JSON.stringify(oldPlayer.toJSON?.())}`)
+            if (!this.options?.advancedOptions?.debugOptions?.playerDestroy?.dontThrowError) throw new Error(`Use Player#destroy() not LavalinkManager#deletePlayer() to stop the Player ${safeStringify(oldPlayer.toJSON?.())}`)
             else if (this.options?.advancedOptions?.enableDebugEvents) {
                 this.emit("debug", DebugEvents.PlayerDeleteInsteadOfDestroy, {
                     state: "warn",
@@ -377,13 +375,13 @@ export class LavalinkManager extends EventEmitter {
     public async init(clientData: BotClientOptions): Promise<LavalinkManager> {
         if (this.initiated) return this;
         clientData = clientData ?? {} as BotClientOptions;
-        this.options.client = { ...(this.options?.client || {}), ...clientData };
+        this.options.client = { ...this.options?.client, ...clientData };
         if (!this.options?.client.id) throw new Error('"client.id" is not set. Pass it in Manager#init() or as a option in the constructor.');
 
         if (typeof this.options?.client.id !== "string") throw new Error('"client.id" set is not type of "string"');
 
         let success = 0;
-        for (const node of [...this.nodeManager.nodes.values()]) {
+        for (const node of this.nodeManager.nodes.values()) {
             try {
                 await node.connect();
                 success++;
@@ -459,7 +457,7 @@ export class LavalinkManager extends EventEmitter {
                 if (this.options?.advancedOptions?.enableDebugEvents) {
                     this.emit("debug", DebugEvents.NoAudioDebug, {
                         state: "warn",
-                        message: `No Update data found in payload :: ${JSON.stringify(data, null, 2)}`,
+                        message: `No Update data found in payload :: ${safeStringify(data, 2)}`,
                         functionLayer: "LavalinkManager > sendRawData()",
                     })
                 }
@@ -471,7 +469,7 @@ export class LavalinkManager extends EventEmitter {
                 if (this.options?.advancedOptions?.enableDebugEvents) {
                     this.emit("debug", DebugEvents.NoAudioDebug, {
                         state: "error",
-                        message: `No 'token' nor 'session_id' found in payload :: ${JSON.stringify(data, null, 2)}`,
+                        message: `No 'token' nor 'session_id' found in payload :: ${safeStringify(data, 2)}`,
                         functionLayer: "LavalinkManager > sendRawData()",
                     })
                 }
@@ -485,7 +483,7 @@ export class LavalinkManager extends EventEmitter {
                 if (this.options?.advancedOptions?.enableDebugEvents) {
                     this.emit("debug", DebugEvents.NoAudioDebug, {
                         state: "warn",
-                        message: `No Lavalink Player found via key: 'guild_id' of update-data :: ${JSON.stringify(update, null, 2)}`,
+                        message: `No Lavalink Player found via key: 'guild_id' of update-data :: ${safeStringify(update, 2)}`,
                         functionLayer: "LavalinkManager > sendRawData()",
                     })
                 }
@@ -511,7 +509,7 @@ export class LavalinkManager extends EventEmitter {
                 if (!sessionId2Use) {
                     this.emit("debug", DebugEvents.NoAudioDebug, {
                         state: "error",
-                        message: `Can't send updatePlayer for voice token session - Missing sessionId :: ${JSON.stringify({ voice: { token: update.token, endpoint: update.endpoint, sessionId: sessionId2Use, }, update, playerVoice: player.voice }, null, 2)}`,
+                        message: `Can't send updatePlayer for voice token session - Missing sessionId :: ${safeStringify({ voice: { token: update.token, endpoint: update.endpoint, sessionId: sessionId2Use, }, update, playerVoice: player.voice }, 2)}`,
                         functionLayer: "LavalinkManager > sendRawData()",
                     });
                     if (this.options?.advancedOptions?.debugOptions?.noAudio === true) console.debug("Lavalink-Client-Debug | NO-AUDIO [::] sendRawData function, Can't send updatePlayer for voice token session - Missing sessionId", { voice: { token: update.token, endpoint: update.endpoint, sessionId: sessionId2Use, }, update, playerVoice: player.voice });
@@ -529,7 +527,7 @@ export class LavalinkManager extends EventEmitter {
                     if (this.options?.advancedOptions?.enableDebugEvents) {
                         this.emit("debug", DebugEvents.NoAudioDebug, {
                             state: "log",
-                            message: `Sent updatePlayer for voice token session :: ${JSON.stringify({ voice: { token: update.token, endpoint: update.endpoint, sessionId: sessionId2Use, }, update, playerVoice: player.voice }, null, 2)}`,
+                            message: `Sent updatePlayer for voice token session :: ${safeStringify({ voice: { token: update.token, endpoint: update.endpoint, sessionId: sessionId2Use, }, update, playerVoice: player.voice }, 2)}`,
                             functionLayer: "LavalinkManager > sendRawData()",
                         })
                     }
@@ -565,11 +563,11 @@ export class LavalinkManager extends EventEmitter {
                     if (this.options?.advancedOptions?.enableDebugEvents) {
                         this.emit("debug", DebugEvents.NoAudioDebug, {
                             state: "warn",
-                            message: `Function to assing sessionId provided, but no found in Payload: ${JSON.stringify({ update, playerVoice: player.voice }, null, 2)}`,
+                            message: `Function to assing sessionId provided, but no found in Payload: ${safeStringify({ update, playerVoice: player.voice }, 2)}`,
                             functionLayer: "LavalinkManager > sendRawData()",
                         })
                     }
-                    if (this.options?.advancedOptions?.debugOptions?.noAudio === true) console.debug(`Lavalink-Client-Debug | NO-AUDIO [::] sendRawData function, Function to assing sessionId provided, but no found in Payload: ${JSON.stringify(update, null, 2)}`);
+                    if (this.options?.advancedOptions?.debugOptions?.noAudio === true) console.debug(`Lavalink-Client-Debug | NO-AUDIO [::] sendRawData function, Function to assing sessionId provided, but no found in Payload: ${safeStringify(update, 2)}`);
                 }
 
                 player.voiceChannelId = update.channel_id;

@@ -500,7 +500,7 @@ export async function queueTrackEnd(player: Player, dontShiftQueue: boolean = fa
 
     // and if repeatMode == queue, add it back to the queue!
     if (player.repeatMode === "queue" && player.queue.current) player.queue.tracks.push(player.queue.current)
-    // change the current Track to the next upcoming one 
+    // change the current Track to the next upcoming one
     const nextSong = dontShiftQueue ? null : player.queue.tracks.shift() as Track;
 
     try {
@@ -578,4 +578,19 @@ async function getClosestTrack(data: UnresolvedTrack, player: Player): Promise<T
         // apply unresolved data and return the track
         return applyUnresolvedData(trackToUse || res.tracks[0], data, player.LavalinkManager.utils);
     });
+}
+
+
+export function safeStringify(obj: any, padding = 0) {
+    const seen = new WeakSet();
+    return JSON.stringify(obj, (key, value) => {
+        if (typeof value === "function") return undefined; // Funktion skippen
+        if (typeof value === "symbol") return undefined;   // Symbol skippen
+        if (typeof value === "bigint") return value.toString(); // BigInt to String
+        if (typeof value === "object" && value !== null) {
+            if (seen.has(value)) return "[Circular]";
+            seen.add(value);
+        }
+        return value;
+    }, padding);
 }

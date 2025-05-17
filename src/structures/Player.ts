@@ -2,7 +2,7 @@ import { DebugEvents } from "./Constants";
 import { bandCampSearch } from "./CustomSearches/BandCampSearch";
 import { FilterManager } from "./Filters";
 import { Queue, QueueSaver } from "./Queue";
-import { queueTrackEnd } from "./Utils";
+import { queueTrackEnd, safeStringify } from "./Utils";
 
 import type { DestroyReasons } from "./Constants";
 import type { Track, UnresolvedTrack } from "./Types/Track";
@@ -221,7 +221,11 @@ export class Player {
                 }
             }
 
-            if ((typeof options.track?.userData === "object" || typeof options.clientTrack?.userData === "object") && options.clientTrack) options.clientTrack.userData = { ...(options?.clientTrack.userData || {}), ...(options.track?.userData || {}) };
+            if ((typeof options.track?.userData === "object" || typeof options.clientTrack?.userData === "object") && options.clientTrack) options.clientTrack.userData = {
+                ...(typeof options?.clientTrack?.requester === "object" ? { requester: this.LavalinkManager.utils.getTransformedRequester(options?.clientTrack?.requester || {}) as anyObject } : { }),
+                ...options?.clientTrack.userData,
+                ...options.track?.userData,
+            };
 
             options.track = {
                 encoded: options.clientTrack?.encoded,
@@ -245,16 +249,11 @@ export class Player {
             const track = Object.fromEntries(Object.entries({
                 encoded: options.track.encoded,
                 identifier: options.track.identifier,
+                userData: {
+                    ...(typeof options?.track?.requester === "object" ? { requester: this.LavalinkManager.utils.getTransformedRequester(options?.track?.requester || {}) } : { }),
+                    ...options.track.userData,
+                }
             }).filter(v => typeof v[1] !== "undefined")) as LavalinkPlayOptions["track"];
-
-            if (typeof options.track.userData === "object") track.userData = {
-                ...(options.track.userData || {})
-            };
-
-            if (typeof options?.track?.requester === "object") track.userData = {
-                ...(track.userData || {}),
-                requester: this.LavalinkManager.utils.getTransformedRequester(options?.track?.requester || {}) as anyObject
-            };
 
             if (this.LavalinkManager.options?.advancedOptions?.enableDebugEvents) {
                 this.LavalinkManager.emit("debug", DebugEvents.PlayerPlayWithTrackReplace, {
@@ -294,7 +293,11 @@ export class Player {
                 // resolve the unresolved track
                 await (this.queue.current as unknown as UnresolvedTrack).resolve(this);
 
-                if (typeof options.track?.userData === "object" && this.queue.current) this.queue.current.userData = { ...(this.queue.current?.userData || {}), ...(options.track?.userData || {}) };
+                if (typeof options.track?.userData === "object" && this.queue.current) this.queue.current.userData = {
+                    ...(typeof this.queue.current?.requester === "object" ? { requester: this.LavalinkManager.utils.getTransformedRequester(this.queue.current?.requester || {}) as anyObject } : { }),
+                    ...this.queue.current?.userData,
+                    ...options.track?.userData
+                };
             } catch (error) {
 
                 if (this.LavalinkManager.options?.advancedOptions?.enableDebugEvents) {
@@ -316,7 +319,7 @@ export class Player {
 
                 // try to play the next track if possible
                 if (this.LavalinkManager.options?.autoSkipOnResolveError === true && this.queue.tracks[0]) return this.play(options);
-                
+
                 return this;
             }
         }
@@ -335,7 +338,11 @@ export class Player {
             track: {
                 encoded: this.queue.current?.encoded || null,
                 // identifier: options.identifier,
-                userData: options?.track?.userData || {},
+                userData: {
+                    ...(typeof this.queue.current?.requester === "object" ? { requester: this.LavalinkManager.utils.getTransformedRequester(this.queue.current?.requester || {}) } : { }),
+                    ...options?.track?.userData,
+                    ...this.queue.current?.userData,
+                },
             },
             volume: this.lavalinkVolume,
             position: options?.position ?? 0,
@@ -777,7 +784,7 @@ export class Player {
             await this.node.request(endpoint, r => {
                 r.method = "PATCH";
                 r.headers["Content-Type"] = "application/json";
-                r.body = JSON.stringify({
+                r.body = safeStringify({
                     voice: {
                         token: voiceData.token,
                         endpoint: voiceData.endpoint,
@@ -788,7 +795,7 @@ export class Player {
             const hasSponsorBlock = this.node.info?.plugins?.find(v => v.name === "sponsorblock-plugin");
                 if (hasSponsorBlock) {
                     if (segments.length) {
-                        await this.setSponsorBlock(segments).catch(error => { 
+                        await this.setSponsorBlock(segments).catch(error => {
                             if (this.LavalinkManager.options?.advancedOptions?.enableDebugEvents) {
                                 this.LavalinkManager.emit("debug", DebugEvents.PlayerChangeNode, {
                                     state: "error",

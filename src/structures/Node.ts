@@ -2,12 +2,19 @@ import { isAbsolute } from "path";
 import WebSocket from "ws";
 
 import { DebugEvents, DestroyReasons, validSponsorBlocks } from "./Constants";
-import { NodeSymbol, queueTrackEnd } from "./Utils";
+import { NodeSymbol, queueTrackEnd, safeStringify } from "./Utils";
 
+import type {
+	Base64, InvalidLavalinkRestRequest, LavalinkPlayer, LavaSearchQuery, LavaSearchResponse,
+	LoadTypes, LyricsFoundEvent, LyricsLineEvent, LyricsNotFoundEvent, PlayerEvents,
+	PlayerEventType, PlayerUpdateInfo, RoutePlanner, SearchQuery, SearchResult,
+	Session, SponsorBlockChaptersLoaded, SponsorBlockChapterStarted, SponsorBlockSegmentSkipped,
+	SponsorBlockSegmentsLoaded, TrackEndEvent, TrackExceptionEvent, TrackStartEvent,
+	TrackStuckEvent, WebSocketClosedEvent
+} from "./Types/Utils";
 import type { Player } from "./Player";
 import type { DestroyReasonsType, DisconnectReasonsType } from "./Types/Player";
 import type { LavalinkTrack, PluginInfo, Track } from "./Types/Track";
-import type { Base64, InvalidLavalinkRestRequest, LavalinkPlayer, LavaSearchQuery, LavaSearchResponse, LoadTypes, LyricsFoundEvent, LyricsLineEvent, LyricsNotFoundEvent, PlayerEvents, PlayerEventType, PlayerUpdateInfo, RoutePlanner, SearchQuery, SearchResult, Session, SponsorBlockChaptersLoaded, SponsorBlockChapterStarted, SponsorBlockSegmentSkipped, SponsorBlockSegmentsLoaded, TrackEndEvent, TrackExceptionEvent, TrackStartEvent, TrackStuckEvent, WebSocketClosedEvent } from "./Types/Utils";
 import type { NodeManager } from "./NodeManager";
 
 import type {
@@ -171,7 +178,7 @@ export class LavalinkNode {
 
         if (["DELETE", "PUT"].includes(options.method)) return;
 
-        if (response.status === 404) throw new Error(`Node Request resulted into an error, request-PATH: ${options.path} | headers: ${JSON.stringify(response.headers)}`)
+        if (response.status === 404) throw new Error(`Node Request resulted into an error, request-PATH: ${options.path} | headers: ${safeStringify(response.headers)}`)
 
         return parseAsText ? await response.text() : await response.json();
     }
@@ -324,7 +331,7 @@ export class LavalinkNode {
 
             r.headers!["Content-Type"] = "application/json";
 
-            r.body = JSON.stringify(data.playerOptions);
+            r.body = safeStringify(data.playerOptions);
 
             if (data.noReplace) {
                 const url = new URL(`${this.restAddress}${r.path}`);
@@ -336,7 +343,7 @@ export class LavalinkNode {
         if (this.NodeManager.LavalinkManager.options?.advancedOptions?.enableDebugEvents) {
             this.NodeManager.LavalinkManager.emit("debug", DebugEvents.PlayerUpdateSuccess, {
                 state: "log",
-                message: `Player get's updated with following payload :: ${JSON.stringify(data.playerOptions, null, 3)}`,
+                message: `Player get's updated with following payload :: ${safeStringify(data.playerOptions, 3)}`,
                 functionLayer: "LavalinkNode > node > updatePlayer()",
             });
         }
@@ -665,7 +672,7 @@ export class LavalinkNode {
         return this.request(`/sessions/${this.sessionId}`, r => {
             r.method = "PATCH";
             r.headers = { Authorization: this.options.authorization, 'Content-Type': 'application/json' }
-            r.body = JSON.stringify(data);
+            r.body = safeStringify(data);
         }) as Promise<Session | InvalidLavalinkRestRequest | null>;
     }
 
@@ -710,7 +717,7 @@ export class LavalinkNode {
             // return the decoded + builded tracks
             return await this.request(`/decodetracks`, r => {
                 r.method = "POST";
-                r.body = JSON.stringify(encodeds);
+                r.body = safeStringify(encodeds);
 
                 r.headers!["Content-Type"] = "application/json";
             }).then((r: LavalinkTrack[]) => r.map(track => this.NodeManager.LavalinkManager.utils.buildTrack(track, requester)));
@@ -911,7 +918,7 @@ export class LavalinkNode {
                 r.method = "POST";
 
                 r.headers!["Content-Type"] = "application/json";
-                r.body = JSON.stringify({ address });
+                r.body = safeStringify({ address });
             });
         },
 
@@ -1350,7 +1357,7 @@ export class LavalinkNode {
         // If there are no songs in the queue
         if (!player.queue.tracks.length && (player.repeatMode === "off" || player.get("internal_stopPlaying"))) {
             try { //Sometimes the trackStuck event triggers from the Lavalink server, but the track continues playing or resumes after. We explicitly end the track in such cases
-                await player.node.updatePlayer({ guildId: player.guildId, playerOptions: { track: { encoded: null } } });  //trackEnd -> queueEnd 
+                await player.node.updatePlayer({ guildId: player.guildId, playerOptions: { track: { encoded: null } } });  //trackEnd -> queueEnd
                 return;
             } catch {
                 return this.queueEnd(player, track || this.getTrackOfPayload(payload), payload);
@@ -1466,7 +1473,7 @@ export class LavalinkNode {
         await this.request(`/sessions/${this.sessionId}/players/${player.guildId}/sponsorblock/categories`, (r) => {
             r.method = "PUT";
             r.headers = { Authorization: this.options.authorization, 'Content-Type': 'application/json' }
-            r.body = JSON.stringify(segments.map(v => v.toLowerCase()));
+            r.body = safeStringify(segments.map(v => v.toLowerCase()));
         });
 
         if (this.NodeManager.LavalinkManager.options?.advancedOptions?.enableDebugEvents) {
