@@ -1,4 +1,4 @@
-import { SlashCommandBuilder } from "discord.js";
+import { MessageFlags, SlashCommandBuilder } from "discord.js";
 
 import type { CommandInteractionOptionResolver, GuildMember, VoiceChannel } from "discord.js";
 import type { Command } from "../types/Client";
@@ -24,10 +24,10 @@ export default {
         if (!interaction.guildId) return;
 
         const vcId = (interaction.member as GuildMember)?.voice?.channelId;
-        if (!vcId) return interaction.reply({ ephemeral: true, content: `Join a voice Channel` });
+        if (!vcId) return interaction.reply({ flags: [MessageFlags.Ephemeral], content: `Join a voice Channel` });
 
         const vc = (interaction.member as GuildMember)?.voice?.channel as VoiceChannel;
-        if (!vc.joinable || !vc.speakable) return interaction.reply({ ephemeral: true, content: "I am not able to join your channel / speak in there." });
+        if (!vc.joinable || !vc.speakable) return interaction.reply({ flags: [MessageFlags.Ephemeral], content: "I am not able to join your channel / speak in there." });
 
         const src = (interaction.options as CommandInteractionOptionResolver).getString("source") as SearchPlatform | undefined;
         const title = (interaction.options as CommandInteractionOptionResolver).getString("title") as string;

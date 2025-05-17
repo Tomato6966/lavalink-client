@@ -1,4 +1,4 @@
-import { SlashCommandBuilder } from "discord.js";
+import { MessageFlags, SlashCommandBuilder } from "discord.js";
 
 import type { StoredQueue } from "lavalink-client";
 import type { SubCommand } from "../types/Client";
@@ -16,7 +16,7 @@ export default {
             // get the guild's player
             const player = client.lavalink.getPlayer(interaction.guildId);
             // return if no player
-            if (!player) return interaction.reply({ ephemeral: true, content: "I'm not connected" });
+            if (!player) return interaction.reply({ flags: [MessageFlags.Ephemeral], content: "I'm not connected" });
             // get old queue for difference
             const oldQueue = player.queue.tracks.map(v => "> - " + v.info.title);
 
@@ -39,7 +39,7 @@ export default {
             // get the guild's player
             const player = client.lavalink.getPlayer(interaction.guildId);
             // return if no player
-            if (!player) return interaction.reply({ ephemeral: true, content: "I'm not connected" });
+            if (!player) return interaction.reply({ flags: [MessageFlags.Ephemeral], content: "I'm not connected" });
             // remove tracks
             await player.queue.splice(0, player.queue.tracks.length);
             // respond

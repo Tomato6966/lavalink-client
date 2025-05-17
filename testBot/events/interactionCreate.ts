@@ -1,4 +1,4 @@
-import { Events } from "discord.js";
+import { Events, MessageFlags } from "discord.js";
 
 import type { ChatInputCommandInteraction, CommandInteractionOptionResolver, Interaction } from "discord.js";
 import type { Command, Event, SubCommand } from "../types/Client";
@@ -34,9 +34,9 @@ export default {
             console.error(error);
             if (interaction.isAutocomplete()) return;
             if (interaction.replied || interaction.deferred) {
-                await interaction.followUp({ content: 'There was an error while executing this command!', ephemeral: true });
+                await interaction.followUp({ flags: [MessageFlags.Ephemeral], content: 'There was an error while executing this command!' });
             } else {
-                await interaction.reply({ content: 'There was an error while executing this command!', ephemeral: true });
+                await interaction.reply({ flags: [MessageFlags.Ephemeral], content: 'There was an error while executing this command!' });
             }
         }
     }
