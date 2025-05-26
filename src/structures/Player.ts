@@ -94,7 +94,7 @@ export class Player {
      * @param options
      * @param LavalinkManager
      */
-    constructor(options: PlayerOptions, LavalinkManager: LavalinkManager) {
+    constructor(options: PlayerOptions, LavalinkManager: LavalinkManager, dontEmitPlayerCreateEvent?: boolean) {
         if(typeof options?.customData === "object") for(const [key, value] of Object.entries(options.customData)) this.set(key, value);
 
         this.options = options;
@@ -133,7 +133,7 @@ export class Player {
                 ? this.volume * this.LavalinkManager.options.playerOptions.volumeDecrementer
                 : this.volume), 1000), 0));
 
-        this.LavalinkManager.emit("playerCreate", this);
+        if(!dontEmitPlayerCreateEvent) this.LavalinkManager.emit("playerCreate", this);
 
         this.queue = new Queue(this.guildId, {}, new QueueSaver(this.LavalinkManager.options.queueOptions), this.LavalinkManager.options.queueOptions)
     }
