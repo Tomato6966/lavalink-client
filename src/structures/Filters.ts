@@ -686,6 +686,6 @@ export class FilterManager {
 
     /** Clears the equalizer bands. */
     public async clearEQ(): Promise<this> {
-        return this.setEQ(Array.from({ length: 15 }, () => ({ band: 0, gain: 0 })));
+        return this.setEQ(Array.from({ length: 15 }, (_v, i) => ({ band: i, gain: 0 })));
     }
 }
