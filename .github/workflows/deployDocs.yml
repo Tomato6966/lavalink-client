@@ -13,6 +13,7 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
+    if: github.repository == 'Tomato6966/lavalink-client'
     steps:
       - name: Checkout your repository using git
         uses: actions/checkout@v4
