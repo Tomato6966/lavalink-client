@@ -178,6 +178,7 @@ export class LavalinkNode {
 
         if (["DELETE", "PUT"].includes(options.method)) return;
 
+        if (response.status === 204) return; // no content
         if (response.status === 404) throw new Error(`Node Request resulted into an error, request-PATH: ${options.path} | headers: ${safeStringify(response.headers)}`)
 
         return parseAsText ? await response.text() : await response.json();
@@ -836,7 +837,9 @@ export class LavalinkNode {
                 !this.info.plugins.find(v => v.name === "java-lyrics-plugin")
             ) throw new RangeError(`there is no lyrics source (via lavasrc-plugin / java-lyrics-plugin) available in the lavalink node (required for lyrics): ${this.id}`);
 
-            return await this.request(`/sessions/${this.sessionId}/players/${guildId}/unsubscribe`);
+            return await this.request(`/sessions/${this.sessionId}/players/${guildId}/lyrics/subscribe`, (options) => {
+                options.method = "DELETE";
+            });
         },
     };
 

@@ -706,7 +706,6 @@ export class Player {
 
     /**
      * Subscribe to the lyrics event on a specific guild to active live lyrics events
-     * @param guildId The guild id to subscribe to
      * @returns The unsubscribe function
      * @example
      * ```ts
@@ -719,15 +718,14 @@ export class Player {
 
     /**
      * Unsubscribe from the lyrics event on a specific guild to disable live lyrics events
-     * @param guildId The guild id to unsubscribe from
      * @returns The unsubscribe function
      * @example
      * ```ts
      * const lyrics = await player.unsubscribeLyrics();
      * ```
      */
-    public unsubscribeLyrics(guildId: string) {
-        return this.node.lyrics.unsubscribe(guildId);
+    public unsubscribeLyrics() {
+        return this.node.lyrics.unsubscribe(this.guildId);
     }
 
     /**
