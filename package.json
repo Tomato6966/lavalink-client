@@ -1,6 +1,6 @@
 {
   "name": "lavalink-client",
-  "version": "2.5.5",
+  "version": "2.5.6",
   "description": "Easy, flexible and feature-rich lavalink@v4 Client. Both for Beginners and Proficients.",
   "main": "dist/cjs/index.js",
   "module": "dist/esm/index.js",
