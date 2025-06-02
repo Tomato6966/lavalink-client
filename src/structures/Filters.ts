@@ -705,6 +705,36 @@ export class FilterManager {
         this.filters.custom = !this.filters.nightcore && !this.filters.vaporwave && Object.values(this.data.timescale).some(d => d !== 1);
         return this.filters.custom;
     }
+
+    public getActiveFilterNames(): string[] {
+        const activeFilterNames: string[] = [];
+
+        if (this.filters.volume) activeFilterNames.push('volume');
+        if (this.filters.nightcore) activeFilterNames.push('nightcore');
+        if (this.filters.vaporwave) activeFilterNames.push('vaporwave');
+        if (this.filters.custom) activeFilterNames.push('custom');
+        if (this.filters.rotation) activeFilterNames.push('rotation');
+        if (this.filters.karaoke) activeFilterNames.push('karaoke');
+        if (this.filters.tremolo) activeFilterNames.push('tremolo');
+        if (this.filters.vibrato) activeFilterNames.push('vibrato');
+        if (this.filters.lowPass) activeFilterNames.push('lowPass');
+        if (this.filters.audioOutput !== "stereo") activeFilterNames.push('audioOutput');
+
+        // Plugin filters
+        if (this.filters.lavalinkFilterPlugin.echo) activeFilterNames.push('lavalinkFilterPlugin.echo');
+        if (this.filters.lavalinkFilterPlugin.reverb) activeFilterNames.push('lavalinkFilterPlugin.reverb');
+        if (this.filters.lavalinkLavaDspxPlugin.lowPass) activeFilterNames.push('lavalinkLavaDspxPlugin.lowPass');
+        if (this.filters.lavalinkLavaDspxPlugin.highPass) activeFilterNames.push('lavalinkLavaDspxPlugin.highPass');
+        if (this.filters.lavalinkLavaDspxPlugin.normalization) activeFilterNames.push('lavalinkLavaDspxPlugin.normalization');
+        if (this.filters.lavalinkLavaDspxPlugin.echo) activeFilterNames.push('lavalinkLavaDspxPlugin.echo');
+
+        // Equalizer
+        if (this.equalizerBands.length > 0 && this.equalizerBands.some(band => band.gain !== 0)) {
+            activeFilterNames.push('equalizer');
+        }
+
+        return activeFilterNames;
+    }
     /**
    * Sets the players equalizer band on-top of the existing ones.
    * @param bands
