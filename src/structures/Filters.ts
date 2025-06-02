@@ -172,11 +172,60 @@ export class FilterManager {
      * @returns
      */
     checkFiltersState(oldFilterTimescale?: Partial<TimescaleFilter>) {
+        if (!this.data) {
+            this.data = {
+                lowPass: { smoothing: 0 },
+                karaoke: { level: 0, monoLevel: 0, filterBand: 0, filterWidth: 0 },
+                timescale: { speed: 1, pitch: 1, rate: 1 },
+                rotation: { rotationHz: 0 },
+                tremolo: { frequency: 0, depth: 0 },
+                vibrato: { frequency: 0, depth: 0 },
+                pluginFilters: {
+                    "lavalink-filter-plugin": {
+                        echo: { delay: 0, decay: 0 },
+                        reverb: { delays: [], gains: [] }
+                    },
+                    "high-pass": {},
+                    "low-pass": {},
+                    "normalization": {},
+                    "echo": {},
+                },
+                channelMix: audioOutputsData.stereo,
+            };
+        }
+
+        // Ensure nested objects exist
+        if (!this.data.rotation) this.data.rotation = { rotationHz: 0 };
+        if (!this.data.vibrato) this.data.vibrato = { frequency: 0, depth: 0 };
+        if (!this.data.tremolo) this.data.tremolo = { frequency: 0, depth: 0 };
+        if (!this.data.lowPass) this.data.lowPass = { smoothing: 0 };
+        if (!this.data.karaoke) this.data.karaoke = { level: 0, monoLevel: 0, filterBand: 0, filterWidth: 0 };
+        if (!this.data.timescale) this.data.timescale = { speed: 1, pitch: 1, rate: 1 };
+        if (!this.data.pluginFilters) this.data.pluginFilters = {};
+        if (!this.data.pluginFilters["lavalink-filter-plugin"]) {
+            this.data.pluginFilters["lavalink-filter-plugin"] = {
+                echo: { delay: 0, decay: 0 },
+                reverb: { delays: [], gains: [] }
+            };
+        }
+        if (!this.data.pluginFilters["high-pass"]) this.data.pluginFilters["high-pass"] = {};
+        if (!this.data.pluginFilters["low-pass"]) this.data.pluginFilters["low-pass"] = {};
+        if (!this.data.pluginFilters.normalization) this.data.pluginFilters.normalization = {};
+        if (!this.data.pluginFilters.echo) this.data.pluginFilters.echo = {};
+
+        // Now perform the original checks
         this.filters.rotation = this.data.rotation.rotationHz !== 0;
         this.filters.vibrato = this.data.vibrato.frequency !== 0 || this.data.vibrato.depth !== 0;
         this.filters.tremolo = this.data.tremolo.frequency !== 0 || this.data.tremolo.depth !== 0;
 
-        const lavalinkFilterData = (this.data.pluginFilters?.["lavalink-filter-plugin"] || { echo: { decay: this.data.pluginFilters?.echo?.decay && !this.data.pluginFilters?.echo?.echoLength ? this.data.pluginFilters.echo.decay : 0, delay: (this.data.pluginFilters?.echo as { decay: number, delay: number })?.delay || 0 }, reverb: { gains: [], delays: [], ...((this.data.pluginFilters as { reverb: { gains: number[], delays: number[] } }).reverb) } });
+        const lavalinkFilterData = (this.data.pluginFilters?.["lavalink-filter-plugin"] || {
+            echo: {
+                decay: this.data.pluginFilters?.echo?.decay && !this.data.pluginFilters?.echo?.echoLength ? this.data.pluginFilters.echo.decay : 0,
+                delay: (this.data.pluginFilters?.echo as { decay: number, delay: number })?.delay || 0
+            },
+            reverb: { gains: [], delays: [], ...((this.data.pluginFilters as { reverb: { gains: number[], delays: number[] } }).reverb) }
+        });
+
         this.filters.lavalinkFilterPlugin.echo = lavalinkFilterData.echo.decay !== 0 || lavalinkFilterData.echo.delay !== 0;
         this.filters.lavalinkFilterPlugin.reverb = lavalinkFilterData.reverb?.delays?.length !== 0 || lavalinkFilterData.reverb?.gains?.length !== 0;
         this.filters.lavalinkLavaDspxPlugin.highPass = Object.values(this.data.pluginFilters["high-pass"] || {}).length > 0;
@@ -186,6 +235,7 @@ export class FilterManager {
 
         this.filters.lowPass = this.data.lowPass.smoothing !== 0;
         this.filters.karaoke = Object.values(this.data.karaoke).some(v => v !== 0);
+
         if ((this.filters.nightcore || this.filters.vaporwave) && oldFilterTimescale) {
             if (oldFilterTimescale.pitch !== this.data.timescale.pitch || oldFilterTimescale.rate !== this.data.timescale.rate || oldFilterTimescale.speed !== this.data.timescale.speed) {
                 this.filters.custom = Object.values(this.data.timescale).some(v => v !== 1);
@@ -672,10 +722,40 @@ export class FilterManager {
 
         if (this.player.options.instaUpdateFiltersFix === true) this.filterUpdatedState = true
 
+        // Create sendData with existing data structure instead of just equalizer
+        const sendData = { ...this.data } as LavalinkFilterData & { equalizer: EQBand[] };
+        sendData.equalizer = [...this.equalizerBands];
+
+        // Apply the same cleanup logic as in applyPlayerFilters
+        this.checkFiltersState();
+
+        if (!this.filters.volume) delete sendData.volume;
+        if (!this.filters.tremolo) delete sendData.tremolo;
+        if (!this.filters.vibrato) delete sendData.vibrato;
+        if (!this.filters.lowPass) delete sendData.lowPass;
+        if (!this.filters.karaoke) delete sendData.karaoke;
+        if (!this.filters.rotation) delete sendData.rotation;
+        if (this.filters.audioOutput === "stereo") delete sendData.channelMix;
+
+        if (Object.values(this.data.timescale).every(v => v === 1)) delete sendData.timescale;
+
+        // Handle plugin filters
+        if (!this.filters.lavalinkFilterPlugin.echo) delete sendData.pluginFilters?.["lavalink-filter-plugin"]?.echo;
+        if (!this.filters.lavalinkFilterPlugin.reverb) delete sendData.pluginFilters?.["lavalink-filter-plugin"]?.reverb;
+        if (!this.filters.lavalinkLavaDspxPlugin.echo) delete sendData.pluginFilters?.echo;
+        if (!this.filters.lavalinkLavaDspxPlugin.normalization) delete sendData.pluginFilters?.normalization;
+        if (!this.filters.lavalinkLavaDspxPlugin.highPass) delete sendData.pluginFilters?.["high-pass"];
+        if (!this.filters.lavalinkLavaDspxPlugin.lowPass) delete sendData.pluginFilters?.["low-pass"];
+
+        if (sendData.pluginFilters?.["lavalink-filter-plugin"] && Object.values(sendData.pluginFilters?.["lavalink-filter-plugin"]).length === 0) delete sendData.pluginFilters["lavalink-filter-plugin"];
+        if (sendData.pluginFilters && Object.values(sendData.pluginFilters).length === 0) delete sendData.pluginFilters;
+
+        if (sendData.equalizer.length === 0) delete sendData.equalizer;
+
         await this.player.node.updatePlayer({
             guildId: this.player.guildId,
             playerOptions: {
-                filters: { equalizer: this.equalizerBands }
+                filters: sendData
             }
         });
 
