@@ -132,7 +132,7 @@ export class LavalinkNode {
             headers: {
                 "Authorization": this.options.authorization
             },
-            signal: this.options.requestSignalTimeoutMS && this.options.requestSignalTimeoutMS > 0 ? AbortSignal.timeout(this.options.requestSignalTimeoutMS) : undefined,
+            signal: undefined,
         }
 
         modify?.(options);
@@ -140,8 +140,8 @@ export class LavalinkNode {
         const url = new URL(`${this.restAddress}${options.path}`);
         url.searchParams.append("trace", "true");
 
-        if(options.extraQueryUrlParams && options.extraQueryUrlParams?.size > 0) {
-            for (const [ paramKey, paramValue ] of options.extraQueryUrlParams.entries()) {
+        if (options.extraQueryUrlParams && options.extraQueryUrlParams?.size > 0) {
+            for (const [paramKey, paramValue] of options.extraQueryUrlParams.entries()) {
                 url.searchParams.append(paramKey, paramValue)
             }
         }
@@ -151,11 +151,26 @@ export class LavalinkNode {
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const { path, extraQueryUrlParams, ...fetchOptions } = options; // destructure fetch only options
 
-        const response = await fetch(urlToUse, fetchOptions);
+        const abortController = new AbortController();
+        let timeoutId: NodeJS.Timeout | undefined;
 
-        this.calls++;
+        if (this.options.requestSignalTimeoutMS && this.options.requestSignalTimeoutMS > 0) {
+            timeoutId = setTimeout(() => {
+                abortController.abort();
+            }, this.options.requestSignalTimeoutMS);
 
-        return { response, options: options };
+            fetchOptions.signal = abortController.signal;
+        }
+
+        try {
+            const response = await fetch(urlToUse, fetchOptions);
+            this.calls++;
+            return { response, options: options };
+        } finally {
+            if (timeoutId) {
+                clearTimeout(timeoutId);
+            }
+        }
     }
     /**
      * Makes an API call to the Node. Should only be used for manual parsing like for not supported plugins
