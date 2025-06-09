@@ -4,7 +4,7 @@ import { FilterManager } from "./Filters";
 import { Queue, QueueSaver } from "./Queue";
 import { queueTrackEnd, safeStringify } from "./Utils";
 
-import type { DestroyReasons } from "./Constants";
+import { DestroyReasons } from "./Constants";
 import type { Track, UnresolvedTrack } from "./Types/Track";
 import type { LavalinkNode } from "./Node";
 import type { SponsorBlockSegment } from "./Types/Node";
@@ -846,6 +846,54 @@ export class Player {
         } finally {
             this.set("internal_nodeChanging", undefined);
         }
+    }
+    public async moveNode(node?: string) {
+        if (!node) node = Array.from(this.LavalinkManager.nodeManager.leastUsedNodes("cpuLavalink"))
+            .find(n => n.connected && n.options.id !== this.node.options.id).id;
+        if (!node || !this.LavalinkManager.nodeManager.nodes.get(node)) throw new RangeError("No nodes are available.");
+        if (this.node.options.id === node) return this;
+
+        const currentNode = this.node;
+        const destinationNode = this.LavalinkManager.nodeManager.nodes.get(node);
+
+        const currentTrack = this.queue.current;
+        const data = this.toJSON();
+
+        await destinationNode.request(`/sessions/${destinationNode.sessionId}/players/${this.guildId}?noReplace=false`, (r) => {
+            r.method = "PATCH";
+            r.headers["Content-Type"] = "application/json";
+            r.body = JSON.stringify({
+                voice: {
+                    token: this?.voice?.token,
+                    endpoint: this?.voice?.endpoint,
+                    sessionId: this?.voice?.sessionId,
+                },
+            });
+        });
+        this.node = destinationNode;
+        if (currentTrack) {
+            await this.node.updatePlayer({
+                guildId: this.guildId,
+                noReplace: false,
+                playerOptions: {
+                    track: currentTrack ?? null,
+                    position: currentTrack ? data.position : 0,
+                    volume: data.lavalinkVolume,
+                    paused: data.paused,
+                    filters: {
+                        distortion: this?.filterManager.data.distortion,
+                        equalizer: this?.filterManager.equalizerBands,
+                        karaoke: this?.filterManager.data?.karaoke,
+                        rotation: this?.filterManager.data?.rotation,
+                        timescale: this?.filterManager.data?.timescale,
+                        vibrato: this?.filterManager.data?.vibrato,
+                        volume: this?.filterManager.data?.volume,
+                    },
+                },
+            });
+        }
+        currentNode.destroy(DestroyReasons.NodeDestroy, true);
+        return this;
     }
 
     /** Converts the Player including Queue to a Json state */

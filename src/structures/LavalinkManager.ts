@@ -109,6 +109,7 @@ export class LavalinkManager extends EventEmitter {
                     maxAmount: options?.playerOptions?.maxErrorsPerTime?.maxAmount ?? 3
                 }
             },
+            autoMove: options?.autoMove ?? false,
             linksWhitelist: options?.linksWhitelist ?? [],
             linksBlacklist: options?.linksBlacklist ?? [],
             linksAllowed: options?.linksAllowed ?? true,
