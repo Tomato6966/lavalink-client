@@ -848,7 +848,8 @@ export class Player {
         }
     }
     public async moveNode(node?: string) {
-        if (!node) node = this.LavalinkManager.nodeManager.leastLoadNodes().at(0)?.options.id;
+        if (!node) node = Array.from(this.LavalinkManager.nodeManager.leastUsedNodes("playingPlayers"))
+            .find(n => n.connected && n.options.id !== this.node.options.id).id;
         if (!node || !this.LavalinkManager.nodeManager.nodes.get(node)) throw new RangeError("No nodes are available.");
         if (this.node.options.id === node) return this;
 

@@ -5,12 +5,12 @@ import { DebugEvents, DestroyReasons, validSponsorBlocks } from "./Constants";
 import { NodeSymbol, queueTrackEnd, safeStringify } from "./Utils";
 
 import type {
-    Base64, InvalidLavalinkRestRequest, LavalinkPlayer, LavaSearchQuery, LavaSearchResponse,
-    LoadTypes, LyricsFoundEvent, LyricsLineEvent, LyricsNotFoundEvent, PlayerEvents,
-    PlayerEventType, PlayerUpdateInfo, RoutePlanner, SearchQuery, SearchResult,
-    Session, SponsorBlockChaptersLoaded, SponsorBlockChapterStarted, SponsorBlockSegmentSkipped,
-    SponsorBlockSegmentsLoaded, TrackEndEvent, TrackExceptionEvent, TrackStartEvent,
-    TrackStuckEvent, WebSocketClosedEvent
+	Base64, InvalidLavalinkRestRequest, LavalinkPlayer, LavaSearchQuery, LavaSearchResponse,
+	LoadTypes, LyricsFoundEvent, LyricsLineEvent, LyricsNotFoundEvent, PlayerEvents,
+	PlayerEventType, PlayerUpdateInfo, RoutePlanner, SearchQuery, SearchResult,
+	Session, SponsorBlockChaptersLoaded, SponsorBlockChapterStarted, SponsorBlockSegmentSkipped,
+	SponsorBlockSegmentsLoaded, TrackEndEvent, TrackExceptionEvent, TrackStartEvent,
+	TrackStuckEvent, WebSocketClosedEvent
 } from "./Types/Utils";
 import type { Player } from "./Player";
 import type { DestroyReasonsType, DisconnectReasonsType } from "./Types/Player";
@@ -270,7 +270,7 @@ export class LavalinkNode {
                 thumbnail: (res.data.info?.artworkUrl) || (res.data.pluginInfo?.artworkUrl) || ((typeof res.data?.info?.selectedTrack !== "number" || res.data?.info?.selectedTrack === -1) ? null : resTracks[res.data?.info?.selectedTrack] ? (resTracks[res.data?.info?.selectedTrack]?.info?.artworkUrl || resTracks[res.data?.info?.selectedTrack]?.info?.pluginInfo?.artworkUrl) : null) || null,
                 uri: res.data.info?.url || res.data.info?.uri || res.data.info?.link || res.data.pluginInfo?.url || res.data.pluginInfo?.uri || res.data.pluginInfo?.link || null,
                 selectedTrack: typeof res.data?.info?.selectedTrack !== "number" || res.data?.info?.selectedTrack === -1 ? null : resTracks[res.data?.info?.selectedTrack] ? this.NodeManager.LavalinkManager.utils.buildTrack(resTracks[res.data?.info?.selectedTrack], requestUser) : null,
-                duration: resTracks.length ? resTracks.reduce((acc: number, cur: Track & { info: Track["info"] & { length?: number } }) => acc + (cur?.info?.duration || cur?.info?.length || 0), 0) : 0,
+                duration: resTracks.length ? resTracks.reduce((acc: number, cur: Track & { info: Track["info"] & { length?: number }}) => acc + (cur?.info?.duration || cur?.info?.length || 0), 0) : 0,
 
             } : null,
             tracks: (resTracks.length ? resTracks.map(t => this.NodeManager.LavalinkManager.utils.buildTrack(t, requestUser)) : []) as Track[]
