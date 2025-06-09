@@ -178,6 +178,14 @@ export class NodeManager extends EventEmitter {
         }
     }
 
+    public leastLoadNodes(): LavalinkNode[] {
+        const connectedNodes = Array.from(this.nodes.values()).filter((node) => node.connected);
+        return connectedNodes.sort((a, b) => {
+            const aload = a.stats.cpu ? (a.stats.cpu.lavalinkLoad / a.stats.cpu.cores) * 100 : 0;
+            const bload = b.stats.cpu ? (b.stats.cpu.lavalinkLoad / b.stats.cpu.cores) * 100 : 0;
+            return aload - bload;
+        });
+    }
 
     /**
      * Delete a node from the nodeManager and destroy it
