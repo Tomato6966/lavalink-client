@@ -871,16 +871,17 @@ export class Player {
             });
         });
         this.node = destinationNode;
-        if (currentTrack) {
+        if (currentTrack && currentTrack.encoded) {
             await this.node.updatePlayer({
                 guildId: this.guildId,
-                noReplace: false,
+                noReplace: true,
                 playerOptions: {
                     track: {
                         encoded: currentTrack.encoded,
                         identifier: currentTrack.info.identifier,
                         userData: currentTrack.userData
                     },
+                    endTime: currentTrack.info.duration,
                     position: currentTrack ? data.position : 0,
                     volume: data.lavalinkVolume,
                     paused: data.paused,
