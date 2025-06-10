@@ -4,7 +4,7 @@ import { FilterManager } from "./Filters";
 import { Queue, QueueSaver } from "./Queue";
 import { queueTrackEnd, safeStringify } from "./Utils";
 
-import { DestroyReasons } from "./Constants";
+import type { DestroyReasons } from "./Constants";
 import type { Track, UnresolvedTrack } from "./Types/Track";
 import type { LavalinkNode } from "./Node";
 import type { SponsorBlockSegment } from "./Types/Node";
@@ -95,7 +95,7 @@ export class Player {
      * @param LavalinkManager
      */
     constructor(options: PlayerOptions, LavalinkManager: LavalinkManager, dontEmitPlayerCreateEvent?: boolean) {
-        if(typeof options?.customData === "object") for(const [key, value] of Object.entries(options.customData)) this.set(key, value);
+        if (typeof options?.customData === "object") for (const [key, value] of Object.entries(options.customData)) this.set(key, value);
 
         this.options = options;
         this.filterManager = new FilterManager(this);
@@ -133,7 +133,7 @@ export class Player {
                 ? this.volume * this.LavalinkManager.options.playerOptions.volumeDecrementer
                 : this.volume), 1000), 0));
 
-        if(!dontEmitPlayerCreateEvent) this.LavalinkManager.emit("playerCreate", this);
+        if (!dontEmitPlayerCreateEvent) this.LavalinkManager.emit("playerCreate", this);
 
         this.queue = new Queue(this.guildId, {}, new QueueSaver(this.LavalinkManager.options.queueOptions), this.LavalinkManager.options.queueOptions)
     }
@@ -222,7 +222,7 @@ export class Player {
             }
 
             if ((typeof options.track?.userData === "object" || typeof options.clientTrack?.userData === "object") && options.clientTrack) options.clientTrack.userData = {
-                ...(typeof options?.clientTrack?.requester === "object" ? { requester: this.LavalinkManager.utils.getTransformedRequester(options?.clientTrack?.requester || {}) as anyObject } : { }),
+                ...(typeof options?.clientTrack?.requester === "object" ? { requester: this.LavalinkManager.utils.getTransformedRequester(options?.clientTrack?.requester || {}) as anyObject } : {}),
                 ...options?.clientTrack.userData,
                 ...options.track?.userData,
             };
@@ -250,7 +250,7 @@ export class Player {
                 encoded: options.track.encoded,
                 identifier: options.track.identifier,
                 userData: {
-                    ...(typeof options?.track?.requester === "object" ? { requester: this.LavalinkManager.utils.getTransformedRequester(options?.track?.requester || {}) } : { }),
+                    ...(typeof options?.track?.requester === "object" ? { requester: this.LavalinkManager.utils.getTransformedRequester(options?.track?.requester || {}) } : {}),
                     ...options.track.userData,
                 }
             }).filter(v => typeof v[1] !== "undefined")) as LavalinkPlayOptions["track"];
@@ -294,7 +294,7 @@ export class Player {
                 await (this.queue.current as unknown as UnresolvedTrack).resolve(this);
 
                 if (typeof options.track?.userData === "object" && this.queue.current) this.queue.current.userData = {
-                    ...(typeof this.queue.current?.requester === "object" ? { requester: this.LavalinkManager.utils.getTransformedRequester(this.queue.current?.requester || {}) as anyObject } : { }),
+                    ...(typeof this.queue.current?.requester === "object" ? { requester: this.LavalinkManager.utils.getTransformedRequester(this.queue.current?.requester || {}) as anyObject } : {}),
                     ...this.queue.current?.userData,
                     ...options.track?.userData
                 };
@@ -339,7 +339,7 @@ export class Player {
                 encoded: this.queue.current?.encoded || null,
                 // identifier: options.identifier,
                 userData: {
-                    ...(typeof this.queue.current?.requester === "object" ? { requester: this.LavalinkManager.utils.getTransformedRequester(this.queue.current?.requester || {}) } : { }),
+                    ...(typeof this.queue.current?.requester === "object" ? { requester: this.LavalinkManager.utils.getTransformedRequester(this.queue.current?.requester || {}) } : {}),
                     ...options?.track?.userData,
                     ...this.queue.current?.userData,
                 },
@@ -791,41 +791,45 @@ export class Player {
                 });
             });
             const hasSponsorBlock = this.node.info?.plugins?.find(v => v.name === "sponsorblock-plugin");
-                if (hasSponsorBlock) {
-                    if (segments.length) {
-                        await this.setSponsorBlock(segments).catch(error => {
-                            if (this.LavalinkManager.options?.advancedOptions?.enableDebugEvents) {
-                                this.LavalinkManager.emit("debug", DebugEvents.PlayerChangeNode, {
-                                    state: "error",
-                                    error: error,
-                                    message: `Player > changeNode() Unable to set SponsorBlock Segments`,
-                                    functionLayer: "Player > changeNode()",
-                                });
-                            }
-                        });
-                    } else {
-                        await this.setSponsorBlock().catch(error => {
-                            if (this.LavalinkManager.options?.advancedOptions?.enableDebugEvents) {
-                                this.LavalinkManager.emit("debug", DebugEvents.PlayerChangeNode, {
-                                    state: "error",
-                                    error: error,
-                                    message: `Player > changeNode() Unable to set SponsorBlock Segments`,
-                                    functionLayer: "Player > changeNode()",
-                                });
-                            }
-                        });
-                    }
+            if (hasSponsorBlock) {
+                if (segments.length) {
+                    await this.setSponsorBlock(segments).catch(error => {
+                        if (this.LavalinkManager.options?.advancedOptions?.enableDebugEvents) {
+                            this.LavalinkManager.emit("debug", DebugEvents.PlayerChangeNode, {
+                                state: "error",
+                                error: error,
+                                message: `Player > changeNode() Unable to set SponsorBlock Segments`,
+                                functionLayer: "Player > changeNode()",
+                            });
+                        }
+                    });
+                } else {
+                    await this.setSponsorBlock().catch(error => {
+                        if (this.LavalinkManager.options?.advancedOptions?.enableDebugEvents) {
+                            this.LavalinkManager.emit("debug", DebugEvents.PlayerChangeNode, {
+                                state: "error",
+                                error: error,
+                                message: `Player > changeNode() Unable to set SponsorBlock Segments`,
+                                functionLayer: "Player > changeNode()",
+                            });
+                        }
+                    });
                 }
+            }
             if (currentTrack) { // If there is a current track, send it to the new node.
                 await this.node.updatePlayer({
                     guildId: this.guildId,
                     noReplace: false,
                     playerOptions: {
-                        track: currentTrack ?? null,
+                        track: currentTrack ? {
+                            encoded: currentTrack.encoded,
+                            identifier: currentTrack.info.identifier,
+                            requester: currentTrack.requester,
+                            userData: currentTrack.userData
+                        } : null,
                         position: currentTrack ? data.position : 0,
                         volume: data.lavalinkVolume,
                         paused: data.paused,
-                        //filters: { ...data.filters, equalizer: data.equalizer }, Sending filters on nodeChange causes issues (player gets dicsonnected)
                     }
                 });
             }
@@ -848,49 +852,15 @@ export class Player {
         }
     }
     public async moveNode(node?: string) {
-        if (!node) node = Array.from(this.LavalinkManager.nodeManager.leastUsedNodes("cpuLavalink"))
-            .find(n => n.connected && n.options.id !== this.node.options.id).id;
-        if (!node || !this.LavalinkManager.nodeManager.nodes.get(node)) throw new RangeError("No nodes are available.");
-        if (this.node.options.id === node) return this;
-
-        const currentNode = this.node;
-        const destinationNode = this.LavalinkManager.nodeManager.nodes.get(node);
-
-        const currentTrack = this.queue.current ? this.queue.current : null;
-       
-        await destinationNode.request(`/sessions/${destinationNode.sessionId}/players/${this.guildId}?noReplace=false`, (r) => {
-            r.method = "PATCH";
-            r.headers["Content-Type"] = "application/json";
-            r.body = JSON.stringify({
-                voice: {
-                    token: this?.voice?.token,
-                    endpoint: this?.voice?.endpoint,
-                    sessionId: this?.voice?.sessionId,
-                },
-                track: {
-                    encoded: currentTrack.encoded,
-                    identifier: currentTrack.info.identifier,
-                    userData: currentTrack.userData,
-                    requester: currentTrack.requester,
-                },
-                endTime: currentTrack.info.duration,
-                position: currentTrack ? this.position : 0,
-                volume: this.lavalinkVolume,
-                paused: this.paused,
-                filters: {
-                    distortion: this?.filterManager.data.distortion,
-                    equalizer: this?.filterManager.equalizerBands,
-                    karaoke: this?.filterManager.data?.karaoke,
-                    rotation: this?.filterManager.data?.rotation,
-                    timescale: this?.filterManager.data?.timescale,
-                    vibrato: this?.filterManager.data?.vibrato,
-                    volume: this?.filterManager.data?.volume,
-                },
-            });
-        });
-        this.node = destinationNode;
-        currentNode.destroy(DestroyReasons.NodeDestroy, true);
-        return this;
+        try {
+            if (!node) node = Array.from(this.LavalinkManager.nodeManager.leastUsedNodes("cpuLavalink"))
+                .find(n => n.connected && n.options.id !== this.node.options.id).id;
+            if (!node || !this.LavalinkManager.nodeManager.nodes.get(node)) throw new RangeError("No nodes are available.");
+            if (this.node.options.id === node) return this;
+            return await this.changeNode(this.LavalinkManager.nodeManager.nodes.get(node)!);
+        } catch (error) {
+            throw new Error(`Failed to move the node: ${error}`);
+        }
     }
 
     /** Converts the Player including Queue to a Json state */
