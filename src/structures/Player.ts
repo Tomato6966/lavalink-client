@@ -856,9 +856,8 @@ export class Player {
         const currentNode = this.node;
         const destinationNode = this.LavalinkManager.nodeManager.nodes.get(node);
 
-        const currentTrack = this.queue.current;
-        const data = this.toJSON();
-
+        const currentTrack = this.queue.current ? this.queue.current : null;
+       
         await destinationNode.request(`/sessions/${destinationNode.sessionId}/players/${this.guildId}?noReplace=false`, (r) => {
             r.method = "PATCH";
             r.headers["Content-Type"] = "application/json";
@@ -868,35 +867,28 @@ export class Player {
                     endpoint: this?.voice?.endpoint,
                     sessionId: this?.voice?.sessionId,
                 },
+                track: {
+                    encoded: currentTrack.encoded,
+                    identifier: currentTrack.info.identifier,
+                    userData: currentTrack.userData,
+                    requester: currentTrack.requester,
+                },
+                endTime: currentTrack.info.duration,
+                position: currentTrack ? this.position : 0,
+                volume: this.lavalinkVolume,
+                paused: this.paused,
+                filters: {
+                    distortion: this?.filterManager.data.distortion,
+                    equalizer: this?.filterManager.equalizerBands,
+                    karaoke: this?.filterManager.data?.karaoke,
+                    rotation: this?.filterManager.data?.rotation,
+                    timescale: this?.filterManager.data?.timescale,
+                    vibrato: this?.filterManager.data?.vibrato,
+                    volume: this?.filterManager.data?.volume,
+                },
             });
         });
         this.node = destinationNode;
-        if (currentTrack && currentTrack.encoded) {
-            await this.node.updatePlayer({
-                guildId: this.guildId,
-                noReplace: true,
-                playerOptions: {
-                    track: {
-                        encoded: currentTrack.encoded,
-                        identifier: currentTrack.info.identifier,
-                        userData: currentTrack.userData
-                    },
-                    endTime: currentTrack.info.duration,
-                    position: currentTrack ? data.position : 0,
-                    volume: data.lavalinkVolume,
-                    paused: data.paused,
-                    filters: {
-                        distortion: this?.filterManager.data.distortion,
-                        equalizer: this?.filterManager.equalizerBands,
-                        karaoke: this?.filterManager.data?.karaoke,
-                        rotation: this?.filterManager.data?.rotation,
-                        timescale: this?.filterManager.data?.timescale,
-                        vibrato: this?.filterManager.data?.vibrato,
-                        volume: this?.filterManager.data?.volume,
-                    },
-                },
-            });
-        }
         currentNode.destroy(DestroyReasons.NodeDestroy, true);
         return this;
     }
