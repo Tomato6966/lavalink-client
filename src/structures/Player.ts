@@ -821,12 +821,7 @@ export class Player {
                     guildId: this.guildId,
                     noReplace: false,
                     playerOptions: {
-                        track: currentTrack ? {
-                            encoded: currentTrack.encoded,
-                            identifier: currentTrack.info.identifier,
-                            requester: currentTrack.requester,
-                            userData: currentTrack.userData
-                        } : null,
+                        track: currentTrack ?? null,
                         position: currentTrack ? data.position : 0,
                         volume: data.lavalinkVolume,
                         paused: data.paused,
@@ -857,6 +852,7 @@ export class Player {
                 .find(n => n.connected && n.options.id !== this.node.options.id).id;
             if (!node || !this.LavalinkManager.nodeManager.nodes.get(node)) throw new RangeError("No nodes are available.");
             if (this.node.options.id === node) return this;
+            this.LavalinkManager.emit("debug", DebugEvents.PlayerChangeNode, { state: "log", message: `Player.moveNode() was executed, trying to move from "${this.node.id}" to "${node}"`, functionLayer: "Player > moveNode()" });
             return await this.changeNode(this.LavalinkManager.nodeManager.nodes.get(node)!);
         } catch (error) {
             throw new Error(`Failed to move the node: ${error}`);
