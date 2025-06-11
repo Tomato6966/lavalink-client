@@ -156,28 +156,33 @@ export class NodeManager extends EventEmitter {
             case "memory": {
                 return connectedNodes
                     .sort((a, b) => (a.stats?.memory?.used || 0) - (b.stats?.memory?.used || 0)) // sort after memor
-            } case "cpuLavalink": {
+            } break;
+            case "cpuLavalink": {
                 return connectedNodes
                     .sort((a, b) => (a.stats?.cpu?.lavalinkLoad || 0) - (b.stats?.cpu?.lavalinkLoad || 0)) // sort after memor
-            } case "cpuSystem": {
+            } break;
+            case "cpuSystem": {
                 return connectedNodes
                     .sort((a, b) => (a.stats?.cpu?.systemLoad || 0) - (b.stats?.cpu?.systemLoad || 0)) // sort after memor
-            } case "calls": {
+            } break;
+            case "calls": {
                 return connectedNodes
                     .sort((a, b) => a.calls - b.calls); // client sided sorting
-            } case "playingPlayers": {
+            } break;
+            case "playingPlayers": {
                 return connectedNodes
                     .sort((a, b) => (a.stats?.playingPlayers || 0) - (b.stats?.playingPlayers || 0))
-            } case "players": {
+            } break;
+            case "players": {
                 return connectedNodes
                     .sort((a, b) => (a.stats?.players || 0) - (b.stats?.players || 0))
-            } default: {
+            } break;
+            default: {
                 return connectedNodes
                     .sort((a, b) => (a.stats?.players || 0) - (b.stats?.players || 0))
-            }
+            } break;
         }
     }
-
 
     /**
      * Delete a node from the nodeManager and destroy it

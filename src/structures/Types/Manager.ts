@@ -258,8 +258,6 @@ export interface ManagerOptions {
     playerOptions?: ManagerPlayerOptions;
     /** If it should skip to the next Track on TrackEnd / TrackError etc. events */
     autoSkip?: boolean;
-    /** If it should automatically move the player to the next node when node is down */
-    autoMove?: boolean;
     /** If it should skip to the next Track if track.resolve errors while trying to play a track. */
     autoSkipOnResolveError?: boolean;
     /** If it should emit only new (unique) songs and not when a looping track (or similar) is plaid, default false */
