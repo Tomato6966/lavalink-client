@@ -1136,16 +1136,6 @@ export class LavalinkNode {
                 this.reconnect();
             }
         }
-        this.NodeManager.LavalinkManager.players
-            .filter((p) => p?.node?.options?.id === this?.options?.id)
-            .forEach((p) => {
-                if (!this.NodeManager.LavalinkManager.options.autoMove) return (p.playing = false);
-                if (this.NodeManager.LavalinkManager.options.autoMove) {
-                    if (this.NodeManager.nodes.filter((n) => n.connected).size === 0)
-                        return (p.playing = false);
-                    p.moveNode();
-                }
-            });
     }
 
     /** @private util function for handling error events from websocket */
