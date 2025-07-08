@@ -156,32 +156,31 @@ export class NodeManager extends EventEmitter {
             case "memory": {
                 return connectedNodes
                     .sort((a, b) => (a.stats?.memory?.used || 0) - (b.stats?.memory?.used || 0)) // sort after memor
-                break;
-            } case "cpuLavalink": {
+            } break;
+            case "cpuLavalink": {
                 return connectedNodes
                     .sort((a, b) => (a.stats?.cpu?.lavalinkLoad || 0) - (b.stats?.cpu?.lavalinkLoad || 0)) // sort after memor
-                break;
-            } case "cpuSystem": {
+            } break;
+            case "cpuSystem": {
                 return connectedNodes
                     .sort((a, b) => (a.stats?.cpu?.systemLoad || 0) - (b.stats?.cpu?.systemLoad || 0)) // sort after memor
-                break;
-            } case "calls": {
+            } break;
+            case "calls": {
                 return connectedNodes
                     .sort((a, b) => a.calls - b.calls); // client sided sorting
-                break
-            } case "playingPlayers": {
+            } break;
+            case "playingPlayers": {
                 return connectedNodes
                     .sort((a, b) => (a.stats?.playingPlayers || 0) - (b.stats?.playingPlayers || 0))
-                break;
-            } case "players": {
+            } break;
+            case "players": {
                 return connectedNodes
                     .sort((a, b) => (a.stats?.players || 0) - (b.stats?.players || 0))
-                break;
-            } default: {
+            } break;
+            default: {
                 return connectedNodes
                     .sort((a, b) => (a.stats?.players || 0) - (b.stats?.players || 0))
-                break;
-            }
+            } break;
         }
     }
 

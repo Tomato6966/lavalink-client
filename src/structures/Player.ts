@@ -95,7 +95,7 @@ export class Player {
      * @param LavalinkManager
      */
     constructor(options: PlayerOptions, LavalinkManager: LavalinkManager) {
-        if (typeof options?.customData === "object") for (const [key, value] of Object.entries(options.customData)) this.set(key, value);
+        if(typeof options?.customData === "object") for(const [key, value] of Object.entries(options.customData)) this.set(key, value);
 
         this.options = options;
         this.filterManager = new FilterManager(this);
@@ -782,31 +782,30 @@ export class Player {
                 });
             });
             const hasSponsorBlock = this.node.info?.plugins?.find(v => v.name === "sponsorblock-plugin");
-            if (hasSponsorBlock) {
-                if (segments.length) {
-                    await this.setSponsorBlock(segments).catch(error => {
-                        if (this.LavalinkManager.options?.advancedOptions?.enableDebugEvents) {
-                            this.LavalinkManager.emit("debug", DebugEvents.PlayerChangeNode, {
-                                state: "error",
-                                error: error,
-                                message: `Player > changeNode() Unable to set SponsorBlock Segments`,
-                                functionLayer: "Player > changeNode()",
-                            });
-                        }
-                    });
-                } else {
-                    await this.setSponsorBlock().catch(error => {
-                        if (this.LavalinkManager.options?.advancedOptions?.enableDebugEvents) {
-                            this.LavalinkManager.emit("debug", DebugEvents.PlayerChangeNode, {
-                                state: "error",
-                                error: error,
-                                message: `Player > changeNode() Unable to set SponsorBlock Segments`,
-                                functionLayer: "Player > changeNode()",
-                            });
-                        }
-                    });
-                }
-            }
+                if (hasSponsorBlock) {
+                    if (segments.length) {
+                        await this.setSponsorBlock(segments).catch(error => { 
+                            if (this.LavalinkManager.options?.advancedOptions?.enableDebugEvents) {
+                                this.LavalinkManager.emit("debug", DebugEvents.PlayerChangeNode, {
+                                    state: "error",
+                                    error: error,
+                                    message: `Player > changeNode() Unable to set SponsorBlock Segments`,
+                                    functionLayer: "Player > changeNode()",
+                                });
+                            }
+                        });
+                    } else {
+                        await this.setSponsorBlock().catch(error => {
+                            if (this.LavalinkManager.options?.advancedOptions?.enableDebugEvents) {
+                                this.LavalinkManager.emit("debug", DebugEvents.PlayerChangeNode, {
+                                    state: "error",
+                                    error: error,
+                                    message: `Player > changeNode() Unable to set SponsorBlock Segments`,
+                                    functionLayer: "Player > changeNode()",
+                                });
+                            }
+                        });
+                    }
             if (currentTrack) { // If there is a current track, send it to the new node.
                 await this.node.updatePlayer({
                     guildId: this.guildId,
