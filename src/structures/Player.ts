@@ -94,7 +94,7 @@ export class Player {
      * @param options
      * @param LavalinkManager
      */
-    constructor(options: PlayerOptions, LavalinkManager: LavalinkManager) {
+    constructor(options: PlayerOptions, LavalinkManager: LavalinkManager, dontEmitPlayerCreateEvent?: boolean) {
         if (typeof options?.customData === "object") for (const [key, value] of Object.entries(options.customData)) this.set(key, value);
 
         this.options = options;
@@ -133,7 +133,7 @@ export class Player {
                 ? this.volume * this.LavalinkManager.options.playerOptions.volumeDecrementer
                 : this.volume), 1000), 0));
 
-        if(!dontEmitPlayerCreateEvent) this.LavalinkManager.emit("playerCreate", this);
+        if (!dontEmitPlayerCreateEvent) this.LavalinkManager.emit("playerCreate", this);
 
         this.queue = new Queue(this.guildId, {}, new QueueSaver(this.LavalinkManager.options.queueOptions), this.LavalinkManager.options.queueOptions)
     }
@@ -222,7 +222,7 @@ export class Player {
             }
 
             if ((typeof options.track?.userData === "object" || typeof options.clientTrack?.userData === "object") && options.clientTrack) options.clientTrack.userData = {
-                ...(typeof options?.clientTrack?.requester === "object" ? { requester: this.LavalinkManager.utils.getTransformedRequester(options?.clientTrack?.requester || {}) as anyObject } : { }),
+                ...(typeof options?.clientTrack?.requester === "object" ? { requester: this.LavalinkManager.utils.getTransformedRequester(options?.clientTrack?.requester || {}) as anyObject } : {}),
                 ...options?.clientTrack.userData,
                 ...options.track?.userData,
             };
@@ -250,7 +250,7 @@ export class Player {
                 encoded: options.track.encoded,
                 identifier: options.track.identifier,
                 userData: {
-                    ...(typeof options?.track?.requester === "object" ? { requester: this.LavalinkManager.utils.getTransformedRequester(options?.track?.requester || {}) } : { }),
+                    ...(typeof options?.track?.requester === "object" ? { requester: this.LavalinkManager.utils.getTransformedRequester(options?.track?.requester || {}) } : {}),
                     ...options.track.userData,
                 }
             }).filter(v => typeof v[1] !== "undefined")) as LavalinkPlayOptions["track"];
@@ -294,7 +294,7 @@ export class Player {
                 await (this.queue.current as unknown as UnresolvedTrack).resolve(this);
 
                 if (typeof options.track?.userData === "object" && this.queue.current) this.queue.current.userData = {
-                    ...(typeof this.queue.current?.requester === "object" ? { requester: this.LavalinkManager.utils.getTransformedRequester(this.queue.current?.requester || {}) as anyObject } : { }),
+                    ...(typeof this.queue.current?.requester === "object" ? { requester: this.LavalinkManager.utils.getTransformedRequester(this.queue.current?.requester || {}) as anyObject } : {}),
                     ...this.queue.current?.userData,
                     ...options.track?.userData
                 };
@@ -339,7 +339,7 @@ export class Player {
                 encoded: this.queue.current?.encoded || null,
                 // identifier: options.identifier,
                 userData: {
-                    ...(typeof this.queue.current?.requester === "object" ? { requester: this.LavalinkManager.utils.getTransformedRequester(this.queue.current?.requester || {}) } : { }),
+                    ...(typeof this.queue.current?.requester === "object" ? { requester: this.LavalinkManager.utils.getTransformedRequester(this.queue.current?.requester || {}) } : {}),
                     ...options?.track?.userData,
                     ...this.queue.current?.userData,
                 },
