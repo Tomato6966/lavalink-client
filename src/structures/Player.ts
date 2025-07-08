@@ -2,7 +2,7 @@ import { DebugEvents } from "./Constants";
 import { bandCampSearch } from "./CustomSearches/BandCampSearch";
 import { FilterManager } from "./Filters";
 import { Queue, QueueSaver } from "./Queue";
-import { queueTrackEnd } from "./Utils";
+import { queueTrackEnd, safeStringify } from "./Utils";
 
 import type { DestroyReasons } from "./Constants";
 import type { Track, UnresolvedTrack } from "./Types/Track";
@@ -133,7 +133,7 @@ export class Player {
                 ? this.volume * this.LavalinkManager.options.playerOptions.volumeDecrementer
                 : this.volume), 1000), 0));
 
-        this.LavalinkManager.emit("playerCreate", this);
+        if(!dontEmitPlayerCreateEvent) this.LavalinkManager.emit("playerCreate", this);
 
         this.queue = new Queue(this.guildId, {}, new QueueSaver(this.LavalinkManager.options.queueOptions), this.LavalinkManager.options.queueOptions)
     }
@@ -221,7 +221,11 @@ export class Player {
                 }
             }
 
-            if ((typeof options.track?.userData === "object" || typeof options.clientTrack?.userData === "object") && options.clientTrack) options.clientTrack.userData = { ...(options?.clientTrack.userData || {}), ...(options.track?.userData || {}) };
+            if ((typeof options.track?.userData === "object" || typeof options.clientTrack?.userData === "object") && options.clientTrack) options.clientTrack.userData = {
+                ...(typeof options?.clientTrack?.requester === "object" ? { requester: this.LavalinkManager.utils.getTransformedRequester(options?.clientTrack?.requester || {}) as anyObject } : { }),
+                ...options?.clientTrack.userData,
+                ...options.track?.userData,
+            };
 
             options.track = {
                 encoded: options.clientTrack?.encoded,
@@ -245,16 +249,11 @@ export class Player {
             const track = Object.fromEntries(Object.entries({
                 encoded: options.track.encoded,
                 identifier: options.track.identifier,
+                userData: {
+                    ...(typeof options?.track?.requester === "object" ? { requester: this.LavalinkManager.utils.getTransformedRequester(options?.track?.requester || {}) } : { }),
+                    ...options.track.userData,
+                }
             }).filter(v => typeof v[1] !== "undefined")) as LavalinkPlayOptions["track"];
-
-            if (typeof options.track.userData === "object") track.userData = {
-                ...(options.track.userData || {})
-            };
-
-            if (typeof options?.track?.requester === "object") track.userData = {
-                ...(track.userData || {}),
-                requester: this.LavalinkManager.utils.getTransformedRequester(options?.track?.requester || {}) as anyObject
-            };
 
             if (this.LavalinkManager.options?.advancedOptions?.enableDebugEvents) {
                 this.LavalinkManager.emit("debug", DebugEvents.PlayerPlayWithTrackReplace, {
@@ -294,8 +293,13 @@ export class Player {
                 // resolve the unresolved track
                 await (this.queue.current as unknown as UnresolvedTrack).resolve(this);
 
-                if (typeof options.track?.userData === "object" && this.queue.current) this.queue.current.userData = { ...(this.queue.current?.userData || {}), ...(options.track?.userData || {}) };
+                if (typeof options.track?.userData === "object" && this.queue.current) this.queue.current.userData = {
+                    ...(typeof this.queue.current?.requester === "object" ? { requester: this.LavalinkManager.utils.getTransformedRequester(this.queue.current?.requester || {}) as anyObject } : { }),
+                    ...this.queue.current?.userData,
+                    ...options.track?.userData
+                };
             } catch (error) {
+
                 if (this.LavalinkManager.options?.advancedOptions?.enableDebugEvents) {
                     this.LavalinkManager.emit("debug", DebugEvents.PlayerPlayUnresolvedTrackFailed, {
                         state: "error",
@@ -309,6 +313,9 @@ export class Player {
 
                 if (options && "clientTrack" in options) delete options.clientTrack;
                 if (options && "track" in options) delete options.track;
+
+                // get rid of the current song without shifting the queue, so that the shifting can happen inside the next .play() call when "autoSkipOnResolveError" is true
+                await queueTrackEnd(this, true);
 
                 // try to play the next track if possible
                 if (this.LavalinkManager.options?.autoSkipOnResolveError === true && this.queue.tracks[0]) return this.play(options);
@@ -331,7 +338,11 @@ export class Player {
             track: {
                 encoded: this.queue.current?.encoded || null,
                 // identifier: options.identifier,
-                userData: options?.track?.userData || {},
+                userData: {
+                    ...(typeof this.queue.current?.requester === "object" ? { requester: this.LavalinkManager.utils.getTransformedRequester(this.queue.current?.requester || {}) } : { }),
+                    ...options?.track?.userData,
+                    ...this.queue.current?.userData,
+                },
             },
             volume: this.lavalinkVolume,
             position: options?.position ?? 0,
@@ -695,7 +706,6 @@ export class Player {
 
     /**
      * Subscribe to the lyrics event on a specific guild to active live lyrics events
-     * @param guildId The guild id to subscribe to
      * @returns The unsubscribe function
      * @example
      * ```ts
@@ -708,15 +718,14 @@ export class Player {
 
     /**
      * Unsubscribe from the lyrics event on a specific guild to disable live lyrics events
-     * @param guildId The guild id to unsubscribe from
      * @returns The unsubscribe function
      * @example
      * ```ts
      * const lyrics = await player.unsubscribeLyrics();
      * ```
      */
-    public unsubscribeLyrics(guildId: string) {
-        return this.node.lyrics.unsubscribe(guildId);
+    public unsubscribeLyrics() {
+        return this.node.lyrics.unsubscribe(this.guildId);
     }
 
     /**
@@ -773,7 +782,7 @@ export class Player {
             await this.node.request(endpoint, r => {
                 r.method = "PATCH";
                 r.headers["Content-Type"] = "application/json";
-                r.body = JSON.stringify({
+                r.body = safeStringify({
                     voice: {
                         token: voiceData.token,
                         endpoint: voiceData.endpoint,

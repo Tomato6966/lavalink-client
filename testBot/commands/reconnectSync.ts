@@ -1,4 +1,4 @@
-import { SlashCommandBuilder } from "discord.js";
+import { MessageFlags, SlashCommandBuilder } from "discord.js";
 
 import type { GuildMember, VoiceChannel } from "discord.js";
 import type { Command } from "../types/Client";
@@ -10,13 +10,13 @@ export default {
         if (!interaction.guildId) return;
 
         const vcId = (interaction.member as GuildMember)?.voice?.channelId;
-        if (!vcId) return interaction.reply({ ephemeral: true, content: "Join a Voice Channel " });
+        if (!vcId) return interaction.reply({ flags: [MessageFlags.Ephemeral], content: "Join a Voice Channel " });
 
         const vc = (interaction.member as GuildMember)?.voice?.channel as VoiceChannel;
-        if (!vc.joinable || !vc.speakable) return interaction.reply({ ephemeral: true, content: "I am not able to join your channel / speak in there." });
+        if (!vc.joinable || !vc.speakable) return interaction.reply({ flags: [MessageFlags.Ephemeral], content: "I am not able to join your channel / speak in there." });
 
         const player = client.lavalink.getPlayer(interaction.guildId);
-        if (player?.voiceChannelId && player.connected) return interaction.reply({ ephemeral: true, content: "I'm already connected." })
+        if (player?.voiceChannelId && player.connected) return interaction.reply({ flags: [MessageFlags.Ephemeral], content: "I'm already connected." })
 
         if (player) { // player already created, but not connected yet -> connect to it!
             player.voiceChannelId = player?.voiceChannelId || vcId;
@@ -40,13 +40,13 @@ export default {
 
         await newPlayer.queue.utils.sync(true, false);
 
-        if (!newPlayer.queue.current && !newPlayer.queue.tracks.length) return await interaction.reply({ ephemeral: true, content: `No current Song could be synced, with no upcoming tracks` })
+        if (!newPlayer.queue.current && !newPlayer.queue.tracks.length) return await interaction.reply({ flags: [MessageFlags.Ephemeral], content: `No current Song could be synced, with no upcoming tracks` })
 
         await newPlayer.play();
 
         return await interaction.reply({
             content: `Joined your voiceChannel Synced`,
-            ephemeral: true,
+            flags: [MessageFlags.Ephemeral],
         });
     }
 } as Command;

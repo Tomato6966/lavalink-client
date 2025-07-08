@@ -27,6 +27,7 @@ if (envConfig.redis.url && 1 < 0) { // little invalid if statement so the redis 
 
 client.defaultVolume = 100;
 
+
 /**
  * ? In case you wanna provide node data via env, you can use the provided util for url parsing:
  * * Example for multiple Nodes Secure in ENV.
@@ -41,9 +42,12 @@ console.log(LavalinkNodesOfEnv); // you can then provide the result of here in L
 
 
 (async () => {
+    console.debug("now initializing playerSaver");
     // Player saver util class for saving the player data
     const playerSaver = new PlayerSaver();
     const nodeSessions = await playerSaver.getAllLastNodeSessions();
+
+    console.debug("creating lavalink manager");
 
     client.lavalink = new LavalinkManager({
         nodes: [
@@ -120,11 +124,16 @@ console.log(LavalinkNodesOfEnv); // you can then provide the result of here in L
         }
     } as Required<ManagerOptions>);
 
+    console.debug("binding commands and events");
+
     // all what you need to do to enable resuming
     handleResuming(client, playerSaver);
     loadCommands(client);
     loadEvents(client);
     loadLavalinkEvents(client);
+
+
+    console.debug("now logging in");
 
     // IF you ever need to debug djs not connecting the bto, you need to do tit like this
 

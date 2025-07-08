@@ -1,4 +1,4 @@
-import { SlashCommandBuilder } from "discord.js";
+import { MessageFlags, SlashCommandBuilder } from "discord.js";
 
 import { formatMS_HHMMSS } from "../Utils/Time";
 
@@ -27,16 +27,16 @@ export default {
         if (!interaction.guildId) return;
 
         const vcId = (interaction.member as GuildMember)?.voice?.channelId;
-        if (!vcId) return interaction.reply({ ephemeral: true, content: `Join a voice Channel` });
+        if (!vcId) return interaction.reply({ flags: [MessageFlags.Ephemeral], content: `Join a voice Channel` });
 
         const vc = (interaction.member as GuildMember)?.voice?.channel as VoiceChannel;
-        if (!vc.joinable || !vc.speakable) return interaction.reply({ ephemeral: true, content: "I am not able to join your channel / speak in there." });
+        if (!vc.joinable || !vc.speakable) return interaction.reply({ flags: [MessageFlags.Ephemeral], content: "I am not able to join your channel / speak in there." });
 
         const src = (interaction.options as CommandInteractionOptionResolver).getString("source") as SearchPlatform | undefined;
         const query = (interaction.options as CommandInteractionOptionResolver).getString("query") as string;
 
-        if (query === "nothing_found") return interaction.reply({ content: `No Tracks found`, ephemeral: true });
-        if (query === "join_vc") return interaction.reply({ content: `You joined a VC, but redo the Command please.`, ephemeral: true });
+        if (query === "nothing_found") return interaction.reply({ content: `No Tracks found`, flags: [MessageFlags.Ephemeral] });
+        if (query === "join_vc") return interaction.reply({ content: `You joined a VC, but redo the Command please.`, flags: [MessageFlags.Ephemeral] });
 
         // clear previously used autocomplete debounced queries
         const fromAutoComplete = (Number(query.replace("autocomplete_", "")) >= 0 && autocompleteMap.has(`${interaction.user.id}_res`)) && autocompleteMap.get(`${interaction.user.id}_res`);
@@ -63,10 +63,12 @@ export default {
 
         if (!connected) await player.connect();
 
-        if (player.voiceChannelId !== vcId) return interaction.reply({ ephemeral: true, content: "You need to be in my Voice Channel" });
+        if (player.voiceChannelId !== vcId) return interaction.reply({ flags: [MessageFlags.Ephemeral], content: "You need to be in my Voice Channel" });
 
         const response = (fromAutoComplete || await player.search({ query: query, source: src }, interaction.user)) as SearchResult;
-        if (!response || !response.tracks?.length) return interaction.reply({ content: `No Tracks found`, ephemeral: true });
+        if (!response || !response.tracks?.length) return interaction.reply({ content: `No Tracks found`, flags: [MessageFlags.Ephemeral] });
+
+        response.tracks[0].userData = { ...response.tracks[0].userData, testUserDataExample: "this is a test, in case you need to pass stuff like arl or metadata, you can apply userData to the track.." }
 
         await player.queue.add(response.loadType === "playlist" ? response.tracks : response.tracks[fromAutoComplete ? Number(query.replace("autocomplete_", "")) : 0]);
 

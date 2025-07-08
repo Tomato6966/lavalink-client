@@ -1,4 +1,4 @@
-import { SlashCommandBuilder } from "discord.js";
+import { MessageFlags, SlashCommandBuilder } from "discord.js";
 
 import { formatMS_HHMMSS } from "../Utils/Time";
 
@@ -13,13 +13,13 @@ export default {
         if (!interaction.guildId) return;
 
         const vcId = (interaction.member as GuildMember)?.voice?.channelId;
-        if (!vcId) return interaction.reply({ ephemeral: true, content: "Join a Voice Channel " });
+        if (!vcId) return interaction.reply({ flags: [MessageFlags.Ephemeral], content: "Join a Voice Channel " });
 
         const player = client.lavalink.getPlayer(interaction.guildId);
-        if (!player) return interaction.reply({ ephemeral: true, content: "I'm not connected" });
-        if (player.voiceChannelId !== vcId) return interaction.reply({ ephemeral: true, content: "You need to be in my Voice Channel" })
+        if (!player) return interaction.reply({ flags: [MessageFlags.Ephemeral], content: "I'm not connected" });
+        if (player.voiceChannelId !== vcId) return interaction.reply({ flags: [MessageFlags.Ephemeral], content: "You need to be in my Voice Channel" })
 
-        if (!player.queue.current) return interaction.reply({ ephemeral: true, content: "I'm not playing anything" });
+        if (!player.queue.current) return interaction.reply({ flags: [MessageFlags.Ephemeral], content: "I'm not playing anything" });
 
         const position = ((interaction.options as CommandInteractionOptionResolver).getInteger("position") as number) * 1000;
         if (position > player.queue.current.info.duration || position < 0) return await interaction.reply({
@@ -29,7 +29,7 @@ export default {
         await player.seek(position);
 
         await interaction.reply({
-            ephemeral: true, content: `Seeked to: \`${formatMS_HHMMSS(player.position)}\``
+            flags: [MessageFlags.Ephemeral], content: `Seeked to: \`${formatMS_HHMMSS(player.position)}\``
         });
     }
 } as Command;

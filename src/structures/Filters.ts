@@ -1,9 +1,8 @@
 import { audioOutputsData } from "./Constants";
+import { safeStringify } from "./Utils";
 
 import type { Player } from "./Player";
 import type { AudioOutputs, EQBand, FilterData, LavalinkFilterData, PlayerFilters, TimescaleFilter } from "./Types/Filters";
-import type { FloatNumber, IntegerNumber } from "./Types/Utils";
-
 /**
  * The FilterManager for each player
  */
@@ -663,7 +662,7 @@ export class FilterManager {
     public async setEQ(bands: EQBand | EQBand[]): Promise<this> {
         if (!Array.isArray(bands)) bands = [bands];
 
-        if (!bands.length || !bands.every((band) => JSON.stringify(Object.keys(band).sort()) === '["band","gain"]')) throw new TypeError("Bands must be a non-empty object array containing 'band' and 'gain' properties.");
+        if (!bands.length || !bands.every((band) => safeStringify(Object.keys(band).sort()) === '["band","gain"]')) throw new TypeError("Bands must be a non-empty object array containing 'band' and 'gain' properties.");
 
         for (const { band, gain } of bands) this.equalizerBands[band] = { band, gain };
 
@@ -687,6 +686,6 @@ export class FilterManager {
 
     /** Clears the equalizer bands. */
     public async clearEQ(): Promise<this> {
-        return this.setEQ(new Array(15).fill(0.0).map((gain: FloatNumber, band: IntegerNumber) => ({ band, gain })));
+        return this.setEQ(Array.from({ length: 15 }, (_v, i) => ({ band: i, gain: 0 })));
     }
 }
