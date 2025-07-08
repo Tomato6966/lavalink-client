@@ -806,6 +806,7 @@ export class Player {
                             }
                         });
                     }
+                }
             if (currentTrack) { // If there is a current track, send it to the new node.
                 await this.node.updatePlayer({
                     guildId: this.guildId,
