@@ -98,7 +98,7 @@ export class DefaultQueueStore implements QueueStoreManager {
      * @param value The queue to stringify
      * @returns The stringified queue
      */
-    async stringify(value: StoredQueue) {
+    async stringify(value: StoredQueue | string): Promise<StoredQueue | string> {
         return value; // JSON.stringify(value);
     }
 
@@ -107,8 +107,8 @@ export class DefaultQueueStore implements QueueStoreManager {
      * @param value The queue to parse
      * @returns The parsed queue
      */
-    async parse(value: StoredQueue) {
-        return value; // JSON.parse(value)
+    async parse(value: StoredQueue | string): Promise<Partial<StoredQueue>> {
+        return value as Partial<StoredQueue>; // JSON.parse(value)
     }
 }
 
