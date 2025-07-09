@@ -7,7 +7,7 @@ import { DefaultQueueStore } from "./Queue";
 import { ManagerUtils, MiniMap, safeStringify } from "./Utils";
 
 import type {
-	ChannelDeletePacket, VoicePacket, VoiceServer, VoiceState
+    ChannelDeletePacket, VoicePacket, VoiceServer, VoiceState
 } from "./Types/Utils";
 import type { BotClientOptions, LavalinkManagerEvents, ManagerOptions } from "./Types/Manager";
 import type { PlayerOptions } from "./Types/Player";
