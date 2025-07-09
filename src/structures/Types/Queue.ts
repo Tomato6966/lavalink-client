@@ -1,4 +1,5 @@
 import type { Track, UnresolvedTrack } from "./Track";
+import type { Awaitable } from "./Utils";
 
 export interface StoredQueue {
     current: Track | null;
@@ -8,15 +9,15 @@ export interface StoredQueue {
 
 export interface QueueStoreManager {
     /** @async get a Value (MUST RETURN UNPARSED!) */
-    get: (guildId: string) => Promise<StoredQueue | string>;
+    get: (guildId: string) => Awaitable<StoredQueue | string>;
     /** @async Set a value inside a guildId (MUST BE UNPARSED) */
-    set: (guildId: string, value: StoredQueue | string) => Promise<void | boolean>;
+    set: (guildId: string, value: StoredQueue | string) => Awaitable<void | boolean>;
     /** @async Delete a Database Value based of it's guildId */
-    delete: (guildId: string) => Promise<void | boolean>;
+    delete: (guildId: string) => Awaitable<void | boolean>;
     /** @async Transform the value(s) inside of the QueueStoreManager (IF YOU DON'T NEED PARSING/STRINGIFY, then just return the value) */
-    stringify: (value: StoredQueue | string) => Promise<StoredQueue | string>;
+    stringify: (value: StoredQueue | string) => Awaitable<StoredQueue | string>;
     /** @async Parse the saved value back to the Queue (IF YOU DON'T NEED PARSING/STRINGIFY, then just return the value) */
-    parse: (value: StoredQueue | string) => Promise<Partial<StoredQueue>>;
+    parse: (value: StoredQueue | string) => Awaitable<Partial<StoredQueue>>;
 }
 
 export interface ManagerQueueOptions {

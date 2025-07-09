@@ -611,3 +611,5 @@ export type LavaSearchQuery = {
     /** The Types to filter the search to */
     types?: LavaSearchType[]
 };
+
+export type Awaitable<T> = Promise<T> | T
