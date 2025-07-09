@@ -168,6 +168,8 @@ export interface Exception {
     message: string;
     /** Cause by lavalink */
     cause: string;
+    /** causeStackTrace by lavalink */
+    causeStackTrace: string;
 }
 
 export interface PlayerEvent {
