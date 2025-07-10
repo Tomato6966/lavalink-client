@@ -2,19 +2,19 @@
   "name": "lavalink-client",
   "version": "2.5.7",
   "description": "Easy, flexible and feature-rich lavalink@v4 Client. Both for Beginners and Proficients.",
-  "main": "./dist/cjs/index.js",
-  "module": "./dist/esm/index.js",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "require": "./dist/cjs/index.js",
-      "import": "./dist/esm/index.js",
-      "default": "./dist/cjs/index.js"
+      "require": "./dist/index.js",
+      "import": "./dist/index.mjs",
+      "default": "./dist/index.js"
     }
   },
   "scripts": {
-    "build": "node esbuild.config.js && tsc -p tsconfig.build.json && tsc-alias",
+    "build": "tsup",
     "lint": "eslint .",
     "lint:fix": "npm run lint -- --fix",
     "test": "node -v",
@@ -64,6 +64,7 @@
     "esbuild": "^0.25.6",
     "eslint": "^9.27.0",
     "tsc-alias": "^1.8.16",
+    "tsup": "^8.5.0",
     "typescript": "^5.8.3"
   },
   "dependencies": {
