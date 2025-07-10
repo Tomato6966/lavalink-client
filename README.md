@@ -66,6 +66,7 @@ Check out the [Documentation](https://tomato6966.github.io/lavalink-client/)
 
 - [Betty](https://betty.cx/)
 - [Mivator](https://discord.gg/5dUb7M2qCj)
+- [Mintone](https://mintone.tech/)
 
 # Features
 
