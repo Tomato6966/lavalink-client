@@ -23,6 +23,7 @@ export default [
             "**/testBot",
             "**/tools",
             "eslint.config.mjs",
+            "esbuild.config.js",
         ],
     },
     ...compat.extends("plugin:@typescript-eslint/recommended"),
