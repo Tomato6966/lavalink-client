@@ -61,7 +61,6 @@
     "@types/ws": "^8.18.1",
     "@typescript-eslint/eslint-plugin": "^8.32.1",
     "@typescript-eslint/parser": "^8.32.1",
-    "esbuild": "^0.25.6",
     "eslint": "^9.27.0",
     "tsc-alias": "^1.8.16",
     "tsup": "^8.5.0",
