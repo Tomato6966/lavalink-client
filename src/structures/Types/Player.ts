@@ -80,7 +80,7 @@ export interface PlayerOptions {
     /** If a volume should be applied via filters instead of lavalink-volume */
     applyVolumeAsFilter?: boolean;
     /** Custom Data for the player get/set datastorage */
-    customData?:anyObject;
+    customData?: anyObject;
 }
 
 export type anyObject = { [key: string | number]: string | number | null | anyObject };
