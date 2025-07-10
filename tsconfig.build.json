@@ -1,7 +1,8 @@
 {
+    "extends": "./tsconfig.json",
     "compilerOptions": {
         "target": "ESNext",
-        "module": "CommonJS",
+        "module": "ESNext",
         "declaration": true,
         "emitDeclarationOnly": true,
         "outDir": "./dist",
@@ -13,6 +14,12 @@
         "skipLibCheck": true,
     },
     "include": [
-        "src"
+        "src/**/*"
+    ],
+    "exclude": [
+        "node_modules",
+        "dist",
+        "**/*.test.ts",
+        "**/*.spec.ts"
     ]
 }
