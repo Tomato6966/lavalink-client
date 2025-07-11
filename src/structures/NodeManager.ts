@@ -61,7 +61,7 @@ export class NodeManager extends EventEmitter {
     /**
      * The LavalinkManager that created this NodeManager
      */
-    public LavalinkManager: LavalinkManager;
+    private readonly LavalinkManager: LavalinkManager;
     /**
      * A map of all nodes in the nodeManager
      */

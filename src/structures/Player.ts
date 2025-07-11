@@ -278,7 +278,7 @@ export class Player {
             });
         }
 
-        if (!this.queue.current && this.queue.tracks.length) await queueTrackEnd(this);
+        if (!this.queue.current && this.queue.tracks.length) await queueTrackEnd(this, false, this.LavalinkManager);
 
         if (this.queue.current && this.LavalinkManager.utils.isUnresolvedTrack(this.queue.current)) {
             if (this.LavalinkManager.options?.advancedOptions?.enableDebugEvents) {
@@ -315,7 +315,7 @@ export class Player {
                 if (options && "track" in options) delete options.track;
 
                 // get rid of the current song without shifting the queue, so that the shifting can happen inside the next .play() call when "autoSkipOnResolveError" is true
-                await queueTrackEnd(this, true);
+                await queueTrackEnd(this, true, this.LavalinkManager);
 
                 // try to play the next track if possible
                 if (this.LavalinkManager.options?.autoSkipOnResolveError === true && this.queue.tracks[0]) return this.play(options);
