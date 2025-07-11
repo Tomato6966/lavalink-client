@@ -64,9 +64,12 @@ Check out the [Documentation](https://tomato6966.github.io/lavalink-client/)
 
 # Used in:
 
-- [Betty](https://betty.cx/)
-- [Mivator](https://discord.gg/5dUb7M2qCj)
-- [Stelle](https://github.com/Ganyu-Studios/stelle-music)
+- [**Mivator** *(Bot by Chrissy8283 aka @Tomato6966)*](https://discord.gg/5dUb7M2qCj)
+- [Betty *(Bot by good friend of Chrissy, aka fb_sean)*](https://betty.cx/)
+**Bots by Contributors:**
+- [Mintone (@appujet)](https://mintone.tech/)
+- [Stelle (@EvilG-MC)](https://github.com/Ganyu-Studios/stelle-music)
+
 
 # Features
 
