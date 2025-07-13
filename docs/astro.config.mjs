@@ -10,11 +10,28 @@ export default defineConfig({
     integrations: [
         starlight({
             title: "Lavalink Client",
-            social: {
-                github: "https://github.com/Tomato6966/lavalink-client",
-                discord: "https://discord.gg/AsgD3gtPnb",
-                email: "mailto:chrissy@mivator.com",
-            },
+            social: [
+                {
+                    icon: "discord",
+                    href: "https://discord.gg/lavalink-1082302532421943407",
+                    label: "Support-discord"
+                },
+                {
+                    icon: "seti:github",
+                    href: "https://github.com/Tomato6966/lavalink-client",
+                    label: "Github Repository"
+                },
+                {
+                    icon: "email",
+                    href: "mailto:chrissy@mivator.com",
+                    label: "Send an Email"
+                },
+                {
+                    icon: "discord",
+                    href: "https://discord.gg/AsgD3gtPnb",
+                    label: "Personal-discord"
+                },
+            ],
             editLink: {
                 baseUrl: "https://github.com/Tomato6966/lavalink-client/tree/main",
             },
@@ -103,8 +120,12 @@ export default defineConfig({
                     link: "https://github.com/Tomato6966/lavalink-client/tree/main/testBot",
                 },
                 {
-                    label: "Official Lavalink-Discord",
+                    label: "Official Lavalink-Discord & - SUPPORT",
                     link: "https://discord.gg/lavalink-1082302532421943407"
+                },
+                {
+                    label: "Personal Discord & MIvator",
+                    link: "https://discord.gg/AsgD3gtPnb"
                 },
                 {
                     label: "Official Lavalink-Web",
