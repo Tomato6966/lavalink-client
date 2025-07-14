@@ -89,7 +89,7 @@ This client powers a variety of Discord bots:
   - [Mintone](https://mintone.tech/) (@appujet)
   - [Stelle](https://github.com/Ganyu-Studios/stelle-music) (@EvilG-MC)
   - [Panais](https://panais.xyz/) (@LucasB25)
-  
+
 ## 🛠️ Configuration Examples
 
 ### Basic Setup
