@@ -81,8 +81,7 @@ yarn add tomato6966/lavalink-client
 
 ***
 
-***
-### 💖 Used In
+## 💖 Used In
 This client powers a variety of Discord bots:
 - **[Mivator](https://discord.gg/5dUb7M2qCj)** (Bot by @Tomato6966)
 - **[Betty](https://betty.cx/)** (Bot by fb_sean)
