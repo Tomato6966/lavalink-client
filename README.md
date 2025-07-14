@@ -81,6 +81,15 @@ yarn add tomato6966/lavalink-client
 
 ***
 
+### 💖 Used In
+This client powers a variety of Discord bots:
+- **[Mivator](https://discord.gg/5dUb7M2qCj)** (Bot by @Tomato6966)
+- **[Betty](https://betty.cx/)** (Bot by fb_sean)
+- **Bots by Contributors:**
+  - [Mintone](https://mintone.tech/) (@appujet)
+  - [Stelle](https://github.com/Ganyu-Studios/stelle-music) (@EvilG-MC)
+  - [Panais](https://panais.xyz/) (@LucasB25)
+  
 ## 🛠️ Configuration Examples
 
 ### Basic Setup
@@ -397,14 +406,5 @@ if (response.tracks.length > 0) {
     if (!player.playing) player.play();
 }
 ```
-
-### 💖 Used In
-This client powers a variety of Discord bots:
-- **[Mivator](https://discord.gg/5dUb7M2qCj)** (Bot by @Tomato6966)
-- **[Betty](https://betty.cx/)** (Bot by fb_sean)
-- **Bots by Contributors:**
-  - [Mintone](https://mintone.tech/) (@appujet)
-  - [Stelle](https://github.com/Ganyu-Studios/stelle-music) (@EvilG-MC)
-  - [Panais](https://panais.xyz/) (@LucasB25)
 
 </div>
