@@ -207,6 +207,7 @@ export class NodeManager extends EventEmitter {
         if (typeof movePlayers !== "boolean")
             throw new TypeError("nodeManager.deleteNode: movePlayers must be a boolean");
         decodeNode.destroy(DestroyReasons.NodeDeleted, true, movePlayers);
+        this.nodes.delete(decodeNode.id);
         return;
     }
 }
