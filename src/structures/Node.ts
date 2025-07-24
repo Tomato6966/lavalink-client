@@ -1256,7 +1256,8 @@ export class LavalinkNode {
     }
     /** @private util function for handling trackStart event */
     private async trackStart(player: Player, track: Track, payload: TrackStartEvent): Promise<void> {
-        if (player.get('internal_nodeChanging') !== true) { // Don't change the playing state if a nodeChange is in progress.
+        if (!player.get('internal_nodeChanging')) { // Don't change the playing state if a nodeChange is in progress.
+
             player.playing = true;
             player.paused = false;
         }
