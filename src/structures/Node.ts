@@ -480,7 +480,7 @@ export class LavalinkNode {
      * ```
      */
     public destroy(destroyReason?: DestroyReasonsType, deleteNode: boolean = true, movePlayers: boolean = false): void {
-        if (!this.connected) return;
+        // if (!this.connected) return; This Prevents the node from being destroyed if it is not connected, but we want to allow it to be destroyed even if not connected.
 
         const players = this.NodeManager.LavalinkManager.players.filter(p => p.node.id === this.id);
         if (players.size) {
