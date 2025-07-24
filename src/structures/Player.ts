@@ -2,7 +2,7 @@ import { DebugEvents } from "./Constants";
 import { bandCampSearch } from "./CustomSearches/BandCampSearch";
 import { FilterManager } from "./Filters";
 import { Queue, QueueSaver } from "./Queue";
-import { queueTrackEnd, safeStringify } from "./Utils";
+import { queueTrackEnd } from "./Utils";
 
 import type { DestroyReasons } from "./Constants";
 import type { Track, UnresolvedTrack } from "./Types/Track";
@@ -731,7 +731,12 @@ export class Player {
     /**
      * Move the player on a different Audio-Node
      * @param newNode New Node / New Node Id
-     * @param checkSources If it should check if the sources are supported by the new node
+     * @param checkSources If it should check if the sources are supported by the new node @default true
+     * @return The new Node Id
+     * @example
+     * ```ts
+     * const changeNode = await player.changeNode(newNode, true);
+     * ```
      */
     public async changeNode(newNode: LavalinkNode | string, checkSources: boolean = true) {
         const updateNode = typeof newNode === "string" ? this.LavalinkManager.nodeManager.nodes.get(newNode) : newNode;
@@ -766,11 +771,9 @@ export class Player {
 
         const data = this.toJSON();
         const currentTrack = this.queue.current;
-        const segments = await this.getSponsorBlock().catch(() => []);
-        const voiceData = this.voice;
-        if (!voiceData.endpoint ||
-            !voiceData.sessionId ||
-            !voiceData.token)
+        if (!this.voice.endpoint ||
+            !this.voice.sessionId ||
+            !this.voice.token)
             throw new Error("Voice Data is missing, can't change the node");
         this.set("internal_nodeChanging", true); // This will stop execution of trackEnd or queueEnd event while changing the node
         if (this.node.connected) await this.node.destroyPlayer(this.guildId); // destroy the player on the currentNode if it's connected
@@ -778,59 +781,51 @@ export class Player {
         const now = performance.now();
         try {
             await this.connect();
-            const endpoint = `/sessions/${this.node.sessionId}/players/${this.guildId}`;  //Send the VoiceData to the newly connected node.
-            await this.node.request(endpoint, r => {
-                r.method = "PATCH";
-                r.headers["Content-Type"] = "application/json";
-                r.body = safeStringify({
-                    voice: {
-                        token: voiceData.token,
-                        endpoint: voiceData.endpoint,
-                        sessionId: voiceData.sessionId
-                    }
-                });
-            });
             const hasSponsorBlock = this.node.info?.plugins?.find(v => v.name === "sponsorblock-plugin");
-            if (hasSponsorBlock) {
-                if (segments.length) {
-                    await this.setSponsorBlock(segments).catch(error => {
-                        if (this.LavalinkManager.options?.advancedOptions?.enableDebugEvents) {
-                            this.LavalinkManager.emit("debug", DebugEvents.PlayerChangeNode, {
-                                state: "error",
-                                error: error,
-                                message: `Player > changeNode() Unable to set SponsorBlock Segments`,
-                                functionLayer: "Player > changeNode()",
-                            });
-                        }
-                    });
-                } else {
-                    await this.setSponsorBlock().catch(error => {
-                        if (this.LavalinkManager.options?.advancedOptions?.enableDebugEvents) {
-                            this.LavalinkManager.emit("debug", DebugEvents.PlayerChangeNode, {
-                                state: "error",
-                                error: error,
-                                message: `Player > changeNode() Unable to set SponsorBlock Segments`,
-                                functionLayer: "Player > changeNode()",
-                            });
-                        }
-                    });
-                }
-            }
-            if (currentTrack) { // If there is a current track, send it to the new node.
-                await this.node.updatePlayer({
-                    guildId: this.guildId,
-                    noReplace: false,
-                    playerOptions: {
-                        track: currentTrack ?? null,
-                        position: currentTrack ? data.position : 0,
-                        volume: data.lavalinkVolume,
-                        paused: data.paused,
-                        //filters: { ...data.filters, equalizer: data.equalizer }, Sending filters on nodeChange causes issues (player gets dicsonnected)
+                if (hasSponsorBlock) {
+                    const sponsorBlockCategories = this.get("internal_sponsorBlockCategories");
+                    if (Array.isArray(sponsorBlockCategories) && sponsorBlockCategories.length) {
+                        await this.setSponsorBlock(sponsorBlockCategories).catch(error => {
+                            if (this.LavalinkManager.options?.advancedOptions?.enableDebugEvents) {
+                                this.LavalinkManager.emit("debug", DebugEvents.PlayerChangeNode, {
+                                    state: "error",
+                                    error: error,
+                                    message: `Player > changeNode() Unable to set SponsorBlock Segments`,
+                                    functionLayer: "Player > changeNode()",
+                                });
+                            }
+                        });
+                    } else {
+                        await this.setSponsorBlock().catch(error => {
+                            if (this.LavalinkManager.options?.advancedOptions?.enableDebugEvents) {
+                                this.LavalinkManager.emit("debug", DebugEvents.PlayerChangeNode, {
+                                    state: "error",
+                                    error: error,
+                                    message: `Player > changeNode() Unable to set SponsorBlock Segments`,
+                                    functionLayer: "Player > changeNode()",
+                                });
+                            }
+                        });
                     }
-                });
-            }
-            this.paused = data.paused;
-            this.playing = data.playing;
+                }
+            await this.node.updatePlayer({
+                guildId: this.guildId,
+                noReplace: false,
+                playerOptions: {
+                    ...(currentTrack && {
+                        track: currentTrack,
+                        position: data.lastPosition || 0,
+                        volume: this.lavalinkVolume,
+                        paused: this.paused,
+                    }),
+                    voice: {
+                        token: this.voice.token,
+                        endpoint: this.voice.endpoint,
+                        sessionId: this.voice.sessionId,
+                    },
+                },
+            });
+            this.filterManager.applyPlayerFilters(); // Apply filters to the new node
             this.ping.lavalink = Math.round((performance.now() - now) / 10) / 100;
             return this.node.id;
         } catch (error) {

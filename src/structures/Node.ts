@@ -1256,8 +1256,10 @@ export class LavalinkNode {
     }
     /** @private util function for handling trackStart event */
     private async trackStart(player: Player, track: Track, payload: TrackStartEvent): Promise<void> {
-        player.playing = true;
-        player.paused = false;
+        if (player.get('internal_nodeChanging') !== true) { // Don't change the playing state if a nodeChange is in progress.
+            player.playing = true;
+            player.paused = false;
+        }
         // don't emit the event if previous track == new track aka track loop
         if (this.NodeManager.LavalinkManager.options?.emitNewSongsOnly === true && player.queue.previous[0]?.info?.identifier === track?.info?.identifier) {
             if (this.NodeManager.LavalinkManager.options?.advancedOptions?.enableDebugEvents) {
@@ -1481,6 +1483,8 @@ export class LavalinkNode {
             r.body = safeStringify(segments.map(v => v.toLowerCase()));
         });
 
+        player.set("internal_sponsorBlockCategories", segments.map(v => v.toLowerCase()));
+
         if (this.NodeManager.LavalinkManager.options?.advancedOptions?.enableDebugEvents) {
             this.NodeManager.LavalinkManager.emit("debug", DebugEvents.SetSponsorBlock, {
                 state: "log",
@@ -1510,6 +1514,8 @@ export class LavalinkNode {
         await this.request(`/sessions/${this.sessionId}/players/${player.guildId}/sponsorblock/categories`, (r) => {
             r.method = "DELETE";
         });
+
+        player.set("internal_sponsorBlockCategories", []);
 
         if (this.NodeManager.LavalinkManager.options?.advancedOptions?.enableDebugEvents) {
             this.NodeManager.LavalinkManager.emit("debug", DebugEvents.DeleteSponsorBlock, {
