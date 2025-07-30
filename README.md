@@ -70,7 +70,7 @@ Check out the [Documentation](https://tomato6966.github.io/lavalink-client/)
   - [Mintone (@appujet)](https://mintone.tech/)
   - [Stelle (@EvilG-MC)](https://github.com/Ganyu-Studios/stelle-music)
   - [Panais (@LucasB25)](https://panais.xyz/)
-  - [Akyn (@notdeltaxd](https://akynbot.vercel.app/)
+  - [Akyn (@notdeltaxd)](https://akynbot.vercel.app/)
 - **Community:**
   - [Soundy (@idMJA)](https://github.com/idMJA/Soundy)
 
