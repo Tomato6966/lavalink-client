@@ -843,6 +843,28 @@ export class Player {
         }
     }
 
+    /**
+     * Move the player to a different node. If no node is provided, it will find the least used node that is not the same as the current node.
+     * @param node the id of the node to move to
+     * @returns the player
+     * @throws RangeError if there is no available nodes.
+     * @throws Error if the node to move to is the same as the current node.
+     */
+    public async moveNode(node?: string) {
+        try {
+            if (!node) node = Array.from(this.LavalinkManager.nodeManager.leastUsedNodes("playingPlayers"))
+                .find(n => n.connected && n.options.id !== this.node.options.id).id;
+            if (!node || !this.LavalinkManager.nodeManager.nodes.get(node)) throw new RangeError("No nodes are available.");
+            if (this.node.options.id === node) return this;
+            this.LavalinkManager.emit("debug", DebugEvents.PlayerChangeNode, { state: "log", message: `Player.moveNode() was executed, trying to move from "${this.node.id}" to "${node}"`, functionLayer: "Player > moveNode()" });
+            const updateNode = this.LavalinkManager.nodeManager.nodes.get(node);
+            if (!updateNode) throw new RangeError("No nodes are available.");
+            return await this.changeNode(updateNode);
+        } catch (error) {
+            throw new Error(`Failed to move the node: ${error}`);
+        }
+    }
+    
     /** Converts the Player including Queue to a Json state */
     public toJSON() {
         return {

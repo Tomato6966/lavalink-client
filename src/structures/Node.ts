@@ -5,12 +5,12 @@ import { DebugEvents, DestroyReasons, validSponsorBlocks } from "./Constants";
 import { NodeSymbol, queueTrackEnd, safeStringify } from "./Utils";
 
 import type {
-	Base64, InvalidLavalinkRestRequest, LavalinkPlayer, LavaSearchQuery, LavaSearchResponse,
-	LoadTypes, LyricsFoundEvent, LyricsLineEvent, LyricsNotFoundEvent, PlayerEvents,
-	PlayerEventType, PlayerUpdateInfo, RoutePlanner, SearchQuery, SearchResult,
-	Session, SponsorBlockChaptersLoaded, SponsorBlockChapterStarted, SponsorBlockSegmentSkipped,
-	SponsorBlockSegmentsLoaded, TrackEndEvent, TrackExceptionEvent, TrackStartEvent,
-	TrackStuckEvent, WebSocketClosedEvent
+    Base64, InvalidLavalinkRestRequest, LavalinkPlayer, LavaSearchQuery, LavaSearchResponse,
+    LoadTypes, LyricsFoundEvent, LyricsLineEvent, LyricsNotFoundEvent, PlayerEvents,
+    PlayerEventType, PlayerUpdateInfo, RoutePlanner, SearchQuery, SearchResult,
+    Session, SponsorBlockChaptersLoaded, SponsorBlockChapterStarted, SponsorBlockSegmentSkipped,
+    SponsorBlockSegmentsLoaded, TrackEndEvent, TrackExceptionEvent, TrackStartEvent,
+    TrackStuckEvent, WebSocketClosedEvent
 } from "./Types/Utils";
 import type { Player } from "./Player";
 import type { DestroyReasonsType, DisconnectReasonsType } from "./Types/Player";
@@ -1121,6 +1121,17 @@ export class LavalinkNode {
                 this.reconnect();
             }
         }
+        
+        this.NodeManager.LavalinkManager.players
+            .filter((p) => p?.node?.options?.id === this?.options?.id)
+            .forEach((p) => {
+                if (!this.NodeManager.LavalinkManager.options.autoMove) return (p.playing = false);
+                if (this.NodeManager.LavalinkManager.options.autoMove) {
+                    if (this.NodeManager.nodes.filter((n) => n.connected).size === 0)
+                        return (p.playing = false);
+                    p.moveNode();
+                }
+            });
     }
 
     /** @private util function for handling error events from websocket */
