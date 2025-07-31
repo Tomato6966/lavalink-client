@@ -122,7 +122,7 @@ export default {
         }, 25000)); // allow the autocomplete res to be valid to up to 25s
 
         await interaction.respond(
-            res[`${type}s`].map((t: LavaSearchFilteredResponse, i) => ({ name: `[${t.pluginInfo.totalTracks || NaN} Tracks] ${t.info.title || t.info.name} (by ${t.pluginInfo.author || "Unknown-Author"})`.substring(0, 100), value: `autocomplete_${i}` })).slice(0, 25)
+            res[`${type}s`].map((t: LavaSearchFilteredResponse, i) => ({ name: `[${t.pluginInfo.totalTracks || NaN} Tracks] ${t.info.title || t.info.name} (by ${t.pluginInfo.author || t.info?.author || "Unknown-Author"})`.substring(0, 100), value: `autocomplete_${i}` })).slice(0, 25)
         );
     }
 } as Command;
