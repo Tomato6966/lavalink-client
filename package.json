@@ -72,5 +72,10 @@
   "engines": {
     "node": ">=18.0.0",
     "bun": ">=1.1.27"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "esbuild"
+    ]
   }
 }
