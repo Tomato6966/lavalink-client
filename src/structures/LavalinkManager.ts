@@ -80,6 +80,7 @@ export class LavalinkManager extends EventEmitter {
      */
     private applyOptions(options: ManagerOptions) {
         this.options = {
+            ...options, // set the rest of the options without overriding the defined ones
             client: {
                 ...options?.client,
                 id: options?.client?.id,
