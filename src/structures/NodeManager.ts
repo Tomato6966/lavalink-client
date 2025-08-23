@@ -201,10 +201,12 @@ export class NodeManager extends EventEmitter {
      * ```
      */
     deleteNode(node: LavalinkNodeIdentifier | LavalinkNode, movePlayers: boolean = false): void {
-        const decodeNode = typeof node === "string" ? this.nodes.get(node) : node || this.leastUsedNodes()[0];
-        if (!decodeNode) throw new Error("Node was not found");
-        if (movePlayers) decodeNode.destroy(DestroyReasons.NodeDeleted, true, true);
-        else decodeNode.destroy(DestroyReasons.NodeDeleted);
+        const decodeNode = typeof node === "string" ? this.nodes.get(node) : node;
+        if (!(decodeNode instanceof LavalinkNode))
+            throw new RangeError("nodeManager.deleteNode: The node you provided is not valid or doesn't exist.");
+        if (typeof movePlayers !== "boolean")
+            throw new TypeError("nodeManager.deleteNode: movePlayers must be a boolean");
+        decodeNode.destroy(DestroyReasons.NodeDeleted, true, movePlayers);
         this.nodes.delete(decodeNode.id);
         return;
     }

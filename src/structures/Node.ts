@@ -5,12 +5,12 @@ import { DebugEvents, DestroyReasons, validSponsorBlocks } from "./Constants";
 import { NodeSymbol, queueTrackEnd, safeStringify } from "./Utils";
 
 import type {
-	Base64, InvalidLavalinkRestRequest, LavalinkPlayer, LavaSearchQuery, LavaSearchResponse,
-	LoadTypes, LyricsFoundEvent, LyricsLineEvent, LyricsNotFoundEvent, PlayerEvents,
-	PlayerEventType, PlayerUpdateInfo, RoutePlanner, SearchQuery, SearchResult,
-	Session, SponsorBlockChaptersLoaded, SponsorBlockChapterStarted, SponsorBlockSegmentSkipped,
-	SponsorBlockSegmentsLoaded, TrackEndEvent, TrackExceptionEvent, TrackStartEvent,
-	TrackStuckEvent, WebSocketClosedEvent
+    Base64, InvalidLavalinkRestRequest, LavalinkPlayer, LavaSearchQuery, LavaSearchResponse,
+    LoadTypes, LyricsFoundEvent, LyricsLineEvent, LyricsNotFoundEvent, PlayerEvents,
+    PlayerEventType, PlayerUpdateInfo, RoutePlanner, SearchQuery, SearchResult,
+    Session, SponsorBlockChaptersLoaded, SponsorBlockChapterStarted, SponsorBlockSegmentSkipped,
+    SponsorBlockSegmentsLoaded, TrackEndEvent, TrackExceptionEvent, TrackStartEvent,
+    TrackStuckEvent, WebSocketClosedEvent
 } from "./Types/Utils";
 import type { Player } from "./Player";
 import type { DestroyReasonsType, DisconnectReasonsType } from "./Types/Player";
@@ -480,7 +480,7 @@ export class LavalinkNode {
      * ```
      */
     public destroy(destroyReason?: DestroyReasonsType, deleteNode: boolean = true, movePlayers: boolean = false): void {
-        if (!this.connected) return;
+        // if (!this.connected) return; This Prevents the node from being destroyed if it is not connected, but we want to allow it to be destroyed even if not connected.
 
         const players = this.NodeManager.LavalinkManager.players.filter(p => p.node.id === this.id);
         if (players.size) {
@@ -1121,6 +1121,17 @@ export class LavalinkNode {
                 this.reconnect();
             }
         }
+        
+        this.NodeManager.LavalinkManager.players
+            .filter((p) => p?.node?.options?.id === this?.options?.id)
+            .forEach((p) => {
+                if (!this.NodeManager.LavalinkManager.options.autoMove) return (p.playing = false);
+                if (this.NodeManager.LavalinkManager.options.autoMove) {
+                    if (this.NodeManager.nodes.filter((n) => n.connected).size === 0)
+                        return (p.playing = false);
+                    p.moveNode();
+                }
+            });
     }
 
     /** @private util function for handling error events from websocket */
@@ -1256,8 +1267,11 @@ export class LavalinkNode {
     }
     /** @private util function for handling trackStart event */
     private async trackStart(player: Player, track: Track, payload: TrackStartEvent): Promise<void> {
-        player.playing = true;
-        player.paused = false;
+        if (!player.get('internal_nodeChanging')) { // Don't change the playing state if a nodeChange is in progress.
+
+            player.playing = true;
+            player.paused = false;
+        }
         // don't emit the event if previous track == new track aka track loop
         if (this.NodeManager.LavalinkManager.options?.emitNewSongsOnly === true && player.queue.previous[0]?.info?.identifier === track?.info?.identifier) {
             if (this.NodeManager.LavalinkManager.options?.advancedOptions?.enableDebugEvents) {
@@ -1481,6 +1495,8 @@ export class LavalinkNode {
             r.body = safeStringify(segments.map(v => v.toLowerCase()));
         });
 
+        player.set("internal_sponsorBlockCategories", segments.map(v => v.toLowerCase()));
+
         if (this.NodeManager.LavalinkManager.options?.advancedOptions?.enableDebugEvents) {
             this.NodeManager.LavalinkManager.emit("debug", DebugEvents.SetSponsorBlock, {
                 state: "log",
@@ -1510,6 +1526,8 @@ export class LavalinkNode {
         await this.request(`/sessions/${this.sessionId}/players/${player.guildId}/sponsorblock/categories`, (r) => {
             r.method = "DELETE";
         });
+
+        player.set("internal_sponsorBlockCategories", []);
 
         if (this.NodeManager.LavalinkManager.options?.advancedOptions?.enableDebugEvents) {
             this.NodeManager.LavalinkManager.emit("debug", DebugEvents.DeleteSponsorBlock, {

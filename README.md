@@ -48,10 +48,10 @@
 <summary><strong>👉 via NPM</strong></summary>
 
 ```bash
-# Stable
+# Stable (install release)
 npm install --save lavalink-client
 
-# Development
+# Development (Install github dev-branch)
 npm install --save tomato6966/lavalink-client
 ```
 
@@ -61,16 +61,40 @@ npm install --save tomato6966/lavalink-client
 <summary><strong>👉 via YARN</strong></summary>
 
 ```bash
-# Stable
+# Stable (install release)
 yarn add lavalink-client
 
-# Development
+# Development (Install github dev-branch)
 yarn add tomato6966/lavalink-client
 ```
 
 </details>
 
-***
+<details>
+<summary><strong>👉 via BUN</strong></summary>
+
+```bash
+# Stable (install release)
+bun add lavalink-client
+
+# Development (Install github dev-branch)
+bun add tomato6966/lavalink-client
+```
+
+</details>
+
+<details>
+<summary><strong>👉 via pnpm</strong></summary>
+
+```bash
+# Stable (install release)
+pnpm add lavalink-client
+
+# Development (Install github dev-branch)
+pnpm add tomato6966/lavalink-client
+```
+
+</details>
 
 ## 📖 Documentation & Guides
 
@@ -83,13 +107,14 @@ yarn add tomato6966/lavalink-client
 
 ## 💖 Used In
 This client powers various Discord bots:
-- **[Mivator](https://discord.gg/5dUb7M2qCj)** (Bot by @Tomato6966)
-- **[Betty](https://betty.cx/)** (Bot by fb_sean)
+- **[Mivator](https://discord.gg/5dUb7M2qCj)** (Public Bot by @Tomato6966)
+- **[Betty](https://betty.cx/)** (Public Bot by fb_sean)
 - **Bots by Contributors:**
   - [Mintone](https://mintone.tech/) (@appujet)
   - [Stelle](https://github.com/Ganyu-Studios/stelle-music) (@EvilG-MC)
   - [Panais](https://panais.xyz/) (@LucasB25)
-- **Bots Community:**
+  - [Akyn](https://akynbot.vercel.app/) (@notdeltaxd)
+- **Bots Community (Users):**
   - [Soundy](https://github.com/idMJA/Soundy) (@idMJA)
 
 ***
@@ -150,7 +175,7 @@ client.login(process.env.DISCORD_TOKEN);
 ```
 
 <details>
-<summary><strong>🔩 Complete Configuration Example (All Options)</strong></summary>
+<summary><strong>🔩 Complete Configuration Example (almost all Options)</strong></summary>
 
 ```typescript
 import { LavalinkManager, QueueChangesWatcher, QueueStoreManager, StoredQueue } from "lavalink-client";
@@ -172,8 +197,6 @@ const client = new Client({
     ]
 });
 
-const previouslyUsedSessions = new Map<string, string>(); // Example: nodeManager.on("connect", node => previouslyUsedSessions.set(node.id, node.sessionId))
-
 client.lavalink = new LavalinkManager({
     nodes: [
         {
@@ -181,14 +204,13 @@ client.lavalink = new LavalinkManager({
             host: "localhost",
             port: 2333,
             id: "testnode",
-            sessionId: previouslyUsedSessions.get("testnode"), // For resuming
             secure: false, // Set to true for wss://
             retryAmount: 5,
             retryDelay: 10_000, // 10 seconds
         }
     ],
     sendToShard: (guildId, payload) => client.guilds.cache.get(guildId)?.shard?.send(payload),
-    autoSkip: true,
+    autoSkip: true, // automatically play the next song of the queue, on: trackend, trackerror, trackexception
     client: {
         id: process.env.CLIENT_ID,
         username: "TESTBOT",
@@ -204,6 +226,7 @@ client.lavalink = new LavalinkManager({
         },
         onEmptyQueue: {
             destroyAfterMs: 30_000,
+            // function get's called onqueueempty, and if there are songs added to the queue, it continues playing. if not then not (autoplay functionality)
             // autoPlayFunction: async (player) => { /* ... */ },
         },
         useUnresolvedData: true,
@@ -272,6 +295,9 @@ These events are emitted from the main `LavalinkManager` instance and relate to 
 - `trackError (player, track, payload)`
 - `queueEnd (player)`
 
+<details>
+<summary><strong>📢 Example for Manager-Event-Listeners</strong></summary>
+
 ```javascript
 // Example: Listening to a track start event
 client.lavalink.on("trackStart", (player, track) => {
@@ -286,6 +312,7 @@ client.lavalink.on("queueEnd", (player) => {
     player.destroy();
 });
 ```
+</details>
 
 ### Node Manager Events
 These events are emitted from `lavalink.nodeManager` and relate to the Lavalink node connections.
@@ -298,6 +325,9 @@ These events are emitted from `lavalink.nodeManager` and relate to the Lavalink 
 - `error (node, error, payload)`
 - `resumed (node, payload, players)`
 
+<details>
+<summary><strong>📢 Example for Node-Event-Listeners</strong></summary>
+
 ```javascript
 // Example: Logging node connections and errors
 client.lavalink.nodeManager.on("connect", (node) => {
@@ -308,6 +338,7 @@ client.lavalink.nodeManager.on("error", (node, error) => {
   console.error(`Node "${node.id}" encountered an error:`, error.message);
 });
 ```
+</details>
 
 ***
 
@@ -321,6 +352,9 @@ Resuming allows your music bot to continue playback even after a restart.
 3.  **Re-create Players:** Use the data from the `resumed` event and your own saved data (from a database/store) to rebuild the players and their queues.
 
 > 💡 **For a complete, working example, see the [official test bot's implementation](https://github.com/Tomato6966/lavalink-client/blob/main/testBot/Utils/handleResuming.ts).**
+
+<details>
+<summary><strong>💡 Principle of how to enable **resuming**</strong></summary>
 
 ```javascript
 // 1. Enable resuming on connect
@@ -381,9 +415,18 @@ client.lavalink.on("playerDestroy", (player) => {
     deleteFromDatabase(player.guildId);
 });
 ```
+</details>
 
-### How to Use Plugins (e.g., flowertts)
+### How to Use Plugins
+Lavalink client supports most of the major lavalink-plugins.
+The client itself is - for beginner friendly reasons - atm not extendable (via plugins)
+You can just use the built in functions (sponsor block, lyrics) or search plattforms (deezer, spotify, apple music, youtube, ...) and use the lavalink-plugins without any configuration on the client side.
+  
+Some plugins require extra-parameters, such as flowerytts:
 Pass extra parameters to the search function to use plugin-specific features.
+
+<details>
+<summary><strong>How to use the flowerytts plugin</strong></summary>
 
 ```javascript
 // Example for flowertts plugin
@@ -410,5 +453,6 @@ if (response.tracks.length > 0) {
     if (!player.playing) player.play();
 }
 ```
+</details>
 
 </div>
