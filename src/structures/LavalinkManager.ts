@@ -4,22 +4,22 @@ import { DebugEvents, DestroyReasons } from "./Constants";
 import { NodeManager } from "./NodeManager";
 import { Player } from "./Player";
 import { DefaultQueueStore } from "./Queue";
-import { LavalinkNodeOptions } from "./Types/Node";
 import { ManagerUtils, MiniMap, safeStringify } from "./Utils";
 
+import type { LavalinkNodeOptions } from "./Types/Node";
 import type {
     ChannelDeletePacket, VoicePacket, VoiceServer, VoiceState
 } from "./Types/Utils";
 import type { BotClientOptions, DeepRequired, LavalinkManagerEvents, ManagerOptions, RequiredManagerOptions } from "./Types/Manager";
 import type { PlayerOptions } from "./Types/Player";
-export class LavalinkManager extends EventEmitter {
+export class LavalinkManager<CustomPlayerT extends Player = Player> extends EventEmitter {
     /**
      * Emit an event
      * @param event The event to emit
      * @param args The arguments to pass to the event
      * @returns
      */
-    emit<Event extends keyof LavalinkManagerEvents>(event: Event, ...args: Parameters<LavalinkManagerEvents[Event]>): boolean {
+    emit<Event extends keyof LavalinkManagerEvents<CustomPlayerT>>(event: Event, ...args: Parameters<LavalinkManagerEvents<CustomPlayerT>[Event]>): boolean {
         return super.emit(event, ...args);
     }
 
@@ -29,7 +29,7 @@ export class LavalinkManager extends EventEmitter {
      * @param listener The listener to add
      * @returns
      */
-    on<Event extends keyof LavalinkManagerEvents>(event: Event, listener: LavalinkManagerEvents[Event]): this {
+    on<Event extends keyof LavalinkManagerEvents<CustomPlayerT>>(event: Event, listener: LavalinkManagerEvents<CustomPlayerT>[Event]): this {
         return super.on(event, listener);
     }
 
@@ -39,7 +39,7 @@ export class LavalinkManager extends EventEmitter {
      * @param listener The listener to add
      * @returns
      */
-    once<Event extends keyof LavalinkManagerEvents>(event: Event, listener: LavalinkManagerEvents[Event]): this {
+    once<Event extends keyof LavalinkManagerEvents<CustomPlayerT>>(event: Event, listener: LavalinkManagerEvents<CustomPlayerT>[Event]): this {
         return super.once(event, listener);
     }
 
@@ -49,7 +49,7 @@ export class LavalinkManager extends EventEmitter {
      * @param listener The listener to remove
      * @returns
      */
-    off<Event extends keyof LavalinkManagerEvents>(event: Event, listener: LavalinkManagerEvents[Event]): this {
+    off<Event extends keyof LavalinkManagerEvents<CustomPlayerT>>(event: Event, listener: LavalinkManagerEvents<CustomPlayerT>[Event]): this {
         return super.off(event, listener);
     }
 
@@ -59,12 +59,12 @@ export class LavalinkManager extends EventEmitter {
      * @param listener The listener to remove
      * @returns
      */
-    removeListener<Event extends keyof LavalinkManagerEvents>(event: Event, listener: LavalinkManagerEvents[Event]): this {
+    removeListener<Event extends keyof LavalinkManagerEvents<CustomPlayerT>>(event: Event, listener: LavalinkManagerEvents<CustomPlayerT>[Event]): this {
         return super.removeListener(event, listener);
     }
 
     /** The Options of LavalinkManager (changeable) */
-    public options: ManagerOptions;
+    public options: ManagerOptions<CustomPlayerT>;
     /** LavalinkManager's NodeManager to manage all Nodes */
     public nodeManager: NodeManager;
     /** LavalinkManager's Utils Class */
@@ -72,16 +72,16 @@ export class LavalinkManager extends EventEmitter {
     /** Wether the manager was initiated or not */
     public initiated: boolean = false;
     /** All Players stored in a MiniMap */
-    public readonly players: MiniMap<string, Player> = new MiniMap();
+    public readonly players: MiniMap<string, CustomPlayerT> = new MiniMap();
 
     /**
      * Applies the options provided by the User
      * @param options
      * @returns
      */
-    private applyOptions(options: ManagerOptions) {
-        const optionsToAssign:RequiredManagerOptions = {
-            ...(options), // allow users to apply other options if they need to.
+    private applyOptions(options: ManagerOptions<CustomPlayerT>) {
+        const optionsToAssign:RequiredManagerOptions<CustomPlayerT> = {
+            ...(options),
             client: {
                 ...options?.client,
                 id: options?.client?.id,
@@ -90,6 +90,7 @@ export class LavalinkManager extends EventEmitter {
             sendToShard: options?.sendToShard,
             autoMove: options?.autoMove ?? false,
             nodes: options?.nodes as DeepRequired<LavalinkNodeOptions>[],
+            playerClass: (options?.playerClass ?? Player) as unknown as DeepRequired<CustomPlayerT>,
             playerOptions: {
                 applyVolumeAsFilter: options?.playerOptions?.applyVolumeAsFilter ?? false,
                 clientBasedPositionUpdateInterval: options?.playerOptions?.clientBasedPositionUpdateInterval ?? 100,
@@ -138,7 +139,7 @@ export class LavalinkManager extends EventEmitter {
             }
         };
         // overwrite the options with the optionstoAssign
-        this.options = optionsToAssign as unknown as ManagerOptions;
+        this.options = optionsToAssign as unknown as ManagerOptions<CustomPlayerT>;
         return;
     }
 
@@ -146,7 +147,7 @@ export class LavalinkManager extends EventEmitter {
      * Validates the current manager's options
      * @param options
      */
-    private validateOptions(options: ManagerOptions) {
+    private validateOptions(options: ManagerOptions<CustomPlayerT>) {
         if (typeof options?.sendToShard !== "function") throw new SyntaxError("ManagerOption.sendToShard was not provided, which is required!");
         // only check in .init()
         // if(typeof options?.client !== "object" || typeof options?.client.id !== "string") throw new SyntaxError("ManagerOption.client = { id: string, username?:string } was not provided, which is required");
@@ -237,18 +238,18 @@ export class LavalinkManager extends EventEmitter {
      * })
      * ```
      */
-    constructor(options: ManagerOptions) {
+    constructor(options: ManagerOptions<CustomPlayerT>) {
         super();
 
         if (!options) throw new SyntaxError("No Manager Options Provided")
-        this.utils = new ManagerUtils(this);
+        this.utils = new ManagerUtils(this as LavalinkManager);
 
         // use the validators
         this.applyOptions(options);
         this.validateOptions(this.options);
 
         // create classes
-        this.nodeManager = new NodeManager(this);
+        this.nodeManager = new NodeManager(this as LavalinkManager);
 
     }
 
@@ -266,7 +267,7 @@ export class LavalinkManager extends EventEmitter {
      * ```
      * @returns
      */
-    public getPlayer(guildId: string): Player | undefined {
+    public getPlayer(guildId: string): CustomPlayerT | undefined {
         return this.players.get(guildId);
     }
 
@@ -294,11 +295,11 @@ export class LavalinkManager extends EventEmitter {
      * });
      * ```
      */
-    public createPlayer(options: PlayerOptions): Player {
+    public createPlayer(options: PlayerOptions): CustomPlayerT {
         const oldPlayer = this.getPlayer(options?.guildId)
         if (oldPlayer) return oldPlayer;
 
-        const newPlayer = new Player(options, this, true);
+        const newPlayer = new this.options.playerClass(options, this, true);
         this.players.set(newPlayer.guildId, newPlayer);
         this.emit("playerCreate", newPlayer);
         return newPlayer;
@@ -317,10 +318,10 @@ export class LavalinkManager extends EventEmitter {
      * // recommend to do it on the player tho: player.destroy("forcefully destroyed the player");
      * ```
      */
-    public destroyPlayer(guildId: string, destroyReason?: string): Promise<void | Player> {
+    public destroyPlayer(guildId: string, destroyReason?: string): Promise<void | CustomPlayerT> {
         const oldPlayer = this.getPlayer(guildId);
         if (!oldPlayer) return;
-        return oldPlayer.destroy(destroyReason);
+        return oldPlayer.destroy(destroyReason) as Promise<void | CustomPlayerT>;
     }
 
     /**
@@ -379,7 +380,7 @@ export class LavalinkManager extends EventEmitter {
      * });
      * ```
      */
-    public async init(clientData: BotClientOptions): Promise<LavalinkManager> {
+    public async init(clientData: BotClientOptions): Promise<this> {
         if (this.initiated) return this;
         clientData = clientData ?? {} as BotClientOptions;
         this.options.client = { ...this.options?.client, ...clientData };
@@ -484,7 +485,7 @@ export class LavalinkManager extends EventEmitter {
                 return;
             }
 
-            const player = this.getPlayer(update.guild_id) as Player;
+            const player = this.getPlayer(update.guild_id);
 
             if (!player) {
                 if (this.options?.advancedOptions?.enableDebugEvents) {

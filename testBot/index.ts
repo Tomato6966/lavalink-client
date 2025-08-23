@@ -5,6 +5,7 @@ import { createClient } from "redis";
 import { envConfig } from "./config";
 import { loadCommands, loadEvents, loadLavalinkEvents } from "./handler";
 import { JSONStore, myCustomStore, myCustomWatcher, PlayerSaver } from "./Utils/CustomClasses";
+import { myCustomPlayer } from "./Utils/CustomClasses/customPlayerClass";
 import { handleResuming } from "./Utils/handleResuming";
 import { autoPlayFunction, requesterTransformer } from "./Utils/OptionalFunctions";
 
@@ -49,7 +50,8 @@ console.log(LavalinkNodesOfEnv); // you can then provide the result of here in L
 
     console.debug("creating lavalink manager");
 
-    client.lavalink = new LavalinkManager({
+    client.lavalink = new LavalinkManager<myCustomPlayer>({
+        playerClass: myCustomPlayer, // this is how you can use a custom player class for all the players, if you use the createPlayer function
         nodes: [
             {
                 authorization: "chrissy_localhost",
@@ -68,6 +70,7 @@ console.log(LavalinkNodesOfEnv); // you can then provide the result of here in L
                 retryAmount: 5,
             }
         ],
+        autoMove: false,
         sendToShard: (guildId, payload) => client.guilds.cache.get(guildId)?.shard?.send(payload),
         autoSkip: true,
         client: { // client: client.user
@@ -122,7 +125,7 @@ console.log(LavalinkNodesOfEnv); // you can then provide the result of here in L
                 logCustomSearches: false,
             }
         }
-    } as Required<ManagerOptions>);
+    }); // if you want to force all available options you can assert the options, but typed:  as Required<ManagerOptions<myCustomPlayer>>
 
     console.debug("binding commands and events");
 

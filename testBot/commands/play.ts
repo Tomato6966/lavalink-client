@@ -59,6 +59,8 @@ export default {
             // vcRegion: (interaction.member as GuildMember)?.voice.channel?.rtcRegion!
         });
 
+        player.npMess
+
         const connected = player.connected;
 
         if (!connected) await player.connect();

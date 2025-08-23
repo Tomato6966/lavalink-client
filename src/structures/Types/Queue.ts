@@ -1,3 +1,4 @@
+import type { Player } from "../Player";
 import type { Track, UnresolvedTrack } from "./Track";
 import type { Awaitable } from "./Utils";
 
@@ -20,7 +21,7 @@ export interface QueueStoreManager {
     parse: (value: StoredQueue | string) => Awaitable<Partial<StoredQueue>>;
 }
 
-export interface ManagerQueueOptions {
+export interface ManagerQueueOptions<CustomPlayerT extends Player = Player> {
     /** Maximum Amount of tracks for the queue.previous array. Set to 0 to not save previous songs. Defaults to 25 Tracks */
     maxPreviousTracks?: number;
     /** Custom Queue Store option */
