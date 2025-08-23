@@ -244,7 +244,15 @@ export interface ManagerPlayerOptions {
     useUnresolvedData?: boolean;
 }
 
-/** Manager Options used to create the manager */
+export type DeepRequired<T> = {
+  [K in keyof T]-?: NonNullable<T[K]> extends object
+    ? DeepRequired<NonNullable<T[K]>>
+    : NonNullable<T[K]>;
+};
+
+export type RequiredManagerOptions = DeepRequired<ManagerOptions>;
+
+  /** Manager Options used to create the manager */
 export interface ManagerOptions {
     /** The Node Options, for all Nodes! (on init) */
     nodes: LavalinkNodeOptions[];

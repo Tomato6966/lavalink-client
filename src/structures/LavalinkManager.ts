@@ -4,12 +4,13 @@ import { DebugEvents, DestroyReasons } from "./Constants";
 import { NodeManager } from "./NodeManager";
 import { Player } from "./Player";
 import { DefaultQueueStore } from "./Queue";
+import { LavalinkNodeOptions } from "./Types/Node";
 import { ManagerUtils, MiniMap, safeStringify } from "./Utils";
 
 import type {
     ChannelDeletePacket, VoicePacket, VoiceServer, VoiceState
 } from "./Types/Utils";
-import type { BotClientOptions, LavalinkManagerEvents, ManagerOptions } from "./Types/Manager";
+import type { BotClientOptions, DeepRequired, LavalinkManagerEvents, ManagerOptions, RequiredManagerOptions } from "./Types/Manager";
 import type { PlayerOptions } from "./Types/Player";
 export class LavalinkManager extends EventEmitter {
     /**
@@ -79,15 +80,16 @@ export class LavalinkManager extends EventEmitter {
      * @returns
      */
     private applyOptions(options: ManagerOptions) {
-        this.options = {
-            ...options, // set the rest of the options without overriding the defined ones
+        const optionsToAssign:RequiredManagerOptions = {
+            ...(options), // allow users to apply other options if they need to.
             client: {
                 ...options?.client,
                 id: options?.client?.id,
                 username: options?.client?.username ?? "lavalink-client"
             },
             sendToShard: options?.sendToShard,
-            nodes: options?.nodes,
+            autoMove: options?.autoMove ?? false,
+            nodes: options?.nodes as DeepRequired<LavalinkNodeOptions>[],
             playerOptions: {
                 applyVolumeAsFilter: options?.playerOptions?.applyVolumeAsFilter ?? false,
                 clientBasedPositionUpdateInterval: options?.playerOptions?.clientBasedPositionUpdateInterval ?? 100,
@@ -122,6 +124,7 @@ export class LavalinkManager extends EventEmitter {
                 queueStore: options?.queueOptions?.queueStore ?? new DefaultQueueStore(),
             },
             advancedOptions: {
+
                 enableDebugEvents: options?.advancedOptions?.enableDebugEvents ?? false,
                 maxFilterFixDuration: options?.advancedOptions?.maxFilterFixDuration ?? 600_000,
                 debugOptions: {
@@ -133,7 +136,9 @@ export class LavalinkManager extends EventEmitter {
                     }
                 }
             }
-        }
+        };
+        // overwrite the options with the optionstoAssign
+        this.options = optionsToAssign as unknown as ManagerOptions;
         return;
     }
 
