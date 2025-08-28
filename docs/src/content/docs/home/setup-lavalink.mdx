@@ -104,7 +104,6 @@ plugins:
   lavasrc:
     providers:
       - "ytsearch:\"%ISRC%\""
-
       - "dzisrc:%ISRC%"
       - "ytsearch:%QUERY%"
       - "dzsearch:%QUERY%"
@@ -124,10 +123,10 @@ plugins:
       youtube: true # Enable YouTube lyrics source
       yandexMusic: true
     spotify:
-      # clientId & clientSecret are required for using spsearch
+    # clientId & clientSecret are required for using spsearch
       # clientId: "<insert>"
       # clientSecret: "<insert>"
-      # spDc: "<insert>"
+      # spDc: "<insert>" # the sp dc cookie used for accessing the spotify lyrics api
       preferAnonymousToken: true
       customTokenEndpoint: "http://localhost:8080/api/token" # For more details, please refer to https://github.com/topi314/spotify-tokener
       resolveArtistsInSearch: true
@@ -170,7 +169,7 @@ plugins:
       tiktok: true # tiktok.com
       mixcloud: true # mixcloud.com
       soundgasm: true # soundgasm.net
-metrics:
+metrics: 
   prometheus:
     enabled: false
     endpoint: /metrics
