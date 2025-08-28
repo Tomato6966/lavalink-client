@@ -3,7 +3,6 @@ title: Setup Lavalink Server
 description: Learn how to setup a lavalink Server
 ---
 
-
 ## Lavalink Server
 
 In order to use lavalink-client, you need a Lavalink Server, you can host them yourself pretty easily.
@@ -23,7 +22,7 @@ server:
 lavalink:
   server:
     sources:
-      youtube: false # disable youtube on lavalink to use youtube-source
+      youtube: false # disable youtube on lavalink to use [youtube-source](https://github.com/lavalink-devs/youtube-source)
     password: "youshallnotpass"
     bufferDurationMs: 225
     frameBufferDurationMs: 5000
@@ -37,7 +36,7 @@ lavalink:
     soundcloudSearchEnabled: true
     gc-warnings: true
   plugins:
-    - dependency: "com.github.topi314.lavasrc:lavasrc-plugin:4.2.0" # LavaSrc - extra sources like deezer, spotify, etc. https://github.com/topi314/LavaSrc
+    - dependency: "com.github.topi314.lavasrc:lavasrc-plugin:4.8.0" # LavaSrc - for extra sources like deezer, spotify, etc. https://github.com/topi314/LavaSrc
       repository: "https://maven.lavalink.dev/releases"
     - dependency: "com.github.topi314.lavasearch:lavasearch-plugin:1.0.0" # https://github.com/topi314/LavaSearch
       repository: "https://maven.lavalink.dev/releases"
@@ -45,11 +44,11 @@ lavalink:
       repository: "https://maven.lavalink.dev/releases"
     - dependency: "com.github.devoxin:lavadspx-plugin:0.0.5" # https://github.com/devoxin/LavaDSPX-Plugin
       repository: "https://jitpack.io"
-    - dependency: "dev.lavalink.youtube:youtube-plugin:1.8.2" # https://github.com/lavalink-devs/youtube-source
+    - dependency: "dev.lavalink.youtube:youtube-plugin:1.13.5" # https://github.com/lavalink-devs/youtube-source
       snapshot: false
     - dependency: "com.github.topi314.lavalyrics:lavalyrics-plugin:1.0.0" # https://github.com/topi314/LavaLyrics
       repository: "https://maven.lavalink.dev/releases"
-    - dependency: "me.duncte123:java-lyrics-plugin:1.6.5" # https://github.com/DuncteBot/java-timed-lyrics
+    - dependency: "me.duncte123:java-lyrics-plugin:1.6.6" # https://github.com/DuncteBot/java-timed-lyrics
       repository: "https://maven.lavalink.dev/releases"
 plugins:
   lyrics:
@@ -64,6 +63,7 @@ plugins:
       - yandexMusic
   youtube:
     enabled: true
+    # refreshToken: "Insert your refresh token here" # For more details, please refer to https://github.com/lavalink-devs/youtube-source?tab=readme-ov-file#using-oauth-tokens
     oauth:
       enabled: false
     allowSearch: true
@@ -82,7 +82,7 @@ plugins:
       playback: true
     MUSIC:
       playlistLoading: false
-      videoLoading: true
+      videoLoading: false
       searching: true
       playback: false
     WEB:
@@ -102,7 +102,7 @@ plugins:
       playback: true
   lavasrc:
     providers:
-      - "ytsearch:\"%ISRC%\""
+      - 'ytsearch:"%ISRC%"'
       - "dzisrc:%ISRC%"
       - "ytsearch:%QUERY%"
       - "dzsearch:%QUERY%"
@@ -122,12 +122,15 @@ plugins:
       youtube: true # Enable YouTube lyrics source
       yandexMusic: true
     spotify:
-      clientId: "<insert>"
-      clientSecret: "<insert>"
-      spDc: "<insert>"
+      # clientId: "<insert>"
+      # clientSecret: "<insert>"
+      # spDc: "<insert>"
+      preferAnonymousToken: true
+      customTokenEndpoint: "http://localhost:8080/api/token" # For more details, please refer to https://github.com/topi314/spotify-tokener
+      resolveArtistsInSearch: true
+      albumLoadLimit: 2 # The number of pages at 50 tracks each
       countryCode: "US"
       playlistLoadLimit: 3 # The number of pages at 100 tracks each
-      albumLoadLimit: 2 # The number of pages at 50 tracks each
       localFiles: true
     applemusic:
       countryCode: "US"
@@ -153,17 +156,17 @@ plugins:
       speed: 1.0 # the speed parameter is a float between 0.5 and 10. The default is 1.0. (0.5 is half speed, 2.0 is double speed, etc.)
       audioFormat: "mp3" # supported formats are: mp3, ogg_opus, ogg_vorbis, aac, wav, and flac. Default format is mp3
   dunctebot:
-      ttsLanguage: "en-US"
-      sources:
-        getyarn: true # www.getyarn.io
-        clypit: true # www.clyp.it
-        tts: true # speak:Words to speak
-        pornhub: true # should be self-explanatory
-        reddit: true # should be self-explanatory
-        ocremix: true # www.ocremix.org
-        tiktok: true # tiktok.com
-        mixcloud: true # mixcloud.com
-        soundgasm: true # soundgasm.net
+    ttsLanguage: "en-US"
+    sources:
+      getyarn: true # www.getyarn.io
+      clypit: true # www.clyp.it
+      tts: true # speak:Words to speak
+      pornhub: true # should be self-explanatory
+      reddit: true # should be self-explanatory
+      ocremix: true # www.ocremix.org
+      tiktok: true # tiktok.com
+      mixcloud: true # mixcloud.com
+      soundgasm: true # soundgasm.net
 metrics:
   prometheus:
     enabled: false
