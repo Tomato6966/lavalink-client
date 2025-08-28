@@ -123,11 +123,11 @@ plugins:
       youtube: true # Enable YouTube lyrics source
       yandexMusic: true
     spotify:
-    # clientId & clientSecret are required for using spsearch
+      # clientId & clientSecret are required for using spsearch
       # clientId: "<insert>"
       # clientSecret: "<insert>"
       # spDc: "<insert>" # the sp dc cookie used for accessing the spotify lyrics api
-      preferAnonymousToken: true
+      preferAnonymousToken: true # Use this to generate and cache anonymous Spotify access tokens from your own endpoint, as Spotify recently updated their implementation.
       customTokenEndpoint: "http://localhost:8080/api/token" # For more details, please refer to https://github.com/topi314/spotify-tokener
       resolveArtistsInSearch: true
       albumLoadLimit: 2 # The number of pages at 50 tracks each
@@ -169,7 +169,7 @@ plugins:
       tiktok: true # tiktok.com
       mixcloud: true # mixcloud.com
       soundgasm: true # soundgasm.net
-metrics: 
+metrics:
   prometheus:
     enabled: false
     endpoint: /metrics
