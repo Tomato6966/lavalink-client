@@ -22,7 +22,7 @@ server:
 lavalink:
   server:
     sources:
-      youtube: false # disable youtube on lavalink to use [youtube-source](https://github.com/lavalink-devs/youtube-source)
+      youtube: false # This option is deprecated. Use https://github.com/lavalink-devs/youtube-source instead.
     password: "youshallnotpass"
     bufferDurationMs: 225
     frameBufferDurationMs: 5000
@@ -63,9 +63,9 @@ plugins:
       - yandexMusic
   youtube:
     enabled: true
-    # refreshToken: "Insert your refresh token here" # For more details, please refer to https://github.com/lavalink-devs/youtube-source?tab=readme-ov-file#using-oauth-tokens
     oauth:
       enabled: false
+      # refreshToken: "Insert your refresh token here" # For more details, please refer to https://github.com/lavalink-devs/youtube-source?tab=readme-ov-file#using-oauth-tokens
     allowSearch: true
     allowDirectVideoIds: true
     allowDirectPlaylistIds: true
