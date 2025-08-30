@@ -55,7 +55,7 @@ export class Player {
         return this.lastPosition + (this.lastPositionChange ? Date.now() - this.lastPositionChange : 0)
     }
     /** The timestamp when the last position change update happened */
-    public lastPositionChange: number = null;
+    public lastPositionChange: number | null = null;
     /** The current Positin of the player (from Lavalink) */
     public lastPosition: number = 0;
 
@@ -864,7 +864,7 @@ export class Player {
             throw new Error(`Failed to move the node: ${error}`);
         }
     }
-    
+
     /** Converts the Player including Queue to a Json state */
     public toJSON() {
         return {

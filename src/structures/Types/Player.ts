@@ -25,7 +25,7 @@ export interface PlayerJson {
     /** Lavalink's position the player was at */
     lastPosition: number;
     /** Last time the position was sent from lavalink */
-    lastPositionChange: number;
+    lastPositionChange: number | null;
     /** Volume in % from the player (without volumeDecrementer) */
     volume: number;
     /** Real Volume used in lavalink (with the volumeDecrementer) */
