@@ -3,7 +3,6 @@ title: Setup Lavalink Server
 description: Learn how to setup a lavalink Server
 ---
 
-
 ## Lavalink Server
 
 In order to use lavalink-client, you need a Lavalink Server, you can host them yourself pretty easily.
@@ -23,7 +22,7 @@ server:
 lavalink:
   server:
     sources:
-      youtube: false # disable youtube on lavalink to use youtube-source
+      youtube: false # disable youtube on lavalink to use [youtube-source](https://github.com/lavalink-devs/youtube-source)
     password: "youshallnotpass"
     bufferDurationMs: 225
     frameBufferDurationMs: 5000
@@ -37,7 +36,7 @@ lavalink:
     soundcloudSearchEnabled: true
     gc-warnings: true
   plugins:
-    - dependency: "com.github.topi314.lavasrc:lavasrc-plugin:4.2.0" # LavaSrc - extra sources like deezer, spotify, etc. https://github.com/topi314/LavaSrc
+    - dependency: "com.github.topi314.lavasrc:lavasrc-plugin:4.8.0" # LavaSrc - for extra sources like deezer, spotify, etc. https://github.com/topi314/LavaSrc
       repository: "https://maven.lavalink.dev/releases"
     - dependency: "com.github.topi314.lavasearch:lavasearch-plugin:1.0.0" # https://github.com/topi314/LavaSearch
       repository: "https://maven.lavalink.dev/releases"
@@ -45,11 +44,11 @@ lavalink:
       repository: "https://maven.lavalink.dev/releases"
     - dependency: "com.github.devoxin:lavadspx-plugin:0.0.5" # https://github.com/devoxin/LavaDSPX-Plugin
       repository: "https://jitpack.io"
-    - dependency: "dev.lavalink.youtube:youtube-plugin:1.8.2" # https://github.com/lavalink-devs/youtube-source
+    - dependency: "dev.lavalink.youtube:youtube-plugin:1.13.5" # https://github.com/lavalink-devs/youtube-source
       snapshot: false
     - dependency: "com.github.topi314.lavalyrics:lavalyrics-plugin:1.0.0" # https://github.com/topi314/LavaLyrics
       repository: "https://maven.lavalink.dev/releases"
-    - dependency: "me.duncte123:java-lyrics-plugin:1.6.5" # https://github.com/DuncteBot/java-timed-lyrics
+    - dependency: "me.duncte123:java-lyrics-plugin:1.6.6" # https://github.com/DuncteBot/java-timed-lyrics
       repository: "https://maven.lavalink.dev/releases"
 plugins:
   lyrics:
@@ -64,11 +63,13 @@ plugins:
       - yandexMusic
   youtube:
     enabled: true
+    # refreshToken: "Insert your refresh token here" # For more details, please refer to https://github.com/lavalink-devs/youtube-source?tab=readme-ov-file#using-oauth-tokens
     oauth:
       enabled: false
     allowSearch: true
     allowDirectVideoIds: true
     allowDirectPlaylistIds: true
+    # For more details about client setup, refer to https://github.com/lavalink-devs/youtube-source?tab=readme-ov-file#available-clients
     clients:
       - "ANDROID_MUSIC"
       - "MUSIC"
@@ -82,7 +83,7 @@ plugins:
       playback: true
     MUSIC:
       playlistLoading: false
-      videoLoading: true
+      videoLoading: false
       searching: true
       playback: false
     WEB:
@@ -109,25 +110,35 @@ plugins:
       - "scsearch:%QUERY%"
       - "tdsearch:%QUERY%"
     sources:
-      spotify: true
-      applemusic: true
-      deezer: true
-      yandexmusic: true
-      flowerytts: true
-      youtube: true
-      tidal: true
+      spotify: true # Enable Spotify source
+      applemusic: true # Enable Apple Music source
+      deezer: true # Enable Deezer source
+      yandexmusic: true # Enable Yandex Music source
+      flowerytts: true # Enable Flowery TTS source
+      youtube: true # Enable YouTube search source (https://github.com/topi314/LavaSearch)
+      tidal: true # Enable Tidal source
+      vkmusic: true # Enable Vk Music source
+      tidal: true # Enable Tidal source
+      qobuz : true # Enabled qobuz source
+      ytdlp: true # Enable yt-dlp source
     lyrics-sources:
       spotify: true # Enable Spotify lyrics source
       deezer: true # Enable Deezer lyrics source
       youtube: true # Enable YouTube lyrics source
-      yandexMusic: true
+      yandexmusic: true # Enable Yandex Music lyrics source
+      vkmusic: true # Enable Vk Music lyrics source
+      lrcLib: true # Enable LRC Library lyrics source (https://lrclib.net)
     spotify:
-      clientId: "<insert>"
-      clientSecret: "<insert>"
-      spDc: "<insert>"
+      # clientId & clientSecret are required for using spsearch
+      # clientId: "<insert>"
+      # clientSecret: "<insert>"
+      # spDc: "<insert>" # the sp dc cookie used for accessing the spotify lyrics api
+      preferAnonymousToken: true # Use this to generate and cache anonymous Spotify access tokens from your own endpoint, as Spotify recently updated their implementation.
+      customTokenEndpoint: "http://localhost:8080/api/token" # For more details, please refer to https://github.com/topi314/spotify-tokener
+      resolveArtistsInSearch: true
+      albumLoadLimit: 2 # The number of pages at 50 tracks each
       countryCode: "US"
       playlistLoadLimit: 3 # The number of pages at 100 tracks each
-      albumLoadLimit: 2 # The number of pages at 50 tracks each
       localFiles: true
     applemusic:
       countryCode: "US"
@@ -135,7 +146,9 @@ plugins:
       playlistLoadLimit: 3 # The number of pages at 300 tracks each
       albumLoadLimit: 3 # The number of pages at 300 tracks each
     deezer:
-      masterDecryptionKey: "<insert>"
+      masterDecryptionKey: "your master decryption key" # the master key used for decrypting the deezer tracks. (you need to get it from somewhere)
+      arl: "your deezer arl" # the arl cookie used for accessing the deezer api this is not optional anymore
+      formats: [ "FLAC", "MP3_320", "MP3_256", "MP3_128", "MP3_64", "AAC_64" ] # the formats you want to use for the deezer tracks. "FLAC", "MP3_320", "MP3_256" & "AAC_64" are only available for premium users and require a valid arl
     youtube:
       countryCode: "US"
       playlistLoadLimit: 1 # The number of pages at 100 tracks each
@@ -144,8 +157,23 @@ plugins:
     yandexmusic:
       accessToken: "<insert>"
     tidal:
-      countryCode: "US"
-      token: "<insert>"
+      countryCode: "US" # the country code for accessing region-specific content on Tidal (ISO 3166-1 alpha-2).
+      searchLimit: 6 # How many search results should be returned
+      token: "your tidal token" # the token used for accessing the tidal api. See https://github.com/topi314/LavaSrc#tidal
+    qobuz:
+      userOauthToken : "your user oauth token" # This token is needed for authorization in the api. Guide: https://github.com/topi314/LavaSrc#qobuz
+      #      appId : optional (Only pass it when you are using an old userOauthToken)
+      #      appSecret : optional (Only pass it when you are using an old userOauthToken)
+    ytdlp:
+      path: "yt-dlp" # the path to the yt-dlp executable.
+      searchLimit: 10 # How many search results should be returned
+     # customLoadArgs: ["-q", "--no-warnings", "--flat-playlist", "--skip-download", "-J"] # Custom arguments to pass to yt-dlp
+     # customPlaybackArgs: ["-q", "--no-warnings", "-f", "bestaudio", "-J"] # Custom arguments for yt-dlp
+    vkmusic:
+      userToken: "your user token" # This token is needed for authorization in the api. Guide: https://github.com/topi314/LavaSrc#vk-music
+      playlistLoadLimit: 1 # The number of pages at 50 tracks each
+      artistLoadLimit: 1 # The number of pages at 10 tracks each
+      recommendationsLoadLimit: 10 # Number of tracks
     flowerytts:
       voice: "Olivia" # (case-sensitive) get default voice from here https://api.flowery.pw/v1/tts/voices
       translate: false # whether to translate the text to the native language of voice
@@ -153,17 +181,17 @@ plugins:
       speed: 1.0 # the speed parameter is a float between 0.5 and 10. The default is 1.0. (0.5 is half speed, 2.0 is double speed, etc.)
       audioFormat: "mp3" # supported formats are: mp3, ogg_opus, ogg_vorbis, aac, wav, and flac. Default format is mp3
   dunctebot:
-      ttsLanguage: "en-US"
-      sources:
-        getyarn: true # www.getyarn.io
-        clypit: true # www.clyp.it
-        tts: true # speak:Words to speak
-        pornhub: true # should be self-explanatory
-        reddit: true # should be self-explanatory
-        ocremix: true # www.ocremix.org
-        tiktok: true # tiktok.com
-        mixcloud: true # mixcloud.com
-        soundgasm: true # soundgasm.net
+    ttsLanguage: "en-US"
+    sources:
+      getyarn: true # www.getyarn.io
+      clypit: true # www.clyp.it
+      tts: true # speak:Words to speak
+      pornhub: true # should be self-explanatory
+      reddit: true # should be self-explanatory
+      ocremix: true # www.ocremix.org
+      tiktok: true # tiktok.com
+      mixcloud: true # mixcloud.com
+      soundgasm: true # soundgasm.net
 metrics:
   prometheus:
     enabled: false
