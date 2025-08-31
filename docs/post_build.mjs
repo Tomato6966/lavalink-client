@@ -5,7 +5,7 @@ import path from 'path';
 // This is a simplified regex. A more robust one might be needed for a real-world scenario.
 const tableRegex = /## Properties\s*\n\n\|.*?\|\n\|.*?\|\n([\s\S]*?)(?=\n\n|\n$)/g;
 
-function modifyTableMarkdown(markdown) {
+export function modifyTableMarkdown(markdown) {
     return markdown.replace(tableRegex, (fullMatch, content) => {
         const rows = content.split('\n').filter(line => line.trim().startsWith('|'));
         if (rows.length === 0) return fullMatch;
@@ -102,7 +102,8 @@ function modifyTableMarkdown(markdown) {
         return `## Properties\n\n${newTableContent}`;
     });
 }
-async function processDocumentation() {
+
+export async function processDocumentation() {
     console.log(chalk.cyan.bold(`\n--- Starting Documentation Cleanup ---\n`));
 
     const docsPath = path.resolve('./src/content/docs/api');
@@ -117,7 +118,7 @@ async function processDocumentation() {
         let content = fs.readFileSync(filePath, 'utf8');
 
         if (content.includes('## Properties')) {
-            console.log(chalk.green(`✅ Optimizing properties table in: ${chalk.white.italic(file)}`));
+            console.log(chalk.green(`✅ Optimizing properties table in: ${chalk.white.italic(filePath)}`));
             content = modifyTableMarkdown(content);
             fs.writeFileSync(filePath, content);
             modifiedCount++;
@@ -131,4 +132,15 @@ async function processDocumentation() {
     console.log(chalk.bgBlue.black(` ℹ️  Skipped ${files.length - modifiedCount} files. `));
 }
 
-processDocumentation();
+
+export function optimizeTypeDocTables() {
+    return {
+        name: "optimize-typedoc-tables",
+        hooks: {
+            "astro:build:setup": async () => {
+                await processDocumentation();
+                return;
+            }
+        }
+    };
+}

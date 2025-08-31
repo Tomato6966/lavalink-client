@@ -2,6 +2,7 @@
 import { defineConfig } from "astro/config";
 import starlight from "@astrojs/starlight";
 import starlightTypeDoc, { typeDocSidebarGroup } from "starlight-typedoc"
+import { optimizeTypeDocTables } from "./post_build.mjs";
 
 // https://astro.build/config
 export default defineConfig({
@@ -133,5 +134,6 @@ export default defineConfig({
                 }
             ],
         }),
+        optimizeTypeDocTables(),
     ],
 });
