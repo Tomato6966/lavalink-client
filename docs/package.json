@@ -1,11 +1,11 @@
 {
   "name": "lavalink-client-docs",
   "type": "module",
-  "version": "2.1.0",
+  "version": "2.1.1",
   "scripts": {
     "dev": "astro dev",
     "start": "astro dev",
-    "build": "astro check && astro build",
+    "build": "astro check && astro build && node ./post_build.mjs",
     "preview": "astro preview",
     "astro": "astro"
   },
@@ -13,6 +13,7 @@
     "@astrojs/check": "^0.9.4",
     "@astrojs/starlight": "^0.34.5",
     "astro": "^5.11.0",
+    "chalk": "^5.6.0",
     "gray-matter": "^4.0.3",
     "marked": "^16.0.0",
     "sharp": "^0.34.3",

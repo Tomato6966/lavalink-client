@@ -42,6 +42,8 @@ client.lavalink = new LavalinkManager({
     ],
     sendToShard: (guildId, payload) => client.guilds.cache.get(guildId)?.shard?.send(payload),
     autoSkip: true,
+    autoMove: false, // auto move to next node, if a node disconnects
+    //playerClass: yourCustomPlayerClass // class yourCustomPlayerClass extends Player {} .. make your own player class and types, the LavalinkManager is generic so then you can do new LavalinkManager<yourCustomPlayerClass>({})
     client: { // client: client.user
         id: envConfig.clientId, // REQUIRED! (at least after the .init)
         username: "TESTBOT",
