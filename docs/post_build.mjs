@@ -137,7 +137,7 @@ export function optimizeTypeDocTables() {
     return {
         name: "optimize-typedoc-tables",
         hooks: {
-            "astro:build:setup": async () => {
+            "astro:config:setup": async () => {
                 await processDocumentation();
                 return;
             }
