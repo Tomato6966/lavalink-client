@@ -1,6 +1,6 @@
-<div style="font-family: Arial, sans-serif; border: 1px solid #ddd; border-radius: 15px; padding: 25px; background-color: #f9f9f9;">
+<div style="font-family: Arial, sans-serif; border: 1px solid #fab788; border-radius: 15px; padding: 25px; ">
 
-<h1 align="center" style="color: #2c3e50; border-bottom: 2px solid #3498db; padding-bottom: 10px;">Lavalink Client</h1>
+<h1 align="center" style="color: #fab788; border-bottom: 2px solid #3498db; padding-bottom: 10px;">Lavalink Client</h1>
 <p align="center" style="font-size: 1.2em; color: #555;">An easy, flexible, and feature-rich Lavalink v4 Client for both beginners and experts.</p>
 
 <div align="center">
@@ -421,7 +421,7 @@ client.lavalink.on("playerDestroy", (player) => {
 Lavalink client supports most of the major lavalink-plugins.
 The client itself is - for beginner friendly reasons - atm not extendable (via plugins)
 You can just use the built in functions (sponsor block, lyrics) or search plattforms (deezer, spotify, apple music, youtube, ...) and use the lavalink-plugins without any configuration on the client side.
-  
+
 Some plugins require extra-parameters, such as flowerytts:
 Pass extra parameters to the search function to use plugin-specific features.
 

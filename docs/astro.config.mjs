@@ -11,6 +11,10 @@ export default defineConfig({
     integrations: [
         starlight({
             title: "Lavalink Client",
+            logo: {
+
+                "src": "./src/assets/Lavalink-Client.png"
+            },
             social: [
                 {
                     icon: "discord",
@@ -133,6 +137,9 @@ export default defineConfig({
                     link: "https://lavalink.dev"
                 }
             ],
+            customCss: [
+                "./src/styles/global.css"
+            ]
         }),
         optimizeTypeDocTables(),
     ],
