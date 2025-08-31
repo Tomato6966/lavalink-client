@@ -65,24 +65,29 @@ import YARN from '../content/docs/home/installings/yarn.mdx';
 </div>
 
 <script>
-  // Client-side script to handle tab switching
   document.addEventListener('DOMContentLoaded', () => {
-    const buttons = document.querySelectorAll('.package-manager-selector button');
-    const contents = document.querySelectorAll('.install-content');
+    // We explicitly type the NodeList to provide better type safety
+    const buttons = document.querySelectorAll<HTMLButtonElement>('.package-manager-selector button');
+    const contents = document.querySelectorAll<HTMLElement>('.install-content');
 
     buttons.forEach(button => {
       button.addEventListener('click', (event) => {
+        // Use event.currentTarget, which is correctly typed as a button, or cast event.target
+        const targetButton = event.currentTarget as HTMLButtonElement;
+
         // Remove active class from all buttons and hide all content
         buttons.forEach(btn => btn.classList.remove('active'));
         contents.forEach(content => content.style.display = 'none');
 
         // Add active class to the clicked button
-        event?.target?.classList?.add('active');
+        targetButton.classList.add('active');
 
         // Show the corresponding content block
-        const manager = event?.target?.id?.replace('btn-', '');
-        const element = document.getElementById(`content-${manager}`);
-        if(element) element.style.display = 'block';
+        const manager = targetButton.id.replace('btn-', '');
+        const contentBlock = document.getElementById(`content-${manager}`);
+        if (contentBlock) {
+          (contentBlock as HTMLElement).style.display = 'block';
+        }
       });
     });
   });
