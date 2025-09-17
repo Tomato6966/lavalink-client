@@ -59,12 +59,12 @@ export const DefaultSources: Record<
   "vk music": "vksearch",
   vkrec: "vkrec",
   // Gaana Music
-  "gaana music": "gansearch",
-  gaana: "gansearch",
-  gansearch: "gansearch",
-  gan: "gansearch",
-  musicgaana: "gansearch",
-  "music gaana": "gansearch",
+  "gaana music": "gaanasearch",
+  gaana: "gaanasearch",
+  gaanasearch: "gaanasearch",
+  gan: "gaanasearch",
+  musicgaana: "gaanasearch",
+  "music gaana": "gaanasearch",
   vk: "vksearch",
   // Qobuz (lavasrc)
   qbsearch: "qbsearch",
@@ -104,6 +104,13 @@ export const DefaultSources: Record<
   js: "jssearch",
   jssearch: "jssearch",
   jsrec: "jsrec",
+  // Amazon Music (lavasrc)
+  "amazon music": "amznsearch",
+  amazonmusic: "amznsearch",
+  amznsearch: "amznsearch",
+  amzn: "amznsearch",
+  musicamazon: "amznsearch",
+  "music amazon": "amznsearch",
 };
 
 /** Lavalink Plugins definiton */
@@ -191,6 +198,21 @@ export const SourceLinksRegexes: Record<SourcesRegex, RegExp> = {
   /** From lavasrc-plugin */
   GaanaRegex:
     /https?:\/\/(?:www\.)?gaana\.com\/(?<type>song|album|artist|playlist)\/(?<seokey>[a-zA-Z0-9-]+)/,
+  /** Amazon Music regexes */
+  AmazonMusicTrackRegex:
+    /https?:\/\/(?:www\.)?music\.amazon\.[a-z\.]+\/tracks\/(?<identifier>[A-Za-z0-9]+)/,
+  AmazonMusicAlbumRegex:
+    /https?:\/\/(?:www\.)?music\.amazon\.[a-z\.]+\/albums\/(?<identifier>[A-Za-z0-9]+)/,
+  AmazonMusicPlaylistRegex:
+    /https?:\/\/(?:www\.)?music\.amazon\.[a-z\.]+\/playlists\/(?<identifier>[A-Za-z0-9]+)/,
+  AmazonMusicArtistRegex:
+    /https?:\/\/(?:www\.)?music\.amazon\.[a-z\.]+\/artists\/(?<identifier>[A-Za-z0-9]+)/,
+  AmazonMusicUserPlaylistRegex:
+    /https?:\/\/(?:www\.)?music\.amazon\.[a-z\.]+\/user-playlists\/(?<identifier>[A-Za-z0-9]+)/,
+  AmazonMusicCommunityPlaylistRegex:
+    /https?:\/\/(?:www\.)?music\.amazon\.[a-z\.]+\/community-playlists\/(?<identifier>[A-Za-z0-9]+)/,
+  AllAmazonMusicRegex:
+    /https?:\/\/(?:www\.)?music\.amazon\.[a-z\.]+\/(?<type>tracks|albums|playlists|artists|user-playlists|community-playlists)\/(?<identifier>[A-Za-z0-9]+)/,
   mixcloud: /https:\/\/www\.mixcloud\.com\//,
   musicYandex: /https:\/\/music\.yandex\.ru\//,
   radiohost: /https?:\/\/[^.\s]+\.radiohost\.de\/(\S+)/,

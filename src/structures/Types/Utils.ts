@@ -35,7 +35,8 @@ export type LavaSrcSearchPlatformBase =
   | "qbsearch"
   | "qbisrc"
   | "qbrec"
-  | "gansearch";
+  | "gaanasearch"
+  | "amznsearch";
 export type LavaSrcSearchPlatform = LavaSrcSearchPlatformBase | "ftts";
 
 export type JioSaavnSearchPlatform = "jssearch" | "jsrec";
@@ -98,6 +99,12 @@ export type ClientSearchPlatform =
   | "vk music"
   | "vkmusic"
   | "tidal"
+  | "amazon music"
+  | "amazonmusic"
+  | "amznsearch"
+  | "amzn"
+  | "musicamazon"
+  | "music amazon"
   | "gaana"
   | "gaana music"
   | "gan"
@@ -153,6 +160,13 @@ export type SourcesRegex =
   | "tiktok"
   | "mixcloud"
   | "GaanaRegex"
+  | "AmazonMusicTrackRegex"
+  | "AmazonMusicAlbumRegex"
+  | "AmazonMusicPlaylistRegex"
+  | "AmazonMusicArtistRegex"
+  | "AmazonMusicUserPlaylistRegex"
+  | "AmazonMusicCommunityPlaylistRegex"
+  | "AllAmazonMusicRegex"
   | "musicYandex"
   | "radiohost"
   | "bandcamp"

@@ -558,6 +558,22 @@ export class ManagerUtils {
         "Query / Link Provided for this Source but Lavalink Node has not 'tidal' enabled"
       );
     }
+    if (
+      SourceLinksRegexes.GaanaRegex.test(queryString) &&
+      !node.info?.sourceManagers?.includes("gaana")
+    ) {
+      throw new Error(
+        "Query / Link Provided for this Source but Lavalink Node has not 'gaana' enabled via lavasrc-plugin"
+      );
+    }
+    if (
+      SourceLinksRegexes.AllAmazonMusicRegex.test(queryString) &&
+      !node.info?.sourceManagers?.includes("amazonmusic")
+    ) {
+      throw new Error(
+        "Query / Link Provided for this Source but Lavalink Node has not 'amazonmusic' enabled via lavasrc-plugin"
+      );
+    }
     return;
   }
 
@@ -809,11 +825,19 @@ export class ManagerUtils {
       );
     }
     if (
-      source === "gansearch" &&
+      source === "gaanasearch" &&
       !node.info?.sourceManagers?.includes("gaana")
     ) {
       throw new Error(
-        "Lavalink Node has not 'gaana' enabled via lavasrc-plugin, which is required to have 'gansearch' work"
+        "Lavalink Node has not 'gaana' enabled via lavasrc-plugin, which is required to have 'gaanasearch' work"
+      );
+    }
+    if (
+      source === "amznsearch" &&
+      !node.info?.sourceManagers?.includes("amazonmusic")
+    ) {
+      throw new Error(
+        "Lavalink Node has not 'amazonmusic' enabled via lavasrc-plugin, which is required to have 'amznsearch' work"
       );
     }
 
