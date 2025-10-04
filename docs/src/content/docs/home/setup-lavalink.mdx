@@ -108,7 +108,7 @@ plugins:
       playback: true
   lavasrc:
     providers:
-      - "ytsearch:\"%ISRC%\""
+      - 'ytsearch:"%ISRC%"'
       - "dzisrc:%ISRC%"
       - "ytsearch:%QUERY%"
       - "dzsearch:%QUERY%"
@@ -123,8 +123,7 @@ plugins:
       youtube: true # Enable YouTube search source (https://github.com/topi314/LavaSearch)
       tidal: true # Enable Tidal source
       vkmusic: true # Enable Vk Music source
-      tidal: true # Enable Tidal source
-      qobuz : true # Enabled qobuz source
+      qobuz: true # Enabled qobuz source
       ytdlp: true # Enable yt-dlp source
     lyrics-sources:
       spotify: true # Enable Spotify lyrics source
@@ -153,7 +152,7 @@ plugins:
     deezer:
       masterDecryptionKey: "your master decryption key" # the master key used for decrypting the deezer tracks. (you need to get it from somewhere)
       arl: "your deezer arl" # the arl cookie used for accessing the deezer api this is not optional anymore
-      formats: [ "FLAC", "MP3_320", "MP3_256", "MP3_128", "MP3_64", "AAC_64" ] # the formats you want to use for the deezer tracks. "FLAC", "MP3_320", "MP3_256" & "AAC_64" are only available for premium users and require a valid arl
+      formats: ["FLAC", "MP3_320", "MP3_256", "MP3_128", "MP3_64", "AAC_64"] # the formats you want to use for the deezer tracks. "FLAC", "MP3_320", "MP3_256" & "AAC_64" are only available for premium users and require a valid arl
     youtube:
       countryCode: "US"
       playlistLoadLimit: 1 # The number of pages at 100 tracks each
@@ -166,14 +165,14 @@ plugins:
       searchLimit: 6 # How many search results should be returned
       token: "your tidal token" # the token used for accessing the tidal api. See https://github.com/topi314/LavaSrc#tidal
     qobuz:
-      userOauthToken : "your user oauth token" # This token is needed for authorization in the api. Guide: https://github.com/topi314/LavaSrc#qobuz
+      userOauthToken: "your user oauth token" # This token is needed for authorization in the api. Guide: https://github.com/topi314/LavaSrc#qobuz
       #      appId : optional (Only pass it when you are using an old userOauthToken)
       #      appSecret : optional (Only pass it when you are using an old userOauthToken)
     ytdlp:
       path: "yt-dlp" # the path to the yt-dlp executable.
       searchLimit: 10 # How many search results should be returned
-     # customLoadArgs: ["-q", "--no-warnings", "--flat-playlist", "--skip-download", "-J"] # Custom arguments to pass to yt-dlp
-     # customPlaybackArgs: ["-q", "--no-warnings", "-f", "bestaudio", "-J"] # Custom arguments for yt-dlp
+      # customLoadArgs: ["-q", "--no-warnings", "--flat-playlist", "--skip-download", "-J"] # Custom arguments to pass to yt-dlp
+      # customPlaybackArgs: ["-q", "--no-warnings", "-f", "bestaudio", "-J"] # Custom arguments for yt-dlp
     vkmusic:
       userToken: "your user token" # This token is needed for authorization in the api. Guide: https://github.com/topi314/LavaSrc#vk-music
       playlistLoadLimit: 1 # The number of pages at 50 tracks each
