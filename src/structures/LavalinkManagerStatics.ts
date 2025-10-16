@@ -58,6 +58,14 @@ export const DefaultSources: Record<SearchPlatform, LavalinkSearchPlatform | Cli
     "qobuz": "qbsearch",
     "qbisrc": "qbisrc",
     "qbrec": "qbrec",
+    // pandora (lavasrc)
+    "pandora": "pdsearch",
+    "pd": "pdsearch",
+    "pdsearch": "pdsearch",
+    "pdisrc": "pdisrc",
+    "pdrec": "pdrec",
+    "pandora music": "pdsearch",
+    "pandoramusic": "pdsearch",
     // speak PLUGIN
     "speak": "speak",
     "tts": "tts",
@@ -151,6 +159,13 @@ export const SourceLinksRegexes: Record<SourcesRegex, RegExp> = {
 
     /** From jiosaavn-plugin */
     jiosaavn: /(https?:\/\/)(www\.)?jiosaavn\.com\/(?<type>song|album|featured|artist)\/([a-zA-Z0-9-_/,]+)/,
+
+    /** From pandora */
+    PandoraTrackRegex: /^@?(?:https?:\/\/)?(?:www\.)?pandora\.com\/artist\/[\w\-]+(?:\/[\w\-]+)*\/(?<identifier>TR[A-Za-z0-9]+)(?:[?#].*)?$/,
+    PandoraAlbumRegex: /^@?(?:https?:\/\/)?(?:www\.)?pandora\.com\/artist\/[\w\-]+(?:\/[\w\-]+)*\/(?<identifier>AL[A-Za-z0-9]+)(?:[?#].*)?$/,
+    PandoraArtistRegex: /^@?(?:https?:\/\/)?(?:www\.)?pandora\.com\/artist\/[\w\-]+\/(?<identifier>AR[A-Za-z0-9]+)(?:[?#].*)?$/,
+    PandoraPlaylistRegex: /^@?(?:https?:\/\/)?(?:www\.)?pandora\.com\/playlist\/(?<identifier>PL:[\d:]+)(?:[?#].*)?$/,
+    AllPandoraRegex: /^@?(?:https?:\/\/)?(?:www\.)?pandora\.com\/(?:playlist\/(?<playlistId>PL:[\d:]+)|artist\/[\w\-]+(?:\/[\w\-]+)*\/(?<identifier>(?:TR|AL|AR)[A-Za-z0-9]+))(?:[?#].*)?$/,
 
     /** FROM DUNCTE BOT PLUGIN */
     tiktok: /https:\/\/www\.tiktok\.com\//,

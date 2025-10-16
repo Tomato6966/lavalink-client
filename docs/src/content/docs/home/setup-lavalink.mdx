@@ -36,7 +36,7 @@ lavalink:
     soundcloudSearchEnabled: true
     gc-warnings: true
   plugins:
-    - dependency: "com.github.topi314.lavasrc:lavasrc-plugin:4.8.0" # LavaSrc - for extra sources like deezer, spotify, etc. https://github.com/topi314/LavaSrc
+    - dependency: "com.github.topi314.lavasrc:lavasrc-plugin:4.8.1" # LavaSrc - for extra sources like deezer, spotify, etc. https://github.com/topi314/LavaSrc
       repository: "https://maven.lavalink.dev/releases"
     - dependency: "com.github.topi314.lavasearch:lavasearch-plugin:1.0.0" # https://github.com/topi314/LavaSearch
       repository: "https://maven.lavalink.dev/releases"
@@ -44,9 +44,9 @@ lavalink:
       repository: "https://maven.lavalink.dev/releases"
     - dependency: "com.github.devoxin:lavadspx-plugin:0.0.5" # https://github.com/devoxin/LavaDSPX-Plugin
       repository: "https://jitpack.io"
-    - dependency: "dev.lavalink.youtube:youtube-plugin:1.14.0" # https://github.com/lavalink-devs/youtube-source
+    - dependency: "dev.lavalink.youtube:youtube-plugin:1.15.0" # https://github.com/lavalink-devs/youtube-source
       snapshot: false
-    - dependency: "com.github.topi314.lavalyrics:lavalyrics-plugin:1.0.0" # https://github.com/topi314/LavaLyrics
+    - dependency: "com.github.topi314.lavalyrics:lavalyrics-plugin:1.1.0" # https://github.com/topi314/LavaLyrics
       repository: "https://maven.lavalink.dev/releases"
     - dependency: "me.duncte123:java-lyrics-plugin:1.6.6" # https://github.com/DuncteBot/java-timed-lyrics
       repository: "https://maven.lavalink.dev/releases"
@@ -66,6 +66,7 @@ plugins:
     # YouTube's cipher changes are becoming more frequent and complex, making it harder to keep up.
     # To simplify signature deciphering, you can use a remote cipher server like yt-cipher, a lightweight Deno server with a REST API. More details are available at https://github.com/kikkia/yt-cipher
     remoteCipher:
+      userAgent: "your_service_name"
       url: "http://localhost:8001" # The base URL of your remote cipher server.
       password: "your_secret_password" # The password to authenticate with your remote cipher server.
     oauth:
@@ -109,15 +110,19 @@ plugins:
   lavasrc:
     providers:
       - 'ytsearch:"%ISRC%"'
-      - "dzisrc:%ISRC%"
+      - "dzisrc:%ISRC%"
       - "ytsearch:%QUERY%"
       - "dzsearch:%QUERY%"
+      - "jssearch:%QUERY%"
+      - "pdsearch:%QUERY%"
       - "scsearch:%QUERY%"
       - "tdsearch:%QUERY%"
     sources:
       spotify: true # Enable Spotify source
       applemusic: true # Enable Apple Music source
       deezer: true # Enable Deezer source
+      jiosaavn: true # Enabled JioSaavn source
+      pandora: true # Enable Pandora source
       yandexmusic: true # Enable Yandex Music source
       flowerytts: true # Enable Flowery TTS source
       youtube: true # Enable YouTube search source (https://github.com/topi314/LavaSearch)
@@ -173,6 +178,20 @@ plugins:
       searchLimit: 10 # How many search results should be returned
       # customLoadArgs: ["-q", "--no-warnings", "--flat-playlist", "--skip-download", "-J"] # Custom arguments to pass to yt-dlp
       # customPlaybackArgs: ["-q", "--no-warnings", "-f", "bestaudio", "-J"] # Custom arguments for yt-dlp
+    jiosaavn:
+      decryption: # The decryption configuration for the JioSaavn tracks
+        secretKey: "your_key" # The required secret key used for decryption (Find your own secret key)
+        algorithm: "DES" # The algorithm used for decryption (Default "DES")
+        transformation: "DES/ECB/PKCS5Padding" # The transformation used for decryption (Default "DES/ECB/PKCS5Padding")
+      # proxy: # If defined, JioSaavn HTTP requests will be proxied through here. JioSaavn uses region blocking
+      #   url: "https://example.org" # The HTTP proxy to use
+      #   username: "my-bot" # Optional username to authenticate with the proxy
+      #   password: "youshallpass" # Optional password to authenticate with the proxy
+    pandora:
+      cookie: "your cookie" # Full Cookie header from your browser session to pandora.com
+      csrfToken: "your csrf token" # X-CsrfToken header from your browser session to pandora.com
+      authToken: "your auth token" # X-AuthToken header from your browser session to pandora.com
+      searchLimit: 6 # How many search results should be returned
     vkmusic:
       userToken: "your user token" # This token is needed for authorization in the api. Guide: https://github.com/topi314/LavaSrc#vk-music
       playlistLoadLimit: 1 # The number of pages at 50 tracks each
@@ -223,3 +242,5 @@ logging:
       max-file-size: 10MB
       max-history: 5
 ```
+
+
