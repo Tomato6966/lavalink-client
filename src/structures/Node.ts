@@ -1530,7 +1530,7 @@ export class LavalinkNode {
     }
 
     /** private util function for handling the queue end event */
-    public async queueEnd(player: Player, track: Track, payload: TrackEndEvent | TrackStuckEvent | TrackExceptionEvent): Promise<void> {
+    private async queueEnd(player: Player, track: Track, payload: TrackEndEvent | TrackStuckEvent | TrackExceptionEvent): Promise<void> {
         if (player.get('internal_nodeChanging') === true) return; // Check if nodeChange is in Progress than stop the queueEnd Event from being triggered.
         // add previous track to the queue!
         player.queue.current = null;
