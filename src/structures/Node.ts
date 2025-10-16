@@ -106,6 +106,8 @@ export class LavalinkNode {
 
         this.validate();
 
+        if (this.options.secure && this.options.port !== 443) throw new SyntaxError("If secure is true, then the port must be 443");
+
         this.options.regions = (this.options.regions || []).map(a => a.toLowerCase());
 
         Object.defineProperty(this, NodeSymbol, { configurable: true, value: true });

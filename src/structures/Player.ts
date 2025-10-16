@@ -243,7 +243,7 @@ export class Player {
                 let vol = Number(this.volume);
                 if (this.LavalinkManager.options.playerOptions.volumeDecrementer) vol *= this.LavalinkManager.options.playerOptions.volumeDecrementer;
                 this.lavalinkVolume = Math.round(vol);
-
+                options.volume = this.lavalinkVolume;
             }
 
             const track = Object.fromEntries(Object.entries({
