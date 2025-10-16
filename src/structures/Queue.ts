@@ -69,7 +69,7 @@ export class DefaultQueueStore implements QueueStoreManager {
      * @param guildId The guild ID
      * @returns The queue for the guild
      */
-    get(guildId: string):StoredQueue {
+    get(guildId: string): StoredQueue | undefined {
         return this.data.get(guildId);
     }
 
@@ -79,7 +79,7 @@ export class DefaultQueueStore implements QueueStoreManager {
      * @param valueToStringify The queue to set
      * @returns The queue for the guild
      */
-    set(guildId: string, valueToStringify):boolean {
+    set(guildId: string, valueToStringify): boolean {
         return this.data.set(guildId, valueToStringify) ? true : false;
     }
 
@@ -109,25 +109,25 @@ export class DefaultQueueStore implements QueueStoreManager {
     parse(value: StoredQueue | string): Partial<StoredQueue> {
         return value as Partial<StoredQueue>; // JSON.parse(value)
     }
-/*
-    // the base now has an Awaitable util type, so it allows both ASYNC as well as SYNC examples for all functions!
-    // here are all functions as async, typed, if you want to copy-paste it
-    async get(guildId: string): Promise<StoredQueue> {
-        return this.data.get(guildId);
-    }
-    async set(guildId: string, valueToStringify): Promise<boolean> {
-        return this.data.set(guildId, valueToStringify) ? true : false;
-    }
-    async delete(guildId: string) {
-        return this.data.delete(guildId);
-    }
-    async stringify(value: StoredQueue | string): Promise<StoredQueue | string> {
-        return value; // JSON.stringify(value);
-    }
-    async parse(value: StoredQueue | string): Promise<Partial<StoredQueue>> {
-        return value as Partial<StoredQueue>; // JSON.parse(value)
-    }
-*/
+    /*
+        // the base now has an Awaitable util type, so it allows both ASYNC as well as SYNC examples for all functions!
+        // here are all functions as async, typed, if you want to copy-paste it
+        async get(guildId: string): Promise<StoredQueue> {
+            return this.data.get(guildId);
+        }
+        async set(guildId: string, valueToStringify): Promise<boolean> {
+            return this.data.set(guildId, valueToStringify) ? true : false;
+        }
+        async delete(guildId: string) {
+            return this.data.delete(guildId);
+        }
+        async stringify(value: StoredQueue | string): Promise<StoredQueue | string> {
+            return value; // JSON.stringify(value);
+        }
+        async parse(value: StoredQueue | string): Promise<Partial<StoredQueue>> {
+            return value as Partial<StoredQueue>; // JSON.parse(value)
+        }
+    */
 }
 
 export class Queue {

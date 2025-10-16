@@ -36,6 +36,7 @@ export class FilterManager {
     }
     /** The Filter Data sent to Lavalink, only if the filter is enabled (ofc.) */
     public data: FilterData = {
+        volume: 1,
         lowPass: {
             smoothing: 0
         },
@@ -288,6 +289,7 @@ export class FilterManager {
         if (volume < 0 || volume > 5) throw new SyntaxError("Volume-Filter must be between 0 and 5");
 
         this.data.volume = volume;
+        this.filters.volume = volume !== 1;
 
         await this.applyPlayerFilters();
 

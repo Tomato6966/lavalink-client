@@ -106,8 +106,6 @@ export class LavalinkNode {
 
         this.validate();
 
-        if (this.options.secure && this.options.port !== 443) throw new SyntaxError("If secure is true, then the port must be 443");
-
         this.options.regions = (this.options.regions || []).map(a => a.toLowerCase());
 
         Object.defineProperty(this, NodeSymbol, { configurable: true, value: true });
@@ -804,11 +802,6 @@ export class LavalinkNode {
                 !this.info.plugins.find(v => v.name === "lavalyrics-plugin")
             ) throw new RangeError(`there is no lavalyrics-plugin available in the lavalink node (required for lyrics): ${this.id}`);
 
-            if (
-                !this.info.plugins.find(v => v.name === "lavasrc-plugin") &&
-                !this.info.plugins.find(v => v.name === "java-lyrics-plugin")
-            ) throw new RangeError(`there is no lyrics source (via lavasrc-plugin / java-lyrics-plugin) available in the lavalink node (required for lyrics): ${this.id}`);
-
             return await this.request(`/sessions/${this.sessionId}/players/${guildId}/lyrics/subscribe`, (options) => {
                 options.method = "POST";
             });
@@ -831,11 +824,6 @@ export class LavalinkNode {
             if (
                 !this.info.plugins.find(v => v.name === "lavalyrics-plugin")
             ) throw new RangeError(`there is no lavalyrics-plugin available in the lavalink node (required for lyrics): ${this.id}`);
-
-            if (
-                !this.info.plugins.find(v => v.name === "lavasrc-plugin") &&
-                !this.info.plugins.find(v => v.name === "java-lyrics-plugin")
-            ) throw new RangeError(`there is no lyrics source (via lavasrc-plugin / java-lyrics-plugin) available in the lavalink node (required for lyrics): ${this.id}`);
 
             return await this.request(`/sessions/${this.sessionId}/players/${guildId}/lyrics/subscribe`, (options) => {
                 options.method = "DELETE";
@@ -1121,7 +1109,7 @@ export class LavalinkNode {
                 this.reconnect();
             }
         }
-        
+
         this.NodeManager.LavalinkManager.players
             .filter((p) => p?.node?.options?.id === this?.options?.id)
             .forEach((p) => {
@@ -1540,7 +1528,7 @@ export class LavalinkNode {
     }
 
     /** private util function for handling the queue end event */
-    private async queueEnd(player: Player, track: Track, payload: TrackEndEvent | TrackStuckEvent | TrackExceptionEvent): Promise<void> {
+    public async queueEnd(player: Player, track: Track, payload: TrackEndEvent | TrackStuckEvent | TrackExceptionEvent): Promise<void> {
         if (player.get('internal_nodeChanging') === true) return; // Check if nodeChange is in Progress than stop the queueEnd Event from being triggered.
         // add previous track to the queue!
         player.queue.current = null;

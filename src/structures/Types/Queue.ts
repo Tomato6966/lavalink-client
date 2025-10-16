@@ -10,7 +10,7 @@ export interface StoredQueue {
 
 export interface QueueStoreManager {
     /** @async get a Value (MUST RETURN UNPARSED!) */
-    get: (guildId: string) => Awaitable<StoredQueue | string>;
+    get: (guildId: string) => Awaitable<StoredQueue | string | undefined>;
     /** @async Set a value inside a guildId (MUST BE UNPARSED) */
     set: (guildId: string, value: StoredQueue | string) => Awaitable<void | boolean>;
     /** @async Delete a Database Value based of it's guildId */
