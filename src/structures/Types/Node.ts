@@ -1,4 +1,3 @@
-import type internal from "stream";
 import type { LavalinkNode } from "../Node";
 import type { DestroyReasonsType } from "./Player";
 import type { InvalidLavalinkRestRequest, LavalinkPlayer } from "./Utils";
@@ -36,7 +35,7 @@ export interface LavalinkNodeOptions {
     /** Close on error */
     closeOnError?: boolean;
     /** Heartbeat interval , set to <= 0 to disable heartbeat system */
-    heartBeatInterval?: 30000;
+    heartBeatInterval?: number;
     /** Recommended, to check wether the client is still connected or not on the stats endpoint */
     enablePingOnStatsCheck?: boolean;
 }
@@ -138,7 +137,7 @@ export interface VersionObject {
     /** The minor version of this Lavalink server */
     minor: number;
     /** The patch version of this Lavalink server */
-    patch: internal;
+    patch: number;
     /** The pre-release version according to semver as a . separated list of identifiers */
     preRelease?: string;
     /** The build metadata according to semver as a . separated list of identifiers */
