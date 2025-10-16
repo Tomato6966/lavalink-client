@@ -29,7 +29,10 @@ export type LavaSrcSearchPlatformBase =
     "tdrec" |
     "qbsearch" |
     "qbisrc" |
-    "qbrec";
+    "qbrec" |
+    "pdsearch" |
+    "pdisrc" |
+    "pdrec";
 export type LavaSrcSearchPlatform = LavaSrcSearchPlatformBase | "ftts";
 
 export type JioSaavnSearchPlatform = "jssearch" | "jsrec";
@@ -64,6 +67,7 @@ export type ClientSearchPlatform =
     "sp" | "spsuggestion" | "spotify" | "spotify.com" | "spotifycom" |
     "dz" | "deezer" |
     "yandex" | "yandex music" | "yandexmusic" | "vk" | "vk music" | "vkmusic" | "tidal" | "tidal music" | "qobuz" |
+    "pandora" | "pd" | "pandora music" | "pandoramusic" |
     "flowerytts" | "flowery" | "flowery.tts" | LavalinkClientSearchPlatformResolve | LavalinkClientSearchPlatform | "js" | "jiosaavn" | "td" | "tidal" | "tdrec";
 
 export type SearchPlatform = LavalinkSearchPlatform | ClientSearchPlatform;
@@ -103,6 +107,11 @@ export type SourcesRegex = "YoutubeRegex" |
     "jiosaavn" |
     "appleMusic" |
     "tidal" |
+    "PandoraTrackRegex" |
+    "PandoraAlbumRegex" |
+    "PandoraArtistRegex" |
+    "PandoraPlaylistRegex" |
+    "AllPandoraRegex" |
     "TwitchTv" |
     "vimeo";
 
