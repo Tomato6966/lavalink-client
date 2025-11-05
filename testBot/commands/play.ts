@@ -59,7 +59,7 @@ export default {
             // vcRegion: (interaction.member as GuildMember)?.voice.channel?.rtcRegion!
         });
 
-        player.npMess
+        player.npMessage
 
         const connected = player.connected;
 
