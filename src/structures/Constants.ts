@@ -1,5 +1,8 @@
 import type { AudioOutputs, ChannelMixFilter, EQBand } from "./Types/Filters";
 
+/**
+ * Debug events for more detailed logging
+ */
 export enum DebugEvents {
     SetSponsorBlock = "SetSponsorBlock",
     DeleteSponsorBlock = "DeleteSponsorBlock",
@@ -53,6 +56,9 @@ export enum DebugEvents {
     PlayerAutoReconnect = "PlayerAutoReconnect",
 }
 
+/**
+ * Reasons why a player got destroyed
+ */
 export enum DestroyReasons {
     QueueEmpty = "QueueEmpty",
     NodeDestroy = "NodeDestroy",
@@ -70,11 +76,15 @@ export enum DestroyReasons {
     TrackStuckMaxTracksErroredPerTime = "TrackStuckMaxTracksErroredPerTime",
 };
 
+/**
+ *  Reasons why a player got disconnected
+ */
 export enum DisconnectReasons {
     Disconnected = "Disconnected",
     DisconnectAllNodes = "DisconnectAllNodes",
 }
 
+/** The valid SponsorBlock categories */
 export const validSponsorBlocks = ["sponsor", "selfpromo", "interaction", "intro", "outro", "preview", "music_offtopic", "filler"];
 
 /**  The audio Outputs Data map declaration */
@@ -105,6 +115,7 @@ export const audioOutputsData: Record<AudioOutputs, ChannelMixFilter> = {
     },
 }
 
+/**  Equalizer Presets */
 export const EQList = {
     /** A Bassboost Equalizer, so high it distorts the audio */
     BassboostEarrape: [
