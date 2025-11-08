@@ -323,6 +323,15 @@ export class Queue {
      * ```
      */
     public async remove<T extends Track | UnresolvedTrack | number | Track[] | UnresolvedTrack[] | number[] | (number | Track | UnresolvedTrack)[]>(removeQueryTrack: T): Promise<{ removed: (Track | UnresolvedTrack)[] } | null> {
+
+        if (removeQueryTrack === null || removeQueryTrack === undefined) {
+            return null;
+        }
+
+        if (Array.isArray(removeQueryTrack) && removeQueryTrack.length === 0) {
+            return null;
+        }
+
         const oldStored = typeof this.queueChanges?.tracksRemoved === "function" ? this.utils.toJSON() : null;
         if (typeof removeQueryTrack === "number") {
             const toRemove = this.tracks[removeQueryTrack];
