@@ -31,11 +31,6 @@ export default defineConfig({
                     href: "mailto:chrissy@mivator.com",
                     label: "Send an Email"
                 },
-                {
-                    icon: "discord",
-                    href: "https://discord.gg/AsgD3gtPnb",
-                    label: "Personal-discord"
-                },
             ],
             editLink: {
                 baseUrl: "https://github.com/Tomato6966/lavalink-client/tree/main",
@@ -131,10 +126,6 @@ export default defineConfig({
                 {
                     label: "Official Lavalink-Discord & - SUPPORT",
                     link: "https://discord.gg/lavalink-1082302532421943407"
-                },
-                {
-                    label: "Personal Discord & MIvator",
-                    link: "https://discord.gg/AsgD3gtPnb"
                 },
                 {
                     label: "Official Lavalink-Web",
