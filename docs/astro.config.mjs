@@ -85,7 +85,7 @@ export default defineConfig({
                         },
                         {
                             label: "Tipps and Tricks",
-                            link: "/home/tipps_and_tricks.mdx",
+                            link: "/home/tipps_and_tricks",
                         },
                         {
                             label: "Checkout Docs (Manager-Class)",
