@@ -3,6 +3,283 @@ title: "Version Log"
 description: View the Version Updates
 ---
 
-import Versions from '../../../components/version-log.astro'
+## Update Log
 
-<Versions />
+## **Version 2.6.3**
+
+gotta write this versionlog from 2.5.x - 2.6.x ... commits till 2.5.1 https://github.com/Tomato6966/lavalink-client/commit/66289fb0aba996f5ba4adac6ac26ac008bb72105
+
+---
+
+## **Version 2.5.0**
+
+  - Deps got updated
+  - Handling of parsing url got updated to use the **URL object**
+  - **Flowerytts requests needs to be changed** now:
+
+```js
+const query = "Hello World How are you?";
+const voice = "Ava";
+const speed = "1.0";
+
+const fttsParams = new URLSearchParams();
+if(voice) fttsParams.append("voice", voice);
+if(speed) fttsParams.append("speed", speed);
+
+const response = await player.search({
+    // For flowerytts you need to send a URL
+    // and if you want to add optiojns, this is how you add the params to the query..
+    query: `${encodeURI(query)}${fttsParams.size ? `?${fttsParams.toString()}` : ""}`,
+    source: "ftts"
+}, interaction.user);
+```
+
+---
+
+## **Version 2.4.4 - Version 2.4.6**
+
+  - `player.changeNode()` is **fixed and works** - thanks to @PandaIN95
+  - The code got **re-formatted and re-structured**, no code-changes are needed to be made, but it's now cleaner & more readable in some areas
+  - The same for the testbot Folder(s), also it imports lavalink-client directly, so you can just copy it and move on from it.
+  - **Some minor Fixess**:
+      * Autoplay sometimes doesn't get called when previousAutoplay call failed.
+      * remove structuredClone so that it works in bun more stable
+      * Player Options Validation also allows single property objects
+      * Some typos were fixed
+
+---
+
+## **Version 2.4.3**
+
+  - **`managerOptions#playerOptions.onDisconnect.autoReconnectOnlyWithTracks`** added to control whether to try reconnecting only when there are tracks in the queue / current track or not
+  - Added a new debug log for that
+  - Added the try to play the next track if there is no current track
+      * *Fixes a problem where auto-reconnect on-Disconnect while the queue was empty caused the player to get destroyed.*
+
+---
+
+## **Verison 2.4.2**
+
+  - Merged [PR\#78](https://github.com/Tomato6966/lavalink-client/pull/78) from @hwangsihu - Added the configs to eslint ignore
+  - Merged [PR\#80](https://github.com/Tomato6966/lavalink-client/pull/80) from @EvilG-MC - Argument Typo fix in resume event type declaration
+  - Merged [PR\#83](https://github.com/Tomato6966/lavalink-client/pull/83) from @EvilG-MC - Fix if statement in Node\#syncPlayerData() to allow syncing of "single entry objects"
+  - Some minor improvements by removing unnecessary spreading
+
+---
+
+## **Version 2.4.1**
+
+  - Did some cleanup and comment removal
+  - **Removed `playerVoiceEmptyStart`** because it would mean adding voice-state tracking, which wasn't planned.
+
+---
+
+## **Version 2.4.0**
+
+  - Refactored a little the project folder Structure
+  - Added PR Packages to install all commits / packages at once `https://pkg.pr.new/Tomato6966/lavalink-client`
+  - Removed the dist folder, and added prepare Scripts
+  - Added attributes for git linting
+  - Removed the old (gitbook) documentation, and swapped it to a **NEW TSDOC Themed Documentation** via astro.dev and mdx
+  - **Added new player events**:
+      * **`playerMuteChange`** ➡️ `(player, selfMuted, serverMuted) => {}`
+      * **`playerDeafChange`** ➡️ `(player, selfDeafed, serverDeafed) => {}`
+      * **`playerSuppressChange`** ➡️ `(player, suppress) => {}`
+      * **`playerQueueEmptyStart`** ➡️ `(player, timeoutMs) => {}` (Queue empty handler started)
+      * **`playerQueueEmptyEnd`** ➡️ `(player) => {}` (Queue empty handler finished/destroyed player)
+      * **`playerQueueEmptyCancel`** ➡️ `(player) => {}` (Queue empty handler cancelled)
+      * **`playerVoiceJoin`** ➡️ `(player, userId) => {}` (User joins player VC)
+      * **`playerVoiceLeave`** ➡️ `(player, userId) => {}` (User leaves player VC)
+  - Removed `playerVoiceEmptyStart`, `playerVoiceEmptyEnd`, and `playerVoiceEmptyCancel` again.
+
+---
+
+## **Version 2.3.6**
+
+  - **Added Lyrics Support**:
+      * **New Player Functions**:
+          * **`player.getCurrentLyrics(false);`**
+          * **`player.getLyrics(track, true);`**
+          * **`player.subscribeLyrics();`**
+          * **`player.unsubscribeLyrics();`**
+      * **New Node Functions**:
+          * **`player.node.lyrics.getCurrent(player.guildId, false);`**
+          * **`player.node.lyrics.get(track, true);`**
+          * **`player.node.lyrics.subscribe(player.guildId);`**
+          * **`player.node.lyrics.unsubscribe(player.guildId);`**
+      * **New Manager Events for Lyrics**:
+          * **`lavalink.on("LyricsLine", (player, track, lyricsLine) => {});`**
+          * **`lavalink.on("LyricsFound", (player, track, data) => {});`**
+          * **`lavalink.on("LyricsNotFound", (player, track, lyricsLine) => {});`**
+
+---
+
+## **Version 2.3.5**
+
+  - **FIXED not able to import** :: Accidentally removed tsc-alias configuration.
+  - **FIXED autoplay not working** :: Accidentally added an invalid if statement.
+  - Added a new AutoplayExecution Debug Log
+  - Added more samples to the Testbot related configuration
+
+---
+
+## **Version 2.3.4**
+
+  - Improved the package bundling with **tsc-alias**, to export files with file types
+  - Added `package.json` to exported dist
+  - Added **error handling for resolving unresolved tracks** on trackend
+
+---
+
+## **Version 2.3.2** / **Version 2.3.3**
+
+  - Added Missing function calls for the **QueueWatcher** of tracksRemoved within the `queue.remove()` function
+  - **Added new DestroyReasons**: `TrackStuckMaxTracksErroredPerTime`, `TrackErrorMaxTracksErroredPerTime`
+  - **Added new Prevention Systems for CrashbackLoop recognitions**:
+      * **`managerOptions.playerOptions.maxErrorsPerTime`**: (Default: `{ threshold: 10_000, maxAmount: 3 }`) - Destroys player if too many errors occur in a given time.
+      * **`managerOptions.playerOptions.minAutoPlayMs`**: (Default: `10_000`) - Prevents Autoplay from triggering too quickly after a previous execution to avoid crashback loops.
+  - **Added new Event "debug"**: `LavalinkManager#debug(event:DebugEvents, data:{ state: "log" | "warn" | "error", message:string, functionLayer:string, error?:Error })` - Emitted when `LavalinkManager.options.advancedOptions.enableDebugEvents` is set to `true`.
+
+---
+
+## **Version 2.3.1**
+
+  - Fixed Export, where types of Manager weren't exported correctly
+  - Fixed Dist Folder containing old, left over not needed files
+
+---
+
+## **Version 2.3.0**
+
+  - Added a **heartbeat + ping-pong system** to check if the client is still connected to the node (auto-reconnect on failure).
+  - **New nodeOptions**: `enablePingOnStatsCheck: boolean` (default: true), `heartBeatInterval: number` (default: 30\_000)
+  - **New Node Properties**: `isAlive: boolean`, `heartBeatPing: number`
+  - **New NodeManager Event**: **`reconnectinprogress`**
+  - Reduced default `retryDelay` from 30s to **10s**
+  - **"Breaking Change" for providing track / clientTrack for `player.play()`**: Tracks are now directly played by Lavalink by replacing the current track, instead of being added to the queue and skipped to.
+
+---
+
+## **Version 2.2.2**
+
+  - Fixed a bug in **`player.pause()`** where resuming after a long pause could cause an auto-skip.
+  - Fixed the handling of the previous track array (sometimes added "null").
+  - **Added new queue functions**:
+      * **`const previousTrack = await player.queue.shiftPrevious()`**: Removes and returns the previously played track from the `player.queue.previous` array.
+      * **`await player.queue.remove(removeQuery)`**: Remove function supporting an array of Tracks/UnresolvedTracks, single Track/UnresolvedTrack, array of track-indexes, or a single track index.
+  - Added **`track.pluginInfo.clientData?.previousTrack`** handling to prevent a track from being added to the previous track array.
+
+---
+
+## **Version 2.2.1**
+
+  - **Player position is now calculated instead of using intervals** (removes internal interval for position update).
+  - Internal updates for handling query params and url-requests: **You don't have to ever provide stuff encoded via `encodeURIComponent` anymore.**
+  - Added a bunch of jsdoc information.
+  - **Flowery TTS example updated** to use `extraQueryUrlParams` for dynamic mid-request options:
+
+
+```js
+const extraParams = new URLSearchParams();
+if(voice) extraParams.append(`voice`, voice);
+// ...
+const response = await player.search({
+    query: `${query}`,
+    extraQueryUrlParams: extraParams,
+    source: "ftts"
+}, interaction.user);
+```
+
+---
+
+## **Version 2.2.0**
+
+  - Changed `console.error` to **throw error** on `queue.utils.sync` if no data was provided/found
+  - Changed `undici.fetch` to **native fetch** (requires nodejs v18+)
+  - Added sourceNames for **`bandcamp`** (`bcsearch` or `bc`).
+  - Added sourceName for **`phsearch`** from the dunktebot plugin.
+  - Exporting events.
+  - Added new debugOption: **`logCustomSearches`**
+
+---
+
+## **Version 2.1.1**
+
+  - **Enforce link searches** for users with following `searchPlatform` Options: `"http" | "https" | "link" | "uri"`
+  - Added searchPlatform for **local tracks** (files on the lavalink server): **`"local"`**
+
+---
+
+## **Version 2.1.0**
+
+  - Fixed that, if you **skip and have trackloop enabled, it doesn't skip the track**.
+  - **Reworked the Filter Manager for custom filters** via [LavalinkFilterPlugin](https://github.com/rohank05/lavalink-filter-plugin) / [LavalinkLavaDSPX-Plugin](https://github.com/devoxin/LavaDSPX-Plugin/).
+  - They now have individual **state-variables (booleans)** under `player.filterManager.filters`:
+      * `player.filterManager.filters.lavalinkLavaDspxPlugin` (`.echo`, `.normalization`, `.highPass`, `.lowPass`)
+      * `player.filterManager.filters.lavalinkFilterPlugin` (`.echo`, `.reverb`)
+  - They also now have individual **state-changing-methods** under `player.filterManager`:
+      * `player.filterManager.lavalinkLavaDspxPlugin.toggleEcho(...)`, `.toggleNormalization(...)`, `.toggleHighPass(...)`, `.toggleLowPass(...)`
+      * `player.filterManager.lavalinkFilterPlugin.toggleEcho(...)`, `.toggleReverb(...)`
+
+---
+
+## **Version 2.0.0**
+
+  - **Lavalink v4 released, adjusted all features to support it\!**
+  - **Track Loading/Stop Playing has changed (Client handles it automatically)**:
+
+
+```diff
+# Old
+- await player.node.updatePlayer({ encodedTrack?: Base64|null, track?: Track|UnresolvedTrack, identifer?: string });
+# New
++ await player.node.updatePlayer({ track: { encoded?: Base64|null, identifier?: string }, clientTrack?: Track|UnresolvedTrack });
+```
+
+  - **Player play function adjusted**:
+
+
+```diff
+# Old
+- await player.play({ encodedTrack?: Base64|null, track?: Track|UnresolvedTrack, identifer?: string });
+# New
++ await player.play({ track: { encoded?: Base64|null, identifier?: string }, clientTrack?: Track|UnresolvedTrack });
+```
+
+  - **Node Resuming supported**: Enable with `await player.node.updateSession(true, 360_000);` and use `sessionId` on reconnect.
+  - **Node Options property adjusted**: `node.resuming: { enabled: boolean, timeout: number | null }`
+  - **Player function added to stop playing without disconnecting**: `player.stopPlaying(clearQueue:boolean = true, executeAutoplay:boolean = false);`
+  - **Node functions for SponsorBlock Plugin added**: `deleteSponsorBlock(player:Player)`, `setSponsorBlock(player:Player, segments: ["sponsor", ...])`, `getSponsorBlock(player:Player)`
+  - **Corresponding nodeManager events added**: `"ChapterStarted"`, `"ChaptersLoaded"`, `"SegmentsLoaded"`, `"SegmentSkipped"`
+  - **Filters sending supported** for `filters.pluginFilters`
+  - **Native implementation for lavaSearch plugin officially updated**
+  - **Native implementation for lavaSrc plugin officially updated** (including floweryTTS)
+  - **Lavalink `track.userData` got added** (similar to custom `pluginInfo.clientData`)
+
+---
+
+## **Version 1.2.1**
+
+  - **Adjusted `player.stopPlaying()` parameters**: `stopPlaying(clearQueue:boolean = true, executeAutoplay:boolean = false)`.
+      * Default behavior is now to clear the queue and not execute Autoplay.
+  - Fixed that it looped the current track if `repeatmode === "track" / "queue"` when stopping.
+  - Implemented a **`parseLavalinkConnUrl(connectionUrl:string)` Util Function** to parse connection data from a URL string in the pattern: `lavalink://<nodeId>:<nodeAuthorization(Password)>@<NodeHost>:<NodePort>`.
+      * Example: `parseLavalinkConnUrl("lavalink://LavalinkNode_1:strong%23password1@localhost:2345")` returns `{ id: "LavalinkNode_1", authorization: "strong#password1", host: "localhost", port: 2345 }`
+
+---
+
+## **Version 1.2.0**
+
+  - Added **`player.stopPlaying()`**: **Clears the Queue** and **stops playing**, **without destroying the Player**
+  - **Adjusted `Player.skip()`**:
+      * Added `throwError` Property: `player.skip(skipTo?:number = 0, throwError?:boolean = true)`.
+      * If `throwError = false` and the queue is empty, it won't throw an error (behaves like `stopPlaying`).
+  - **Added all Events and Methods from the [SponsorBlock Plugin]** (e.g., `player.getSponsorBlock()`, `player.setSponsorBlock()`, `player.deleteSponsorBlock()`).
+      * **Manager Events added**: `"SegmentsLoaded"`, `"SegmentSkipped"`, `"ChapterStarted"`, `"ChaptersLoaded"`
+  - Example Bot shows how to "disable" / "enable" Autoplay with bot data variables.
+  - Added **`ManagerOptions#emitNewSongsOnly`**: If true, it won't emit the `"trackStart"` Event if track.loop is active or the new current track is the same as the previous one.
+  - **Added URL/Query Blacklist/Whitelist options to `ManagerOptions`**:
+      * **`ManagerOptions#linksBlacklist`** (RegExp/strings to block queries/links)
+      * **`ManagerOptions#linksWhitelist`** (RegExp/strings for links only; if no match, request is blocked)
+      * **`ManagerOptions#linksAllowed`** (If set to false, blocks all requests that are links)
+  - **Moved `ManaagerOptions#debugOptions`** to **`ManaagerOptions#advancedOptions.debugOptions`**

@@ -108,7 +108,7 @@ description: "All Events of the Lavalink Manager."
 ## Debug Logs
 
 > *Internal debugging events from the Lavalink client:*
-> *Only triggered when the **ManagerOptions#` advancedOptions.enableDebugEvents `** is set to **` true `***
+> *Only triggered when the **` ManagerOptions#advancedOptions.enableDebugEvents `** is set to **` true `***
 
 - **`debug`** ➡️ `(eventKey, eventData) => {}`
   *Triggered for various debug logs and errors.*
@@ -116,6 +116,8 @@ description: "All Events of the Lavalink Manager."
 ## Examples
 
 ```js
+import { DebugEvents } from "lavalink-client";
+
 client.lavalink.on("create", (node, payload) => {
   console.log(`The Lavalink Node #${node.id} connected`);
 });
@@ -125,3 +127,36 @@ client.lavalink.on("error", (node, error, payload) => {
   console.error(`The Lavalink Node #${node.id} errored: `, error);
   console.error(`Error Payload: `, payload);
 });
+
+// YOU NEED TO HAVE THE debug EVENT ENABLED
+/*
+
+client.lavalink = new LavalinkManager<myCustomPlayer>({
+    ....
+    advancedOptions: {
+        enableDebugEvents: true, // enable the DEBUG EVENT LISTENER
+        debugOptions: {
+            noAudio: true, // if set to true, you will get additional logs related to not hearing audio while playing on the first setup
+            playerDestroy: {
+                dontThrowError: false,
+                debugLog: false, // if set to true, you will see additional debug logs related to destroying players
+            },
+            logCustomSearches: false, // if set to true, you will see logs related to custom search plugins.
+        }
+    }
+});
+
+*/
+client.lavalink.on("debug", (eventKey, eventData) => {
+    // skip specific log
+    if(eventKey === DebugEvents.NoAudioDebug && eventData.message === "Manager is not initated yet") return;
+    // skip specific event log of a log-level-state "log"
+    if(eventKey === DebugEvents.PlayerUpdateSuccess && eventData.state === "log") return;
+    console.group("Lavalink-Client-Debug:");
+    console.log("-".repeat(20));
+    console.debug(`[${eventKey}]`);
+    console.debug(eventData)
+    console.log("-".repeat(20));
+    console.groupEnd();
+});
+```

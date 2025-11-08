@@ -115,7 +115,7 @@ export function PlayerEvents(client:BotClient) {
         console.debug(eventData)
         console.log("-".repeat(20));
         console.groupEnd();
-    });;
+    });
 
     /**
      * Queue/Track Events

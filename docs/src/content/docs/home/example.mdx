@@ -59,6 +59,7 @@ client.on("ready", () => {
 - `trackError` ➡️ `(player, track, payload) => {}`
 - `trackEnd` ➡️ `(player, track, payload) => {}`
 - `queueEnd` ➡️ `(player, track, payload) => {}`
+- `debug` ➡️ `(eventKey, eventData) => {}` *... for debugging errors, need to enable it via `ManagerOptions#advancedOptions#enableDebugEvents: true`*
 - `playerUpdate` ➡️ `(player) => {}`
 
 ```js
@@ -196,4 +197,43 @@ client.lavalink.on("playerUpdate", (oldPlayer, newPlayer) => { // automatically 
 client.lavalink.on("playerDestroy", (player) => {
     deleteSavedPlayerData(player.guildId);
 })
+```
+
+
+## How to Debug the Client
+
+```ts
+import { DebugEvents } from "lavalink-client";
+
+// YOU NEED TO HAVE THE debug EVENT ENABLED
+/*
+
+client.lavalink = new LavalinkManager<myCustomPlayer>({
+    ....
+    advancedOptions: {
+        enableDebugEvents: true, // enable the DEBUG EVENT LISTENER
+        debugOptions: {
+            noAudio: true, // if set to true, you will get additional logs related to not hearing audio while playing on the first setup
+            playerDestroy: {
+                dontThrowError: false,
+                debugLog: false, // if set to true, you will see additional debug logs related to destroying players
+            },
+            logCustomSearches: false, // if set to true, you will see logs related to custom search plugins.
+        }
+    }
+});
+
+*/
+client.lavalink.on("debug", (eventKey, eventData) => {
+    // skip specific log
+    if(eventKey === DebugEvents.NoAudioDebug && eventData.message === "Manager is not initated yet") return;
+    // skip specific event log of a log-level-state "log"
+    if(eventKey === DebugEvents.PlayerUpdateSuccess && eventData.state === "log") return;
+    console.group("Lavalink-Client-Debug:");
+    console.log("-".repeat(20));
+    console.debug(`[${eventKey}]`);
+    console.debug(eventData)
+    console.log("-".repeat(20));
+    console.groupEnd();
+});
 ```
