@@ -190,7 +190,7 @@ export interface FilterData {
             echoLength?: number; // Float, higher than 0.0, in seconds (1.0 = 1 second).
             decay?: number;      // Float, within the range of 0.0 - 1.0. A value of 1.0 means no decay, and a value of 0.0 means
         };
-    }
+    };
 }
 /**
  * Actual Filter Data sent to Lavalink
