@@ -1,4 +1,4 @@
-import { audioOutputsData } from "./Constants";
+import { audioOutputsData, EQList } from "./Constants";
 import { safeStringify } from "./Utils";
 
 import type { Player } from "./Player";
@@ -75,6 +75,7 @@ const DEFAULT_FILTER_DATAS: FilterData = {
     }*/
 }
 export class FilterManager {
+    public static EQList = EQList;
     /** The Equalizer bands currently applied to the Lavalink Server */
     public equalizerBands: EQBand[] = [];
     /** Private Util for the instaFix Filters option */
@@ -114,8 +115,19 @@ export class FilterManager {
 
     /**
      * Apply Player filters for lavalink filter sending data, if the filter is enabled / not
+     *
+     * @returns {Promise<void>}
+     *
+     * @example
+     * ```ts
+     * // Apply the filters after changing them manually:
+     * player.filterManager.data.volume = 0.5;
+     * // maybe you wanna manually set a distorition filter? then do it like this...
+     * player.filterManager.data.distortion = { sinOffset: 0.5, sinScale: 2, cosOffset: 0.5, cosScale: 2, tanOffset: 0.5, tanScale: 2, offset: 0.5, scale: 2 };
+     * await player.filterManager.applyPlayerFilters();
+     * ```
      */
-    async applyPlayerFilters() {
+    async applyPlayerFilters(): Promise<void> {
         const sendData = { ...this.data } as LavalinkFilterData & { equalizer: EQBand[] };
         this.checkFiltersState();
 
@@ -170,11 +182,19 @@ export class FilterManager {
     }
 
     /**
-     * Checks if the filters are correctly stated (active / not-active)
+     * Checks if the filters are correctly stated (active / not-active) - mostly used internally.
      * @param oldFilterTimescale
-     * @returns
+     * @returns {boolean} True, if the check was successfull
+     *
+     * @example
+     * ```ts
+     * // Check the filter states
+     * player.filterManager.checkFiltersState();
+     * // Apply the filters after checking
+     * await player.filterManager.applyPlayerFilters();
+     * ```
      */
-    checkFiltersState(oldFilterTimescale?: Partial<TimescaleFilter>) {
+    checkFiltersState(oldFilterTimescale?: Partial<TimescaleFilter>): boolean {
         this.filters.rotation = this.data.rotation.rotationHz !== 0;
         this.filters.vibrato = this.data.vibrato.frequency !== 0 || this.data.vibrato.depth !== 0;
         this.filters.tremolo = this.data.tremolo.frequency !== 0 || this.data.tremolo.depth !== 0;
@@ -201,6 +221,13 @@ export class FilterManager {
 
     /**
      * Reset all Filters
+     * @returns {Promise<FilterManager>} The Filter Manager, for chaining.
+     *
+     * @example
+     * ```ts
+     * // Reset all filters
+     * await player.filterManager.resetFilters();
+     * ```
      */
     public async resetFilters(): Promise<FilterManager> {
         this.filters.lavalinkLavaDspxPlugin.echo = false;
@@ -229,6 +256,13 @@ export class FilterManager {
      * Set the Filter Volume
      * @param volume the volume (0.0 - 5.0)
      * @returns {Promise<FilterManager>} The Filter Manager, for chaining.
+     *
+     * @example
+     * ```ts
+     * // Set Volume to 50%
+     * await player.filterManager.setVolume(0.5);
+     * // note this is a filter, so it will "jump" to the volume, i think it's like a "volume boost effect" so i marketed it as a filter
+     * ```
      */
     public async setVolume(volume: number) {
         if (volume < 0 || volume > 5) throw new SyntaxError("Volume-Filter must be between 0 and 5");
@@ -247,6 +281,21 @@ export class FilterManager {
      * Set the AudioOutput Filter
      * @param {AudioOutputs} type the audio output type
      * @returns {Promise<FilterManager>} The Filter Manager, for chaining.
+     *
+     * @example
+     * ```ts
+     * // Set Audio Output to Mono
+     * await player.filterManager.setAudioOutput("mono");
+     *
+     * // Set Audio Output to Stereo
+     * await player.filterManager.setAudioOutput("stereo");
+     *
+     * // Set Audio Output to Left
+     * await player.filterManager.setAudioOutput("left");
+     *
+     * // Set Audio Output to Right
+     * await player.filterManager.setAudioOutput("right");
+     * ```
      */
     public async setAudioOutput(type: AudioOutputs): Promise<FilterManager> {
         if (this.player.node.info && !this.player.node.info?.filters?.includes("channelMix")) throw new Error("Node#Info#filters does not include the 'channelMix' Filter (Node has it not enable)")
@@ -264,6 +313,12 @@ export class FilterManager {
      * Set custom filter.timescale#speed . This method disabled both: nightcore & vaporwave. use 1 to reset it to normal
      * @param {number} speed set the speed of the filter
      * @returns {Promise<FilterManager>} The Filter Manager, for chaining.
+     *
+     * @example
+     * ```ts
+     * // Set Speed to 1.25 (disableds nightcore and vaporwave effect which are pre-made timescale settings of rate,pitch and speed)
+     * await player.filterManager.setSpeed(1.25);
+     * ```
      */
     public async setSpeed(speed = 1): Promise<FilterManager> {
         if (this.player.node.info && !this.player.node.info?.filters?.includes("timescale")) throw new Error("Node#Info#filters does not include the 'timescale' Filter (Node has it not enable)")
@@ -283,6 +338,12 @@ export class FilterManager {
      * Set custom filter.timescale#pitch . This method disabled both: nightcore & vaporwave. use 1 to reset it to normal
      * @param  {number} pitch set the pitch of the filter
      * @returns {Promise<FilterManager>} The Filter Manager, for chaining.
+     *
+     * @example
+     * ```ts
+     * // Set Pitch to 1.25 (disableds nightcore and vaporwave effect which are pre-made timescale settings of rate,pitch and speed)
+     * await player.filterManager.setPitch(1.25);
+     * ```
      */
     public async setPitch(pitch = 1): Promise<FilterManager> {
         if (this.player.node.info && !this.player.node.info?.filters?.includes("timescale")) throw new Error("Node#Info#filters does not include the 'timescale' Filter (Node has it not enable)")
@@ -302,6 +363,12 @@ export class FilterManager {
      * Set custom filter.timescale#rate . This method disabled both: nightcore & vaporwave. use 1 to reset it to normal
      * @param {number} rate set the rate of the filter
      * @returns {Promise<FilterManager>} The Filter Manager, for chaining.
+     *
+     * @example
+     * ```ts
+     * // Set Rate to 1.25 (disableds nightcore and vaporwave effect which are pre-made timescale settings of rate,pitch and speed)
+     * await player.filterManager.setRate(1.25);
+     * ```
      */
     public async setRate(rate = 1): Promise<FilterManager> {
         if (this.player.node.info && !this.player.node.info?.filters?.includes("timescale")) throw new Error("Node#Info#filters does not include the 'timescale' Filter (Node has it not enable)")
@@ -321,6 +388,15 @@ export class FilterManager {
      * Enables / Disables the rotation effect, (Optional: provide your Own Data)
      * @param {number} rotationHz set the rotationHz of the filter
      * @returns {Promise<FilterManager>} The Filter Manager, for chaining.
+     *
+     * @example
+     * ```ts
+     * // Toggle Rotation filter with custom settings
+     * await player.filterManager.toggleRotation(0.4);
+     * // or use the defaults
+     * await player.filterManager.toggleRotation();
+     * // when it's enabled before calling the toggle function, it disables it, so you might need to do some if/else logic.
+     * ```
      */
     public async toggleRotation(rotationHz = 0.2): Promise<FilterManager> {
         if (this.player.node.info && !this.player.node.info?.filters?.includes("rotation")) throw new Error("Node#Info#filters does not include the 'rotation' Filter (Node has it not enable)")
@@ -341,6 +417,15 @@ export class FilterManager {
      * @param {number} frequency set the frequency of the filter
      * @param {number} depth set the depth of the filter
      * @returns {Promise<FilterManager>} The Filter Manager, for chaining.
+     *
+     * @example
+     * ```ts
+     * // Toggle Vibrato filter with custom settings
+     * await player.filterManager.toggleVibrato(8, 0.5);
+     * // or use the defaults
+     * await player.filterManager.toggleVibrato();
+     * // when it's enabled before calling the toggle function, it disables it, so you might need to do some if/else logic.
+     * ```
      */
     public async toggleVibrato(frequency = 10, depth = 1): Promise<FilterManager> {
         if (this.player.node.info && !this.player.node.info?.filters?.includes("vibrato")) throw new Error("Node#Info#filters does not include the 'vibrato' Filter (Node has it not enable)")
@@ -358,6 +443,15 @@ export class FilterManager {
      * @param {number} frequency set the frequency of the filter
      * @param {number} depth set the depth of the filter
      * @returns {Promise<FilterManager>} The Filter Manager, for chaining.
+     *
+     * @example
+     * ```ts
+     * // Toggle Tremolo filter with custom settings
+     * await player.filterManager.toggleTremolo(5, 0.7);
+     * // or use the defaults
+     * await player.filterManager.toggleTremolo();
+     * // when it's enabled before calling the toggle function, it disables it, so you might need to do some if/else logic.
+     * ```
      */
     public async toggleTremolo(frequency = 4, depth = 0.8): Promise<FilterManager> {
         if (this.player.node.info && !this.player.node.info?.filters?.includes("tremolo")) throw new Error("Node#Info#filters does not include the 'tremolo' Filter (Node has it not enable)")
@@ -374,6 +468,15 @@ export class FilterManager {
      * Enables / Disables the LowPass effect, (Optional: provide your Own Data)
      * @param {number} smoothing set the smoothing of the filter
      * @returns {Promise<FilterManager>} The Filter Manager, for chaining.
+     *
+     * @example
+     * ```ts
+     * // Toggle LowPass filter with custom settings
+     * await player.filterManager.toggleLowPass(30);
+     * // or use the defaults
+     * await player.filterManager.toggleLowPass();
+     * // when it's enabled before calling the toggle function, it disables it, so you might need to do some if/else logic.
+     * ```
      */
     public async toggleLowPass(smoothing = 20): Promise<FilterManager> {
 
@@ -397,6 +500,15 @@ export class FilterManager {
          * @param {number} boostFactor set the boost factor of the filter
          * @param {number} cutoffFrequency set the cutoff frequency of the filter
          * @returns  {Promise<boolean>} the state of the filter after execution.
+         *
+         * @example
+         * ```ts
+         * // Toggle LowPass filter with custom settings
+         * await player.filterManager.lavalinkLavaDspxPlugin.toggleLowPass(1.2, 300);
+         * // or use the defaults
+         * await player.filterManager.lavalinkLavaDspxPlugin.toggleLowPass();
+         * // when it's enabled before calling the toggle function, it disables it, so you might need to do some if/else logic.
+         * ```
          */
         toggleLowPass: async (boostFactor = 1.0, cutoffFrequency = 80): Promise<FilterManager> => {
             if (this.player.node.info && !this.player.node.info?.plugins?.find(v => v.name === "lavadspx-plugin")) throw new Error("Node#Info#plugins does not include the lavadspx plugin")
@@ -418,6 +530,15 @@ export class FilterManager {
          * @param {number} boostFactor [] set the boost factor of the filter
          * @param {number} cutoffFrequency set the cutoff frequency of the filter
          * @returns  {Promise<boolean>} the state of the filter after execution.
+         *
+         * @example
+         * ```ts
+         * // Toggle HighPass filter with custom settings
+         * await player.filterManager.lavalinkLavaDspxPlugin.toggleHighPass(1.2, 150); // custom values
+         * // or use the defaults
+         * await player.filterManager.lavalinkLavaDspxPlugin.toggleHighPass();
+         * // when it's enabled before calling the toggle function, it disables it, so you might need to do some if/else logic.
+         * ```
          */
         toggleHighPass: async (boostFactor = 1.0, cutoffFrequency = 80): Promise<FilterManager> => {
             if (this.player.node.info && !this.player.node.info?.plugins?.find(v => v.name === "lavadspx-plugin")) throw new Error("Node#Info#plugins does not include the lavadspx plugin")
@@ -439,6 +560,15 @@ export class FilterManager {
          * @param {number} [maxAmplitude=0.75] - The maximum amplitude of the audio.
          * @param {boolean} [adaptive=true] Whether to use adaptive normalization or not.
          * @returns {Promise<FilterManager>} The Filter Manager, for chaining.
+         *
+         * @example
+         * ```ts
+         * // Toggle Normalization filter with custom settings
+         * await player.filterManager.lavalinkLavaDspxPlugin.toggleNormalization(0.9, false); // custom values
+         * // or use the defaults
+         * await player.filterManager.lavalinkLavaDspxPlugin.toggleNormalization();
+         * // when it's enabled before calling the toggle function, it disables it, so you might need to do some if/else logic.
+         * ```
          */
         toggleNormalization: async (maxAmplitude: number = 0.75, adaptive: boolean = true): Promise<FilterManager> => {
             if (this.player.node.info && !this.player.node.info?.plugins?.find(v => v.name === "lavadspx-plugin")) throw new Error("Node#Info#plugins does not include the lavadspx plugin")
@@ -460,6 +590,15 @@ export class FilterManager {
          * @param {number} [decay=0.5] The decay of the echo effect.
          * @param {number} [echoLength=0.5] The length of the echo effect.
          * @returns {Promise<FilterManager>} The Filter Manager, for chaining.
+         *
+         * @example
+         * ```ts
+         * // Toggle Echo filter with custom settings
+         * await player.filterManager.lavalinkLavaDspxPlugin.toggleEcho(0.7, 0.6); // custom values
+         * // or use the defaults
+         * await player.filterManager.lavalinkLavaDspxPlugin.toggleEcho();
+         * // when it's enabled before calling the toggle function, it disables it, so you might need to do some if/else logic.
+         * ```
          */
         toggleEcho: async (decay: number = 0.5, echoLength: number = 0.5): Promise<FilterManager> => {
             if (this.player.node.info && !this.player.node.info?.plugins?.find(v => v.name === "lavadspx-plugin")) throw new Error("Node#Info#plugins does not include the lavadspx plugin")
@@ -485,6 +624,15 @@ export class FilterManager {
          * @param {number} delay set the delay of the echo
          * @param {number} decay set the decay of the echo
          * @returns {Promise<FilterManager>} The Filter Manager, for chaining.
+         *
+         * @example
+         * ```ts
+         * // Toggle Echo filter with custom settings
+         * await player.filterManager.lavalinkFilterPlugin.toggleEcho(3, 0.7); // custom values
+         * // or use the defaults
+         * await player.filterManager.lavalinkFilterPlugin.toggleEcho();
+         * // when it's enabled before calling the toggle function, it disables it, so you might need to do some if/else logic.
+         * ```
          */
         toggleEcho: async (delay = 4, decay = 0.8): Promise<FilterManager> => {
             if (this.player.node.info && !this.player.node.info?.plugins?.find(v => v.name === "lavalink-filter-plugin")) throw new Error("Node#Info#plugins does not include the lavalink-filter-plugin plugin")
@@ -513,6 +661,15 @@ export class FilterManager {
          * @param {number} delays set the delays of the reverb
          * @param {number} gains set the gains of the reverb
          * @returns {Promise<FilterManager>} The Filter Manager, for chaining.
+         *
+         * @example
+         * ```ts
+         * // Toggle Reverb filter with custom settings
+         * await player.filterManager.lavalinkFilterPlugin.toggleReverb([0.04, 0.045, 0.05, 0.055], [0.85, 0.84, 0.83, 0.82]);
+         * // or use the defaults
+         * await player.filterManager.lavalinkFilterPlugin.toggleReverb();
+         * // when it's enabled before calling the toggle function, it disables it, so you might need to do some if/else logic.
+         * ```
          */
         toggleReverb: async (delays = [0.037, 0.042, 0.048, 0.053], gains = [0.84, 0.83, 0.82, 0.81]): Promise<FilterManager> => {
             if (this.player.node.info && !this.player.node.info?.plugins?.find(v => v.name === "lavalink-filter-plugin")) throw new Error("Node#Info#plugins does not include the lavalink-filter-plugin plugin")
@@ -541,6 +698,15 @@ export class FilterManager {
      * @param {number} pitch set the pitch of the filter
      * @param {number} rate set the rate of the filter
      * @returns {Promise<FilterManager>} The Filter Manager, for chaining.
+     *
+     * @example
+     * ```ts
+     * // Toggle Nightcore filter with custom settings
+     * await player.filterManager.toggleNightcore(1.3, 1.3, 0.9);
+     * // or use the defaults
+     * await player.filterManager.toggleNightcore();
+     * // when it's enabled before calling the toggle function, it disables it, so you might need to do some if/else logic.
+     * ```
      */
     public async toggleNightcore(speed = 1.289999523162842, pitch = 1.289999523162842, rate = 0.9365999523162842): Promise<FilterManager> {
         if (this.player.node.info && !this.player.node.info?.filters?.includes("timescale")) throw new Error("Node#Info#filters does not include the 'timescale' Filter (Node has it not enable)")
@@ -562,6 +728,15 @@ export class FilterManager {
      * @param {number} pitch set the pitch of the filter
      * @param {number} rate set the rate of the filter
      * @returns {Promise<FilterManager>} The Filter Manager, for chaining.
+     *
+     * @example
+     * ```ts
+     * // Toggle Vaporwave filter with custom settings
+     * await player.filterManager.toggleVaporwave(0.9, 0.7, 1);
+     * // or use the defaults
+     * await player.filterManager.toggleVaporwave();
+     * // when it's enabled before calling the toggle function, it disables it, so you might need to do some if/else logic.
+     * ```
      */
     public async toggleVaporwave(speed = 0.8500000238418579, pitch = 0.800000011920929, rate = 1): Promise<FilterManager> {
         if (this.player.node.info && !this.player.node.info?.filters?.includes("timescale")) throw new Error("Node#Info#filters does not include the 'timescale' Filter (Node has it not enable)")
@@ -584,6 +759,15 @@ export class FilterManager {
      * @param {number} filterBand set the filter band of the filter
      * @param {number} filterWidth set the filter width of the filter
      * @returns {Promise<FilterManager>} The Filter Manager, for chaining.
+     *
+     * @example
+     * ```ts
+     * // Toggle Karaoke filter with custom settings
+     * await player.filterManager.toggleKaraoke(1.5, 1.0, 220, 100);
+     * // or use the defaults
+     * await player.filterManager.toggleKaraoke();
+     * // when it's enabled before calling the toggle function, it disables it, so you might need to do some if/else logic.
+     * ```
      */
     public async toggleKaraoke(level = 1, monoLevel = 1, filterBand = 220, filterWidth = 100): Promise<FilterManager> {
         if (this.player.node.info && !this.player.node.info?.filters?.includes("karaoke")) throw new Error("Node#Info#filters does not include the 'karaoke' Filter (Node has it not enable)")
@@ -600,16 +784,53 @@ export class FilterManager {
     /**
      * Function to find out if currently there is a custom timescamle etc. filter applied
      * @returns {boolean} whether a custom filter is active
+     *
+     * @example
+     * ```ts
+     * // Check if a custom filter is active
+     * const isCustom = player.filterManager.isCustomFilterActive();
+     * console.log(`Is custom filter active? ${isCustom}`);
+     * ```
      */
     public isCustomFilterActive(): boolean {
         this.filters.custom = !this.filters.nightcore && !this.filters.vaporwave && Object.values(this.data.timescale).some(d => d !== 1);
         return this.filters.custom;
     }
 
+
+    /**
+     * Sets the players equalizer bands using one of the predefined presets.
+     * @param {keyof typeof EQList} preset The preset to use.
+     * @returns {Promise<FilterManager>} The Filter Manager, for chaining.
+     *
+     * @example
+     * ```ts
+     * // Set EQ preset
+     * await player.filterManager.setEQPreset('BassboostMedium');
+     * ```
+     */
+    public async setEQPreset(preset : keyof typeof EQList): Promise<this> {
+        const bands = EQList[preset];
+        return this.setEQ(bands);
+    }
+
     /**
      * Sets the players equalizer band on-top of the existing ones.
      * @param {number} bands
      * @returns {Promise<FilterManager>} The Filter Manager, for chaining.
+     *
+     * @example
+     * ```ts
+     * // Set EQ bands
+     * await player.filterManager.setEQ([
+     *   { band: 0, gain: 0.3 },
+     *   { band: 1, gain: -0.2 },
+     *   { band: 2, gain: 0.1 }
+     * ]);
+     *
+     * // or use one of the templates:
+     * await player.filterManager.setEQ(player.filterManager.EQList.BassboostMedium); // you can also import EQList from somewhere package if wanted.
+     * ```
      */
     public async setEQ(bands: EQBand | EQBand[]): Promise<this> {
         if (!Array.isArray(bands)) bands = [bands];
@@ -639,6 +860,12 @@ export class FilterManager {
     /**
      * Clears the equalizer bands.
      * @returns {Promise<FilterManager>} The Filter Manager, for chaining.
+     *
+     * @example
+     * ```ts
+     * // Clear all EQ bands
+     * await player.filterManager.clearEQ();
+     * ```
      */
     public async clearEQ(): Promise<this> {
         return this.setEQ(Array.from({ length: 15 }, (_v, i) => ({ band: i, gain: 0 })));
