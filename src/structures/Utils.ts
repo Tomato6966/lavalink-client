@@ -185,6 +185,34 @@ export class ManagerUtils {
         if ("requestTimeout" in data && (typeof data.requestTimeout !== "number" || isNaN(data.requestTimeout) || data.requestTimeout <= 0 && data.requestTimeout !== undefined)) return false;
         return true;
     }
+
+
+    /**
+     * Validate tracks based on duration wether they are playble or broken tracks.
+     * most tracks should be longer than 30s, so you can put a minDuration of 29e3 (cause preview tracks are exactly 30s) or put 0.
+     * This check is not done automatically, you need to check it yourself by doing:
+     * @example
+     * ```ts
+     * const tracks = await player.search("Adele");
+     *
+     * // short hand:
+     * const validTracks = tracks.filter(client.lavalink.utils.isNotBrokenTrack)
+     * // or with options:
+     * const vaildTracks = tracks.filter(t => client.lavalink.utils.isNotBrokenTrack(t, 29e3));
+     *
+     * // then you can add it to the queue.
+     * await player.queue.add(validTracks);
+     * ```
+     */
+    isNotBrokenTrack(data: Track, minDuration = 29e3): data is Track {
+        if(typeof data?.info?.duration !== "number" || isNaN(data?.info?.duration)) return false;
+        if(data.info.duration <= Math.max(minDuration, 0)) return false;
+
+        if(!data.info) return false;
+
+        return this.isTrack(data);
+    }
+
     /**
      * Validate if a data is equal to a track
      * @param data the Track to validate

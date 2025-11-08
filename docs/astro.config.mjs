@@ -84,6 +84,10 @@ export default defineConfig({
                             link: "/home/configuration",
                         },
                         {
+                            label: "Tipps and Tricks",
+                            link: "/home/tipps_and_tricks.mdx",
+                        },
+                        {
                             label: "Checkout Docs (Manager-Class)",
                             link: "/api/lavalinkmanager/classes/lavalinkmanager"
                         },

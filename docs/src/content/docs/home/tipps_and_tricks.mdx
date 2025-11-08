@@ -1,0 +1,22 @@
+---
+title: Tips for Lavalink
+description: Learn handy tricks with the client or lavalink in general.
+---
+
+
+### Skip Broken-Tracks
+
+Some tracks are broken by not containing duration or broken duration. Due to the nature of Flexibility lavalink-client does not handle those scenarios, so you need to check it yourself.
+There are utils for that built in, and this is how you could do it:
+
+```ts
+const tracks = await player.search("Adele");
+
+// short hand:
+const validTracks = tracks.filter(client.lavalink.utils.isNotBrokenTrack)
+// or with options:
+const vaildTracks = tracks.filter(t => client.lavalink.utils.isNotBrokenTrack(t, 29e3));
+
+// then you can add it to the queue.
+await player.queue.add(validTracks);
+```
