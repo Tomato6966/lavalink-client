@@ -379,8 +379,6 @@ export class Player {
 
         if (isNaN(volume)) throw new TypeError("Volume must be a number.");
 
-        volume = Math.round(volume);
-
         this.volume = Math.round(Math.max(Math.min(volume, 1000), 0));
 
         this.lavalinkVolume = Math.round(Math.max(Math.min(Math.round(
@@ -892,3 +890,4 @@ export class Player {
         } as PlayerJson
     }
 }
+
