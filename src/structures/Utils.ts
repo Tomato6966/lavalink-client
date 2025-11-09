@@ -193,23 +193,23 @@ export class ManagerUtils {
      * This check is not done automatically, you need to check it yourself by doing:
      * @example
      * ```ts
-     * const tracks = await player.search("Adele");
+     * const res = await player.search("Adele");
      *
      * // short hand:
-     * const validTracks = tracks.filter(client.lavalink.utils.isNotBrokenTrack)
+     * const validTracks = res.tracks.filter(client.lavalink.utils.isNotBrokenTrack)
      * // or with options:
-     * const vaildTracks = tracks.filter(t => client.lavalink.utils.isNotBrokenTrack(t, 29e3));
+     * const validTracks = res.tracks.filter(t => client.lavalink.utils.isNotBrokenTrack(t, 29e3));
      *
      * // then you can add it to the queue.
      * await player.queue.add(validTracks);
      * ```
      */
-    isNotBrokenTrack(data: Track, minDuration = 29e3): data is Track {
+    isNotBrokenTrack(data: Track | UnresolvedTrack, minDuration = 29e3): data is Track {
         if(typeof data?.info?.duration !== "number" || isNaN(data?.info?.duration)) return false;
         if(data.info.duration <= Math.max(minDuration, 0)) return false;
 
         if(!data.info) return false;
-
+        
         return this.isTrack(data);
     }
 
