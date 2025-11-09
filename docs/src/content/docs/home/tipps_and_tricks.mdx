@@ -10,12 +10,12 @@ Some tracks are broken by not containing duration or broken duration. Due to the
 There are utils for that built in, and this is how you could do it:
 
 ```ts
-const tracks = await player.search("Adele");
+const { tracks } = await player.search("Adele");
 
 // short hand:
 const validTracks = tracks.filter(client.lavalink.utils.isNotBrokenTrack)
 // or with options:
-const vaildTracks = tracks.filter(t => client.lavalink.utils.isNotBrokenTrack(t, 29e3));
+const validTracks = tracks.filter(t => client.lavalink.utils.isNotBrokenTrack(t, 29e3));
 
 // then you can add it to the queue.
 await player.queue.add(validTracks);
