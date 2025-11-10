@@ -116,6 +116,7 @@ This client powers various Discord bots:
   - [Akyn](https://akynbot.vercel.app/) (@notdeltaxd)
 - **Bots Community (Users):**
   - [Soundy](https://github.com/idMJA/Soundy) (@idMJA)
+  - [BeatBot ](https://getbeatbot.vercel.app/) (@zenitsujs)
 
 ***
 
