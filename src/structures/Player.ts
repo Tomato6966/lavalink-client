@@ -239,7 +239,7 @@ export class Player {
             this.queue.utils.save();
 
             if (typeof options?.volume === "number" && !isNaN(options?.volume)) {
-                this.volume = Math.max(Math.min(options?.volume, 500), 0);
+                this.volume = Math.max(Math.min(options?.volume, 1000), 0);
                 let vol = Number(this.volume);
                 if (this.LavalinkManager.options.playerOptions.volumeDecrementer) vol *= this.LavalinkManager.options.playerOptions.volumeDecrementer;
                 this.lavalinkVolume = Math.round(vol);
@@ -327,7 +327,7 @@ export class Player {
         if (!this.queue.current) throw new Error(`There is no Track in the Queue, nor provided in the PlayOptions`);
 
         if (typeof options?.volume === "number" && !isNaN(options?.volume)) {
-            this.volume = Math.max(Math.min(options?.volume, 500), 0);
+            this.volume = Math.max(Math.min(options?.volume, 1000), 0);
             let vol = Number(this.volume);
             if (this.LavalinkManager.options.playerOptions.volumeDecrementer) vol *= this.LavalinkManager.options.playerOptions.volumeDecrementer;
             this.lavalinkVolume = Math.round(vol);
