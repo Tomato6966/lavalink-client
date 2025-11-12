@@ -110,7 +110,8 @@ plugins:
   lavasrc:
     providers:
       - 'ytsearch:"%ISRC%"'
-      - "dzisrc:%ISRC%"
+      - "dzisrc:%ISRC%"
+
       - "ytsearch:%QUERY%"
       - "dzsearch:%QUERY%"
       - "jssearch:%QUERY%"
@@ -188,9 +189,7 @@ plugins:
       #   username: "my-bot" # Optional username to authenticate with the proxy
       #   password: "youshallpass" # Optional password to authenticate with the proxy
     pandora:
-      cookie: "your cookie" # Full Cookie header from your browser session to pandora.com
       csrfToken: "your csrf token" # X-CsrfToken header from your browser session to pandora.com
-      authToken: "your auth token" # X-AuthToken header from your browser session to pandora.com
       searchLimit: 6 # How many search results should be returned
     vkmusic:
       userToken: "your user token" # This token is needed for authorization in the api. Guide: https://github.com/topi314/LavaSrc#vk-music
@@ -242,5 +241,6 @@ logging:
       max-file-size: 10MB
       max-history: 5
 ```
+
 
 
