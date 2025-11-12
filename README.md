@@ -114,6 +114,7 @@ This client powers various Discord bots:
   - [Stelle](https://github.com/Ganyu-Studios/stelle-music) (@EvilG-MC)
   - [Panais](https://panais.xyz/) (@LucasB25)
   - [Akyn](https://akynbot.vercel.app/) (@notdeltaxd)
+  - [ARINO](https://site.arinoapp.qzz.io/) (@ryanwtf88)
 - **Bots Community (Users):**
   - [Soundy](https://github.com/idMJA/Soundy) (@idMJA)
   - [BeatBot ](https://getbeatbot.vercel.app/) (@zenitsujs)
@@ -457,3 +458,4 @@ if (response.tracks.length > 0) {
 </details>
 
 </div>
+
