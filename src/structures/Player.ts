@@ -352,9 +352,9 @@ export class Player {
             voice: options?.voice ?? undefined
         }).filter(v => typeof v[1] !== "undefined")) as Partial<LavalinkPlayOptions>;
 
-        if ((typeof finalOptions.position !== "undefined" && isNaN(finalOptions.position)) || (typeof finalOptions.position === "number" && (finalOptions.position < 0 || finalOptions.position >= this.queue.current.info.duration))) throw new Error("PlayerOption#position must be a positive number, less than track's duration");
+        if ((typeof finalOptions.position !== "undefined" && isNaN(finalOptions.position)) || (typeof finalOptions.position === "number" && finalOptions.position < 0) || (typeof finalOptions.position === "number" && this.queue.current.info.duration > 0 && finalOptions.position >= this.queue.current.info.duration)) throw new Error("PlayerOption#position must be a positive number, less than track's duration");
         if ((typeof finalOptions.volume !== "undefined" && isNaN(finalOptions.volume) || (typeof finalOptions.volume === "number" && finalOptions.volume < 0))) throw new Error("PlayerOption#volume must be a positive number");
-        if ((typeof finalOptions.endTime !== "undefined" && isNaN(finalOptions.endTime)) || (typeof finalOptions.endTime === "number" && (finalOptions.endTime < 0 || finalOptions.endTime >= this.queue.current.info.duration))) throw new Error("PlayerOption#endTime must be a positive number, less than track's duration");
+        if ((typeof finalOptions.endTime !== "undefined" && isNaN(finalOptions.endTime)) || (typeof finalOptions.endTime === "number" && finalOptions.endTime < 0) || (typeof finalOptions.endTime === "number" && this.queue.current.info.duration > 0 && finalOptions.endTime >= this.queue.current.info.duration)) throw new Error("PlayerOption#endTime must be a positive number, less than track's duration");
         if (typeof finalOptions.position === "number" && typeof finalOptions.endTime === "number" && finalOptions.endTime < finalOptions.position) throw new Error("PlayerOption#endTime must be bigger than PlayerOption#position")
 
         const now = performance.now();
@@ -457,7 +457,7 @@ export class Player {
      * Pause the player
      */
     async pause() {
-        if (this.paused && !this.playing) throw new Error("Player is already paused - not able to pause.");
+        if (this.paused) throw new Error("Player is already paused - not able to pause.");
         this.paused = true;
         this.lastPositionChange = null; // needs to removed to not cause issues
         const now = performance.now();

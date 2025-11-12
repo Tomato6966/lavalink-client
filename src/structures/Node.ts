@@ -176,7 +176,7 @@ export class LavalinkNode {
 
         const { response, options } = await this.rawRequest(endpoint, modify);
 
-        if (["DELETE", "PUT"].includes(options.method)) return;
+        if (["DELETE"].includes(options.method)) return;
 
         if (response.status === 204) return; // no content
         if (response.status === 404) throw new Error(`Node Request resulted into an error, request-PATH: ${options.path} | headers: ${safeStringify(response.headers)}`)
@@ -529,7 +529,7 @@ export class LavalinkNode {
 
             // Handle all player operations first, then clean up the socket
             handlePlayerOperations().finally(() => {
-                this.socket.close(1000, "Node-Destroy");
+                this.socket?.close(1000, "Node-Destroy");
                 this.socket.removeAllListeners();
                 this.socket = null;
                 this.reconnectAttempts = 1;
@@ -545,7 +545,7 @@ export class LavalinkNode {
                 }
             });
         } else { // If no players, proceed with socket cleanup immediately
-            this.socket.close(1000, "Node-Destroy");
+            this.socket?.close(1000, "Node-Destroy");
             this.socket.removeAllListeners();
             this.socket = null;
             this.reconnectAttempts = 1;
@@ -578,7 +578,7 @@ export class LavalinkNode {
     public disconnect(disconnectReason?: DisconnectReasonsType) {
         if (!this.connected) return
 
-        this.socket.close(1000, "Node-Disconnect");
+        this.socket?.close(1000, "Node-Disconnect");
         this.socket.removeAllListeners();
         this.socket = null;
 
@@ -1019,7 +1019,7 @@ export class LavalinkNode {
      * @param instaReconnect @default false wether to instantly try to reconnect
      * @returns void
      *
-     * @example
+     * @private
      * ```ts
      * await player.node.reconnect();
      * ```
