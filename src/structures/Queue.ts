@@ -345,9 +345,10 @@ export class Queue {
         if (Array.isArray(removeQueryTrack)) {
             if (removeQueryTrack.every(v => typeof v === "number")) {
                 const removed = [];
-                for (const i of removeQueryTrack) {
+                const sortedIndexes = (removeQueryTrack as number[]).sort((a, b) => b - a);
+                for (const i of sortedIndexes) {
                     if (this.tracks[i]) {
-                        removed.push(...this.tracks.splice(i, 1))
+                        removed.unshift(...this.tracks.splice(i, 1));
                     }
                 }
                 if (!removed.length) return null;
@@ -376,9 +377,10 @@ export class Queue {
 
             const removed = [];
 
-            for (const { i } of tracksToRemove) {
+            const sortedIndexes = tracksToRemove.map(t => t.i).sort((a, b) => b - a);
+            for (const i of sortedIndexes) {
                 if (this.tracks[i]) {
-                    removed.push(...this.tracks.splice(i, 1))
+                    removed.unshift(...this.tracks.splice(i, 1));
                 }
             }
             // Log if available

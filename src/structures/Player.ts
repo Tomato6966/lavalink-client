@@ -439,7 +439,7 @@ export class Player {
     async search(query: SearchQuery, requestUser: unknown, throwOnEmpty: boolean = false) {
         const Query = this.LavalinkManager.utils.transformQuery(query);
 
-        if (["bcsearch", "bandcamp"].includes(Query.source) && !this.node.info.sourceManagers.includes("bandcamp")) {
+        if (["bcsearch", "bandcamp"].includes(Query.source) && !this.node.info?.sourceManagers.includes("bandcamp")) {
             if (this.LavalinkManager.options?.advancedOptions?.enableDebugEvents) {
                 this.LavalinkManager.emit("debug", DebugEvents.BandcampSearchLokalEngine, {
                     state: "log",
@@ -755,7 +755,7 @@ export class Player {
             if (this.queue.current || this.queue.tracks.length) { // Check if all queued track sources are supported by the new node
                 const trackSources = new Set([this.queue.current, ...this.queue.tracks].map(track => track.info.sourceName));
                 const missingSources = [...trackSources].filter(
-                    source => !updateNode.info.sourceManagers.includes(source));
+                    source => !updateNode.info?.sourceManagers.includes(source));
                 if (missingSources.length)
                     throw new RangeError(`Sources missing for Node ${updateNode.id}: ${missingSources.join(', ')}`)
             }

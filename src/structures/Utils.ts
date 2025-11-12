@@ -205,11 +205,11 @@ export class ManagerUtils {
      * ```
      */
     isNotBrokenTrack(data: Track | UnresolvedTrack, minDuration = 29e3): data is Track {
-        if(typeof data?.info?.duration !== "number" || isNaN(data?.info?.duration)) return false;
-        if(data.info.duration <= Math.max(minDuration, 0)) return false;
+        if (typeof data?.info?.duration !== "number" || isNaN(data?.info?.duration)) return false;
+        if (data.info.duration <= Math.max(minDuration, 0)) return false;
 
-        if(!data.info) return false;
-        
+        if (!data.info) return false;
+
         return this.isTrack(data);
     }
 
@@ -445,7 +445,7 @@ export class ManagerUtils {
             throw new Error("Lavalink Node has not 'qobuz' enabled, which is required to have 'qbrec' work");
         }
         if (["pdsearch", "pdisrc", "pdrec"].includes(source) && !node.info?.sourceManagers?.includes("pandora")) {
-    throw new Error("Lavalink Node has not 'pandora' enabled, which is required to have '" + source + "' work");
+            throw new Error("Lavalink Node has not 'pandora' enabled, which is required to have '" + source + "' work");
         }
 
         return;
@@ -603,12 +603,12 @@ async function getClosestTrack(data: UnresolvedTrack, player: Player): Promise<T
         query, source: sourceName !== "twitch" && sourceName !== "flowery-tts" ? sourceName : player.LavalinkManager.options?.playerOptions?.defaultSearchPlatform,
     }, data.requester).then((res: SearchResult) => {
         let trackToUse = null;
-        // try to find via author name
+        // try to find via isrc (most reliable)
+        if (data.info.isrc && !trackToUse) trackToUse = res.tracks.find(track => track.info?.isrc === data.info?.isrc);
+        // try to find via author name OR title
         if (data.info.author && !trackToUse) trackToUse = res.tracks.find(track => [data.info?.author || "", `${data.info?.author} - Topic`].some(name => new RegExp(`^${escapeRegExp(name)}$`, "i").test(track.info?.author)) || new RegExp(`^${escapeRegExp(data.info?.title)}$`, "i").test(track.info?.title));
         // try to find via duration
         if (data.info.duration && !trackToUse) trackToUse = res.tracks.find(track => (track.info?.duration >= (data.info?.duration - 1500)) && (track?.info.duration <= (data.info?.duration + 1500)));
-        // try to find via isrc
-        if (data.info.isrc && !trackToUse) trackToUse = res.tracks.find(track => track.info?.isrc === data.info?.isrc);
         // apply unresolved data and return the track
         return applyUnresolvedData(trackToUse || res.tracks[0], data, player.LavalinkManager.utils);
     });

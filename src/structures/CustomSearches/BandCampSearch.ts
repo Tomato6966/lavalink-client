@@ -25,7 +25,7 @@ export const bandCampSearch = async (player: Player, query: string, requestUser:
             artworkUrl: item.img,
             author: item.band_name,
             title: item.name,
-            identifier: item.id ? `${item.id}` : item.url?.split("/").reverse()[0],
+            identifier: item.id ? `${item.id}` : item.url?.split("/")?.reverse()[0],
         }, requestUser));
 
     } catch (e) { error = e; }
