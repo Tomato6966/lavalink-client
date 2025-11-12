@@ -316,34 +316,6 @@ export interface LyricsLineEvent extends PlayerEvent {
     skipped: boolean;
 }
 
-export interface LyricsFoundEvent extends PlayerEvent {
-    /** The lyricsfound event */
-    type: "LyricsFoundEvent";
-    /** The guildId */
-    guildId: string;
-    /** The lyrics */
-    lyrics: LyricsResult;
-}
-
-export interface LyricsNotFoundEvent extends PlayerEvent {
-    /**The lyricsnotfound event*/
-    type: "LyricsNotFoundEvent";
-    /**The guildId*/
-    guildId: string;
-}
-
-export interface LyricsLineEvent extends PlayerEvent {
-    /**The lyricsline event*/
-    type: "LyricsLineEvent";
-    /** The guildId */
-    guildId: string;
-    /** The line number */
-    lineIndex: number;
-    /** The line */
-    line: LyricsLine;
-    /**skipped is true if the line was skipped */
-    skipped: boolean;
-}
 export type LoadTypes =
     | "track"
     | "playlist"
