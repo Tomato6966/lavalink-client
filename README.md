@@ -118,6 +118,7 @@ This client powers various Discord bots:
 - **Bots Community (Users):**
   - [Soundy](https://github.com/idMJA/Soundy) (@idMJA)
   - [BeatBot ](https://getbeatbot.vercel.app/) (@zenitsujs)
+  - [Atom Music](https://top.gg/bot/1320469557411971165) (@sakshamyep)
 
 ***
 
@@ -458,4 +459,5 @@ if (response.tracks.length > 0) {
 </details>
 
 </div>
+
 
