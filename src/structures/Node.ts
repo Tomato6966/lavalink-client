@@ -176,7 +176,7 @@ export class LavalinkNode {
 
         const { response, options } = await this.rawRequest(endpoint, modify);
 
-        if (["DELETE"].includes(options.method)) return;
+        if (["DELETE", "PUT"].includes(options.method)) return;
 
         if (response.status === 204) return; // no content
         if (response.status === 404) throw new Error(`Node Request resulted into an error, request-PATH: ${options.path} | headers: ${safeStringify(response.headers)}`)
@@ -1019,7 +1019,7 @@ export class LavalinkNode {
      * @param instaReconnect @default false wether to instantly try to reconnect
      * @returns void
      *
-     * @private
+     * @example
      * ```ts
      * await player.node.reconnect();
      * ```
@@ -1097,9 +1097,19 @@ export class LavalinkNode {
     private close(code: number, reason: string): void {
         if (this.pingTimeout) clearTimeout(this.pingTimeout);
 
-        if (this.socket) {
-            this.socket.removeAllListeners();
-            this.socket = null;
+        try {
+            if (this.socket) {
+                this.socket.removeAllListeners();
+                this.socket = null;
+            }
+        } catch (e) {
+            if (this.NodeManager?.LavalinkManager?.options?.advancedOptions?.enableDebugEvents) {
+                this.NodeManager.LavalinkManager.emit("debug", DebugEvents.SocketCleanupError, {
+                    state: "warn",
+                    message: `An error occurred during socket cleanup in close() (likely a race condition): ${e.message}`,
+                    functionLayer: "LavalinkNode > close()",
+                });
+            }
         }
 
         this.isAlive = false;

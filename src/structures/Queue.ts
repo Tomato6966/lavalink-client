@@ -377,10 +377,10 @@ export class Queue {
 
             const removed = [];
 
-            const sortedIndexes = tracksToRemove.map(t => t.i).sort((a, b) => b - a);
-            for (const i of sortedIndexes) {
-                if (this.tracks[i]) {
-                    removed.unshift(...this.tracks.splice(i, 1));
+            tracksToRemove.sort((a, b) => b.i - a.i);
+            for (const trackObj of tracksToRemove) {
+                if (this.tracks[trackObj.i]) {
+                    removed.unshift(...this.tracks.splice(trackObj.i, 1));
                 }
             }
             // Log if available
