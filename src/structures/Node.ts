@@ -579,7 +579,7 @@ export class LavalinkNode {
         if (!this.connected) return
 
         this.socket?.close(1000, "Node-Disconnect");
-        this.socket.removeAllListeners();
+        this.socket?.removeAllListeners();
         this.socket = null;
 
         this.reconnectAttempts = 1;
