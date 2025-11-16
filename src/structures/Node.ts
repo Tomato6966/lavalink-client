@@ -530,7 +530,7 @@ export class LavalinkNode {
             // Handle all player operations first, then clean up the socket
             handlePlayerOperations().finally(() => {
                 this.socket?.close(1000, "Node-Destroy");
-                this.socket.removeAllListeners();
+                this.socket?.removeAllListeners();
                 this.socket = null;
                 this.reconnectAttempts = 1;
                 clearTimeout(this.reconnectTimeout);
@@ -546,7 +546,7 @@ export class LavalinkNode {
             });
         } else { // If no players, proceed with socket cleanup immediately
             this.socket?.close(1000, "Node-Destroy");
-            this.socket.removeAllListeners();
+            this.socket?.removeAllListeners();
             this.socket = null;
             this.reconnectAttempts = 1;
             clearTimeout(this.reconnectTimeout);

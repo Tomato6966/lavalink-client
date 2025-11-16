@@ -457,7 +457,7 @@ export class Player {
      * Pause the player
      */
     async pause() {
-        if (this.paused) throw new Error("Player is already paused - not able to pause.");
+        if (this.paused && !this.playing) throw new Error("Player is already paused - not able to pause.");
         this.paused = true;
         this.lastPositionChange = null; // needs to removed to not cause issues
         const now = performance.now();
