@@ -296,6 +296,7 @@ export class Queue {
      *  - single Track | UnresolvedTrack
      *  - multiple Track | UnresovedTrack
      *  - at the index or multiple indexes
+     *  - Since v2.7 the removed tracks get unshifted into the previous queue state instead of pushed (indexed at the start instead of end - as it should)
      * @param removeQueryTrack
      * @returns null (if nothing was removed) / { removed } where removed is an array with all removed elements
      *
