@@ -1,5 +1,5 @@
 import type { DebugEvents } from "../Constants";
-import { LavalinkManager } from "../LavalinkManager";
+import type { LavalinkManager } from "../LavalinkManager";
 
 import type { Player } from "../Player";
 
@@ -265,7 +265,7 @@ export interface ManagerOptions<CustomPlayerT extends Player = Player> {
     /** The Bot Client's Data for Authorization */
     client?: BotClientOptions;
     /** QueueOptions for all Queues */
-    queueOptions?: ManagerQueueOptions<CustomPlayerT>;
+    queueOptions?: ManagerQueueOptions;
     /** PlayerOptions for all Players */
     playerOptions?: ManagerPlayerOptions<CustomPlayerT>;
     /** The player class you want to use when creating a player. (can be extendable) */
