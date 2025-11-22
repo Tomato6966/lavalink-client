@@ -603,12 +603,17 @@ async function getClosestTrack(data: UnresolvedTrack, player: Player): Promise<T
         query, source: sourceName !== "twitch" && sourceName !== "flowery-tts" ? sourceName : player.LavalinkManager.options?.playerOptions?.defaultSearchPlatform,
     }, data.requester).then((res: SearchResult) => {
         let trackToUse = null;
-        // try to find via isrc (most reliable)
-        if (data.info.isrc && !trackToUse) trackToUse = res.tracks.find(track => track.info?.isrc === data.info?.isrc);
         // try to find via author name OR title
-        if (data.info.author && !trackToUse) trackToUse = res.tracks.find(track => [data.info?.author || "", `${data.info?.author} - Topic`].some(name => new RegExp(`^${escapeRegExp(name)}$`, "i").test(track.info?.author)) || new RegExp(`^${escapeRegExp(data.info?.title)}$`, "i").test(track.info?.title));
+        if ((data.info?.title || data.info?.author) && !trackToUse) trackToUse = res.tracks.find(track => 
+            // find via author name (i ... case insensitve)
+            [data.info?.author || "", `${data.info?.author} - Topic`].some(name => new RegExp(`^${escapeRegExp(name)}$`, "i").test(track.info?.author)) || 
+            // find via title (i ... case insensitve)
+            new RegExp(`^${escapeRegExp(data.info?.title)}$`, "i").test(track.info?.title)
+        );
+        // try to find via isrc (isrc's are not fully unique, finding via author / track title is more reliable, but this is a good alternative approach if everything else fails, and it's more accurate than findig via duration)
+        if (data.info?.isrc && !trackToUse) trackToUse = res.tracks.find(track => track.info?.isrc === data.info?.isrc);
         // try to find via duration
-        if (data.info.duration && !trackToUse) trackToUse = res.tracks.find(track => (track.info?.duration >= (data.info?.duration - 1500)) && (track?.info.duration <= (data.info?.duration + 1500)));
+        if (data.info?.duration && !trackToUse) trackToUse = res.tracks.find(track => (track.info?.duration >= (data.info?.duration - 1500)) && (track?.info.duration <= (data.info?.duration + 1500)));
         // apply unresolved data and return the track
         return applyUnresolvedData(trackToUse || res.tracks[0], data, player.LavalinkManager.utils);
     });
