@@ -108,7 +108,8 @@ pnpm add tomato6966/lavalink-client
 ## 💖 Used In
 This client powers various Discord bots:
 - **[Mivator](https://discord.gg/5dUb7M2qCj)** (Public Bot by @Tomato6966)
-- **[Betty](https://betty.cx/)** (Public Bot by fb_sean)
+- **[Betty](https://betty.bot/?utm_source=lavalink-client)** (Public Bot by @fb_sean)
+- **[Nero](https://betty.bot/?utm_source=lavalink-client)** (Public Bot by @fb_sean)
 - **Bots by Contributors:**
   - [Mintone](https://mintone.tech/) (@appujet)
   - [Stelle](https://github.com/Ganyu-Studios/stelle-music) (@EvilG-MC)
@@ -459,5 +460,6 @@ if (response.tracks.length > 0) {
 </details>
 
 </div>
+
 
 
