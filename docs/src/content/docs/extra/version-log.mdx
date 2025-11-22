@@ -9,6 +9,16 @@ Logs about the changed features.
 
 ---
 
+## **Version 2.7.0**
+
+- BREAKING CHANGE: When using the `queue.remove()` function, the removed tracks are now added via unshift to the queue.previous array instead of push.
+  - This means that the order of removed tracks is reversed in the previous array.
+  - This was done to maintain consistency with how tracks are added to the previous array when skipped or played.
+- Added some conditional chaining and further if statements to make the library more robust.
+- Added additional ways of finding the closest track for resolving unresolved tracks. (isrc) and described that process.
+
+---
+
 ## **Version 2.6.6**
 
 - Fix Error-Typo in the testbot- thanks to @KingKonguido
