@@ -181,6 +181,9 @@ export class FilterManager {
         return;
     }
 
+    privateNot0(value: number | undefined): boolean {
+        return typeof value === "number" && value !== 0;
+    }
     /**
      * Checks if the filters are correctly stated (active / not-active) - mostly used internally.
      * @param oldFilterTimescale
@@ -195,9 +198,11 @@ export class FilterManager {
      * ```
      */
     checkFiltersState(oldFilterTimescale?: Partial<TimescaleFilter>): boolean {
-        this.filters.rotation = this.data.rotation.rotationHz !== 0;
-        this.filters.vibrato = this.data.vibrato.frequency !== 0 || this.data.vibrato.depth !== 0;
-        this.filters.tremolo = this.data.tremolo.frequency !== 0 || this.data.tremolo.depth !== 0;
+        this.data = this.data ?? {};
+
+        this.filters.rotation = this.privateNot0(this.data.rotation?.rotationHz);
+        this.filters.vibrato = this.privateNot0(this.data.vibrato?.frequency) || this.privateNot0(this.data.vibrato?.depth);
+        this.filters.tremolo = this.privateNot0(this.data.tremolo?.frequency) || this.privateNot0(this.data.tremolo?.depth);
 
         const lavalinkFilterData = (this.data.pluginFilters?.["lavalink-filter-plugin"] || { echo: { decay: this.data.pluginFilters?.echo?.decay && !this.data.pluginFilters?.echo?.echoLength ? this.data.pluginFilters.echo.decay : 0, delay: (this.data.pluginFilters?.echo as { decay: number, delay: number })?.delay || 0 }, reverb: { gains: [], delays: [], ...((this.data.pluginFilters as { reverb: { gains: number[], delays: number[] } }).reverb) } });
         this.filters.lavalinkFilterPlugin.echo = lavalinkFilterData.echo.decay !== 0 || lavalinkFilterData.echo.delay !== 0;
