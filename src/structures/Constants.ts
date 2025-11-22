@@ -24,6 +24,7 @@ export enum DebugEvents {
 
     HeartBeatTriggered = "HeartBeatTriggered",
     NoSocketOnDestroy = "NoSocketOnDestroy",
+    SocketCleanupError = "SocketCleanupError",
     SocketTerminateHeartBeatTimeout = "SocketTerminateHeartBeatTimeout",
 
     TryingConnectWhileConnected = "TryingConnectWhileConnected",

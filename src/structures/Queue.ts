@@ -296,6 +296,7 @@ export class Queue {
      *  - single Track | UnresolvedTrack
      *  - multiple Track | UnresovedTrack
      *  - at the index or multiple indexes
+     *  - Since v2.7 the removed tracks get unshifted into the previous queue state instead of pushed (indexed at the start instead of end - as it should)
      * @param removeQueryTrack
      * @returns null (if nothing was removed) / { removed } where removed is an array with all removed elements
      *
@@ -345,9 +346,10 @@ export class Queue {
         if (Array.isArray(removeQueryTrack)) {
             if (removeQueryTrack.every(v => typeof v === "number")) {
                 const removed = [];
-                for (const i of removeQueryTrack) {
+                const sortedIndexes = (removeQueryTrack as number[]).sort((a, b) => b - a);
+                for (const i of sortedIndexes) {
                     if (this.tracks[i]) {
-                        removed.push(...this.tracks.splice(i, 1))
+                        removed.unshift(...this.tracks.splice(i, 1));
                     }
                 }
                 if (!removed.length) return null;
@@ -376,9 +378,10 @@ export class Queue {
 
             const removed = [];
 
+            tracksToRemove.sort((a, b) => b.i - a.i);
             for (const { i } of tracksToRemove) {
                 if (this.tracks[i]) {
-                    removed.push(...this.tracks.splice(i, 1))
+                    removed.unshift(...this.tracks.splice(i, 1));
                 }
             }
             // Log if available

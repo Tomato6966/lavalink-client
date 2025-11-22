@@ -239,7 +239,7 @@ export class Player {
             this.queue.utils.save();
 
             if (typeof options?.volume === "number" && !isNaN(options?.volume)) {
-                this.volume = Math.max(Math.min(options?.volume, 500), 0);
+                this.volume = Math.max(Math.min(options?.volume, 1000), 0);
                 let vol = Number(this.volume);
                 if (this.LavalinkManager.options.playerOptions.volumeDecrementer) vol *= this.LavalinkManager.options.playerOptions.volumeDecrementer;
                 this.lavalinkVolume = Math.round(vol);
@@ -327,7 +327,7 @@ export class Player {
         if (!this.queue.current) throw new Error(`There is no Track in the Queue, nor provided in the PlayOptions`);
 
         if (typeof options?.volume === "number" && !isNaN(options?.volume)) {
-            this.volume = Math.max(Math.min(options?.volume, 500), 0);
+            this.volume = Math.max(Math.min(options?.volume, 1000), 0);
             let vol = Number(this.volume);
             if (this.LavalinkManager.options.playerOptions.volumeDecrementer) vol *= this.LavalinkManager.options.playerOptions.volumeDecrementer;
             this.lavalinkVolume = Math.round(vol);
@@ -352,9 +352,9 @@ export class Player {
             voice: options?.voice ?? undefined
         }).filter(v => typeof v[1] !== "undefined")) as Partial<LavalinkPlayOptions>;
 
-        if ((typeof finalOptions.position !== "undefined" && isNaN(finalOptions.position)) || (typeof finalOptions.position === "number" && (finalOptions.position < 0 || finalOptions.position >= this.queue.current.info.duration))) throw new Error("PlayerOption#position must be a positive number, less than track's duration");
+        if ((typeof finalOptions.position !== "undefined" && isNaN(finalOptions.position)) || (typeof finalOptions.position === "number" && finalOptions.position < 0) || (typeof finalOptions.position === "number" && this.queue.current.info.duration > 0 && finalOptions.position >= this.queue.current.info.duration)) throw new Error("PlayerOption#position must be a positive number, less than track's duration");
         if ((typeof finalOptions.volume !== "undefined" && isNaN(finalOptions.volume) || (typeof finalOptions.volume === "number" && finalOptions.volume < 0))) throw new Error("PlayerOption#volume must be a positive number");
-        if ((typeof finalOptions.endTime !== "undefined" && isNaN(finalOptions.endTime)) || (typeof finalOptions.endTime === "number" && (finalOptions.endTime < 0 || finalOptions.endTime >= this.queue.current.info.duration))) throw new Error("PlayerOption#endTime must be a positive number, less than track's duration");
+        if ((typeof finalOptions.endTime !== "undefined" && isNaN(finalOptions.endTime)) || (typeof finalOptions.endTime === "number" && finalOptions.endTime < 0) || (typeof finalOptions.endTime === "number" && this.queue.current.info.duration > 0 && finalOptions.endTime >= this.queue.current.info.duration)) throw new Error("PlayerOption#endTime must be a positive number, less than track's duration");
         if (typeof finalOptions.position === "number" && typeof finalOptions.endTime === "number" && finalOptions.endTime < finalOptions.position) throw new Error("PlayerOption#endTime must be bigger than PlayerOption#position")
 
         const now = performance.now();
@@ -439,7 +439,7 @@ export class Player {
     async search(query: SearchQuery, requestUser: unknown, throwOnEmpty: boolean = false) {
         const Query = this.LavalinkManager.utils.transformQuery(query);
 
-        if (["bcsearch", "bandcamp"].includes(Query.source) && !this.node.info.sourceManagers.includes("bandcamp")) {
+        if (["bcsearch", "bandcamp"].includes(Query.source) && !this.node.info?.sourceManagers.includes("bandcamp")) {
             if (this.LavalinkManager.options?.advancedOptions?.enableDebugEvents) {
                 this.LavalinkManager.emit("debug", DebugEvents.BandcampSearchLokalEngine, {
                     state: "log",
@@ -755,7 +755,7 @@ export class Player {
             if (this.queue.current || this.queue.tracks.length) { // Check if all queued track sources are supported by the new node
                 const trackSources = new Set([this.queue.current, ...this.queue.tracks].map(track => track.info.sourceName));
                 const missingSources = [...trackSources].filter(
-                    source => !updateNode.info.sourceManagers.includes(source));
+                    source => !updateNode.info?.sourceManagers.includes(source));
                 if (missingSources.length)
                     throw new RangeError(`Sources missing for Node ${updateNode.id}: ${missingSources.join(', ')}`)
             }

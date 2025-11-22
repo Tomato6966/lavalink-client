@@ -80,7 +80,7 @@ export class LavalinkManager<CustomPlayerT extends Player = Player> extends Even
      * @returns
      */
     private applyOptions(options: ManagerOptions<CustomPlayerT>) {
-        const optionsToAssign:RequiredManagerOptions<CustomPlayerT> = {
+        const optionsToAssign: RequiredManagerOptions<CustomPlayerT> = {
             ...(options),
             client: {
                 ...options?.client,
@@ -339,7 +339,7 @@ export class LavalinkManager<CustomPlayerT extends Player = Player> extends Even
         const oldPlayer = this.getPlayer(guildId);
         if (!oldPlayer) return;
         // oldPlayer.connected is operational. you could also do oldPlayer.voice?.token
-        if (oldPlayer.voiceChannelId === "string" && oldPlayer.connected && !oldPlayer.get("internal_destroywithoutdisconnect")) {
+        if (typeof oldPlayer.voiceChannelId === "string" && oldPlayer.connected && !oldPlayer.get("internal_destroywithoutdisconnect")) {
             if (!this.options?.advancedOptions?.debugOptions?.playerDestroy?.dontThrowError) throw new Error(`Use Player#destroy() not LavalinkManager#deletePlayer() to stop the Player ${safeStringify(oldPlayer.toJSON?.())}`)
             else if (this.options?.advancedOptions?.enableDebugEvents) {
                 this.emit("debug", DebugEvents.PlayerDeleteInsteadOfDestroy, {
@@ -639,6 +639,8 @@ export class LavalinkManager<CustomPlayerT extends Player = Player> extends Even
                             message: `Auto reconnected, but nothing to play`,
                             functionLayer: "LavalinkManager > sendRawData()",
                         });
+
+                        return;
                     } catch (e) {
                         console.error(e);
                         return void await player.destroy(DestroyReasons.PlayerReconnectFail);
