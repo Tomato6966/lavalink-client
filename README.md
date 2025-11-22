@@ -116,6 +116,7 @@ This client powers various Discord bots:
   - [Panais](https://panais.xyz/) (@LucasB25)
   - [Akyn](https://akynbot.vercel.app/) (@notdeltaxd)
   - [ARINO](https://site.arinoapp.qzz.io/) (@ryanwtf88)
+  - [iHorizon](https://github.com/ihrz/ihrz) (@iHorizon)
 - **Bots Community (Users):**
   - [Soundy](https://github.com/idMJA/Soundy) (@idMJA)
   - [BeatBot ](https://getbeatbot.vercel.app/) (@zenitsujs)
