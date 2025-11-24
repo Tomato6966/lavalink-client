@@ -121,6 +121,7 @@ This client powers various Discord bots:
   - [Soundy](https://github.com/idMJA/Soundy) (@idMJA)
   - [BeatBot ](https://getbeatbot.vercel.app/) (@zenitsujs)
   - [Atom Music](https://top.gg/bot/1320469557411971165) (@sakshamyep)
+  - [BeatDock](https://github.com/lazaroagomez/BeatDock) (@lazaroagomez)
 
 ***
 
