@@ -1141,7 +1141,9 @@ export class LavalinkNode {
     /** @private util function for handling error events from websocket */
     private error(error: Error): void {
         if (!error) return;
-        this.NodeManager.emit("error", this, error);
+        // We shouldn't emit the error here because it won't trigger another attempt to reconnect
+        // this.NodeManager.emit("error", this, error);
+        this.reconnect();
         if (this.options.closeOnError) {
             if (this.heartBeatInterval) clearInterval(this.heartBeatInterval);
             if (this.pingTimeout) clearTimeout(this.pingTimeout);
