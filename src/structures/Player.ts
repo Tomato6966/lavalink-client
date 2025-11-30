@@ -560,6 +560,8 @@ export class Player {
         // send to lavalink, that it should stop playing
         await this.node.updatePlayer({ guildId: this.guildId, playerOptions: { track: { encoded: null } } });
 
+        this.paused = false;
+
         this.ping.lavalink = Math.round((performance.now() - now) / 10) / 100;
 
         return this;
@@ -890,4 +892,5 @@ export class Player {
         } as PlayerJson
     }
 }
+
 
