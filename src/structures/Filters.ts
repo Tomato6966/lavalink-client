@@ -200,6 +200,9 @@ export class FilterManager {
     checkFiltersState(oldFilterTimescale?: Partial<TimescaleFilter>): boolean {
         this.data = this.data ?? {};
 
+        this.filters.volume = (this.data.volume !== 1 && this.data.volume !== undefined);
+        this.filters.audioOutput = (this.data.channelMix && this.filters.audioOutput !== "stereo") ? this.filters.audioOutput : "stereo";
+
         this.filters.rotation = this.privateNot0(this.data.rotation?.rotationHz);
         this.filters.vibrato = this.privateNot0(this.data.vibrato?.frequency) || this.privateNot0(this.data.vibrato?.depth);
         this.filters.tremolo = this.privateNot0(this.data.tremolo?.frequency) || this.privateNot0(this.data.tremolo?.depth);
@@ -814,7 +817,7 @@ export class FilterManager {
      * await player.filterManager.setEQPreset('BassboostMedium');
      * ```
      */
-    public async setEQPreset(preset : keyof typeof EQList): Promise<this> {
+    public async setEQPreset(preset: keyof typeof EQList): Promise<this> {
         const bands = EQList[preset];
         return this.setEQ(bands);
     }
