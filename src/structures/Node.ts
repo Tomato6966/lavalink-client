@@ -1042,8 +1042,12 @@ export class LavalinkNode {
                 const error = new Error(`Unable to connect after ${this.options.retryAmount} attempts.`)
 
                 this.NodeManager.emit("error", this, error);
+
+                this.reconnectionState = ReconnectionState.DESTROYING;
+                this.destroy(DestroyReasons.NodeReconnectFail);
+
                 this.reconnectionState = ReconnectionState.IDLE;
-                return this.destroy(DestroyReasons.NodeReconnectFail);
+                return;
             }
 
             this.NodeManager.emit("reconnecting", this);
