@@ -252,5 +252,6 @@ export interface NodeManagerEvents {
 export enum ReconnectionState {
     IDLE = "IDLE",
     RECONNECTING = "RECONNECTING",
-    PENDING = "PENDING"
+    PENDING = "PENDING",
+    DESTROYING = "DESTROYING"
 }
