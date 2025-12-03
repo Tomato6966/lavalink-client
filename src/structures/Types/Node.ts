@@ -248,3 +248,9 @@ export interface NodeManagerEvents {
      */
     "resumed": (node: LavalinkNode, payload: { resumed: true, sessionId: string, op: "ready" }, players: LavalinkPlayer[] | InvalidLavalinkRestRequest) => void;
 }
+
+export enum ReconnectionState {
+    IDLE = "IDLE",
+    RECONNECTING = "RECONNECTING",
+    PENDING = "PENDING"
+}
