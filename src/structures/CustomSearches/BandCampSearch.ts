@@ -20,10 +20,9 @@ export const bandCampSearch = async (player: Player, query: string, requestUser:
 
         if (!data.ok) throw new Error(`Bandcamp Error: ${data.statusText}`);
 
-        const text = await data.text();
         let json;
         try {
-            json = JSON.parse(text);
+            json = await data.json();
         } catch {
             throw new Error("Invalid JSON response from Bandcamp");
         }

@@ -200,7 +200,6 @@ export class FilterManager {
     checkFiltersState(oldFilterTimescale?: Partial<TimescaleFilter>): boolean {
         this.data = this.data ?? {};
 
-        this.filters.volume = (this.data.volume !== 1 && this.data.volume !== undefined);
         this.filters.audioOutput = (this.data.channelMix && this.filters.audioOutput !== "stereo") ? this.filters.audioOutput : "stereo";
 
         this.filters.rotation = this.privateNot0(this.data.rotation?.rotationHz);

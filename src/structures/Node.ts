@@ -1213,6 +1213,7 @@ export class LavalinkNode {
                 break;
             case "ready":  // payload: { resumed: false, sessionId: 'ytva350aevn6n9n8', op: 'ready' }
                 this.reconnectAttempts = 1;
+                clearTimeout(this.reconnectTimeout);
 
                 this.sessionId = payload.sessionId;
                 this.resuming.enabled = payload.resumed;
