@@ -1036,7 +1036,8 @@ export class LavalinkNode {
         // Set reconnection state to pending
         this.reconnectionState = ReconnectionState.PENDING;
         this.NodeManager.emit("reconnectinprogress", this);
-        if (instaReconnect) {
+
+        const executeReconnect = () => {
             if (this.reconnectAttempts >= this.options.retryAmount) {
                 const error = new Error(`Unable to connect after ${this.options.retryAmount} attempts.`)
 
@@ -1049,21 +1050,14 @@ export class LavalinkNode {
             this.reconnectionState = ReconnectionState.RECONNECTING;
             this.connect();
             this.reconnectAttempts++;
+        };
+        if (instaReconnect) {
+            executeReconnect();
             return;
         }
         this.reconnectTimeout = setTimeout(() => {
             this.reconnectTimeout = null;
-            if (this.reconnectAttempts >= this.options.retryAmount) {
-                const error = new Error(`Unable to connect after ${this.options.retryAmount} attempts.`)
-                this.NodeManager.emit("error", this, error);
-                this.reconnectionState = ReconnectionState.IDLE;
-                return this.destroy(DestroyReasons.NodeReconnectFail);
-            }
-
-            this.NodeManager.emit("reconnecting", this);
-            this.reconnectionState = ReconnectionState.RECONNECTING;
-            this.connect();
-            this.reconnectAttempts++;
+            executeReconnect();
         }, this.options.retryDelay || 1000);
     }
 
