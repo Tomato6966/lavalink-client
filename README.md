@@ -122,6 +122,7 @@ This client powers various Discord bots:
   - [BeatBot](https://getbeatbot.vercel.app/) (@zenitsujs)
   - [Atom Music](https://top.gg/bot/1320469557411971165) (@sakshamyep)
   - [All Time Bot](https://top.gg/bot/1163027457671180418) (@PeterGamez)
+  - [BeatDock](https://github.com/lazaroagomez/BeatDock) (@lazaroagomez)
 
 ***
 
