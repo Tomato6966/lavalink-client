@@ -157,6 +157,60 @@ export class LavalinkNode {
 
         return { response, options: options };
     }
+    
+    /**
+    * Request a REST endpoint on the Lavalink node.
+    * 
+    * @param fullPath The full path of the endpoint to request (e.g. `/youtube/oauth/`)
+    * @param modify A function to modify the request options before sending the request
+    * @param parseAsText If true, the response will be parsed as a string instead of JSON
+    * @returns A promise that resolves to the response data as a JSON object or string if `parseAsText` is true
+    * @throws {Error} If the node is not connected to the Lavalink Server
+    */
+    public async requestREST<T = unknown>(fullPath: string, modify?: ModifyRequest): Promise<T>;
+    public async requestREST(fullPath: string, modify: ModifyRequest | undefined, parseAsText: true): Promise<string>;
+    public async requestREST<T>(
+        fullPath: string,
+        modify?: ModifyRequest,
+        parseAsText?: boolean
+    ): Promise<T | string> {
+        if (!this.connected) {
+            throw new Error("The node is not connected to the Lavalink Server!");
+        }
+
+        const options: RequestInit & { path: string, extraQueryUrlParams?: URLSearchParams } = {
+            path: fullPath.startsWith("/") ? fullPath : `/${fullPath}`,
+            method: "GET",
+            headers: {
+                "Authorization": this.options.authorization
+            },
+            signal: this.options.requestSignalTimeoutMS && this.options.requestSignalTimeoutMS > 0
+                ? AbortSignal.timeout(this.options.requestSignalTimeoutMS)
+                : undefined,
+        };
+
+        modify?.(options);
+
+        const url = new URL(`${this.restAddress}${options.path}`);
+
+        if (options.extraQueryUrlParams?.size) {
+            for (const [k, v] of options.extraQueryUrlParams.entries()) {
+                url.searchParams.append(k, v);
+            }
+        }
+
+        const { ...fetchOptions } = options;
+        const response = await fetch(url.toString(), fetchOptions);
+
+        this.calls++;
+
+        if (["DELETE", "PUT"].includes(options.method)) return undefined as any;
+        if (response.status === 204) return undefined as any;
+        if (response.status === 404) throw new Error(`Request failed: ${options.path}`);
+
+        return parseAsText ? await response.text() : await response.json();
+    }
+
     /**
      * Makes an API call to the Node. Should only be used for manual parsing like for not supported plugins
      * @param endpoint The endpoint that we will make the call to
