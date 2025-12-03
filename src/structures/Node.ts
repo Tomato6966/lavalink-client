@@ -1029,7 +1029,7 @@ export class LavalinkNode {
      */
     private reconnect(instaReconnect = false): void {
         // If already trying to reconnect or pending, return
-        if (this.reconnectionState != ReconnectionState.IDLE) {
+        if (this.reconnectionState !== ReconnectionState.IDLE) {
             return;
         }
 
