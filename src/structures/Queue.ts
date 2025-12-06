@@ -280,9 +280,15 @@ export class Queue {
         // Log if available
         if ((TrackOrTracks) && typeof this.queueChanges?.tracksAdd === "function") try { this.queueChanges.tracksAdd(this.guildId, (Array.isArray(TrackOrTracks) ? TrackOrTracks : [TrackOrTracks]).flat(2).filter(v => this.managerUtils.isTrack(v) || this.managerUtils.isUnresolvedTrack(v)), index, oldStored, this.utils.toJSON()); } catch { /*  */ }
         // remove the tracks (and add the new ones)
-        let spliced = TrackOrTracks ? this.tracks.splice(index, amount, ...(Array.isArray(TrackOrTracks) ? TrackOrTracks : [TrackOrTracks]).flat(2).filter(v => this.managerUtils.isTrack(v) || this.managerUtils.isUnresolvedTrack(v))) : this.tracks.splice(index, amount);
-        // get the spliced array
-        spliced = (Array.isArray(spliced) ? spliced : [spliced]);
+        const spliced = TrackOrTracks
+            ? this.tracks.splice(
+                index,
+                amount,
+                ...(Array.isArray(TrackOrTracks) ? TrackOrTracks : [TrackOrTracks])
+                    .flat(2)
+                    .filter(v => this.managerUtils.isTrack(v) || this.managerUtils.isUnresolvedTrack(v))
+            )
+            : this.tracks.splice(index, amount);
         // Log if available
         if (typeof this.queueChanges?.tracksRemoved === "function") try { this.queueChanges.tracksRemoved(this.guildId, spliced, index, oldStored, this.utils.toJSON()) } catch { /* */ }
         // save the queue
