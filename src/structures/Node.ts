@@ -2,6 +2,7 @@ import { isAbsolute } from "path";
 import WebSocket from "ws";
 
 import { DebugEvents, DestroyReasons, validSponsorBlocks } from "./Constants";
+import { ReconnectionState } from "./Types/Node";
 import { NodeSymbol, queueTrackEnd, safeStringify } from "./Utils";
 
 import type {
@@ -20,7 +21,6 @@ import type { NodeManager } from "./NodeManager";
 import type {
     BaseNodeStats, LavalinkInfo, LavalinkNodeOptions, LyricsResult, ModifyRequest, NodeStats, SponsorBlockSegment
 } from "./Types/Node";
-import { ReconnectionState } from "./Types/Node";
 /**
  * Lavalink Node creator class
  */
@@ -65,14 +65,14 @@ export class LavalinkNode {
     public resuming: { enabled: boolean, timeout: number | null } = { enabled: true, timeout: null };
     /** Actual Lavalink Information of the Node */
     public info: LavalinkInfo | null = null;
+    /** current state of the Reconnections */
+    public reconnectionState: ReconnectionState = ReconnectionState.IDLE;
     /** The Node Manager of this Node */
     private NodeManager: NodeManager | null = null;
     /** The Reconnection Timeout */
     private reconnectTimeout?: NodeJS.Timeout = undefined;
-    /** The Reconnection Attempt counter */
-    private reconnectAttempts = 1;
-    /** Reconnection current state */
-    private reconnectionState: ReconnectionState = ReconnectionState.IDLE;
+    /** The Reconnection Attempt counter (array of datetimes when it tried it.) */
+    private reconnectAttempts: number[] = [];
     /** The Socket of the Lavalink */
     private socket: WebSocket | null = null;
     /** Version of what the Lavalink Server should be */
@@ -98,6 +98,7 @@ export class LavalinkNode {
             secure: false,
             retryAmount: 5,
             retryDelay: 10e3,
+            retryTimespan: -1,
             requestSignalTimeoutMS: 10000,
             heartBeatInterval: 30_000,
             closeOnError: true,
@@ -1013,9 +1014,17 @@ export class LavalinkNode {
         return `http${this.options.secure ? "s" : ""}://${this.options.host}:${this.options.port}`;
     }
 
+
+    /**
+     * If already trying to reconnect or pending, return
+     */
+    public get isNodeReconnecting(): boolean {
+        return this.reconnectionState !== ReconnectionState.IDLE;
+    }
+
     /**
      * Reconnect to the lavalink node
-     * @param instaReconnect @default false wether to instantly try to reconnect
+     * @param force @default false Wether to instantly try to reconnect (force it)
      * @returns void
      *
      * @example
@@ -1023,9 +1032,9 @@ export class LavalinkNode {
      * await player.node.reconnect();
      * ```
      */
-    private reconnect(instaReconnect = false): void {
+    private reconnect(force = false): void {
         // If already trying to reconnect or pending, return
-        if (this.reconnectionState !== ReconnectionState.IDLE) {
+        if (this.isNodeReconnecting) {
             return;
         }
 
@@ -1033,40 +1042,53 @@ export class LavalinkNode {
         this.reconnectionState = ReconnectionState.PENDING;
         this.NodeManager.emit("reconnectinprogress", this);
 
-        const executeReconnect = () => {
-            if (this.reconnectAttempts >= this.options.retryAmount) {
-                const error = new Error(`Unable to connect after ${this.options.retryAmount} attempts.`)
-
-                this.NodeManager.emit("error", this, error);
-
-                this.reconnectionState = ReconnectionState.DESTROYING;
-                this.destroy(DestroyReasons.NodeReconnectFail);
-
-                this.reconnectionState = ReconnectionState.IDLE;
-                return;
-            }
-
-            this.NodeManager.emit("reconnecting", this);
-            this.reconnectionState = ReconnectionState.RECONNECTING;
-            this.connect();
-            this.reconnectAttempts++;
-        };
-        if (instaReconnect) {
-            executeReconnect();
+        if (force) {
+            this.executeReconnect();
             return;
         }
         this.reconnectTimeout = setTimeout(() => {
             this.reconnectTimeout = null;
-            executeReconnect();
+            this.executeReconnect();
         }, this.options.retryDelay || 1000);
     }
+
+    public get reconnectionAttemptCount(): number {
+        const maxAllowedTimestan = this.options.retryTimespan || -1;
+        if(maxAllowedTimestan <= 0) return this.reconnectAttempts.length;
+        return this.reconnectAttempts.filter(timestamp => Date.now() - timestamp <= maxAllowedTimestan).length;
+    }
+
+    /**
+     * Private Utility function to execute the reconnection
+    */
+    private executeReconnect() {
+        if (this.reconnectionAttemptCount >= this.options.retryAmount) {
+            const error = new Error(`Unable to connect after ${this.options.retryAmount} attempts.`)
+
+            this.reconnectionState = ReconnectionState.DESTROYING;
+
+            this.NodeManager.emit("error", this, error);
+            this.destroy(DestroyReasons.NodeReconnectFail);
+            // the reconnection State should be set on idle inside of the destroy function
+            return;
+        }
+
+        // state's should be changed before emitting an event
+        this.reconnectAttempts.push(Date.now());
+        this.reconnectionState = ReconnectionState.RECONNECTING;
+
+        this.NodeManager.emit("reconnecting", this);
+        this.connect();
+    };
+
 
     /**
      * Private function to reset the reconnection attempts
      * @returns
      */
     private resetReconnectionAttempts(): void {
-        this.reconnectAttempts = 1;
+        this.reconnectionState = ReconnectionState.IDLE;
+        this.reconnectAttempts = [];
         clearTimeout(this.reconnectTimeout);
         this.reconnectTimeout = null;
         return;
@@ -1095,7 +1117,6 @@ export class LavalinkNode {
         this.isAlive = true;
 
         // Reset reconnection state on successful connection
-        this.reconnectionState = ReconnectionState.IDLE;
         this.resetReconnectionAttempts();
 
         // trigger heartbeat-ping timeout - this is to check wether the client lost connection without knowing it

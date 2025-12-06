@@ -26,10 +26,12 @@ export interface LavalinkNodeOptions {
     id?: string;
     /** Voice Regions of this Node */
     regions?: string[];
-    /** The retryAmount for the node. */
+    /** The max amount of retries for this node. */
     retryAmount?: number;
-    /** The retryDelay for the node. */
+    /** The delay of how often to retry a reconnection. */
     retryDelay?: number;
+    /** How long a retry is a valid retry, it should be at least retryAmount*retryDelay. if <= 0 (default) then this won't be accounted. */
+    retryTimespan?: number;
     /** signal for cancelling requests - default: AbortSignal.timeout(options.requestSignalTimeoutMS || 10000) - put <= 0 to disable */
     requestSignalTimeoutMS?: number;
     /** Close on error */

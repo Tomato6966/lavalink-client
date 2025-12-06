@@ -9,6 +9,25 @@ Logs about the changed features.
 
 ---
 
+## **Version 2.7.2**
+
+Make the node auto-reconnection more solid by a reconnection queue, so we can trigger reconnection tries much easier.
+You can check the current state of reconnection by accessing **`node.reconnectionState`** (`"IDLE"` / `"RECONNECTING"` / `"PENDING"` / `"DESTROYING"`)
+Alterantivly you can use the getter property to check wether it's pending to reconnect or reconnecting: **`node.isNodeReconnecting`** (easier to use)
+
+Huge thanks to **[@ductridev](https://github.com/ductridev)** who introduced this change in: [Pull #154](https://github.com/Tomato6966/lavalink-client/pull/154)
+Enhances the resilience of the LavalinkNode by introducing automatic reconnection attempts on WebSocket errors instead of only emitting error events. The implementation adds a state machine using a new ReconnectionState enum to prevent duplicate reconnection attempts.
+
+Key Changes:
+
+- Added ReconnectionState enum to track reconnection status (IDLE, RECONNECTING, PENDING)
+- Refactored reconnect() method to use state guards preventing concurrent reconnection attempts
+- Modified error() handler to trigger reconnection directly instead of emitting error events
+- there is now a new getter: `node.reconnectionAttemptCount` (which allows you to get the count of the current reconnection attempts, considering the new option `node.options.retryTimespan`)
+- Before the `node.reconnectAttempts` was a number-counter. Now it's just an array of Date-Times, to be able to allow Retrys per a timespan (e.g. you can have 20 retries every hour.) - setup able through `node.options.retryTimespan`, on default it's -1. so it behaves as before.
+- FIX: Now instead of counting from "1 retry up" it counts from 0 up, means if you set `node.retryAmount` to "1" it actually tries 1 time to retry, and not 0. (issue before)
+
+
 ## **Version 2.7.1**
 
 Fixes:
