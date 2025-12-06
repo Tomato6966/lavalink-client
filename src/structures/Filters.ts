@@ -207,16 +207,16 @@ export class FilterManager {
         const lavalinkFilterData = (this.data.pluginFilters?.["lavalink-filter-plugin"] || { echo: { decay: this.data.pluginFilters?.echo?.decay && !this.data.pluginFilters?.echo?.echoLength ? this.data.pluginFilters.echo.decay : 0, delay: (this.data.pluginFilters?.echo as { decay: number, delay: number })?.delay || 0 }, reverb: { gains: [], delays: [], ...((this.data.pluginFilters as { reverb: { gains: number[], delays: number[] } }).reverb) } });
         this.filters.lavalinkFilterPlugin.echo = lavalinkFilterData.echo.decay !== 0 || lavalinkFilterData.echo.delay !== 0;
         this.filters.lavalinkFilterPlugin.reverb = lavalinkFilterData.reverb?.delays?.length !== 0 || lavalinkFilterData.reverb?.gains?.length !== 0;
-        this.filters.lavalinkLavaDspxPlugin.highPass = Object.values(this.data.pluginFilters["high-pass"] || {}).length > 0;
-        this.filters.lavalinkLavaDspxPlugin.lowPass = Object.values(this.data.pluginFilters["low-pass"] || {}).length > 0;
-        this.filters.lavalinkLavaDspxPlugin.normalization = Object.values(this.data.pluginFilters.normalization || {}).length > 0;
-        this.filters.lavalinkLavaDspxPlugin.echo = Object.values(this.data.pluginFilters.echo || {}).length > 0 && typeof (this.data.pluginFilters?.echo as { decay: number, delay: number })?.delay === "undefined";
+        this.filters.lavalinkLavaDspxPlugin.highPass = Object.values(this.data.pluginFilters?.["high-pass"] || {}).length > 0;
+        this.filters.lavalinkLavaDspxPlugin.lowPass = Object.values(this.data.pluginFilters?.["low-pass"] || {}).length > 0;
+        this.filters.lavalinkLavaDspxPlugin.normalization = Object.values(this.data.pluginFilters?.normalization || {}).length > 0;
+        this.filters.lavalinkLavaDspxPlugin.echo = Object.values(this.data.pluginFilters?.echo || {}).length > 0 && typeof (this.data.pluginFilters?.echo as { decay: number, delay: number })?.delay === "undefined";
 
-        this.filters.lowPass = this.data.lowPass.smoothing !== 0;
-        this.filters.karaoke = Object.values(this.data.karaoke).some(v => v !== 0);
+        this.filters.lowPass = this.privateNot0(this.data.lowPass?.smoothing);
+        this.filters.karaoke = Object.values(this.data.karaoke ?? {}).some(v => v !== 0);
         if ((this.filters.nightcore || this.filters.vaporwave) && oldFilterTimescale) {
-            if (oldFilterTimescale.pitch !== this.data.timescale.pitch || oldFilterTimescale.rate !== this.data.timescale.rate || oldFilterTimescale.speed !== this.data.timescale.speed) {
-                this.filters.custom = Object.values(this.data.timescale).some(v => v !== 1);
+            if (oldFilterTimescale.pitch !== this.data.timescale?.pitch || oldFilterTimescale.rate !== this.data.timescale?.rate || oldFilterTimescale.speed !== this.data.timescale?.speed) {
+                this.filters.custom = Object.values(this.data.timescale || {}).some(v => v !== 1);
                 this.filters.nightcore = false;
                 this.filters.vaporwave = false;
             }
