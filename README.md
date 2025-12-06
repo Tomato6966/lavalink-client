@@ -119,8 +119,10 @@ This client powers various Discord bots:
   - [iHorizon](https://github.com/ihrz/ihrz) (@iHorizon)
 - **Bots Community (Users):**
   - [Soundy](https://github.com/idMJA/Soundy) (@idMJA)
-  - [BeatBot ](https://getbeatbot.vercel.app/) (@zenitsujs)
+  - [BeatBot](https://getbeatbot.vercel.app/) (@zenitsujs)
   - [Atom Music](https://top.gg/bot/1320469557411971165) (@sakshamyep)
+  - [All Time Bot](https://top.gg/bot/1163027457671180418) (@PeterGamez)
+  - [BeatDock](https://github.com/lazaroagomez/BeatDock) (@lazaroagomez)
 
 ***
 
@@ -461,6 +463,3 @@ if (response.tracks.length > 0) {
 </details>
 
 </div>
-
-
-

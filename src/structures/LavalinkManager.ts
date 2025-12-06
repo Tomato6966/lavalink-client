@@ -579,6 +579,7 @@ export class LavalinkManager<CustomPlayerT extends Player = Player> extends Even
                 }
 
                 player.voiceChannelId = update.channel_id;
+                player.options.voiceChannelId = update.channel_id;
 
                 const selfMuteChanged = typeof update.self_mute === "boolean" && player.voiceState.selfMute !== update.self_mute;
                 const serverMuteChanged = typeof update.mute === "boolean" && player.voiceState.serverMute !== update.mute;
@@ -634,11 +635,13 @@ export class LavalinkManager<CustomPlayerT extends Player = Player> extends Even
                             return void await player.play({ paused: previousPaused });
                         }
                         // debug log if nothing was possible
+                        if (this.options?.advancedOptions?.enableDebugEvents) {
                         this.emit("debug", DebugEvents.PlayerAutoReconnect, {
                             state: "log",
                             message: `Auto reconnected, but nothing to play`,
                             functionLayer: "LavalinkManager > sendRawData()",
                         });
+                    }
 
                         return;
                     } catch (e) {

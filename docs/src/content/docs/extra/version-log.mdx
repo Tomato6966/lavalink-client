@@ -9,6 +9,22 @@ Logs about the changed features.
 
 ---
 
+## **Version 2.7.1**
+
+Fixes:
+- player.options.voiceChannelId is not updating after playerMove
+- checkFiltersState() "cannot read properties of undefined ..." (added conditional chaining + default datas for multiple checks + a new private library for nonnullish checks)
+- Bandcamp search crashing when no valid json is returned
+- Infinite reconnection loop because this.reconnectAttempts = 1; was not made in the connection-ready.
+
+Additions:
+- Added checks for volume + audioOutput Channel checks in checkFilterState function
+- Utilities for resetting internal timeouts for easier code readability. (resetReconnectionAttempts & resetAckTimeouts)
+
+Others:
+- new Bots in README.md
+
+
 ## **Version 2.7.0**
 
 - BREAKING CHANGE: When using the `queue.remove()` function, the removed tracks are now added via unshift to the queue.previous array instead of push.

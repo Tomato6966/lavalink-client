@@ -1,6 +1,6 @@
 {
   "name": "lavalink-client",
-  "version": "2.7.0",
+  "version": "2.7.1",
   "description": "Easy, flexible and feature-rich lavalink@v4 Client. Both for Beginners and Proficients.",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
@@ -55,12 +55,12 @@
   },
   "homepage": "https://tomato6966.github.io/lavalink-client/",
   "devDependencies": {
-    "@eslint/eslintrc": "^3.3.1",
+    "@eslint/eslintrc": "^3.3.3",
     "@eslint/js": "^9.39.1",
     "@types/node": "^24.10.1",
     "@types/ws": "^8.18.1",
-    "@typescript-eslint/eslint-plugin": "^8.46.4",
-    "@typescript-eslint/parser": "^8.46.4",
+    "@typescript-eslint/eslint-plugin": "^8.48.0",
+    "@typescript-eslint/parser": "^8.48.0",
     "eslint": "^9.39.1",
     "tsup": "^8.5.1",
     "typescript": "^5.9.3"

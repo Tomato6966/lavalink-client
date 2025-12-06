@@ -1,6 +1,16 @@
 import type { Player } from "../Player";
 import type { UnresolvedSearchResult } from "../Types/Utils";
 
+interface BandCampAutocompleteTrackObject {
+    url?: string;
+    uri?: string;
+    img?: string;
+    band_name?: string;
+    name?: string;
+    id?: string;
+    [name:string]: unknown;
+}
+
 export const bandCampSearch = async (player: Player, query: string, requestUser: unknown) => {
     let error = null;
     let tracks = [];
@@ -18,9 +28,14 @@ export const bandCampSearch = async (player: Player, query: string, requestUser:
             }
         });
 
-        const json = await data.json() as { results: { [key: string]: string }[] };
+        if (!data.ok) throw new Error(`Bandcamp Error: ${data.statusText}`);
 
-        tracks = json?.results?.filter(x => !!x && typeof x === "object" && "type" in x && x.type === "t").map?.(item => player.LavalinkManager.utils.buildUnresolvedTrack({
+        // generate custom error message.
+        let json: null | { results: BandCampAutocompleteTrackObject[] } = null;
+        try { json = await data.json(); } catch { throw new Error("Invalid JSON response from Bandcamp"); }
+
+        tracks = json?.results?.filter(x => !!x && typeof x === "object" && "type" in x && x.type === "t")
+        .map?.(item => player.LavalinkManager.utils.buildUnresolvedTrack({
             uri: item.url || item.uri,
             artworkUrl: item.img,
             author: item.band_name,
