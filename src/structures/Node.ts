@@ -431,6 +431,7 @@ export class LavalinkNode {
 
         this.resetAckTimeouts(false, true);
 
+        if(this.pingTimeout) clearTimeout(this.pingTimeout);
         this.pingTimeout = setTimeout(() => {
             this.pingTimeout = null;
             if (!this.socket) {
@@ -1029,7 +1030,7 @@ export class LavalinkNode {
      *
      * @example
      * ```ts
-     * await player.node.reconnect();
+     * await player.node.reconnect(true); //true forcefully trys the reconnect
      * ```
      */
     private reconnect(force = false): void {
@@ -1046,6 +1047,8 @@ export class LavalinkNode {
             this.executeReconnect();
             return;
         }
+
+        if(this.reconnectTimeout) clearTimeout(this.reconnectTimeout);
         this.reconnectTimeout = setTimeout(() => {
             this.reconnectTimeout = null;
             this.executeReconnect();
@@ -1180,10 +1183,7 @@ export class LavalinkNode {
 
         if (code !== 1000 || reason !== "Node-Destroy") {
             if (this.NodeManager.nodes.has(this.id)) { // try to reconnect only when the node is still in the nodeManager.nodes list
-                // Only reconnect if not already in progress
-                if (this.reconnectionState === ReconnectionState.IDLE) {
-                    this.reconnect();
-                }
+                this.reconnect();
             }
         }
 
@@ -1688,11 +1688,7 @@ export class LavalinkNode {
 
                 this.NodeManager.LavalinkManager.emit("playerQueueEmptyStart", player, this.NodeManager.LavalinkManager.options.playerOptions.onEmptyQueue?.destroyAfterMs);
 
-                if (player.get("internal_queueempty")) {
-                    clearTimeout(player.get("internal_queueempty"));
-                    player.set("internal_queueempty", undefined);
-                }
-
+                if (player.get("internal_queueempty")) clearTimeout(player.get("internal_queueempty"));
                 player.set("internal_queueempty", setTimeout(() => {
                     player.set("internal_queueempty", undefined);
                     if (player.queue.current) {

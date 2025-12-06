@@ -26,7 +26,7 @@ Key Changes:
 - there is now a new getter: `node.reconnectionAttemptCount` (which allows you to get the count of the current reconnection attempts, considering the new option `node.options.retryTimespan`)
 - Before the `node.reconnectAttempts` was a number-counter. Now it's just an array of Date-Times, to be able to allow Retrys per a timespan (e.g. you can have 20 retries every hour.) - setup able through `node.options.retryTimespan`, on default it's -1. so it behaves as before.
 - FIX: Now instead of counting from "1 retry up" it counts from 0 up, means if you set `node.retryAmount` to "1" it actually tries 1 time to retry, and not 0. (issue before)
-
+- New node-event "reconnectinprogress" which is triggered before "reconnecting" is triggered, but "reconnecting" might not be triggered, when the max retryAmount is reached, therefore "reconnectinprogress" exists.
 
 ## **Version 2.7.1**
 
