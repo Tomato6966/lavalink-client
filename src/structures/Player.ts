@@ -846,11 +846,15 @@ export class Player {
     }
 
     /**
-     * Move the player to a different node. If no node is provided, it will find the least used node that is not the same as the current node.
+     * (Wrapper-FN for changeNode) Move the player to a different node. If no node is provided, it will find the least used node that is not the same as the current node.
      * @param node the id of the node to move to
      * @returns the player
      * @throws RangeError if there is no available nodes.
      * @throws Error if the node to move to is the same as the current node.
+     * @example
+     * ```ts
+     * const newNodeMovedTo = await player.moveNode(); // no need to specify the new node, it will find a least used node automatically, but you can ofc. use a custom node id.
+     * ```
      */
     public async moveNode(node?: string) {
         try {
@@ -892,5 +896,3 @@ export class Player {
         } as PlayerJson
     }
 }
-
-

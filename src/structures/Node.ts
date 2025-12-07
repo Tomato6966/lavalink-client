@@ -574,7 +574,7 @@ export class LavalinkNode {
      *
      * @example
      * ```ts
-     * player.node.destroy("custom Player Destroy Reason", true);
+     * player.node.disconnect("Forcefully disconnect the connection to the node.");
      * ```
      */
     public disconnect(disconnectReason?: DisconnectReasonsType) {
