@@ -1137,11 +1137,11 @@ export class LavalinkNode {
             // every x ms send a ping to lavalink to retrieve a pong later on
             this.heartBeatInterval = setInterval(() => {
                 if (!this.socket) return console.error("Node-Heartbeat-Interval - Socket not available - maybe reconnecting?");
-                if (!this.isAlive) this.close(500, "Node-Heartbeat-Timeout");
+                if (!this.isAlive) return this.close(500, "Node-Heartbeat-Timeout");
 
                 this.isAlive = false;
                 this.heartBeatPingTimestamp = performance.now();
-                this.socket.ping();
+                this.socket?.ping?.();
             }, this.options.heartBeatInterval || 30_000);
         }
 
