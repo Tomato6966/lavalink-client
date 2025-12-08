@@ -487,6 +487,7 @@ export class LavalinkNode {
      */
     public destroy(destroyReason?: DestroyReasonsType, deleteNode: boolean = true, movePlayers: boolean = false): void {
         // if (!this.connected) return; This Prevents the node from being destroyed if it is not connected, but we want to allow it to be destroyed even if not connected.
+        this.reconnectionState = ReconnectionState.IDLE;
 
         const players = this.NodeManager.LavalinkManager.players.filter(p => p.node.id === this.id);
         if (players.size) {
@@ -583,6 +584,7 @@ export class LavalinkNode {
         this.socket?.close(1000, "Node-Disconnect");
         this.socket?.removeAllListeners();
         this.socket = null;
+        this.reconnectionState = ReconnectionState.IDLE;
 
         this.resetReconnectionAttempts();
 
@@ -1203,6 +1205,7 @@ export class LavalinkNode {
     private error(error: Error): void {
         if (!error) return;
         this.NodeManager.emit("error", this, error);
+        this.reconnectionState = ReconnectionState.IDLE;
         this.reconnect();
         if (this.options.closeOnError) {
             if (this.heartBeatInterval) clearInterval(this.heartBeatInterval);
@@ -1787,3 +1790,4 @@ export class LavalinkNode {
         return;
     }
 }
+
