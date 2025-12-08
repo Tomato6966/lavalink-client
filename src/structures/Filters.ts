@@ -150,7 +150,7 @@ export class FilterManager {
         if (!this.filters.rotation) delete sendData.rotation;
         if (this.filters.audioOutput === "stereo") delete sendData.channelMix;
 
-        if (Object.values(this.data.timescale).every(v => v === 1)) delete sendData.timescale;
+        if (Object.values(this.data.timescale ?? {}).every(v => v === 1)) delete sendData.timescale;
 
         if (!this.player.node.sessionId) throw new Error("The Lavalink-Node is either not ready or not up to date");
 
@@ -896,3 +896,4 @@ export class FilterManager {
         return this.setEQ(Array.from({ length: 15 }, (_v, i) => ({ band: i, gain: 0 })));
     }
 }
+
