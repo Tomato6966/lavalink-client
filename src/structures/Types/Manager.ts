@@ -247,7 +247,7 @@ export interface ManagerPlayerOptions<CustomPlayerT extends Player = Player> {
 }
 
 export type DeepRequired<T> = {
-  [K in keyof T]-?: NonNullable<T[K]> extends object
+    [K in keyof T]-?: NonNullable<T[K]> extends object
     ? DeepRequired<NonNullable<T[K]>>
     : NonNullable<T[K]>;
 };
@@ -284,6 +284,13 @@ export interface ManagerOptions<CustomPlayerT extends Player = Player> {
     linksBlacklist?: (RegExp | string)[];
     /** If links should be allowed or not. If set to false, it will throw an error if a link was provided. */
     linksAllowed?: boolean;
+    /** If the library should automatically check something, on default everything is enabled */
+    autoChecks?: {
+        /** Wether or not the client should check if the requested source's plugin is available on the node. */
+        pluginValidations?: boolean;
+        /** Wether or not the client should check if the requested source is available on the node */
+        sourcesValidations?: boolean;
+    };
     /** Advanced Options for the Library, which may or may not be "library breaking" */
     advancedOptions?: {
         /** Max duration for that the filter fix duration works (in ms) - default is 8mins */

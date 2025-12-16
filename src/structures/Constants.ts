@@ -55,6 +55,10 @@ export enum DebugEvents {
     FailedToConnectToNodes = "FailedToConnectToNodes",
     NoAudioDebug = "NoAudioDebug",
     PlayerAutoReconnect = "PlayerAutoReconnect",
+
+    PlayerDestroyFail = "PlayerDestroyFail",
+    PlayerChangeNodeFailNoEligibleNode = "PlayerChangeNodeFailNoEligibleNode",
+    PlayerChangeNodeFail = "PlayerChangeNodeFail",
 }
 
 /**

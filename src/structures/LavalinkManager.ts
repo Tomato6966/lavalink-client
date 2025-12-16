@@ -87,6 +87,10 @@ export class LavalinkManager<CustomPlayerT extends Player = Player> extends Even
                 id: options?.client?.id,
                 username: options?.client?.username ?? "lavalink-client"
             },
+            autoChecks: {
+                sourcesValidations: options?.autoChecks?.sourcesValidations ?? true,
+                pluginValidations: options?.autoChecks?.pluginValidations ?? true,
+            },
             sendToShard: options?.sendToShard,
             autoMove: options?.autoMove ?? false,
             nodes: options?.nodes as DeepRequired<LavalinkNodeOptions>[],
@@ -160,6 +164,9 @@ export class LavalinkManager<CustomPlayerT extends Player = Player> extends Even
 
         if (!options?.nodes || !Array.isArray(options?.nodes) || !options?.nodes.every(node => this.utils.isNodeOptions(node))) throw new SyntaxError("ManagerOption.nodes must be an Array of NodeOptions and is required of at least 1 Node");
 
+        if (typeof options?.autoChecks?.nodeSourcesValidations !== "boolean") throw new SyntaxError("ManagerOption.autoChecks.nodeSourcesValidations must be either false | true aka boolean");
+        if (typeof options?.autoChecks?.pluginValidations !== "boolean") throw new SyntaxError("ManagerOption.autoChecks.pluginValidations must be either false | true aka boolean");
+
         /* QUEUE STORE */
         if (options?.queueOptions?.queueStore) {
             const keys = Object.getOwnPropertyNames(Object.getPrototypeOf(options?.queueOptions?.queueStore));
@@ -177,6 +184,18 @@ export class LavalinkManager<CustomPlayerT extends Player = Player> extends Even
         if (typeof options?.queueOptions?.maxPreviousTracks !== "number" || options?.queueOptions?.maxPreviousTracks < 0) options.queueOptions.maxPreviousTracks = 25;
 
 
+    }
+
+
+
+    /**
+     * Emits a debug event to the LavalinkManager
+     * @param name name of the event
+     * @param eventData event data
+     */
+    private _emitDebugEvent(name: DebugEvents, eventData: { message: string, state: "log" | "warn" | "error", error?: Error | string, functionLayer: string }) {
+        if (!this.options?.advancedOptions?.enableDebugEvents) return;
+        this.emit("debug", name, eventData);
     }
 
     /**
@@ -341,13 +360,12 @@ export class LavalinkManager<CustomPlayerT extends Player = Player> extends Even
         // oldPlayer.connected is operational. you could also do oldPlayer.voice?.token
         if (typeof oldPlayer.voiceChannelId === "string" && oldPlayer.connected && !oldPlayer.get("internal_destroywithoutdisconnect")) {
             if (!this.options?.advancedOptions?.debugOptions?.playerDestroy?.dontThrowError) throw new Error(`Use Player#destroy() not LavalinkManager#deletePlayer() to stop the Player ${safeStringify(oldPlayer.toJSON?.())}`)
-            else if (this.options?.advancedOptions?.enableDebugEvents) {
-                this.emit("debug", DebugEvents.PlayerDeleteInsteadOfDestroy, {
-                    state: "warn",
-                    message: "Use Player#destroy() not LavalinkManager#deletePlayer() to stop the Player",
-                    functionLayer: "LavalinkManager > deletePlayer()",
-                })
-            }
+
+            this._emitDebugEvent(DebugEvents.PlayerDeleteInsteadOfDestroy, {
+                state: "warn",
+                message: "Use Player#destroy() not LavalinkManager#deletePlayer() to stop the Player",
+                functionLayer: "LavalinkManager > deletePlayer()",
+            })
         }
         return this.players.delete(guildId);
     }
@@ -400,13 +418,11 @@ export class LavalinkManager<CustomPlayerT extends Player = Player> extends Even
             }
         }
         if (success > 0) this.initiated = true;
-        else if (this.options?.advancedOptions?.enableDebugEvents) {
-            this.emit("debug", DebugEvents.FailedToConnectToNodes, {
-                state: "error",
-                message: "Failed to connect to at least 1 Node",
-                functionLayer: "LavalinkManager > init()",
-            })
-        }
+        else this._emitDebugEvent(DebugEvents.FailedToConnectToNodes, {
+            state: "error",
+            message: "Failed to connect to at least 1 Node",
+            functionLayer: "LavalinkManager > init()",
+        })
         return this;
     }
 
@@ -427,25 +443,21 @@ export class LavalinkManager<CustomPlayerT extends Player = Player> extends Even
      */
     public async sendRawData(data: VoicePacket | VoiceServer | VoiceState | ChannelDeletePacket): Promise<void> {
         if (!this.initiated) {
-            if (this.options?.advancedOptions?.enableDebugEvents) {
-                this.emit("debug", DebugEvents.NoAudioDebug, {
-                    state: "log",
-                    message: "Manager is not initated yet",
-                    functionLayer: "LavalinkManager > sendRawData()",
-                })
-            }
+            this._emitDebugEvent(DebugEvents.NoAudioDebug, {
+                state: "log",
+                message: "Manager is not initated yet",
+                functionLayer: "LavalinkManager > sendRawData()",
+            })
             if (this.options?.advancedOptions?.debugOptions?.noAudio === true) console.debug("Lavalink-Client-Debug | NO-AUDIO [::] sendRawData function, manager is not initated yet");
             return;
         }
 
         if (!("t" in data)) {
-            if (this.options?.advancedOptions?.enableDebugEvents) {
-                this.emit("debug", DebugEvents.NoAudioDebug, {
-                    state: "error",
-                    message: "No 't' in payload-data of the raw event:",
-                    functionLayer: "LavalinkManager > sendRawData()",
-                })
-            }
+            this._emitDebugEvent(DebugEvents.NoAudioDebug, {
+                state: "error",
+                message: "No 't' in payload-data of the raw event:",
+                functionLayer: "LavalinkManager > sendRawData()",
+            })
             if (this.options?.advancedOptions?.debugOptions?.noAudio === true) console.debug("Lavalink-Client-Debug | NO-AUDIO [::] sendRawData function, no 't' in payload-data of the raw event:", data);
             return;
         }
@@ -462,25 +474,21 @@ export class LavalinkManager<CustomPlayerT extends Player = Player> extends Even
         if (["VOICE_STATE_UPDATE", "VOICE_SERVER_UPDATE"].includes(data.t)) {
             const update = ("d" in data ? data.d : data) as VoiceServer | VoiceState;
             if (!update) {
-                if (this.options?.advancedOptions?.enableDebugEvents) {
-                    this.emit("debug", DebugEvents.NoAudioDebug, {
-                        state: "warn",
-                        message: `No Update data found in payload :: ${safeStringify(data, 2)}`,
-                        functionLayer: "LavalinkManager > sendRawData()",
-                    })
-                }
+                this._emitDebugEvent(DebugEvents.NoAudioDebug, {
+                    state: "warn",
+                    message: `No Update data found in payload :: ${safeStringify(data, 2)}`,
+                    functionLayer: "LavalinkManager > sendRawData()",
+                })
                 if (this.options?.advancedOptions?.debugOptions?.noAudio === true) console.debug("Lavalink-Client-Debug | NO-AUDIO [::] sendRawData function, no update data found in payload:", data);
                 return;
             }
 
             if (!("token" in update) && !("session_id" in update)) {
-                if (this.options?.advancedOptions?.enableDebugEvents) {
-                    this.emit("debug", DebugEvents.NoAudioDebug, {
-                        state: "error",
-                        message: `No 'token' nor 'session_id' found in payload :: ${safeStringify(data, 2)}`,
-                        functionLayer: "LavalinkManager > sendRawData()",
-                    })
-                }
+                this._emitDebugEvent(DebugEvents.NoAudioDebug, {
+                    state: "error",
+                    message: `No 'token' nor 'session_id' found in payload :: ${safeStringify(data, 2)}`,
+                    functionLayer: "LavalinkManager > sendRawData()",
+                })
                 if (this.options?.advancedOptions?.debugOptions?.noAudio === true) console.debug("Lavalink-Client-Debug | NO-AUDIO [::] sendRawData function, no 'token' nor 'session_id' found in payload:", data);
                 return;
             }
@@ -488,25 +496,21 @@ export class LavalinkManager<CustomPlayerT extends Player = Player> extends Even
             const player = this.getPlayer(update.guild_id);
 
             if (!player) {
-                if (this.options?.advancedOptions?.enableDebugEvents) {
-                    this.emit("debug", DebugEvents.NoAudioDebug, {
-                        state: "warn",
-                        message: `No Lavalink Player found via key: 'guild_id' of update-data :: ${safeStringify(update, 2)}`,
-                        functionLayer: "LavalinkManager > sendRawData()",
-                    })
-                }
+                this._emitDebugEvent(DebugEvents.NoAudioDebug, {
+                    state: "warn",
+                    message: `No Lavalink Player found via key: 'guild_id' of update-data :: ${safeStringify(update, 2)}`,
+                    functionLayer: "LavalinkManager > sendRawData()",
+                })
                 if (this.options?.advancedOptions?.debugOptions?.noAudio === true) console.debug("Lavalink-Client-Debug | NO-AUDIO [::] sendRawData function, No Lavalink Player found via key: 'guild_id' of update-data:", update);
                 return;
             }
 
             if (player.get("internal_destroystatus") === true) {
-                if (this.options?.advancedOptions?.enableDebugEvents) {
-                    this.emit("debug", DebugEvents.NoAudioDebug, {
-                        state: "warn",
-                        message: `Player is in a destroying state. can't signal the voice states`,
-                        functionLayer: "LavalinkManager > sendRawData()",
-                    })
-                }
+                this._emitDebugEvent(DebugEvents.NoAudioDebug, {
+                    state: "warn",
+                    message: `Player is in a destroying state. can't signal the voice states`,
+                    functionLayer: "LavalinkManager > sendRawData()",
+                })
                 if (this.options?.advancedOptions?.debugOptions?.noAudio === true) console.debug("Lavalink-Client-Debug | NO-AUDIO [::] sendRawData function, Player is in a destroying state. can't signal the voice states")
                 return;
             }
@@ -532,13 +536,11 @@ export class LavalinkManager<CustomPlayerT extends Player = Player> extends Even
                             },
                         },
                     });
-                    if (this.options?.advancedOptions?.enableDebugEvents) {
-                        this.emit("debug", DebugEvents.NoAudioDebug, {
-                            state: "log",
-                            message: `Sent updatePlayer for voice token session :: ${safeStringify({ voice: { token: update.token, endpoint: update.endpoint, sessionId: sessionId2Use, }, update, playerVoice: player.voice }, 2)}`,
-                            functionLayer: "LavalinkManager > sendRawData()",
-                        })
-                    }
+                    this._emitDebugEvent(DebugEvents.NoAudioDebug, {
+                        state: "log",
+                        message: `Sent updatePlayer for voice token session :: ${safeStringify({ voice: { token: update.token, endpoint: update.endpoint, sessionId: sessionId2Use, }, update, playerVoice: player.voice }, 2)}`,
+                        functionLayer: "LavalinkManager > sendRawData()",
+                    })
                     if (this.options?.advancedOptions?.debugOptions?.noAudio === true) console.debug("Lavalink-Client-Debug | NO-AUDIO [::] sendRawData function, Sent updatePlayer for voice token session", { voice: { token: update.token, endpoint: update.endpoint, sessionId: sessionId2Use, }, playerVoice: player.voice, update });
                 }
                 return
@@ -550,13 +552,11 @@ export class LavalinkManager<CustomPlayerT extends Player = Player> extends Even
                     this.emit(update.channel_id === player.voiceChannelId ? "playerVoiceJoin" : "playerVoiceLeave", player, update.user_id);
                 }
 
-                if (this.options?.advancedOptions?.enableDebugEvents) {
-                    this.emit("debug", DebugEvents.NoAudioDebug, {
-                        state: "warn",
-                        message: `voice update user is not equal to provided client id of the LavalinkManager.options.client.id :: user: "${update.user_id}" manager client id: "${this.options?.client.id}"`,
-                        functionLayer: "LavalinkManager > sendRawData()",
-                    })
-                }
+                this._emitDebugEvent(DebugEvents.NoAudioDebug, {
+                    state: "warn",
+                    message: `voice update user is not equal to provided client id of the LavalinkManager.options.client.id :: user: "${update.user_id}" manager client id: "${this.options?.client.id}"`,
+                    functionLayer: "LavalinkManager > sendRawData()",
+                })
 
                 if (this.options?.advancedOptions?.debugOptions?.noAudio === true) console.debug("Lavalink-Client-Debug | NO-AUDIO [::] sendRawData function, voice update user is not equal to provided client id of the manageroptions#client#id", "user:", update.user_id, "manager client id:", this.options?.client.id);
                 return;
@@ -568,13 +568,11 @@ export class LavalinkManager<CustomPlayerT extends Player = Player> extends Even
                 player.voice.sessionId = update.session_id || player.voice.sessionId;
 
                 if (!player.voice.sessionId) {
-                    if (this.options?.advancedOptions?.enableDebugEvents) {
-                        this.emit("debug", DebugEvents.NoAudioDebug, {
-                            state: "warn",
-                            message: `Function to assing sessionId provided, but no found in Payload: ${safeStringify({ update, playerVoice: player.voice }, 2)}`,
-                            functionLayer: "LavalinkManager > sendRawData()",
-                        })
-                    }
+                    this._emitDebugEvent(DebugEvents.NoAudioDebug, {
+                        state: "warn",
+                        message: `Function to assing sessionId provided, but no found in Payload: ${safeStringify({ update, playerVoice: player.voice }, 2)}`,
+                        functionLayer: "LavalinkManager > sendRawData()",
+                    })
                     if (this.options?.advancedOptions?.debugOptions?.noAudio === true) console.debug(`Lavalink-Client-Debug | NO-AUDIO [::] sendRawData function, Function to assing sessionId provided, but no found in Payload: ${safeStringify(update, 2)}`);
                 }
 
@@ -614,13 +612,11 @@ export class LavalinkManager<CustomPlayerT extends Player = Player> extends Even
                         const previousPosition = player.position;
                         const previousPaused = player.paused;
 
-                        if (this.options?.advancedOptions?.enableDebugEvents) {
-                            this.emit("debug", DebugEvents.PlayerAutoReconnect, {
-                                state: "log",
-                                message: `Auto reconnecting player because LavalinkManager.options.playerOptions.onDisconnect.autoReconnect is true`,
-                                functionLayer: "LavalinkManager > sendRawData()",
-                            });
-                        }
+                        this._emitDebugEvent(DebugEvents.PlayerAutoReconnect, {
+                            state: "log",
+                            message: `Auto reconnecting player because LavalinkManager.options.playerOptions.onDisconnect.autoReconnect is true`,
+                            functionLayer: "LavalinkManager > sendRawData()",
+                        });
 
                         // connect if there are tracks & autoReconnectOnlyWithTracks = true or autoReconnectOnlyWithTracks is false
                         if (!autoReconnectOnlyWithTracks || (autoReconnectOnlyWithTracks && (player.queue.current || player.queue.tracks.length))) {
@@ -635,13 +631,11 @@ export class LavalinkManager<CustomPlayerT extends Player = Player> extends Even
                             return void await player.play({ paused: previousPaused });
                         }
                         // debug log if nothing was possible
-                        if (this.options?.advancedOptions?.enableDebugEvents) {
-                        this.emit("debug", DebugEvents.PlayerAutoReconnect, {
+                        this._emitDebugEvent(DebugEvents.PlayerAutoReconnect, {
                             state: "log",
                             message: `Auto reconnected, but nothing to play`,
                             functionLayer: "LavalinkManager > sendRawData()",
                         });
-                    }
 
                         return;
                     } catch (e) {

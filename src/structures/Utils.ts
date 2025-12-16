@@ -261,7 +261,7 @@ export class ManagerUtils {
 
     validateQueryString(node: LavalinkNode, queryString: string, sourceString?: LavalinkSearchPlatform): void {
         if (!node.info) throw new Error("No Lavalink Node was provided");
-        if (!node.info.sourceManagers?.length) throw new Error("Lavalink Node, has no sourceManagers enabled");
+        if (this.LavalinkManager.options?.autoChecks?.sourcesValidations && !node.info.sourceManagers?.length) throw new Error("Lavalink Node, has no sourceManagers enabled");
 
         if (!queryString.trim().length) throw new Error(`Query string is empty, please provide a valid query string.`)
 
@@ -297,6 +297,8 @@ export class ManagerUtils {
                 throw new Error(`Query string contains a link / word which isn't whitelisted.`)
             }
         }
+
+        if (!this.LavalinkManager.options?.autoChecks?.sourcesValidations) return;
 
         // missing links: beam.pro local getyarn.io clypit pornhub reddit ocreamix soundgasm
         if ((SourceLinksRegexes.YoutubeMusicRegex.test(queryString) || SourceLinksRegexes.YoutubeRegex.test(queryString)) && !node.info?.sourceManagers?.includes("youtube")) {
@@ -384,6 +386,8 @@ export class ManagerUtils {
 
         if (!node.info) throw new Error("Lavalink Node does not have any info cached yet, not ready yet!")
 
+        if(!this.LavalinkManager.options?.autoChecks?.sourcesValidations) return;
+
         if (source === "amsearch" && !node.info?.sourceManagers?.includes("applemusic")) {
             throw new Error("Lavalink Node has not 'applemusic' enabled, which is required to have 'amsearch' work");
         }
@@ -405,7 +409,7 @@ export class ManagerUtils {
         if (source === "scsearch" && !node.info?.sourceManagers?.includes("soundcloud")) {
             throw new Error("Lavalink Node has not 'soundcloud' enabled, which is required to have 'scsearch' work");
         }
-        if (source === "speak" && !node.info?.plugins?.find(c => c.name.toLowerCase().includes(LavalinkPlugins.DuncteBot_Plugin.toLowerCase()))) {
+        if (source === "speak" && this.LavalinkManager.options?.autoChecks?.pluginValidations && !node.info?.plugins?.find(c => c.name.toLowerCase().includes(LavalinkPlugins.DuncteBot_Plugin.toLowerCase()))) {
             throw new Error("Lavalink Node has not 'speak' enabled, which is required to have 'speak' work");
         }
         if (source === "tdsearch" && !node.info?.sourceManagers?.includes("tidal")) {
@@ -414,7 +418,7 @@ export class ManagerUtils {
         if (source === "tdrec" && !node.info?.sourceManagers?.includes("tidal")) {
             throw new Error("Lavalink Node has not 'tidal' enabled, which is required to have 'tdrec' work");
         }
-        if (source === "tts" && !node.info?.plugins?.find(c => c.name.toLowerCase().includes(LavalinkPlugins.GoogleCloudTTS.toLowerCase()))) {
+        if (source === "tts" && this.LavalinkManager.options?.autoChecks?.pluginValidations && !node.info?.plugins?.find(c => c.name.toLowerCase().includes(LavalinkPlugins.GoogleCloudTTS.toLowerCase()))) {
             throw new Error("Lavalink Node has not 'tts' enabled, which is required to have 'tts' work");
         }
         if (source === "ftts" && !(node.info?.sourceManagers?.includes("ftts") || node.info?.sourceManagers?.includes("flowery-tts") || node.info?.sourceManagers?.includes("flowerytts"))) {
@@ -423,7 +427,7 @@ export class ManagerUtils {
         if (source === "ymsearch" && !node.info?.sourceManagers?.includes("yandexmusic")) {
             throw new Error("Lavalink Node has not 'yandexmusic' enabled, which is required to have 'ymsearch' work");
         }
-        if (source === "ytmsearch" && !node.info.sourceManagers?.includes("youtube")) {
+        if (source === "ytmsearch" && !node.info?.sourceManagers?.includes("youtube")) {
             throw new Error("Lavalink Node has not 'youtube' enabled, which is required to have 'ytmsearch' work");
         }
         if (source === "ytsearch" && !node.info?.sourceManagers?.includes("youtube")) {
@@ -604,9 +608,9 @@ async function getClosestTrack(data: UnresolvedTrack, player: Player): Promise<T
     }, data.requester).then((res: SearchResult) => {
         let trackToUse = null;
         // try to find via author name OR title
-        if ((data.info?.title || data.info?.author) && !trackToUse) trackToUse = res.tracks.find(track => 
+        if ((data.info?.title || data.info?.author) && !trackToUse) trackToUse = res.tracks.find(track =>
             // find via author name (i ... case insensitve)
-            [data.info?.author || "", `${data.info?.author} - Topic`].some(name => new RegExp(`^${escapeRegExp(name)}$`, "i").test(track.info?.author)) || 
+            [data.info?.author || "", `${data.info?.author} - Topic`].some(name => new RegExp(`^${escapeRegExp(name)}$`, "i").test(track.info?.author)) ||
             // find via title (i ... case insensitve)
             new RegExp(`^${escapeRegExp(data.info?.title)}$`, "i").test(track.info?.title)
         );

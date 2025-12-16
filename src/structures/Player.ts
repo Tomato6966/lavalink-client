@@ -90,6 +90,16 @@ export class Player {
     private readonly data: Record<string, unknown> = {};
 
     /**
+     * Emits a debug event to the LavalinkManager
+     * @param name name of the event
+     * @param eventData event data
+     */
+    private _emitDebugEvent(name: DebugEvents, eventData: { message: string, state: "log" | "warn" | "error", error?: Error | string, functionLayer: string }) {
+        if (!this.LavalinkManager.options?.advancedOptions?.enableDebugEvents) return;
+        this.LavalinkManager.emit("debug", name, eventData);
+    }
+
+    /**
      * Create a new Player
      * @param options
      * @param LavalinkManager
@@ -111,8 +121,8 @@ export class Player {
             : this.options.node;
 
         if (!this.node || typeof this.node.request !== "function") {
-            if (typeof this.options.node === "string" && this.LavalinkManager.options?.advancedOptions?.enableDebugEvents) {
-                this.LavalinkManager.emit("debug", DebugEvents.PlayerCreateNodeNotFound, {
+            if (typeof this.options.node === "string") {
+                this._emitDebugEvent(DebugEvents.PlayerCreateNodeNotFound, {
                     state: "warn",
                     message: `Player was created with provided node Id: ${this.options.node}, but no node with that Id was found.`,
                     functionLayer: "Player > constructor()",
@@ -181,13 +191,11 @@ export class Player {
      */
     async play(options: Partial<PlayOptions> = {}) {
         if (this.get("internal_queueempty")) {
-            if (this.LavalinkManager.options?.advancedOptions?.enableDebugEvents) {
-                this.LavalinkManager.emit("debug", DebugEvents.PlayerPlayQueueEmptyTimeoutClear, {
-                    state: "log",
-                    message: `Player was called to play something, while there was a queueEmpty Timeout set, clearing the timeout.`,
-                    functionLayer: "Player > play()",
-                });
-            }
+            this._emitDebugEvent(DebugEvents.PlayerPlayQueueEmptyTimeoutClear, {
+                state: "log",
+                message: `Player was called to play something, while there was a queueEmpty Timeout set, clearing the timeout.`,
+                functionLayer: "Player > play()",
+            });
             this.LavalinkManager.emit("playerQueueEmptyCancel", this);
             clearTimeout(this.get("internal_queueempty"));
             this.set("internal_queueempty", undefined);
@@ -200,14 +208,12 @@ export class Player {
                     // resolve the unresolved track
                     await (options.clientTrack as UnresolvedTrack).resolve(this);
                 } catch (error) {
-                    if (this.LavalinkManager.options?.advancedOptions?.enableDebugEvents) {
-                        this.LavalinkManager.emit("debug", DebugEvents.PlayerPlayUnresolvedTrackFailed, {
-                            state: "error",
-                            error: error,
-                            message: `Player Play was called with clientTrack, Song is unresolved, but couldn't resolve it`,
-                            functionLayer: "Player > play() > resolve currentTrack",
-                        });
-                    }
+                    this._emitDebugEvent(DebugEvents.PlayerPlayUnresolvedTrackFailed, {
+                        state: "error",
+                        error: error,
+                        message: `Player Play was called with clientTrack, Song is unresolved, but couldn't resolve it`,
+                        functionLayer: "Player > play() > resolve currentTrack",
+                    });
 
                     this.LavalinkManager.emit("trackError", this, this.queue.current, error);
 
@@ -255,13 +261,11 @@ export class Player {
                 }
             }).filter(v => typeof v[1] !== "undefined")) as LavalinkPlayOptions["track"];
 
-            if (this.LavalinkManager.options?.advancedOptions?.enableDebugEvents) {
-                this.LavalinkManager.emit("debug", DebugEvents.PlayerPlayWithTrackReplace, {
-                    state: "log",
-                    message: `Player was called to play something, with a specific track provided. Replacing the current Track and resolving the track on trackStart Event.`,
-                    functionLayer: "Player > play()",
-                });
-            }
+            this._emitDebugEvent(DebugEvents.PlayerPlayWithTrackReplace, {
+                state: "log",
+                message: `Player was called to play something, with a specific track provided. Replacing the current Track and resolving the track on trackStart Event.`,
+                functionLayer: "Player > play()",
+            });
 
             return this.node.updatePlayer({
                 guildId: this.guildId,
@@ -281,13 +285,11 @@ export class Player {
         if (!this.queue.current && this.queue.tracks.length) await queueTrackEnd(this);
 
         if (this.queue.current && this.LavalinkManager.utils.isUnresolvedTrack(this.queue.current)) {
-            if (this.LavalinkManager.options?.advancedOptions?.enableDebugEvents) {
-                this.LavalinkManager.emit("debug", DebugEvents.PlayerPlayUnresolvedTrack, {
-                    state: "log",
-                    message: `Player Play was called, current Queue Song is unresolved, resolving the track.`,
-                    functionLayer: "Player > play()",
-                });
-            }
+            this._emitDebugEvent(DebugEvents.PlayerPlayUnresolvedTrack, {
+                state: "log",
+                message: `Player Play was called, current Queue Song is unresolved, resolving the track.`,
+                functionLayer: "Player > play()",
+            });
 
             try {
                 // resolve the unresolved track
@@ -300,14 +302,12 @@ export class Player {
                 };
             } catch (error) {
 
-                if (this.LavalinkManager.options?.advancedOptions?.enableDebugEvents) {
-                    this.LavalinkManager.emit("debug", DebugEvents.PlayerPlayUnresolvedTrackFailed, {
-                        state: "error",
-                        error: error,
-                        message: `Player Play was called, current Queue Song is unresolved, but couldn't resolve it`,
-                        functionLayer: "Player > play() > resolve currentTrack",
-                    });
-                }
+                this._emitDebugEvent(DebugEvents.PlayerPlayUnresolvedTrackFailed, {
+                    state: "error",
+                    error: error,
+                    message: `Player Play was called, current Queue Song is unresolved, but couldn't resolve it`,
+                    functionLayer: "Player > play() > resolve currentTrack",
+                });
 
                 this.LavalinkManager.emit("trackError", this, this.queue.current, error);
 
@@ -388,13 +388,11 @@ export class Player {
 
         const now = performance.now();
         if (this.LavalinkManager.options.playerOptions.applyVolumeAsFilter) {
-            if (this.LavalinkManager.options?.advancedOptions?.enableDebugEvents) {
-                this.LavalinkManager.emit("debug", DebugEvents.PlayerVolumeAsFilter, {
-                    state: "log",
-                    message: `Player Volume was set as a Filter, because LavalinkManager option "playerOptions.applyVolumeAsFilter" is true`,
-                    functionLayer: "Player > setVolume()",
-                });
-            }
+            this._emitDebugEvent(DebugEvents.PlayerVolumeAsFilter, {
+                state: "log",
+                message: `Player Volume was set as a Filter, because LavalinkManager option "playerOptions.applyVolumeAsFilter" is true`,
+                functionLayer: "Player > setVolume()",
+            });
             await this.node.updatePlayer({ guildId: this.guildId, playerOptions: { filters: { volume: this.lavalinkVolume / 100 } } });
         } else {
             await this.node.updatePlayer({ guildId: this.guildId, playerOptions: { volume: this.lavalinkVolume } });
@@ -440,13 +438,11 @@ export class Player {
         const Query = this.LavalinkManager.utils.transformQuery(query);
 
         if (["bcsearch", "bandcamp"].includes(Query.source) && !this.node.info?.sourceManagers.includes("bandcamp")) {
-            if (this.LavalinkManager.options?.advancedOptions?.enableDebugEvents) {
-                this.LavalinkManager.emit("debug", DebugEvents.BandcampSearchLokalEngine, {
-                    state: "log",
-                    message: `Player.search was called with a Bandcamp Query, but no bandcamp search was enabled on lavalink, searching with the custom Search Engine.`,
-                    functionLayer: "Player > search()",
-                });
-            }
+            this._emitDebugEvent(DebugEvents.BandcampSearchLokalEngine, {
+                state: "log",
+                message: `Player.search was called with a Bandcamp Query, but no bandcamp search was enabled on lavalink, searching with the custom Search Engine.`,
+                functionLayer: "Player > search()",
+            });
             return await bandCampSearch(this, Query.query, requestUser);
         }
 
@@ -648,13 +644,11 @@ export class Player {
 
         if (this.get("internal_destroystatus") === true) {
 
-            if (this.LavalinkManager.options?.advancedOptions?.enableDebugEvents) {
-                this.LavalinkManager.emit("debug", DebugEvents.PlayerDestroyingSomewhereElse, {
-                    state: "warn",
-                    message: `Player is already destroying somewhere else..`,
-                    functionLayer: "Player > destroy()",
-                });
-            }
+            this._emitDebugEvent(DebugEvents.PlayerDestroyingSomewhereElse, {
+                state: "warn",
+                message: `Player is already destroying somewhere else..`,
+                functionLayer: "Player > destroy()",
+            });
 
             if (this.LavalinkManager.options.advancedOptions?.debugOptions.playerDestroy.debugLog) console.log(`Lavalink-Client-Debug | PlayerDestroy [::] destroy Function, [guildId ${this.guildId}] - Already destroying somewhere else..`);
             return;
@@ -746,6 +740,7 @@ export class Player {
         if (!updateNode.connected) throw new Error("The provided Node is not active or disconnected");
         if (this.node.id === updateNode.id) throw new Error("Player is already on the provided Node");
         if (this.get("internal_nodeChanging") === true) throw new Error("Player is already changing the node please wait");
+
         if (checkSources) {
             const isDefaultSource = (): boolean => { // check if defaultSearchPlatform is enabled on newNode
                 try {
@@ -758,18 +753,16 @@ export class Player {
                 const trackSources = new Set([this.queue.current, ...this.queue.tracks].map(track => track.info.sourceName));
                 const missingSources = [...trackSources].filter(
                     source => !updateNode.info?.sourceManagers.includes(source));
-                if (missingSources.length)
+                if (this.LavalinkManager.options.autoChecks?.sourcesValidations && missingSources.length)
                     throw new RangeError(`Sources missing for Node ${updateNode.id}: ${missingSources.join(', ')}`)
             }
         }
 
-        if (this.LavalinkManager.options?.advancedOptions?.enableDebugEvents) {
-            this.LavalinkManager.emit("debug", DebugEvents.PlayerChangeNode, {
-                state: "log",
-                message: `Player.changeNode() was executed, trying to change from "${this.node.id}" to "${updateNode.id}"`,
-                functionLayer: "Player > changeNode()",
-            });
-        }
+        this._emitDebugEvent(DebugEvents.PlayerChangeNode, {
+            state: "log",
+            message: `Player.changeNode() was executed, trying to change from "${this.node.id}" to "${updateNode.id}"`,
+            functionLayer: "Player > changeNode()",
+        });
 
         const data = this.toJSON();
         const currentTrack = this.queue.current;
@@ -783,30 +776,26 @@ export class Player {
         const now = performance.now();
         try {
             await this.connect();
-            const hasSponsorBlock = this.node.info?.plugins?.find(v => v.name === "sponsorblock-plugin");
+            const hasSponsorBlock = !this.LavalinkManager.options?.autoChecks?.pluginValidations || this.node.info?.plugins?.find(v => v.name === "sponsorblock-plugin");
             if (hasSponsorBlock) {
                 const sponsorBlockCategories = this.get("internal_sponsorBlockCategories");
                 if (Array.isArray(sponsorBlockCategories) && sponsorBlockCategories.length) {
                     await this.setSponsorBlock(sponsorBlockCategories).catch(error => {
-                        if (this.LavalinkManager.options?.advancedOptions?.enableDebugEvents) {
-                            this.LavalinkManager.emit("debug", DebugEvents.PlayerChangeNode, {
-                                state: "error",
-                                error: error,
-                                message: `Player > changeNode() Unable to set SponsorBlock Segments`,
-                                functionLayer: "Player > changeNode()",
-                            });
-                        }
+                        this._emitDebugEvent(DebugEvents.PlayerChangeNode, {
+                            state: "error",
+                            error: error,
+                            message: `Player > changeNode() Unable to set SponsorBlock Segments`,
+                            functionLayer: "Player > changeNode()",
+                        });
                     });
                 } else {
                     await this.setSponsorBlock().catch(error => {
-                        if (this.LavalinkManager.options?.advancedOptions?.enableDebugEvents) {
-                            this.LavalinkManager.emit("debug", DebugEvents.PlayerChangeNode, {
-                                state: "error",
-                                error: error,
-                                message: `Player > changeNode() Unable to set SponsorBlock Segments`,
-                                functionLayer: "Player > changeNode()",
-                            });
-                        }
+                        this._emitDebugEvent(DebugEvents.PlayerChangeNode, {
+                            state: "error",
+                            error: error,
+                            message: `Player > changeNode() Unable to set SponsorBlock Segments`,
+                            functionLayer: "Player > changeNode()",
+                        });
                     });
                 }
             }
@@ -831,14 +820,12 @@ export class Player {
             this.ping.lavalink = Math.round((performance.now() - now) / 10) / 100;
             return this.node.id;
         } catch (error) {
-            if (this.LavalinkManager.options?.advancedOptions?.enableDebugEvents) {
-                this.LavalinkManager.emit("debug", DebugEvents.PlayerChangeNode, {
-                    state: "error",
-                    error: error,
-                    message: `Player.changeNode() execution failed`,
-                    functionLayer: "Player > changeNode()",
-                });
-            }
+            this._emitDebugEvent(DebugEvents.PlayerChangeNode, {
+                state: "error",
+                error: error,
+                message: `Player.changeNode() execution failed`,
+                functionLayer: "Player > changeNode()",
+            });
             throw new Error(`Failed to change the node: ${error}`);
         } finally {
             this.set("internal_nodeChanging", undefined);
