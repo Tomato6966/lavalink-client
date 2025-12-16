@@ -9,6 +9,26 @@ Logs about the changed features.
 
 ---
 
+
+## **Version 2.7.7**
+
+- Added `node.on("nodeLinkEvent", node, eventName, player, track, payload)` to handle nodelink events.
+
+Example:
+```ts
+this.nodeManager.on("nodeLinkEvent", (node, event, player, track, payload) => {
+  if (event === "SeekEvent") {
+      console.log("new position:", payload.position);
+  }
+  if (event === "FiltersChangedEvent") {
+      console.log("new filters state", payload.filters);
+  }
+});
+```
+It is fully typed and generic, so you get code completion + type security based on the event Name.
+Why not many different events?`
+- This way the client does not get bloated, as nodelink is not the primary focus of this client.
+
 ## **Version 2.7.6**
 
 More NodeLink Specific / additional features added, in case you are using NodeLink.
