@@ -144,6 +144,7 @@ export class LavalinkManager<CustomPlayerT extends Player = Player> extends Even
         };
         // overwrite the options with the optionstoAssign
         this.options = optionsToAssign as unknown as ManagerOptions<CustomPlayerT>;
+
         return;
     }
 

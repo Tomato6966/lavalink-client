@@ -1,7 +1,9 @@
 import type { LavalinkNode } from "../Node";
 import type { DestroyReasonsType } from "./Player";
 import type { InvalidLavalinkRestRequest, LavalinkPlayer } from "./Utils";
-import type { PluginInfo } from "./Track";
+import type { PluginInfo, Track } from "./Track";
+import type { Player } from "../Player";
+import type { NodeLinkEventPayload, NodeLinkEventTypes } from "./NodeLink";
 
 /** Ability to manipulate fetch requests */
 export type ModifyRequest = (options: RequestInit & { path: string, extraQueryUrlParams?: URLSearchParams }) => void;
@@ -159,6 +161,8 @@ export interface LavalinkInfo {
     isNodelink?: boolean;
 }
 
+
+
 /**
  * Lavalink's version object from lavalink
  */
@@ -280,6 +284,26 @@ export interface NodeManagerEvents {
      * @event Manager.nodeManager#nodeResumed
      */
     "resumed": (node: LavalinkNode, payload: { resumed: true, sessionId: string, op: "ready" }, players: LavalinkPlayer[] | InvalidLavalinkRestRequest) => void;
+
+    /**
+     * Event Handler for Nodelink specific events https://nodelink.js.org/docs/api/websocket Fully typed and generic based on the eventName.
+     * @event Manager.nodeManager#nodeLinkEvent
+     * @example
+     *
+     * ```ts
+     * this.nodeManager.on("nodeLinkEvent", (node, event, player, track, payload) => {
+     *   if (event === "SeekEvent") {
+     *       console.log("new position:", payload.position);
+     *   }
+     *   if (event === "FiltersChangedEvent") {
+     *       console.log("new filters state", payload.filters);
+     *   }
+     * });
+     * ```
+     */
+    "nodeLinkEvent": (...args: {
+        [K in NodeLinkEventTypes]: [node: LavalinkNode, event: K, player: Player, track: Track | null, payload: NodeLinkEventPayload<K>]
+    }[NodeLinkEventTypes]) => void;
 }
 
 export enum ReconnectionState {

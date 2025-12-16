@@ -21,6 +21,7 @@ import type { NodeManager } from "./NodeManager";
 import type {
     BaseNodeStats, LavalinkInfo, LavalinkNodeOptions, LyricsResult, ModifyRequest, NodeLinkConnectionMetrics, NodeStats, SponsorBlockSegment
 } from "./Types/Node";
+import { NodeLinkEventPayload, NodeLinkEventTypes } from "./Types/NodeLink";
 /**
  * Lavalink Node creator class
  */
@@ -1357,6 +1358,24 @@ export class LavalinkNode {
         const player = this._LManager.getPlayer(payload.guildId);
         if (!player) return;
 
+        // https://nodelink.js.org/docs/differences#websocket-events
+        const NodeLinkEventType = payload.type as NodeLinkEventTypes;
+        const NodeLinkExclusiveEvents: NodeLinkEventTypes[] = [
+            "PlayerCreatedEvent",
+            "PlayerDestroyedEvent",
+            "PlayerConnectedEvent",
+            "PlayerReconnectingEvent",
+            "VolumeChangedEvent",
+            "FiltersChangedEvent",
+            "SeekEvent",
+            "PauseEvent",
+            "ConnectionStatusEvent",
+            "MixStartedEvent",
+            "MixEndedEvent",
+        ];
+        if (NodeLinkExclusiveEvents.includes(NodeLinkEventType) && (!this.info || this.info.isNodelink)) {
+            return this.nodeLinkEventHandler(NodeLinkEventType, player, player.queue.current, payload as unknown as NodeLinkEventPayload<typeof NodeLinkEventType>)
+        }
 
         switch (payload.type) {
             case "TrackStartEvent": this.trackStart(player, player.queue.current as Track, payload); break;
@@ -1376,6 +1395,16 @@ export class LavalinkNode {
         return;
     }
 
+    /**
+     * nodeLink specific events handling https://nodelink.js.org/docs/api/websocket#incoming-events-server--client
+     * @param eventName
+     * @param player
+     * @param track
+     * @param payload
+     */
+    private async nodeLinkEventHandler<NodeLinkEventName extends NodeLinkEventTypes>(eventName: NodeLinkEventName, player: Player, track: Track | null, payload: NodeLinkEventPayload<NodeLinkEventName>) {
+        this.NodeManager.emit("nodeLinkEvent", this, eventName as any, player, track, payload as any);
+    }
 
     private getTrackOfPayload(payload: PlayerEvents): Track | null {
         return "track" in payload
