@@ -1647,13 +1647,13 @@ export class LavalinkNode {
             if (player.queue.current) {
                 if (payload.type === "TrackEndEvent") this._LManager.emit("trackEnd", player, track, payload);
                 if (this._LManager.options.autoSkip) return player.play({ noReplace: true, paused: false });
+            } else {
+                this._emitDebugEvent(DebugEvents.AutoplayThresholdSpamLimiter, {
+                    state: "warn",
+                    message: `Autoplay was triggered after the previousautoplay too early. Threshold is: ${this._LManager.options.playerOptions.minAutoPlayMs}ms and the Duration was ${duration}ms`,
+                    functionLayer: "LavalinkNode > queueEnd() > autoplayFunction",
+                });
             }
-        } else {
-            this._emitDebugEvent(DebugEvents.AutoplayThresholdSpamLimiter, {
-                state: "warn",
-                message: `Autoplay was triggered after the previousautoplay too early. Threshold is: ${this._LManager.options.playerOptions.minAutoPlayMs}ms and the Duration was ${duration}ms`,
-                functionLayer: "LavalinkNode > queueEnd() > autoplayFunction",
-            });
         }
 
         player.set("internal_skipped", false);
