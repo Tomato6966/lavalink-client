@@ -164,7 +164,7 @@ export class LavalinkManager<CustomPlayerT extends Player = Player> extends Even
 
         if (!options?.nodes || !Array.isArray(options?.nodes) || !options?.nodes.every(node => this.utils.isNodeOptions(node))) throw new SyntaxError("ManagerOption.nodes must be an Array of NodeOptions and is required of at least 1 Node");
 
-        if (typeof options?.autoChecks?.nodeSourcesValidations !== "boolean") throw new SyntaxError("ManagerOption.autoChecks.nodeSourcesValidations must be either false | true aka boolean");
+        if (typeof options?.autoChecks?.sourcesValidations !== "boolean") throw new SyntaxError("ManagerOption.autoChecks.sourcesValidations must be either false | true aka boolean");
         if (typeof options?.autoChecks?.pluginValidations !== "boolean") throw new SyntaxError("ManagerOption.autoChecks.pluginValidations must be either false | true aka boolean");
 
         /* QUEUE STORE */
