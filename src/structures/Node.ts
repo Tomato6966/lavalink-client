@@ -19,7 +19,7 @@ import type { LavalinkTrack, PluginInfo, Track } from "./Types/Track";
 import type { NodeManager } from "./NodeManager";
 
 import type {
-    BaseNodeStats, LavalinkInfo, LavalinkNodeOptions, LyricsResult, ModifyRequest, NodeStats, SponsorBlockSegment
+    BaseNodeStats, LavalinkInfo, LavalinkNodeOptions, LyricsResult, ModifyRequest, NodeLinkConnectionMetrics, NodeStats, SponsorBlockSegment
 } from "./Types/Node";
 /**
  * Lavalink Node creator class
@@ -51,6 +51,17 @@ export class LavalinkNode {
             used: 0,
         },
         uptime: 0,
+        /** something from nodeLink https://nodelink.js.org/docs/differences#detailed-statistics */
+        detailedStats: {
+            api: {
+                requests: {},
+                errors: {},
+            },
+            sources: {},
+            playback: {
+                events: {},
+            },
+        },
         frameStats: {
             deficit: 0,
             nulled: 0,
@@ -876,6 +887,20 @@ export class LavalinkNode {
     }
 
     /**
+     * Request NodeLink connection metrics. https://nodelink.js.org/docs/differences#connection-metrics
+     * @returns the connection metrics of the node
+     *
+     * @example
+     * ```ts
+     * const connectionMetrics = await player.node.fetchConnectionMetrics();
+     * ```
+     */
+    public async fetchConnectionMetrics(): Promise<NodeLinkConnectionMetrics> {
+        if (this.info && !this.info.isNodelink) throw new Error("There is no Information about wether you are using NodeLink instead of Lavalink, so this function won't work");
+        return await this.request(`/connection`) as NodeLinkConnectionMetrics;
+    }
+
+    /**
      * Request Lavalink version.
      * @returns the current used lavalink version
      *
@@ -1180,8 +1205,12 @@ export class LavalinkNode {
             throw new Error(errorString);
         }
 
+        // if it's a lavalink server this property will be undefined
+        this.info.isNodelink = !!this.info.isNodelink
+
         this.NodeManager.emit("connect", this);
     }
+
 
     /** @private util function for handling closing events from websocket */
     private close(code: number, reason: string): void {

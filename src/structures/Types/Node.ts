@@ -98,12 +98,41 @@ export interface BaseNodeStats {
     frameStats: FrameStats;
 }
 
+export interface NodeLinkConnectionMetrics {
+    status: string;
+    metrics: {
+        speed: {
+            bps: number;
+            kbps: number;
+            mbps: number;
+        };
+        downloadedBytes: number;
+        durationSeconds: number;
+        timestamp: number;
+    };
+}
 /**
  * Interface for nodeStats from lavalink
  */
 export interface NodeStats extends BaseNodeStats {
     /** The frame stats for the node. */
     frameStats: FrameStats;
+    /** something from nodeLink https://nodelink.js.org/docs/differences#detailed-statistics */
+    detailedStats?: {
+        api: {
+            /** e.g. { "/v4/loadtracks": 150, "/v4/info": 5 }  */
+            requests: Record<string, number>;
+            errors: unknown;
+        };
+        /** e.g. { "youtube": 150, "soundcloud": 5 } */
+        sources: Record<string, number>;
+        playback: {
+            /** e.g. { "TrackStartEvent": 150, "TrackEndEvent": 5 } */
+            events: Record<string, number>;
+        };
+        /** and potential others */
+        [key: string]: unknown;
+    },
 }
 
 /**
@@ -126,6 +155,8 @@ export interface LavalinkInfo {
     filters: string[];
     /** The enabled plugins for this server */
     plugins: PluginObject[];
+    /** Something from NodeLink: https://nodelink.js.org/docs/differences#server-info */
+    isNodelink?: boolean;
 }
 
 /**
