@@ -496,7 +496,6 @@ export class LavalinkNode {
 
         this.resetAckTimeouts(false, true);
 
-        if (this.pingTimeout) clearTimeout(this.pingTimeout);
         this.pingTimeout = setTimeout(() => {
             this.pingTimeout = null;
             if (!this.socket) {
@@ -1180,7 +1179,7 @@ export class LavalinkNode {
         if (this.options.enablePingOnStatsCheck) this.heartBeat();
 
         if (this.heartBeatInterval) clearInterval(this.heartBeatInterval);
-
+        
         if (this.options.heartBeatInterval > 0) {
             // everytime a pong happens, set this.isAlive to true
             this.socket.on("pong", () => {
