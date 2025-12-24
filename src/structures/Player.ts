@@ -226,6 +226,30 @@ export class Player {
                     return this;
                 }
             }
+            if (
+                options.clientTrack?.info?.sourceName === "spotify" &&
+                !options.clientTrack.info?.isrc &&
+                options.clientTrack.info?.uri
+            ) {
+                try {
+                    const res = await this.search(
+                        options.clientTrack.info.uri,
+                        options.clientTrack.requester
+                    );
+
+                    const resolved = res?.tracks?.[0];
+                    if (resolved?.encoded) {
+                        options.clientTrack = resolved;
+                    }
+                } catch (error) {
+                    this._emitDebugEvent(DebugEvents.PlayerPlaySpotifyFallback, {
+                        state: "error",
+                        error,
+                        message: "Spotify track had no ISRC, fallback search failed",
+                        functionLayer: "Player > play() > spotify fallback",
+                    });
+                }
+            }
 
             if ((typeof options.track?.userData === "object" || typeof options.clientTrack?.userData === "object") && options.clientTrack) options.clientTrack.userData = {
                 ...(typeof options?.clientTrack?.requester === "object" ? { requester: this.LavalinkManager.utils.getTransformedRequester(options?.clientTrack?.requester || {}) as anyObject } : {}),

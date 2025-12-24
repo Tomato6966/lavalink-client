@@ -59,6 +59,7 @@ export enum DebugEvents {
     PlayerDestroyFail = "PlayerDestroyFail",
     PlayerChangeNodeFailNoEligibleNode = "PlayerChangeNodeFailNoEligibleNode",
     PlayerChangeNodeFail = "PlayerChangeNodeFail",
+    PlayerPlaySpotifyFallback = "PlayerPlaySpotifyFallback",
 }
 
 /**
