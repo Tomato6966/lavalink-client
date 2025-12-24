@@ -325,6 +325,54 @@ export class Player {
 
         if (!this.queue.current && this.queue.tracks.length) await queueTrackEnd(this);
 
+        // ADDED: Handle Spotify tracks without ISRC in queue
+        if (this.queue.current &&
+            this.queue.current.info?.sourceName === "spotify" &&
+            !this.queue.current.info?.isrc &&
+            this.queue.current.info?.uri) {
+
+            this._emitDebugEvent(DebugEvents.PlayerPlaySpotifyFallback, {
+                state: "log",
+                message: `Queue current track is Spotify without ISRC, resolving: ${this.queue.current.info.title}`,
+                functionLayer: "Player > play() > queue spotify fallback",
+            });
+
+            try {
+                const res = await this.search(
+                    this.queue.current.info.uri,
+                    this.queue.current.requester
+                );
+
+                const resolved = res?.tracks?.[0];
+                if (resolved?.encoded) {
+                    // Replace queue.current with resolved track
+                    this.queue.current = {
+                        ...resolved,
+                        requester: this.queue.current.requester,
+                        userData: {
+                            ...this.queue.current.userData,
+                            ...resolved.userData
+                        }
+                    } as Track;
+
+                    this.queue.utils.save();
+
+                    this._emitDebugEvent(DebugEvents.PlayerPlaySpotifyFallback, {
+                        state: "log",
+                        message: `Spotify track resolved successfully: ${resolved.info.title} with encoded: ${resolved.encoded.substring(0, 50)}...`,
+                        functionLayer: "Player > play() > queue spotify fallback",
+                    });
+                }
+            } catch (error) {
+                this._emitDebugEvent(DebugEvents.PlayerPlaySpotifyFallback, {
+                    state: "error",
+                    error,
+                    message: "Spotify track in queue had no ISRC, fallback search failed",
+                    functionLayer: "Player > play() > queue spotify fallback",
+                });
+            }
+        }
+
         if (this.queue.current && this.LavalinkManager.utils.isUnresolvedTrack(this.queue.current)) {
             this._emitDebugEvent(DebugEvents.PlayerPlayUnresolvedTrack, {
                 state: "log",
