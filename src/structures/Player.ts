@@ -226,6 +226,8 @@ export class Player {
                     return this;
                 }
             }
+
+            // MODIFIED: Spotify track resolution with full track replacement
             if (
                 options.clientTrack?.info?.sourceName === "spotify" &&
                 !options.clientTrack.info?.isrc &&
@@ -239,7 +241,21 @@ export class Player {
 
                     const resolved = res?.tracks?.[0];
                     if (resolved?.encoded) {
-                        options.clientTrack = resolved;
+                        // Replace with resolved track while preserving original metadata
+                        options.clientTrack = {
+                            ...resolved,
+                            requester: options.clientTrack.requester,
+                            userData: {
+                                ...options.clientTrack.userData,
+                                ...resolved.userData
+                            }
+                        };
+
+                        this._emitDebugEvent(DebugEvents.PlayerPlaySpotifyFallback, {
+                            state: "log",
+                            message: `Spotify track resolved successfully: ${resolved.info.title}`,
+                            functionLayer: "Player > play() > spotify fallback",
+                        });
                     }
                 } catch (error) {
                     this._emitDebugEvent(DebugEvents.PlayerPlaySpotifyFallback, {
@@ -263,6 +279,7 @@ export class Player {
                 userData: options.clientTrack?.userData,
             }
         }
+
         // if either encoded or identifier is provided generate the data to play them
         if (options?.track?.encoded || options?.track?.identifier) {
             this.queue.current = options.clientTrack as Track || null;
