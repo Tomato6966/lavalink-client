@@ -234,32 +234,36 @@ export class Player {
                 options.clientTrack.info?.uri
             ) {
                 try {
-                    const oldClientData = options.clientTrack.pluginInfo?.clientData || {};
-
                     const res = await this.search(
                         options.clientTrack.info.uri,
                         options.clientTrack.requester
                     );
 
-                    if (res.tracks.length && res.loadType !== "empty" && res.loadType !== "error") {
-                        const newTrack = res.tracks[0]!;
-
-                        if (newTrack.pluginInfo) {
-                            newTrack.pluginInfo.clientData = {
-                                ...oldClientData,
-                                ...(newTrack.pluginInfo.clientData || {})
-                            };
+                    const resolved = res?.tracks?.[0];
+                    if (resolved?.encoded) {
+                        if (resolved.pluginInfo.clientData) {
+                            resolved.pluginInfo.clientData = {
+                                ...options.clientTrack.pluginInfo?.clientData,
+                                ...resolved.pluginInfo.clientData
+                            }
                         }
 
-                        options.clientTrack = newTrack;
+                        // Replace with resolved track while preserving original metadata
+                        options.clientTrack = {
+                            ...resolved,
+                            requester: options.clientTrack.requester,
+                            userData: {
+                                ...options.clientTrack.userData,
+                                ...resolved.userData
+                            }
+                        };
+
+                        this._emitDebugEvent(DebugEvents.PlayerPlaySpotifyFallback, {
+                            state: "log",
+                            message: `Spotify track resolved successfully: ${resolved.info.title}`,
+                            functionLayer: "Player > play() > spotify fallback",
+                        });
                     }
-
-                    this._emitDebugEvent(DebugEvents.PlayerPlaySpotifyFallback, {
-                        state: "log",
-                        message: `Spotify track resolved successfully: ${options.clientTrack.info.title}`,
-                        functionLayer: "Player > play() > spotify fallback",
-                    });
-
                 } catch (error) {
                     this._emitDebugEvent(DebugEvents.PlayerPlaySpotifyFallback, {
                         state: "error",
