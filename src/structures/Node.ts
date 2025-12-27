@@ -5,6 +5,7 @@ import { DebugEvents, DestroyReasons, validSponsorBlocks } from "./Constants";
 import { ReconnectionState } from "./Types/Node";
 import { NodeSymbol, queueTrackEnd, safeStringify } from "./Utils";
 
+import type { NodeLinkEventPayload, NodeLinkEventTypes } from "./Types/NodeLink";
 import type {
     Base64, InvalidLavalinkRestRequest, LavalinkPlayer, LavaSearchQuery, LavaSearchResponse,
     LoadTypes, LyricsFoundEvent, LyricsLineEvent, LyricsNotFoundEvent, PlayerEvents,
@@ -21,7 +22,6 @@ import type { NodeManager } from "./NodeManager";
 import type {
     BaseNodeStats, LavalinkInfo, LavalinkNodeOptions, LyricsResult, ModifyRequest, NodeLinkConnectionMetrics, NodeStats, SponsorBlockSegment
 } from "./Types/Node";
-import { NodeLinkEventPayload, NodeLinkEventTypes } from "./Types/NodeLink";
 /**
  * Lavalink Node creator class
  */
@@ -303,14 +303,18 @@ export class LavalinkNode {
             if (typeof query === "object" && typeof query.extraQueryUrlParams?.size === "number" && query.extraQueryUrlParams?.size > 0) {
                 options.extraQueryUrlParams = query.extraQueryUrlParams;
             }
-        }) as {
-            loadType: LoadTypes,
-            data: any,
-            pluginInfo: PluginInfo,
-        };
+        }) as { loadType: LoadTypes, data: any, pluginInfo: PluginInfo };
 
         // transform the data which can be Error, Track or Track[] to enfore [Track]
-        const resTracks = res.loadType === "playlist" ? res.data?.tracks : res.loadType === "track" ? [res.data] : res.loadType === "search" ? Array.isArray(res.data) ? res.data : [res.data] : [];
+        const resTracks = res.loadType === "playlist"
+            ? res.data?.tracks
+            : res.loadType === "track"
+                ? [res.data]
+                : res.loadType === "search"
+                    ? Array.isArray(res.data)
+                        ? res.data
+                        : [res.data]
+                    : [];
 
         if (throwOnEmpty === true && (res.loadType === "empty" || !resTracks.length)) {
             this._emitDebugEvent(DebugEvents.SearchNothingFound, {
@@ -333,7 +337,6 @@ export class LavalinkNode {
                 uri: res.data.info?.url || res.data.info?.uri || res.data.info?.link || res.data.pluginInfo?.url || res.data.pluginInfo?.uri || res.data.pluginInfo?.link || null,
                 selectedTrack: typeof res.data?.info?.selectedTrack !== "number" || res.data?.info?.selectedTrack === -1 ? null : resTracks[res.data?.info?.selectedTrack] ? this._LManager.utils.buildTrack(resTracks[res.data?.info?.selectedTrack], requestUser) : null,
                 duration: resTracks.length ? resTracks.reduce((acc: number, cur: Track & { info: Track["info"] & { length?: number } }) => acc + (cur?.info?.duration || cur?.info?.length || 0), 0) : 0,
-
             } : null,
             tracks: (resTracks.length ? resTracks.map(t => this._LManager.utils.buildTrack(t, requestUser)) : []) as Track[]
         };
@@ -1109,9 +1112,10 @@ export class LavalinkNode {
     }
 
     public get reconnectionAttemptCount(): number {
+        if (!Array.isArray(this.reconnectAttempts)) this.reconnectAttempts = [];
         const maxAllowedTimestan = this.options.retryTimespan || -1;
         if (maxAllowedTimestan <= 0) return this.reconnectAttempts.length;
-        return this.reconnectAttempts.filter(timestamp => Date.now() - timestamp <= maxAllowedTimestan).length;
+        return this.reconnectAttempts?.filter(timestamp => Date.now() - timestamp <= maxAllowedTimestan).length || 0;
     }
 
     /**
@@ -1130,6 +1134,7 @@ export class LavalinkNode {
         }
 
         // state's should be changed before emitting an event
+        if (!Array.isArray(this.reconnectAttempts)) this.reconnectAttempts = [];
         this.reconnectAttempts.push(Date.now());
         this.reconnectionState = ReconnectionState.RECONNECTING;
 
@@ -1179,7 +1184,7 @@ export class LavalinkNode {
         if (this.options.enablePingOnStatsCheck) this.heartBeat();
 
         if (this.heartBeatInterval) clearInterval(this.heartBeatInterval);
-        
+
         if (this.options.heartBeatInterval > 0) {
             // everytime a pong happens, set this.isAlive to true
             this.socket.on("pong", () => {
