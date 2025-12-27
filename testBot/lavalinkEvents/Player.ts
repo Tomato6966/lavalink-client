@@ -28,6 +28,18 @@ export function PlayerEvents(client:BotClient) {
     .on("playerDisconnect", (player, voiceChannelId) => {
         logPlayer(client, player, "Player disconnected the Voice Channel :: ", voiceChannelId);
     })
+    .on("playerReconnect", (player, voiceChannelId) => {
+        logPlayer(client, player, "Player reconnected to Voice Channel :: ", voiceChannelId);
+        sendPlayerMessage(client, player, {
+            embeds: [
+                new EmbedBuilder()
+                .setColor("Green")
+                .setTitle("🔄 Player Reconnected")
+                .setDescription(`Successfully reconnected to <#${voiceChannelId}>`)
+                .setTimestamp()
+            ]
+        });
+    })
     .on("playerMove", (player, oldVoiceChannelId, newVoiceChannelId) => {
         logPlayer(client, player, "Player moved from Voice Channel :: ", oldVoiceChannelId, " :: To ::", newVoiceChannelId);
     })

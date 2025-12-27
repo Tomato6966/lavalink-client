@@ -622,6 +622,8 @@ export class LavalinkManager<CustomPlayerT extends Player = Player> extends Even
                         // connect if there are tracks & autoReconnectOnlyWithTracks = true or autoReconnectOnlyWithTracks is false
                         if (!autoReconnectOnlyWithTracks || (autoReconnectOnlyWithTracks && (player.queue.current || player.queue.tracks.length))) {
                             await player.connect();
+                            // Emit playerReconnect event after successful reconnection
+                            this.emit("playerReconnect", player, player.voiceChannelId);
                         }
                         // replay the current playing stream
                         if (player.queue.current) {
