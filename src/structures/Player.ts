@@ -234,6 +234,9 @@ export class Player {
                 options.clientTrack.info?.uri
             ) {
                 try {
+                    const oldClientData = options.clientTrack.pluginInfo?.clientData ?? {};
+                    const oldUserData = options.clientTrack.userData ?? {};
+
                     const res = await this.search(
                         options.clientTrack.info.uri,
                         options.clientTrack.requester
@@ -241,21 +244,28 @@ export class Player {
 
                     const resolved = res?.tracks?.[0];
                     if (resolved?.encoded) {
-                        if (resolved.pluginInfo.clientData) {
-                            resolved.pluginInfo.clientData = {
-                                ...options.clientTrack.pluginInfo?.clientData,
-                                ...resolved.pluginInfo.clientData
-                            }
-                        }
 
-                        // Replace with resolved track while preserving original metadata
+                        // ✅ Explicitly merge pluginInfo
+                        resolved.pluginInfo = {
+                            ...(resolved.pluginInfo ?? {}),
+                            clientData: {
+                                ...oldClientData,
+                                ...(resolved.pluginInfo?.clientData ?? {}),
+                            }
+                        };
+
+                        // ✅ MIRROR clientData → userData (IMPORTANT)
+                        resolved.userData = {
+                            ...oldUserData,
+                            ...oldClientData,
+                            ...(resolved.userData ?? {}),
+                        };
+
                         options.clientTrack = {
                             ...resolved,
                             requester: options.clientTrack.requester,
-                            userData: {
-                                ...options.clientTrack.userData,
-                                ...resolved.userData
-                            }
+                            userData: resolved.userData,
+                            pluginInfo: resolved.pluginInfo,
                         };
 
                         this._emitDebugEvent(DebugEvents.PlayerPlaySpotifyFallback, {
