@@ -211,6 +211,120 @@ export class Queue {
          */
         totalDuration: () => {
             return this.tracks.reduce((acc: number, cur) => acc + (cur.info.duration || 0), this.current?.info.duration || 0);
+        },
+
+        /**
+         * Find tracks in the queue matching specific criteria.
+         * **This method DOES NOT MUTATE the queue** - it returns a new array without modifying the original queue.
+         * @param predicate Function to test each track, or an object with criteria to match
+         * @returns Array of matching tracks with their indexes
+         * 
+         * @example
+         * ```ts
+         * // Find by author
+         * const artistTracks = player.queue.utils.filterTracks({ author: "Artist Name" });
+         * 
+         * // Find by duration range (5-10 minutes)
+         * const longTracks = player.queue.utils.filterTracks({ duration: { min: 300000, max: 600000 } });
+         * 
+         * // Find by title (partial match)
+         * const titleMatches = player.queue.utils.filterTracks({ title: "Never Gonna" });
+         * 
+         * // Custom predicate
+         * const customFilter = player.queue.utils.filterTracks(track => track.info.isStream);
+         * ```
+         */
+        filterTracks: (predicate: ((track: Track | UnresolvedTrack, index: number) => boolean) | {
+            title?: string;
+            author?: string;
+            duration?: number | { min?: number; max?: number };
+            uri?: string;
+            identifier?: string;
+            sourceName?: string;
+            isStream?: boolean;
+            isSeekable?: boolean;
+        }): Array<{ track: Track | UnresolvedTrack; index: number }> => {
+            if (typeof predicate === "function") {
+                return this.tracks
+                    .map((track, index) => ({ track, index }))
+                    .filter(({ track, index }) => predicate(track, index));
+            }
+
+            return this.tracks
+                .map((track, index) => ({ track, index }))
+                .filter(({ track }) => {
+                    if (predicate.title && !track.info?.title?.toLowerCase().includes(predicate.title.toLowerCase())) {
+                        return false;
+                    }
+
+                    if (predicate.author && !track.info?.author?.toLowerCase().includes(predicate.author.toLowerCase())) {
+                        return false;
+                    }
+
+                    if (predicate.duration !== undefined) {
+                        const duration = track.info?.duration || 0;
+                        if (typeof predicate.duration === "number") {
+                            if (duration !== predicate.duration) return false;
+                        } else {
+                            if (predicate.duration.min !== undefined && duration < predicate.duration.min) return false;
+                            if (predicate.duration.max !== undefined && duration > predicate.duration.max) return false;
+                        }
+                    }
+
+                    if (predicate.uri && track.info?.uri !== predicate.uri) {
+                        return false;
+                    }
+
+                    if (predicate.identifier && track.info?.identifier !== predicate.identifier) {
+                        return false;
+                    }
+
+                    if (predicate.sourceName && track.info?.sourceName?.toLowerCase() !== predicate.sourceName.toLowerCase()) {
+                        return false;
+                    }
+
+                    if (predicate.isStream !== undefined && track.info?.isStream !== predicate.isStream) {
+                        return false;
+                    }
+
+                    if (predicate.isSeekable !== undefined && track.info?.isSeekable !== predicate.isSeekable) {
+                        return false;
+                    }
+
+                    return true;
+                });
+        },
+
+        /**
+         * Find a single track in the queue matching specific criteria.
+         * **This method DOES NOT MUTATE the queue** - it searches without modifying the original queue.
+         * @param predicate Function to test each track, or an object with criteria to match
+         * @returns First matching track with its index, or null if not found
+         * 
+         * @example
+         * ```ts
+         * // Find first track by author
+         * const track = player.queue.utils.findTrack({ author: "Artist Name" });
+         * if (track) {
+         *   console.log(`Found at index ${track.index}: ${track.track.info.title}`);
+         * }
+         * 
+         * // Find with custom predicate
+         * const liveStream = player.queue.utils.findTrack(track => track.info.isStream);
+         * ```
+         */
+        findTrack: (predicate: ((track: Track | UnresolvedTrack, index: number) => boolean) | {
+            title?: string;
+            author?: string;
+            duration?: number | { min?: number; max?: number };
+            uri?: string;
+            identifier?: string;
+            sourceName?: string;
+            isStream?: boolean;
+            isSeekable?: boolean;
+        }): { track: Track | UnresolvedTrack; index: number } | null => {
+            const results = this.utils.filterTracks(predicate);
+            return results.length > 0 ? results[0] : null;
         }
     }
 
@@ -433,5 +547,185 @@ export class Queue {
         const removed = this.previous.shift();
         if (removed) await this.utils.save();
         return removed ?? null;
+    }
+
+    /**
+     * Find tracks in the queue matching specific criteria.
+     * **This method DOES NOT MUTATE the queue** - it returns a new array without modifying the original queue.
+     * @deprecated Use `player.queue.utils.filterTracks()` instead.
+     * @param predicate Function to test each track, or an object with criteria to match
+     * @returns Array of matching tracks with their indexes
+     * 
+     * @example
+     * ```ts
+     * // Use the new method instead:
+     * const artistTracks = player.queue.utils.filterTracks({ author: "Artist Name" });
+     * ```
+     */
+    public filter(predicate: ((track: Track | UnresolvedTrack, index: number) => boolean) | {
+        title?: string;
+        author?: string;
+        duration?: number | { min?: number; max?: number };
+        uri?: string;
+        identifier?: string;
+        sourceName?: string;
+        isStream?: boolean;
+        isSeekable?: boolean;
+    }): Array<{ track: Track | UnresolvedTrack; index: number }> {
+        return this.utils.filterTracks(predicate);
+    }
+
+    /**
+     * Find a single track in the queue matching specific criteria.
+     * **This method DOES NOT MUTATE the queue** - it searches without modifying the original queue.
+     * @deprecated Use `player.queue.utils.findTrack()` instead.
+     * @param predicate Function to test each track, or an object with criteria to match
+     * @returns First matching track with its index, or null if not found
+     * 
+     * @example
+     * ```ts
+     * // Use the new method instead:
+     * const track = player.queue.utils.findTrack({ author: "Artist Name" });
+     * ```
+     */
+    public find(predicate: ((track: Track | UnresolvedTrack, index: number) => boolean) | {
+        title?: string;
+        author?: string;
+        duration?: number | { min?: number; max?: number };
+        uri?: string;
+        identifier?: string;
+        sourceName?: string;
+        isStream?: boolean;
+        isSeekable?: boolean;
+    }): { track: Track | UnresolvedTrack; index: number } | null {
+        return this.utils.findTrack(predicate);
+    }
+
+    /**
+     * Sort the queue tracks by a specific property.
+     * **⚠️ This method MUTATES the queue** - it modifies the original queue in place.
+     * @param sortBy Property to sort by or custom comparator function
+     * @param order Sort order: 'asc' or 'desc' (default: 'asc')
+     * @returns The queue instance for chaining
+     * 
+     * @example
+     * ```ts
+     * // Sort by duration (shortest first)
+     * await player.queue.sortBy("duration", "asc");
+     * 
+     * // Sort by title alphabetically (Z-A)
+     * await player.queue.sortBy("title", "desc");
+     * 
+     * // Custom sorting
+     * await player.queue.sortBy((a, b) => {
+     *   return a.info.title.localeCompare(b.info.title);
+     * });
+     * ```
+     */
+    public async sortBy(
+        sortBy: "duration" | "title" | "author" | ((a: Track | UnresolvedTrack, b: Track | UnresolvedTrack) => number),
+        order: "asc" | "desc" = "asc"
+    ): Promise<this> {
+        const oldStored = typeof this.queueChanges?.tracksAdd === "function" ? this.utils.toJSON() : null;
+
+        if (typeof sortBy === "function") {
+            this.tracks.sort(sortBy);
+        } else {
+            this.tracks.sort((a, b) => {
+                let comparison = 0;
+
+                switch (sortBy) {
+                    case "duration":
+                        comparison = (a.info?.duration || 0) - (b.info?.duration || 0);
+                        break;
+                    case "title":
+                        comparison = (a.info?.title || "").localeCompare(b.info?.title || "");
+                        break;
+                    case "author":
+                        comparison = (a.info?.author || "").localeCompare(b.info?.author || "");
+                        break;
+                    default:
+                        return 0;
+                }
+
+                return order === "desc" ? -comparison : comparison;
+            });
+        }
+
+        await this.utils.save();
+        return this;
+    }
+
+    /**
+     * Get a sorted copy of the queue tracks without modifying the original queue.
+     * **This method DOES NOT MUTATE the queue** - it returns a new sorted array, similar to `Array.toSorted()`.
+     * @param sortBy Property to sort by or custom comparator function
+     * @param order Sort order: 'asc' or 'desc' (default: 'asc')
+     * @returns A new sorted array of tracks (does not modify the queue)
+     * 
+     * @example
+     * ```ts
+     * // Get sorted copy by duration (shortest first)
+     * const sortedTracks = player.queue.toSortedBy("duration", "asc");
+     * // Original queue remains unchanged
+     * 
+     * // Get sorted copy by title alphabetically (Z-A)
+     * const sortedByTitle = player.queue.toSortedBy("title", "desc");
+     * 
+     * // Custom sorting
+     * const customSorted = player.queue.toSortedBy((a, b) => {
+     *   return a.info.title.localeCompare(b.info.title);
+     * });
+     * ```
+     */
+    public toSortedBy(
+        sortBy: "duration" | "title" | "author" | ((a: Track | UnresolvedTrack, b: Track | UnresolvedTrack) => number),
+        order: "asc" | "desc" = "asc"
+    ): (Track | UnresolvedTrack)[] {
+        const tracksCopy = [...this.tracks];
+
+        if (typeof sortBy === "function") {
+            return tracksCopy.sort(sortBy);
+        }
+
+        return tracksCopy.sort((a, b) => {
+            let comparison = 0;
+
+            switch (sortBy) {
+                case "duration":
+                    comparison = (a.info?.duration || 0) - (b.info?.duration || 0);
+                    break;
+                case "title":
+                    comparison = (a.info?.title || "").localeCompare(b.info?.title || "");
+                    break;
+                case "author":
+                    comparison = (a.info?.author || "").localeCompare(b.info?.author || "");
+                    break;
+                default:
+                    return 0;
+            }
+
+            return order === "desc" ? -comparison : comparison;
+        });
+    }
+
+    /**
+     * Get a range of tracks from the queue.
+     * **This method DOES NOT MUTATE the queue** - it returns a new array slice, similar to `Array.slice()`.
+     * @param start Start index (inclusive)
+     * @param end End index (exclusive)
+     * @returns Array of tracks in the specified range
+     * 
+     * @example
+     * ```ts
+     * // Get tracks 5-15
+     * const tracks = player.queue.getTracks(5, 15);
+     * 
+     * // Get first 10 tracks
+     * const firstTen = player.queue.getTracks(0, 10);
+     * ```
+     */
+    public getTracks(start: number, end?: number): (Track | UnresolvedTrack)[] {
+        return this.tracks.slice(start, end);
     }
 }
