@@ -1176,42 +1176,42 @@ export class LavalinkNode {
     /** @private util function for handling opening events from websocket */
     private async open(): Promise<void> {
         this.isAlive = true;
-
-        // Reset reconnection state on successful connection
         this.resetReconnectionAttempts();
 
-        // trigger heartbeat-ping timeout - this is to check wether the client lost connection without knowing it
         if (this.options.enablePingOnStatsCheck) this.heartBeat();
 
-        if (this.heartBeatInterval) clearInterval(this.heartBeatInterval);
+        this.info = await this.fetchInfo().catch(() => null);
 
-        if (this.options.heartBeatInterval > 0) {
-            // everytime a pong happens, set this.isAlive to true
-            this.socket.on("pong", () => {
+        if (!this.info && ["v3", "v4"].includes(this.version)) {
+            throw new Error(`Lavalink Node (${this.restAddress}) does not provide any /${this.version}/info`);
+        }
+
+        this.info!.isNodelink = !!this.info!.isNodelink;
+        // nodelink has a built in heartbeat, so this can make everything go boom since its not compatible with this, so we disable it.
+        // if enabled, this will return corrupted to nodelink's websocket, plus this gonna be loop crashing the node with 1002 error codes.
+        const canUseWsPing =
+            !this.info?.isNodelink &&
+            typeof this.options.heartBeatInterval === "number" &&
+            this.options.heartBeatInterval > 0;
+
+        this.resetAckTimeouts(true, false);
+
+        if (canUseWsPing) {
+            this.socket!.on("pong", () => {
                 this.heartBeatPongTimestamp = performance.now();
                 this.isAlive = true;
             });
 
-            // every x ms send a ping to lavalink to retrieve a pong later on
             this.heartBeatInterval = setInterval(() => {
-                if (!this.socket) return console.error("Node-Heartbeat-Interval - Socket not available - maybe reconnecting?");
+                if (!this.socket) return;
+
                 if (!this.isAlive) return this.close(500, "Node-Heartbeat-Timeout");
 
                 this.isAlive = false;
                 this.heartBeatPingTimestamp = performance.now();
-                this.socket?.ping?.();
-            }, this.options.heartBeatInterval || 30_000);
+                this.socket.ping();
+            }, this.options.heartBeatInterval);
         }
-
-        this.info = await this.fetchInfo().catch((e) => (console.error(e, "ON-OPEN-FETCH"), null));
-
-        if (!this.info && ["v3", "v4"].includes(this.version)) {
-            const errorString = `Lavalink Node (${this.restAddress}) does not provide any /${this.version}/info`;
-            throw new Error(errorString);
-        }
-
-        // if it's a lavalink server this property will be undefined
-        this.info.isNodelink = !!this.info.isNodelink
 
         this.NodeManager.emit("connect", this);
     }
