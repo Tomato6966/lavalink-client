@@ -69,7 +69,7 @@ export class LavalinkManager<CustomPlayerT extends Player = Player> extends Even
     public nodeManager: NodeManager;
     /** LavalinkManager's Utils Class */
     public utils: ManagerUtils;
-    /** Wether the manager was initiated or not */
+    /** Whether the manager was initiated or not */
     public initiated: boolean = false;
     /** All Players stored in a MiniMap */
     public readonly players: MiniMap<string, CustomPlayerT> = new MiniMap();
@@ -372,7 +372,7 @@ export class LavalinkManager<CustomPlayerT extends Player = Player> extends Even
     }
 
     /**
-     * Checks wether the the lib is useable based on if any node is connected
+     * Checks whether the the lib is useable based on if any node is connected
      *
      * @example
      * ```ts

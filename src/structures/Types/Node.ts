@@ -40,7 +40,7 @@ export interface LavalinkNodeOptions {
     closeOnError?: boolean;
     /** Heartbeat interval , set to <= 0 to disable heartbeat system */
     heartBeatInterval?: number;
-    /** Recommended, to check wether the client is still connected or not on the stats endpoint */
+    /** Recommended, to check whether the client is still connected or not on the stats endpoint */
     enablePingOnStatsCheck?: boolean;
 }
 
@@ -255,7 +255,7 @@ export interface NodeManagerEvents {
 
     /**
      * Emitted When a node starts to reconnect (if you have a reconnection delay, the reconnecting event will be emitted after the retryDelay.)
-     * Useful to check wether the internal node reconnect system works or not
+     * Useful to check whether the internal node reconnect system works or not
      * @event Manager.nodeManager#reconnectinprogress
      */
     "reconnectinprogress": (node: LavalinkNode) => void;

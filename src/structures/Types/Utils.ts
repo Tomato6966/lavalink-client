@@ -365,7 +365,7 @@ export interface LavalinkPlayerVoice {
     endpoint: string;
     /** The Voice SessionId */
     sessionId: string;
-    /** Wether or not the player is connected */
+    /** Whether or not the player is connected */
     connected?: boolean;
     /** The Ping to the voice server */
     ping?: number
@@ -410,7 +410,7 @@ export interface RoutePlanner {
 }
 
 export interface Session {
-    /** Wether or not session is resuming or not */
+    /** Whether or not session is resuming or not */
     resuming: boolean;
     /** For how long a session is lasting while not connected */
     timeout: number;
@@ -425,9 +425,9 @@ export interface GuildShardPayload {
         guild_id: string;
         /** channel to move/connect to, or null to leave it */
         channel_id: string | null;
-        /** wether or not mute yourself */
+        /** whether or not mute yourself */
         self_mute: boolean;
-        /** wether or not deafen yourself */
+        /** whether or not deafen yourself */
         self_deaf: boolean;
     };
 }
@@ -448,7 +448,7 @@ export interface LavalinkPlayer {
     track?: LavalinkTrack;
     /** Lavalink volume (mind volumedecrementer) */
     volume: number;
-    /** Wether it's paused or not */
+    /** Whether it's paused or not */
     paused: boolean;
     /** Voice Endpoint data */
     voice: LavalinkPlayerVoice;
@@ -508,7 +508,7 @@ export interface VoiceState {
     self_video: boolean;
     /** Self Stream status */
     self_stream: boolean;
-    /** Wether the user requests to speak (stage channel) */
+    /** Whether the user requests to speak (stage channel) */
     request_to_speak_timestamp: boolean;
     /** Self suppressed status (stage channel) */
     suppress: boolean;
