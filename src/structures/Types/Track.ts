@@ -26,9 +26,9 @@ export interface LavalinkTrackInfo {
     uri: string;
     /** The Source name of the Track, e.g. soundcloud, youtube, spotify */
     sourceName: SourceNames;
-    /** Wether the audio is seekable */
+    /** Whether the audio is seekable */
     isSeekable: boolean;
-    /** Wether the audio is of a live stream */
+    /** Whether the audio is of a live stream */
     isStream: boolean;
     /** If isrc code is available, it's provided */
     isrc: string | null;
@@ -49,9 +49,9 @@ export interface TrackInfo {
     uri: string;
     /** The Source name of the Track, e.g. soundcloud, youtube, spotify */
     sourceName: SourceNames;
-    /** Wether the audio is seekable */
+    /** Whether the audio is seekable */
     isSeekable: boolean;
-    /** Wether the audio is of a live stream */
+    /** Whether the audio is of a live stream */
     isStream: boolean;
     /** If isrc code is available, it's provided */
     isrc: string | null;

@@ -188,7 +188,7 @@ export class ManagerUtils {
 
 
     /**
-     * Validate tracks based on duration wether they are playble or broken tracks.
+     * Validate tracks based on duration whether they are playble or broken tracks.
      * most tracks should be longer than 30s, so you can put a minDuration of 29e3 (cause preview tracks are exactly 30s) or put 0.
      * This check is not done automatically, you need to check it yourself by doing:
      * @example

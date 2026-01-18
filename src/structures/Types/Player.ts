@@ -34,7 +34,7 @@ export interface PlayerJson {
     repeatMode: RepeatMode;
     /** Pause state */
     paused: boolean;
-    /** Wether the player was playing or not */
+    /** Whether the player was playing or not */
     playing: boolean;
     /** When the player was created */
     createdTimeStamp?: number;

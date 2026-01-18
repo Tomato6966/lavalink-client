@@ -71,7 +71,7 @@ export class LavalinkNode {
     };
     /** The current sessionId, only present when connected */
     public sessionId?: string | null = null;
-    /** Wether the node resuming is enabled or not */
+    /** Whether the node resuming is enabled or not */
     public resuming: { enabled: boolean, timeout: number | null } = { enabled: true, timeout: null };
     /** Actual Lavalink Information of the Node */
     public info: LavalinkInfo | null = null;
@@ -103,13 +103,13 @@ export class LavalinkNode {
     }
 
     /**
-     * Returns wether the plugin validations are enabled or not
+     * Returns whether the plugin validations are enabled or not
      */
     private get _checkForPlugins() {
         return !!this._LManager.options?.autoChecks?.pluginValidations;
     }
     /**
-     * Returns wether the source validations are enabled or not
+     * Returns whether the source validations are enabled or not
      */
     private get _checkForSources() {
         return !!this._LManager.options?.autoChecks?.sourcesValidations;
@@ -267,7 +267,7 @@ export class LavalinkNode {
      * Search something raw on the node, please note only add tracks to players of that node
      * @param query SearchQuery Object
      * @param requestUser Request User for creating the player(s)
-     * @param throwOnEmpty Wether to throw on an empty result or not
+     * @param throwOnEmpty Whether to throw on an empty result or not
      * @returns Searchresult
      *
      * @example
@@ -346,7 +346,7 @@ export class LavalinkNode {
      * Search something using the lavaSearchPlugin (filtered searches by types)
      * @param query LavaSearchQuery Object
      * @param requestUser Request User for creating the player(s)
-     * @param throwOnEmpty Wether to throw on an empty result or not
+     * @param throwOnEmpty Whether to throw on an empty result or not
      * @returns LavaSearchresult (SearchResult if link is provided)
      *
      * @example
@@ -533,7 +533,7 @@ export class LavalinkNode {
     /**
      * Destroys the Node-Connection (Websocket) and all player's of the node
      * @param destroyReason Destroy Reason to use when destroying the players
-     * @param deleteNode wether to delete the nodte from the nodes list too, if false it will emit a disconnect. @default true
+     * @param deleteNode whether to delete the nodte from the nodes list too, if false it will emit a disconnect. @default true
      * @param movePlayers whether to movePlayers to different eligible connected node. If false players won't be moved @default false
      * @returns void
      *
@@ -772,7 +772,7 @@ export class LavalinkNode {
         /**
          * Get the lyrics of a track
          * @param track the track to get the lyrics for
-         * @param skipTrackSource wether to skip the track source or not
+         * @param skipTrackSource whether to skip the track source or not
          * @returns the lyrics of the track
          * @example
          *
@@ -802,7 +802,7 @@ export class LavalinkNode {
          * Get the lyrics of the current playing track
          *
          * @param guildId the guild id of the player
-         * @param skipTrackSource wether to skip the track source or not
+         * @param skipTrackSource whether to skip the track source or not
          * @returns the lyrics of the current playing track
          * @example
          * ```ts
@@ -899,7 +899,7 @@ export class LavalinkNode {
      * ```
      */
     public async fetchConnectionMetrics(): Promise<NodeLinkConnectionMetrics> {
-        if (this.info && !this.info.isNodelink) throw new Error("There is no Information about wether you are using NodeLink instead of Lavalink, so this function won't work");
+        if (this.info && !this.info.isNodelink) throw new Error("There is no Information about whether you are using NodeLink instead of Lavalink, so this function won't work");
         return await this.request(`/connection`) as NodeLinkConnectionMetrics;
     }
 
@@ -1081,7 +1081,7 @@ export class LavalinkNode {
 
     /**
      * Reconnect to the lavalink node
-     * @param force @default false Wether to instantly try to reconnect (force it)
+     * @param force @default false Whether to instantly try to reconnect (force it)
      * @returns void
      *
      * @example
@@ -1180,7 +1180,7 @@ export class LavalinkNode {
         // Reset reconnection state on successful connection
         this.resetReconnectionAttempts();
 
-        // trigger heartbeat-ping timeout - this is to check wether the client lost connection without knowing it
+        // trigger heartbeat-ping timeout - this is to check whether the client lost connection without knowing it
         if (this.options.enablePingOnStatsCheck) this.heartBeat();
 
         if (this.heartBeatInterval) clearInterval(this.heartBeatInterval);
