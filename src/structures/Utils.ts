@@ -270,15 +270,15 @@ export class ManagerUtils {
         // checks for blacklisted links / domains / queries
         if (this.LavalinkManager.options?.linksBlacklist?.length > 0) {
             if (this.LavalinkManager.options?.advancedOptions?.enableDebugEvents) {
-                this.LavalinkManager.emit("debug", DebugEvents.ValidatingBlacklistLinks, {
-                    state: "log",
-                    message: `Validating Query against LavalinkManager.options.linksBlacklist, query: "${queryString}"`,
-                    functionLayer: "(LavalinkNode > node | player) > search() > validateQueryString()",
-                });
+            this.LavalinkManager.emit("debug", DebugEvents.ValidatingBlacklistLinks, {
+                state: "log",
+                message: `Validating Query against LavalinkManager.options.linksBlacklist, query: "${queryString}"`,
+                functionLayer: "(LavalinkNode > node | player) > search() > validateQueryString()",
+             });
             }
-            if (this.LavalinkManager.options?.linksBlacklist.some(v => (typeof v === "string" && (queryString.toLowerCase().includes(v.toLowerCase()) || v.toLowerCase().includes(queryString.toLowerCase()))) || isRegExp(v) && v.test(queryString))) {
+             if (this.LavalinkManager.options?.linksBlacklist.some(v => (typeof v === "string" && queryString.toLowerCase().includes(v.toLowerCase())) || (isRegExp(v) && v.test(queryString)))) {
                 throw new Error(`Query string contains a link / word which is blacklisted.`)
-            }
+             }
         }
 
         if (!/^https?:\/\//.test(queryString)) return;
@@ -293,7 +293,7 @@ export class ManagerUtils {
                     functionLayer: "(LavalinkNode > node | player) > search() > validateQueryString()",
                 });
             }
-            if (!this.LavalinkManager.options?.linksWhitelist.some(v => (typeof v === "string" && (queryString.toLowerCase().includes(v.toLowerCase()) || v.toLowerCase().includes(queryString.toLowerCase()))) || isRegExp(v) && v.test(queryString))) {
+            if (!this.LavalinkManager.options?.linksWhitelist.some(v => (typeof v === "string" &&  queryString.toLowerCase().includes(v.toLowerCase())) || (isRegExp(v) && v.test(queryString)))) {
                 throw new Error(`Query string contains a link / word which isn't whitelisted.`)
             }
         }
