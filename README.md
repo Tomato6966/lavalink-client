@@ -118,7 +118,7 @@ This client powers various Discord bots:
   - [Akyn](https://akynbot.vercel.app/) (@notdeltaxd)
   - [ARINO](https://site.arinoapp.qzz.io/) (@ryanwtf88)
   - [iHorizon](https://github.com/ihrz/ihrz) (@iHorizon)
-- **Bots Community (Users):**
+- **Bots By Community (Users):**
   - [Soundy](https://github.com/idMJA/Soundy) (@idMJA)
   - [BeatBot](https://getbeatbot.vercel.app/) (@zenitsujs)
   - [Atom Music](https://top.gg/bot/1320469557411971165) (@sakshamyep)
