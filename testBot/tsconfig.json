@@ -1,7 +1,14 @@
 {
   "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "lavalink-client": [
+        "../src/index.ts"
+      ]
+    },
     "lib": [
-      "ESNext", "DOM"
+      "ESNext",
+      "DOM"
     ],
     "target": "ESNext",
     "module": "commonjs",
@@ -12,10 +19,13 @@
     "esModuleInterop": true,
     "experimentalDecorators": true,
     "sourceMap": true,
-    "types": [ "node", "ws" ]
+    "types": [
+      "node",
+      "ws"
+    ]
   },
   "include": [
-    "src/**/*.ts"
+    "**/*.ts"
   ],
   "exclude": [
     "node_modules",
