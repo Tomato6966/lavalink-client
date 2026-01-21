@@ -108,6 +108,9 @@ export interface LavalinkTrack {
     userData?: anyObject;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
+export interface Requester { }
+
 export interface Track {
     /** The Base 64 encoded String */
     encoded?: Base64;
@@ -116,7 +119,7 @@ export interface Track {
     /** Plugin Information from Lavalink */
     pluginInfo: Partial<PluginInfo>;
     /** The Track's Requester */
-    requester?: unknown;
+    requester?: Requester;
     /** The userData Object from when you provide to the lavalink request */
     userData?: anyObject;
 }
@@ -142,5 +145,5 @@ export interface UnresolvedTrack {
     /** The userData Object from when you provide to the lavalink request */
     userData?: anyObject;
     /** The Track's Requester */
-    requester?: unknown;
+    requester?: Requester;
 }
