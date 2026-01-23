@@ -173,6 +173,7 @@ This client powers various Discord bots:
   - [Atom Music](https://top.gg/bot/1320469557411971165) (@sakshamyep)
   - [All Time Bot](https://top.gg/bot/1163027457671180418) (@PeterGamez)
   - [BeatDock](https://github.com/lazaroagomez/BeatDock) (@lazaroagomez)
+  - [Nazha](https://top.gg/bot/1124681788070055967) (@Nazha-Team)
 
 ***
 
@@ -513,4 +514,5 @@ if (response.tracks.length > 0) {
 </details>
 
 </div>
+
 
