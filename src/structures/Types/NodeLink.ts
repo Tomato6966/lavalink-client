@@ -1,5 +1,5 @@
-import { LavalinkTrack } from "./Track";
-import { LavalinkFilterData } from "./Filters";
+import type { LavalinkTrack } from "./Track";
+import type { LavalinkFilterData } from "./Filters";
 
 export type NodeLinkEventTypes =
     | "PlayerCreatedEvent"
