@@ -9,7 +9,23 @@ Logs about the changed features.
 
 ---
 
-## **Version 2.7.8**
+## **Version 2.8.0**
+
+- Added global typing for the TrackRequester type via `module augmentation`. ( Thanks to @appujet on Github)
+- Added information for Nodelink Users on how to disable heartbeat system in the readme.
+- Fixed typos in the jsdoc documentation
+
+Example for TrackRequester augmentation:
+```ts
+declare module "lavalink-client" {
+    export interface TrackRequester {
+        id: string;
+        username: string;
+        avatarURL: string;
+    }
+}
+```
+
 
 New Queue Utilities:
 
