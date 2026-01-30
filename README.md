@@ -106,6 +106,55 @@ pnpm add tomato6966/lavalink-client
 
 ***
 
+# Node Link
+
+This client can be used with nodelink too, but because nodelink's websocket is different than the one from lavalink, you need to disable a few things on the NODE OPTIONS / NODE PROPERTIES:
+
+```ts
+nodeOptions.heartBeatInterval = -1
+nodeOptions.enablePingOnStatsCheck = false
+```
+
+this can be done directly when creating the node in the lavalinkmanager.
+
+```ts
+client.lavalink = new LavalinkManager({
+  nodes: [
+    {
+       host: "localhost",
+   
+       heartBeatInterval: -1,
+       enablePingOnStatsCheck: false,
+    }
+  ]
+})
+client.lavalink = new LavalinkManager({
+    nodes: [
+        {
+            authorization: "youshallnotpass", // The password for your Lavalink server
+            host: "localhost",
+            port: 2333,
+            id: "Main Node",
+            // DISABLE HEARTBEAT CHECKS AND regular PING CHECKS IN ORDER TO HAVE A STABLE CONNECTION TO NODELINK
+            heartBeatInterval: -1,
+            enablePingOnStatsCheck: false,
+        }
+    ],
+    // A function to send voice server updates to the Lavalink client
+    sendToShard: (guildId, payload) => {
+        const guild = client.guilds.cache.get(guildId);
+        if (guild) guild.shard.send(payload);
+    },
+    autoSkip: true,
+    client: {
+        id: process.env.CLIENT_ID, // Your bot's user ID
+        username: "MyBot",
+    },
+});
+```
+
+***
+
 ## 💖 Used In
 This client powers various Discord bots:
 - **[Mivator](https://discord.gg/5dUb7M2qCj)** (Public Bot by @Tomato6966)
@@ -118,12 +167,13 @@ This client powers various Discord bots:
   - [Akyn](https://akynbot.vercel.app/) (@notdeltaxd)
   - [ARINO](https://site.arinoapp.qzz.io/) (@ryanwtf88)
   - [iHorizon](https://github.com/ihrz/ihrz) (@iHorizon)
-- **Bots Community (Users):**
+- **Bots By Community (Users):**
   - [Soundy](https://github.com/idMJA/Soundy) (@idMJA)
   - [BeatBot](https://getbeatbot.vercel.app/) (@zenitsujs)
   - [Atom Music](https://top.gg/bot/1320469557411971165) (@sakshamyep)
   - [All Time Bot](https://top.gg/bot/1163027457671180418) (@PeterGamez)
   - [BeatDock](https://github.com/lazaroagomez/BeatDock) (@lazaroagomez)
+  - [Nazha](https://top.gg/bot/1124681788070055967) (@Nazha-Team)
 
 ***
 
@@ -464,3 +514,5 @@ if (response.tracks.length > 0) {
 </details>
 
 </div>
+
+

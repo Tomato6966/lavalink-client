@@ -2,7 +2,7 @@ import { EmbedBuilder, Message, MessageCreateOptions, TextChannel, VoiceChannel 
 import { DebugEvents, Player } from "lavalink-client";
 
 import { BotClient, CustomRequester } from "../types/Client";
-import { delay, formatMS_HHMMSS } from "../Utils/Time";
+import { formatMS_HHMMSS } from "../Utils/Time";
 
 const messagesMap = new Map<string, Message>();
 
@@ -147,12 +147,12 @@ export function PlayerEvents(client:BotClient) {
                     `> - **Author:** ${track?.info?.author}`,
                     `> - **Duration:** ${formatMS_HHMMSS(track?.info?.duration || 0)} | Ends <t:${Math.floor((Date.now() + (track?.info?.duration || 0)) / 1000)}:R>`,
                     `> - **Source:** ${track?.info?.sourceName}`,
-                    `> - **Requester:** <@${(track?.requester as CustomRequester)?.id}>`,
+                    `> - **Requester:** <@${track?.requester?.id}>`,
                     track?.pluginInfo?.clientData?.fromAutoplay ? `> *From Autoplay* ✅` : undefined
                 ].filter(v => typeof v === "string" && v.length).join("\n").substring(0, 4096)
             )
             .setFooter({
-                text: `Requested by ${(track?.requester as CustomRequester)?.username}`,
+                text: `Requested by ${track?.requester?.username}`,
                 iconURL: /^https?:\/\//.test(avatarURL || "") ? avatarURL : undefined,
             })
             .setTimestamp()

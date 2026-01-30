@@ -26,9 +26,9 @@ export interface LavalinkTrackInfo {
     uri: string;
     /** The Source name of the Track, e.g. soundcloud, youtube, spotify */
     sourceName: SourceNames;
-    /** Wether the audio is seekable */
+    /** Whether the audio is seekable */
     isSeekable: boolean;
-    /** Wether the audio is of a live stream */
+    /** Whether the audio is of a live stream */
     isStream: boolean;
     /** If isrc code is available, it's provided */
     isrc: string | null;
@@ -49,9 +49,9 @@ export interface TrackInfo {
     uri: string;
     /** The Source name of the Track, e.g. soundcloud, youtube, spotify */
     sourceName: SourceNames;
-    /** Wether the audio is seekable */
+    /** Whether the audio is seekable */
     isSeekable: boolean;
-    /** Wether the audio is of a live stream */
+    /** Whether the audio is of a live stream */
     isStream: boolean;
     /** If isrc code is available, it's provided */
     isrc: string | null;
@@ -108,6 +108,9 @@ export interface LavalinkTrack {
     userData?: anyObject;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
+export interface TrackRequester { }
+
 export interface Track {
     /** The Base 64 encoded String */
     encoded?: Base64;
@@ -116,7 +119,7 @@ export interface Track {
     /** Plugin Information from Lavalink */
     pluginInfo: Partial<PluginInfo>;
     /** The Track's Requester */
-    requester?: unknown;
+    requester?: TrackRequester;
     /** The userData Object from when you provide to the lavalink request */
     userData?: anyObject;
 }
@@ -142,5 +145,5 @@ export interface UnresolvedTrack {
     /** The userData Object from when you provide to the lavalink request */
     userData?: anyObject;
     /** The Track's Requester */
-    requester?: unknown;
+    requester?: TrackRequester;
 }

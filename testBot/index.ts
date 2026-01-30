@@ -10,7 +10,15 @@ import { handleResuming } from "./Utils/handleResuming";
 import { autoPlayFunction, requesterTransformer } from "./Utils/OptionalFunctions";
 
 import type { ManagerOptions } from "lavalink-client";
-import type { BotClient } from "./types/Client";
+import type { BotClient, CustomRequester } from "./types/Client";
+
+
+// you can declare a global type for the requester used via the requesterTransformer
+declare module "lavalink-client" {
+    export interface TrackRequester extends CustomRequester {}
+}
+
+
 const client = new Client({
     intents: [
         GatewayIntentBits.Guilds,
@@ -63,8 +71,12 @@ console.log(LavalinkNodesOfEnv); // you can then provide the result of here in L
                 // sessionId: "lsvunq8h8bxx0m9w", // add the sessionId in order to resume the session for the node, and then to recover the players listen to nodeManager#resumed.
                 requestSignalTimeoutMS: 3000,
                 closeOnError: true,
-                heartBeatInterval: 30_000,
+
+                heartBeatInterval: 30000,
                 enablePingOnStatsCheck: true,
+                // this is how you disable the heartbeat, in case you have instable network or use nodelink
+                // heartBeatInterval: -1,
+                // enablePingOnStatsCheck: false,
                 retryDelay: 10e3,
                 secure: false,
                 retryAmount: 5,

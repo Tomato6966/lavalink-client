@@ -113,13 +113,13 @@ export class FilterManager {
     }
 
     /**
-     * Returns wether the plugin validations are enabled or not
+     * Returns whether the plugin validations are enabled or not
      */
     private get _checkForPlugins() {
         return !!this._LManager.options?.autoChecks?.pluginValidations;
     }
     /**
-     * Returns wether the source validations are enabled or not
+     * Returns whether the source validations are enabled or not
      */
     private get _checkForSources() {
         return !!this._LManager.options?.autoChecks?.sourcesValidations;
