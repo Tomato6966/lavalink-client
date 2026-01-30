@@ -1120,15 +1120,23 @@ export class LavalinkNode {
         // Base capacity estimation on current resource usage
         // Assume a healthy node can handle ~100 players at 50% CPU, ~200 at 70% CPU
         if (status !== "critical" && status !== "offline") {
-            const cpuCapacity = cpuLoad > 0 ? Math.max(0, Math.floor((cpuThresholds.fair - cpuLoad) / cpuLoad * players)) : 200;
-            const memoryCapacity = memoryUsagePercent > 0 ? Math.max(0, Math.floor((memoryThresholds.fair - memoryUsagePercent) / memoryUsagePercent * players)) : 200;
-            
+            const cpuCapacity = players === 0
+                ? 200
+                : cpuLoad > 0
+                    ? Math.max(0, Math.floor((cpuThresholds.fair - cpuLoad) / cpuLoad * players))
+                    : 200;
+            const memoryCapacity = players === 0
+                ? 200
+                : memoryUsagePercent > 0
+                    ? Math.max(0, Math.floor((memoryThresholds.fair - memoryUsagePercent) / memoryUsagePercent * players))
+                    : 200;
+
             // Use the more conservative estimate
             estimatedRemainingCapacity = Math.min(cpuCapacity, memoryCapacity);
-            
+
             // Cap at reasonable maximum
             estimatedRemainingCapacity = Math.min(estimatedRemainingCapacity, 500);
-            
+
             // If already overloaded, capacity is 0
             if (isOverloaded) {
                 estimatedRemainingCapacity = 0;
