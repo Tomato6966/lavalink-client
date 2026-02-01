@@ -324,13 +324,13 @@ export const EQList = {
 
 
 export const RecommendationsStrings = {
-    highCPULoad: `High CPU load (${(cpuLoad * 100).toFixed(1)}%). Consider reducing player count or upgrading CPU.`,
-    highSystemLoad: `High system load (${(systemLoad * 100).toFixed(1)}%). Check other processes on the server.`,
-    highMemoryUsage. `High memory usage (${memoryUsagePercent.toFixed(1)}%). Consider increasing allocated memory or reducing player count.`,
-    frameDeficit: `Frame deficit detected (${frameDeficit}). Audio quality may be affected. Check network and CPU.`,
-    highLatency: `High latency (${ping}ms). Check network connection to the node.`,
+    highCPULoad: (cpuLoad: number) => `High CPU load (${(cpuLoad * 100).toFixed(1)}%). Consider reducing player count or upgrading CPU.`,
+    highSystemLoad: (systemLoad: number) => `High system load (${(systemLoad * 100).toFixed(1)}%). Check other processes on the server.`,
+    highMemoryUsage: (memoryUsagePercent: number) => `High memory usage (${memoryUsagePercent.toFixed(1)}%). Consider increasing allocated memory or reducing player count.`,
+    frameDeficit: (frameDeficit: number) => `Frame deficit detected (${frameDeficit}). Audio quality may be affected. Check network and CPU.`,
+    highLatency: (ping: number) => `High latency (${ping}ms). Check network connection to the node.`,
     nodeRestart: "Node restart recommended to clear memory and reset connections.",
-    highPlayercount: `High player count (${players}). Consider load balancing across multiple nodes.`,
+    highPlayercount: (players: number) => `High player count (${players}). Consider load balancing across multiple nodes.`,
     nodeOffline: "Node is offline or disconnected", 
     checkConnectivity: "Check node connectivity and restart if needed"
 }
