@@ -1,7 +1,7 @@
 import { isAbsolute } from "path";
 import WebSocket from "ws";
 
-import { DebugEvents, DestroyReasons, validSponsorBlocks } from "./Constants";
+import { DebugEvents, DestroyReasons, validSponsorBlocks, RecommendationsStrings } from "./Constants";
 import { ReconnectionState } from "./Types/Node";
 import { NodeSymbol, queueTrackEnd, safeStringify } from "./Utils";
 
@@ -21,7 +21,7 @@ import type { NodeManager } from "./NodeManager";
 import type {
     BaseNodeStats, LavalinkInfo, LavalinkNodeOptions, LyricsResult, ModifyRequest, NodeLinkConnectionMetrics, NodeStats, SponsorBlockSegment
 } from "./Types/Node";
-import { NodeLinkEventPayload, NodeLinkEventTypes } from "./Types/NodeLink";
+import { NodeLinkEventPayload, NodeLinkEventTypes, HealthStatusThreshold, HealthStatusKeys, HealthPerformanceKeys, NodeMetricSummary } from "./Types/NodeLink";
 /**
  * Lavalink Node creator class
  */
@@ -181,14 +181,18 @@ export class LavalinkNode {
             ...options
         };
 
+        // Allow custom health/capacity thresholds via options.healthThresholds
+        this.healthThresholds = options.healthThresholds || {
+            cpu: { excellent: 0.3, good: 0.5, fair: 0.7, poor: 0.85 },
+            memory: { excellent: 60, good: 75, fair: 85, poor: 95 },
+            ping: { excellent: 50, good: 100, fair: 200, poor: 300 },
+            frameDeficit: { overload: 100, critical: 500 }
+        };
+
         this.NodeManager = manager;
-
         this.validate();
-
         if (this.options.secure && this.options.port !== 443) throw new SyntaxError("If secure is true, then the port must be 443");
-
         this.options.regions = (this.options.regions || []).map(a => a.toLowerCase());
-
         Object.defineProperty(this, NodeSymbol, { configurable: true, value: true });
     }
 
@@ -929,6 +933,21 @@ export class LavalinkNode {
         return await this.request(`/info`) as LavalinkInfo;
     }
 
+
+    public nodeMetricSummary(): NodeMetricSummary {
+        if (!this.connected || !this.isAlive) return { systemLoad: 0, cpuLoad: 0, memoryUsage: 0, players: 0, playingPlayers: 0, uptime: 0, ping: 0, frameDeficit: 0 }
+        const cpuLoad = this.stats.cpu.lavalinkLoad;
+        const systemLoad = this.stats.cpu.systemLoad;
+        const _memoryUsed = this.stats.memory.used;
+        const _memoryAllocated = this.stats.memory.allocated;
+        const memoryUsage = _memoryAllocated > 0 ? (_memoryUsed / _memoryAllocated) * 100 : 0;
+        const players = this.stats.players;
+        const playingPlayers = this.stats.playingPlayers;
+        const frameDeficit = this.stats.frameStats?.deficit || 0;
+        const ping = this.heartBeatPing;
+        const uptime = this.stats.uptime;
+        return { systemLoad, cpuLoad, memoryUsage, players, playingPlayers, uptime, ping, frameDeficit }
+    }
     /**
      * Get the node's health status with performance assessment.
      * @returns Object containing health status, performance rating, load balancing info, and recommendations
@@ -947,9 +966,9 @@ export class LavalinkNode {
      * }
      * ```
      */
-    public getHealthStatus(): {
-        status: "healthy" | "degraded" | "critical" | "offline";
-        performance: "excellent" | "good" | "fair" | "poor";
+    public getHealthStatus(thresholds?: { cpu: Partial<HealthStatusThreshold>, memory: Partial<HealthStatusThreshold>, ping: Partial<HealthStatusThreshold> }): {
+        status: HealthStatusKeys;
+        performance: HealthPerformanceKeys;
         isOverloaded: boolean;
         needsRestart: boolean;
         penaltyScore: number;
@@ -965,7 +984,12 @@ export class LavalinkNode {
             frameDeficit: number;
         };
     } {
+        const cpuThresholds: HealthStatusThreshold = { excellent: 0.3, good: 0.5, fair: 0.7, poor: 0.85, ...thresholds?.cpu };
+        const memoryThresholds: HealthStatusThreshold = { excellent: 60, good: 75, fair: 85, poor: 95, ...thresholds?.memory };
+        const pingThresholds: HealthStatusThreshold = { excellent: 50, good: 100, fair: 200, poor: 300, ...thresholds?.ping };
         const recommendations: string[] = [];
+        const metrics = this.nodeMetricSummary();
+        const { systemLoad, cpuLoad, memoryUsage, players, playingPlayers, uptime, ping, frameDeficit } = metrics;
         
         // Check if node is offline
         if (!this.connected || !this.isAlive) {
@@ -976,45 +1000,11 @@ export class LavalinkNode {
                 needsRestart: true,
                 penaltyScore: 999999, // Maximum penalty for offline nodes
                 estimatedRemainingCapacity: 0,
-                recommendations: ["Node is offline or disconnected", "Check node connectivity and restart if needed"],
-                metrics: {
-                    cpuLoad: 0,
-                    memoryUsage: 0,
-                    players: 0,
-                    playingPlayers: 0,
-                    uptime: 0,
-                    ping: 0,
-                    frameDeficit: 0
-                }
+                recommendations: [ RecommendationsStrings.nodeOffline, RecommendationsStrings.checkConnectivity ],
+                metrics
             };
         }
 
-        // Calculate metrics
-        const cpuLoad = this.stats.cpu.lavalinkLoad;
-        const systemLoad = this.stats.cpu.systemLoad;
-        const memoryUsed = this.stats.memory.used;
-        const memoryAllocated = this.stats.memory.allocated;
-        const memoryUsagePercent = memoryAllocated > 0 ? (memoryUsed / memoryAllocated) * 100 : 0;
-        const players = this.stats.players;
-        const playingPlayers = this.stats.playingPlayers;
-        const frameDeficit = this.stats.frameStats?.deficit || 0;
-        const ping = this.heartBeatPing;
-
-        // Performance thresholds with validation
-        const cpuThresholds = { excellent: 0.3, good: 0.5, fair: 0.7, poor: 0.85 };
-        const memoryThresholds = { excellent: 60, good: 75, fair: 85, poor: 95 };
-        const pingThresholds = { excellent: 50, good: 100, fair: 200, poor: 300 };
-        
-        // Validate thresholds are in ascending order
-        if (cpuThresholds.excellent >= cpuThresholds.good || cpuThresholds.good >= cpuThresholds.fair || cpuThresholds.fair >= cpuThresholds.poor) {
-            throw new Error('CPU thresholds must be in ascending order: excellent < good < fair < poor');
-        }
-        if (memoryThresholds.excellent >= memoryThresholds.good || memoryThresholds.good >= memoryThresholds.fair || memoryThresholds.fair >= memoryThresholds.poor) {
-            throw new Error('Memory thresholds must be in ascending order: excellent < good < fair < poor');
-        }
-        if (pingThresholds.excellent >= pingThresholds.good || pingThresholds.good >= pingThresholds.fair || pingThresholds.fair >= pingThresholds.poor) {
-            throw new Error('Ping thresholds must be in ascending order: excellent < good < fair < poor');
-        }
 
         // Assess CPU performance
         let cpuScore = 0;
@@ -1022,15 +1012,13 @@ export class LavalinkNode {
         else if (cpuLoad < cpuThresholds.good) cpuScore = 3;
         else if (cpuLoad < cpuThresholds.fair) cpuScore = 2;
         else if (cpuLoad < cpuThresholds.poor) cpuScore = 1;
-        else cpuScore = 0;
 
         // Assess memory performance
         let memoryScore = 0;
-        if (memoryUsagePercent < memoryThresholds.excellent) memoryScore = 4;
-        else if (memoryUsagePercent < memoryThresholds.good) memoryScore = 3;
-        else if (memoryUsagePercent < memoryThresholds.fair) memoryScore = 2;
-        else if (memoryUsagePercent < memoryThresholds.poor) memoryScore = 1;
-        else memoryScore = 0;
+        if (memoryUsage < memoryThresholds.excellent) memoryScore = 4;
+        else if (memoryUsage < memoryThresholds.good) memoryScore = 3;
+        else if (memoryUsage < memoryThresholds.fair) memoryScore = 2;
+        else if (memoryUsage < memoryThresholds.poor) memoryScore = 1;
 
         // Assess ping performance
         let pingScore = 0;
@@ -1038,90 +1026,51 @@ export class LavalinkNode {
         else if (ping < pingThresholds.good) pingScore = 3;
         else if (ping < pingThresholds.fair) pingScore = 2;
         else if (ping < pingThresholds.poor) pingScore = 1;
-        else pingScore = 0;
 
         // Overall performance rating (average of scores)
         const avgScore = (cpuScore + memoryScore + pingScore) / 3;
-        let performance: "excellent" | "good" | "fair" | "poor";
+        let performance: HealthPerformanceKeys = "poor";
         if (avgScore >= 3.5) performance = "excellent";
         else if (avgScore >= 2.5) performance = "good";
         else if (avgScore >= 1.5) performance = "fair";
-        else performance = "poor";
 
         // Check if overloaded
-        const isOverloaded = cpuLoad > cpuThresholds.fair || memoryUsagePercent > memoryThresholds.fair || frameDeficit > 100;
-
+        const isOverloaded = cpuLoad > cpuThresholds.fair || memoryUsage > memoryThresholds.fair || frameDeficit > 100;
+        const isCritical = cpuLoad > cpuThresholds.poor || memoryUsage > memoryThresholds.poor || frameDeficit > 500;
         // Determine status
-        let status: "healthy" | "degraded" | "critical" | "offline";
-        if (cpuLoad > cpuThresholds.poor || memoryUsagePercent > memoryThresholds.poor || frameDeficit > 500) {
-            status = "critical";
-        } else if (isOverloaded) {
-            status = "degraded";
-        } else {
-            status = "healthy";
-        }
+        const status: HealthStatusKeys = isCritical ? "critical" : isOverloaded ? "degraded" : "healthy";
 
         // Check if restart is needed
         const needsRestart = status === "critical" || 
-                             (isOverloaded && memoryUsagePercent > 90) ||
+                             (isOverloaded && memoryUsage > 90) ||
                              frameDeficit > 1000 ||
                              (this.reconnectionAttemptCount > 0 && this.reconnectionAttemptCount >= this.options.retryAmount / 2);
 
         // Generate recommendations
-        if (cpuLoad > cpuThresholds.fair) {
-            recommendations.push(RecommendationsStrings.highCpuLoad(cpuLoad));
-        }
-        if (systemLoad > 0.8) {
-            recommendations.push(RecommendationsStrings.highSystemLoad(systemLoad));
-        }
-        if (memoryUsagePercent > memoryThresholds.fair) {
-            recommendations.push(RecommendationsStrings.highMemoryUsage(memoryUsagePercent));
-        }
-        if (frameDeficit > 100) {
-            recommendations.push(RecommendationsStrings.frameDeficit(frameDeficit));
-        }
-        if (ping > pingThresholds.fair) {
-            recommendations.push(RecommendationsStrings.highLatency(ping));
-        }
-        if (needsRestart) {
-            recommendations.push(RecommendationsStrings.nodeRestart);
-        }
-        if (players > 500) {
-            recommendations.push(RecommendationsStrings.highPlayercount(players));
-        }
+        if (cpuLoad > cpuThresholds.fair) recommendations.push(RecommendationsStrings.highCPULoad(cpuLoad));
+        if (systemLoad > 0.8) recommendations.push(RecommendationsStrings.highSystemLoad(systemLoad));
+        if (memoryUsage > memoryThresholds.fair) recommendations.push(RecommendationsStrings.highMemoryUsage(memoryUsage));
+        if (frameDeficit > 100) recommendations.push(RecommendationsStrings.frameDeficit(frameDeficit));
+        if (ping > pingThresholds.fair) recommendations.push(RecommendationsStrings.highLatency(ping));
+        if (needsRestart) recommendations.push(RecommendationsStrings.nodeRestart);
+        if (players > 500) recommendations.push(RecommendationsStrings.highPlayercount(players));
 
         // Calculate penalty score for load balancing (lower is better)
         // Based on Lavalink's penalty system but customized for health
-        let penaltyScore = 0;
-        
-        // Player count penalty (each player adds base penalty)
-        penaltyScore += players;
-        
-        // CPU penalty (exponential - heavily penalize high CPU)
-        penaltyScore += Math.pow(cpuLoad * 100, 2);
-        
-        // Memory penalty (exponential - heavily penalize high memory)
-        penaltyScore += Math.pow(memoryUsagePercent, 1.5);
-        
-        // Latency penalty
-        penaltyScore += ping * 2;
-        
-        // Frame deficit penalty (critical for audio quality)
-        penaltyScore += frameDeficit * 10;
-        
-        // Null frame penalty (if available)
         const nullFrames = this.stats.frameStats?.nulled || 0;
-        penaltyScore += nullFrames * 5;
+        const penaltyScore = players // Player count penalty (each player adds base penalty)
+            + Math.pow(cpuLoad * 100, 2) // CPU penalty (exponential - heavily penalize high CPU)
+            + Math.pow(memoryUsage, 1.5) // Memory penalty (exponential - heavily penalize high memory)
+            + ping * 2 // Latency penalty
+            + frameDeficit * 10 // Frame deficit penalty (critical for audio quality)
+            + nullFrames * 5; // Null frame penalty (if available)
         
         // Status penalties
         if (status === "critical") penaltyScore += 10000;
         else if (status === "degraded") penaltyScore += 5000;
-        
         // Disconnection penalty
-        if (this.reconnectionAttemptCount > 0) {
-            penaltyScore += this.reconnectionAttemptCount * 1000;
-        }
-        
+        if (this.reconnectionAttemptCount > 0) penaltyScore += this.reconnectionAttemptCount * 1000;
+
         // Round penalty score
         penaltyScore = Math.round(penaltyScore);
 
@@ -1131,38 +1080,21 @@ export class LavalinkNode {
         // Base capacity estimation on current resource usage
         // Assume a healthy node can handle ~100 players at 50% CPU, ~200 at 70% CPU
         if (status !== "critical" && status !== "offline") {
-            let cpuCapacity = 200; // Default
-            let memoryCapacity = 200; // Default
-            
-            if (players === 0) {
-                // Empty node - use default high capacity
-                cpuCapacity = 200;
-                memoryCapacity = 200;
-            } else if (players > 0) {
-                // Calculate based on current usage, with safety checks
-                if (cpuLoad > 0 && cpuLoad < cpuThresholds.fair) {
-                    cpuCapacity = Math.max(0, Math.floor((cpuThresholds.fair - cpuLoad) / cpuLoad * players));
-                } else if (cpuLoad >= cpuThresholds.fair) {
-                    cpuCapacity = 0; // Already at or above threshold
-                }
-                
-                if (memoryUsagePercent > 0 && memoryUsagePercent < memoryThresholds.fair) {
-                    memoryCapacity = Math.max(0, Math.floor((memoryThresholds.fair - memoryUsagePercent) / memoryUsagePercent * players));
-                } else if (memoryUsagePercent >= memoryThresholds.fair) {
-                    memoryCapacity = 0; // Already at or above threshold
-                }
-            }
+            const cpuCapacity = players === 0
+                ? 200
+                : cpuLoad > 0
+                    ? Math.max(0, Math.floor((cpuThresholds.fair - cpuLoad) / cpuLoad * players))
+                    : 200;
+            const memoryCapacity = players === 0
+                ? 200
+                : memoryUsage > 0
+                    ? Math.max(0, Math.floor((memoryThresholds.fair - memoryUsage) / memoryUsage * players))
+                    : 200;
 
-            // Use the more conservative estimate
-            estimatedRemainingCapacity = Math.min(cpuCapacity, memoryCapacity);
-
-            // Cap at reasonable maximum
-            estimatedRemainingCapacity = Math.min(estimatedRemainingCapacity, 500);
-
+            // Use the more conservative estimate, capped at a reasonable maximum
+            estimatedRemainingCapacity = Math.min(Math.min(cpuCapacity, memoryCapacity), 500);
             // If already overloaded, capacity is 0
-            if (isOverloaded) {
-                estimatedRemainingCapacity = 0;
-            }
+            if (isOverloaded) estimatedRemainingCapacity = 0;
         }
 
         return {
@@ -1173,16 +1105,7 @@ export class LavalinkNode {
             penaltyScore,
             estimatedRemainingCapacity,
             recommendations,
-            metrics: {
-                cpuLoad,
-                systemLoad,
-                memoryUsage: memoryUsagePercent,
-                players,
-                playingPlayers,
-                uptime: this.stats.uptime,
-                ping,
-                frameDeficit
-            }
+            metrics
         };
     }
 
@@ -1387,12 +1310,17 @@ export class LavalinkNode {
         }
 
         // state's should be changed before emitting an event
+        const MAX_RECONNECT_ATTEMPTS = 1000;
         this.reconnectAttempts.push(Date.now());
+        // Clean up old entries if array grows too large
+        if (this.reconnectAttempts.length > MAX_RECONNECT_ATTEMPTS) {
+            this.reconnectAttempts = this.reconnectAttempts.slice(-MAX_RECONNECT_ATTEMPTS);
+        }
         this.reconnectionState = ReconnectionState.RECONNECTING;
 
         this.NodeManager.emit("reconnecting", this);
         this.connect();
-    };
+    }
 
 
     /**

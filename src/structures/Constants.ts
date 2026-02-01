@@ -323,6 +323,7 @@ export const EQList = {
 
 
 
+
 export const RecommendationsStrings = {
     highCPULoad: (cpuLoad: number) => `High CPU load (${(cpuLoad * 100).toFixed(1)}%). Consider reducing player count or upgrading CPU.`,
     highSystemLoad: (systemLoad: number) => `High system load (${(systemLoad * 100).toFixed(1)}%). Check other processes on the server.`,
