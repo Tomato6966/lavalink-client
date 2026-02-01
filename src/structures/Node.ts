@@ -1000,10 +1000,21 @@ export class LavalinkNode {
         const frameDeficit = this.stats.frameStats?.deficit || 0;
         const ping = this.heartBeatPing;
 
-        // Performance thresholds
+        // Performance thresholds with validation
         const cpuThresholds = { excellent: 0.3, good: 0.5, fair: 0.7, poor: 0.85 };
         const memoryThresholds = { excellent: 60, good: 75, fair: 85, poor: 95 };
         const pingThresholds = { excellent: 50, good: 100, fair: 200, poor: 300 };
+        
+        // Validate thresholds are in ascending order
+        if (cpuThresholds.excellent >= cpuThresholds.good || cpuThresholds.good >= cpuThresholds.fair || cpuThresholds.fair >= cpuThresholds.poor) {
+            throw new Error('CPU thresholds must be in ascending order: excellent < good < fair < poor');
+        }
+        if (memoryThresholds.excellent >= memoryThresholds.good || memoryThresholds.good >= memoryThresholds.fair || memoryThresholds.fair >= memoryThresholds.poor) {
+            throw new Error('Memory thresholds must be in ascending order: excellent < good < fair < poor');
+        }
+        if (pingThresholds.excellent >= pingThresholds.good || pingThresholds.good >= pingThresholds.fair || pingThresholds.fair >= pingThresholds.poor) {
+            throw new Error('Ping thresholds must be in ascending order: excellent < good < fair < poor');
+        }
 
         // Assess CPU performance
         let cpuScore = 0;
@@ -1120,16 +1131,27 @@ export class LavalinkNode {
         // Base capacity estimation on current resource usage
         // Assume a healthy node can handle ~100 players at 50% CPU, ~200 at 70% CPU
         if (status !== "critical" && status !== "offline") {
-            const cpuCapacity = players === 0
-                ? 200
-                : cpuLoad > 0
-                    ? Math.max(0, Math.floor((cpuThresholds.fair - cpuLoad) / cpuLoad * players))
-                    : 200;
-            const memoryCapacity = players === 0
-                ? 200
-                : memoryUsagePercent > 0
-                    ? Math.max(0, Math.floor((memoryThresholds.fair - memoryUsagePercent) / memoryUsagePercent * players))
-                    : 200;
+            let cpuCapacity = 200; // Default
+            let memoryCapacity = 200; // Default
+            
+            if (players === 0) {
+                // Empty node - use default high capacity
+                cpuCapacity = 200;
+                memoryCapacity = 200;
+            } else if (players > 0) {
+                // Calculate based on current usage, with safety checks
+                if (cpuLoad > 0 && cpuLoad < cpuThresholds.fair) {
+                    cpuCapacity = Math.max(0, Math.floor((cpuThresholds.fair - cpuLoad) / cpuLoad * players));
+                } else if (cpuLoad >= cpuThresholds.fair) {
+                    cpuCapacity = 0; // Already at or above threshold
+                }
+                
+                if (memoryUsagePercent > 0 && memoryUsagePercent < memoryThresholds.fair) {
+                    memoryCapacity = Math.max(0, Math.floor((memoryThresholds.fair - memoryUsagePercent) / memoryUsagePercent * players));
+                } else if (memoryUsagePercent >= memoryThresholds.fair) {
+                    memoryCapacity = 0; // Already at or above threshold
+                }
+            }
 
             // Use the more conservative estimate
             estimatedRemainingCapacity = Math.min(cpuCapacity, memoryCapacity);
@@ -1153,6 +1175,7 @@ export class LavalinkNode {
             recommendations,
             metrics: {
                 cpuLoad,
+                systemLoad,
                 memoryUsage: memoryUsagePercent,
                 players,
                 playingPlayers,
