@@ -473,7 +473,7 @@ export class LavalinkNode {
         const headers = {
             Authorization: this.options.authorization,
             "User-Id": this._LManager.options.client.id,
-            "Client-Name": this._LManager.options.client.username || "Lavalink-Client",
+            "Client-Name": String(this._LManager.options.client.username || "Lavalink-Client").replace(/[^\x20-\x7E]/g, ""),
         }
 
         if (typeof this.options.sessionId === "string" || typeof sessionId === "string") {
