@@ -51,7 +51,14 @@ Logs about the changed features.
     - `node.getYoutubeConfig(validate?)`: Gets the YouTube configuration.
     - `node.getConnectionMetrics()`: Get connection metrics. [Docs](https://nodelink.js.org/docs/api/rest#node-information)
     - `node.loadDirectStream(track, volume, position, filters)`: Stream raw PCM audio. [Docs](https://nodelink.js.org/docs/api/nodelink-features#loadstream)
-
+    - Specific Filters:
+        - `node.specificFilters.echo(player, options, disableFilter?)`: Creates delay-based echo with feedback control.
+        - `node.specificFilters.chorus(player, options, disableFilter?)`: Simulates multiple voices playing together with modulated delays.
+        - `node.specificFilters.compressor(player, options, disableFilter?)`: Dynamic range compression for balanced audio levels.
+        - `node.specificFilters.highPass(player, options, disableFilter?)`: Filters out low frequencies, letting high frequencies pass through.
+        - `node.specificFilters.phaser(player, options, disableFilter?)`: Sweeps all-pass filters across the frequency spectrum for a swooshing effect.
+        - `node.specificFilters.spatial(player, options, disableFilter?)`: Creates spatial audio using cross-channel delays and modulation.
+        - `node.specificFilters.resetNodeLinkFilters(player)`: Resets all NodeLink filters.
 - Now sanetizing the User-Name header field (manager.init.username) to prevent the "Invalid User-Agent" error.
 
 - Added info on how to use nodeLink and listen to all events.
