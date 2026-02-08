@@ -98,6 +98,7 @@ export type NodeLinkEventPayload<T extends NodeLinkEventTypes> =
     never;
 
 export type HealthStatusThreshold = { excellent: number, good: number, fair: number, poor: number }
+export type HealthStatusThresholdOptions = { cpu: Partial<HealthStatusThreshold>, memory: Partial<HealthStatusThreshold>, ping: Partial<HealthStatusThreshold> };
 export type NodeMetricSummary = {
     cpuLoad: number;
     systemLoad: number;
@@ -107,6 +108,24 @@ export type NodeMetricSummary = {
     uptime: number;
     ping: number;
     frameDeficit: number;
+}
+export type HealthStatusObject = {
+    status: HealthStatusKeys;
+    performance: HealthPerformanceKeys;
+    isOverloaded: boolean;
+    needsRestart: boolean;
+    penaltyScore: number;
+    estimatedRemainingCapacity: number;
+    recommendations: string[];
+    metrics: {
+        cpuLoad: number;
+        memoryUsage: number;
+        players: number;
+        playingPlayers: number;
+        uptime: number;
+        ping: number;
+        frameDeficit: number;
+    };
 }
 
 export type HealthPerformanceKeys = "excellent" | "good" | "fair" | "poor";
