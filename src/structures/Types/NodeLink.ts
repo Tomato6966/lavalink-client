@@ -1,5 +1,5 @@
 import type { LavalinkFilterData } from "./Filters";
-import type { LavalinkTrack } from "./Track";
+import type { LavalinkTrack, LavalinkTrackInfo } from "./Track";
 
 export type NodeLinkEventTypes =
     | "PlayerCreatedEvent"
@@ -86,26 +86,26 @@ export interface MixEndedEvent extends NodeLinkBaseEvent {
 export type NodeLinkEventPayload<T extends NodeLinkEventTypes> = T extends "PlayerCreatedEvent"
     ? PlayerCreatedEvent
     : T extends "PlayerDestroyedEvent"
-      ? PlayerDestroyedEvent
-      : T extends "PlayerConnectedEvent"
-        ? PlayerConnectedEvent
-        : T extends "PlayerReconnectingEvent"
-          ? PlayerReconnectingEvent
-          : T extends "VolumeChangedEvent"
-            ? VolumeChangedEvent
-            : T extends "FiltersChangedEvent"
-              ? FiltersChangedEvent
-              : T extends "SeekEvent"
-                ? SeekEvent
-                : T extends "PauseEvent"
-                  ? PauseEvent
-                  : T extends "ConnectionStatusEvent"
-                    ? ConnectionStatusEvent
-                    : T extends "MixStartedEvent"
-                      ? MixStartedEvent
-                      : T extends "MixEndedEvent"
-                        ? MixEndedEvent
-                        : never;
+    ? PlayerDestroyedEvent
+    : T extends "PlayerConnectedEvent"
+    ? PlayerConnectedEvent
+    : T extends "PlayerReconnectingEvent"
+    ? PlayerReconnectingEvent
+    : T extends "VolumeChangedEvent"
+    ? VolumeChangedEvent
+    : T extends "FiltersChangedEvent"
+    ? FiltersChangedEvent
+    : T extends "SeekEvent"
+    ? SeekEvent
+    : T extends "PauseEvent"
+    ? PauseEvent
+    : T extends "ConnectionStatusEvent"
+    ? ConnectionStatusEvent
+    : T extends "MixStartedEvent"
+    ? MixStartedEvent
+    : T extends "MixEndedEvent"
+    ? MixEndedEvent
+    : never;
 
 export type HealthStatusThreshold = { excellent: number; good: number; fair: number; poor: number };
 export type HealthStatusThresholdOptions = {
@@ -144,3 +144,20 @@ export type HealthStatusObject = {
 
 export type HealthPerformanceKeys = "excellent" | "good" | "fair" | "poor";
 export type HealthStatusKeys = "healthy" | "degraded" | "critical" | "offline";
+
+
+export type AddMixerLayerResponse = {
+    id: string;
+    track: LavalinkTrack,
+    volume: number;
+}
+
+export type ListMixerLayersResponse = {
+    mixes: {
+        id: string;
+        track: LavalinkTrack;
+        volume: number;
+        position: number;
+        startTime: number;
+    }[]
+}

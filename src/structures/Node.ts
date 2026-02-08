@@ -57,6 +57,7 @@ import type {
     WebSocketClosedEvent,
 } from "./Types/Utils";
 import { NodeSymbol, queueTrackEnd, safeStringify } from "./Utils";
+import { NodeLinkNode } from "./NodeLink";
 /**
  * Lavalink Node creator class
  */
@@ -1449,6 +1450,22 @@ export class LavalinkNode {
             (!Array.isArray(this.options.regions) || !this.options.regions.every((r) => typeof r === "string"))
         )
             throw new SyntaxError("LavalinkNode.regions must be an Array of strings");
+    }
+
+    /**
+     * Checks if the node is a NodeLink node
+     * @returns true if the node is a NodeLink node
+     */
+    public isNodeLink(): this is NodeLinkNode {
+        return this.nodeType === "NodeLink";
+    }
+
+    /**
+     * Checks if the node is a Lavalink node
+     * @returns true if the node is a Lavalink node
+     */
+    public isLavalinkNode(): this is LavalinkNode {
+        return this.nodeType === "Lavalink";
     }
 
     /**

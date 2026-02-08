@@ -151,12 +151,27 @@ client.lavalink = new LavalinkManager({
 });
 ```
 
-Also if you use the getNode function you get proper types and the exposed functions typed.
+Now if you want to use NodeLink specific functions, you can use the type assertion checker function:
 
 ```ts
-const node = client.lavalink.getNode("id");
-// node is now typed as LavalinkNode
+if (node.isNodeLink()) {
+    // node is now typed as NodeLink
+    node.addMixerLayer()
+} else if(node.isLavalinkNode()) {
+    // node is now typed as LavalinkNode
+} else {
+    // node is now typed as whatever it is..
+}
+
 ```
+
+or you have to assert the type...
+
+```
+const node = client.lavalink.lavalinkManager.getNode("id") as NodeLinkNode;
+node.addMixerLayer()
+```
+
 
 ---
 

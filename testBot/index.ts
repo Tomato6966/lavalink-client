@@ -1,6 +1,5 @@
 import { Client, GatewayIntentBits } from "discord.js";
 import { LavalinkManager, MiniMap, parseLavalinkConnUrl } from "lavalink-client";
-import type { ManagerOptions } from "lavalink-client";
 import { createClient } from "redis";
 
 import { envConfig } from "./config";

@@ -65,10 +65,6 @@ export default {
                 // vcRegion: (interaction.member as GuildMember)?.voice.channel?.rtcRegion!
             }));
 
-        if(player.node.nodeType === "NodeLink") {
-            player.node.
-        }
-
         const connected = player.connected;
 
         if (!connected) await player.connect();

@@ -24,7 +24,7 @@ Logs about the changed features.
 - Added nodeOptions.nodeType to check if the node is a "NodeLink" or "Lavalink" (default: "Lavalink") node. (setable via nodeOptions.nodeType)
     - If nodeType = NodeLink, the NodeClass will be NodeLinkNode instead of LavalinkNode.
 
-- Added a Manager.getNode() function, to typed-return a node if you are looking for one.
+- Added a Manager.lavalinkManager.getNode() function, to typed-return a node if you are looking for one.
 
 - Added public options for the autoChecks on node: `_checkForPlugins` and `_checkForSourcesAndFilters`
     - `_checkForPlugins` ... default is true, set to false if you want to skip plugin validations (if nodeType === "NodeLink" then this will always be false)
