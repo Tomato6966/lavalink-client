@@ -96,3 +96,18 @@ export type NodeLinkEventPayload<T extends NodeLinkEventTypes> =
     T extends "MixStartedEvent" ? MixStartedEvent :
     T extends "MixEndedEvent" ? MixEndedEvent :
     never;
+
+export type HealthStatusThreshold = { excellent: number, good: number, fair: number, poor: number }
+export type NodeMetricSummary = {
+    cpuLoad: number;
+    systemLoad: number;
+    memoryUsage: number;
+    players: number;
+    playingPlayers: number;
+    uptime: number;
+    ping: number;
+    frameDeficit: number;
+}
+
+export type HealthPerformanceKeys = "excellent" | "good" | "fair" | "poor";
+export type HealthStatusKeys = "healthy" | "degraded" | "critical" | "offline";
