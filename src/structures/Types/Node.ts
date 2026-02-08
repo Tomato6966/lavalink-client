@@ -1,19 +1,30 @@
 import type { LavalinkNode } from "../Node";
-import type { DestroyReasonsType } from "./Player";
-import type { InvalidLavalinkRestRequest, LavalinkPlayer } from "./Utils";
-import type { PluginInfo, Track } from "./Track";
 import type { Player } from "../Player";
+
 import type { NodeLinkEventPayload, NodeLinkEventTypes } from "./NodeLink";
+import type { DestroyReasonsType } from "./Player";
+import type { PluginInfo, Track } from "./Track";
+import type { InvalidLavalinkRestRequest, LavalinkPlayer } from "./Utils";
 
 /** Ability to manipulate fetch requests */
-export type ModifyRequest = (options: RequestInit & { path: string, extraQueryUrlParams?: URLSearchParams }) => void;
+export type ModifyRequest = (options: RequestInit & { path: string; extraQueryUrlParams?: URLSearchParams }) => void;
 
-export type SponsorBlockSegment = "sponsor" | "selfpromo" | "interaction" | "intro" | "outro" | "preview" | "music_offtopic" | "filler";
+export type SponsorBlockSegment =
+    | "sponsor"
+    | "selfpromo"
+    | "interaction"
+    | "intro"
+    | "outro"
+    | "preview"
+    | "music_offtopic"
+    | "filler";
 
 /**
  * Node Options for creating a lavalink node
  */
 export interface LavalinkNodeOptions {
+    /** Specify the Node-Type of this node. Default: Lavalink */
+    nodeType?: NodeTypes;
     /** The Lavalink Server-Ip / Domain-URL */
     host: string;
     /** The Lavalink Connection Port */
@@ -42,6 +53,13 @@ export interface LavalinkNodeOptions {
     heartBeatInterval?: number;
     /** Recommended, to check whether the client is still connected or not on the stats endpoint */
     enablePingOnStatsCheck?: boolean;
+    /** Per Node Options */
+    autoChecks?: {
+        /** Wether to check for every node to check for plugin validations or not. (ignored for NodeType NodeLink) */
+        pluginValidations?: boolean;
+        /** Wether to check for every node to check for source validations or not. */
+        sourcesValidations?: boolean;
+    };
 }
 
 /**
@@ -134,7 +152,7 @@ export interface NodeStats extends BaseNodeStats {
         };
         /** and potential others */
         [key: string]: unknown;
-    },
+    };
 }
 
 /**
@@ -160,8 +178,6 @@ export interface LavalinkInfo {
     /** Something from NodeLink: https://nodelink.js.org/docs/differences#server-info */
     isNodelink?: boolean;
 }
-
-
 
 /**
  * Lavalink's version object from lavalink
@@ -233,57 +249,61 @@ export interface NodeManagerEvents {
      * Emitted when a Node is created.
      * @event Manager.nodeManager#create
      */
-    "create": (node: LavalinkNode) => void;
+    create: (node: LavalinkNode) => void;
 
     /**
      * Emitted when a Node is destroyed.
      * @event Manager.nodeManager#destroy
      */
-    "destroy": (node: LavalinkNode, destroyReason?: DestroyReasonsType) => void;
+    destroy: (node: LavalinkNode, destroyReason?: DestroyReasonsType) => void;
 
     /**
      * Emitted when a Node is connected.
      * @event Manager.nodeManager#connect
      */
-    "connect": (node: LavalinkNode) => void;
+    connect: (node: LavalinkNode) => void;
 
     /**
      * Emitted when a Node is reconnecting.
      * @event Manager.nodeManager#reconnecting
-    */
-    "reconnecting": (node: LavalinkNode) => void;
+     */
+    reconnecting: (node: LavalinkNode) => void;
 
     /**
      * Emitted When a node starts to reconnect (if you have a reconnection delay, the reconnecting event will be emitted after the retryDelay.)
      * Useful to check whether the internal node reconnect system works or not
      * @event Manager.nodeManager#reconnectinprogress
      */
-    "reconnectinprogress": (node: LavalinkNode) => void;
+    reconnectinprogress: (node: LavalinkNode) => void;
 
     /**
      * Emitted when a Node is disconnects.
      * @event Manager.nodeManager#disconnect
-    */
-    "disconnect": (node: LavalinkNode, reason: { code?: number, reason?: string }) => void;
+     */
+    disconnect: (node: LavalinkNode, reason: { code?: number; reason?: string }) => void;
 
     /**
      * Emitted when a Node is error.
      * @event Manager.nodeManager#error
-    */
-    "error": (node: LavalinkNode, error: Error, payload?: unknown) => void;
+     */
+    error: (node: LavalinkNode, error: Error, payload?: unknown) => void;
 
     /**
      * Emits every single Node event.
      * @event Manager.nodeManager#raw
-    */
-    "raw": (node: LavalinkNode, payload: unknown) => void;
+     */
+    raw: (node: LavalinkNode, payload: unknown) => void;
 
     /**
      * Emits when the node connects resumed. You then need to create all players within this event for your usecase.
      * Aka for that you need to be able to save player data like vc channel + text channel in a db and then sync it again
      * @event Manager.nodeManager#nodeResumed
      */
-    "resumed": (node: LavalinkNode, payload: { resumed: true, sessionId: string, op: "ready" }, players: LavalinkPlayer[] | InvalidLavalinkRestRequest) => void;
+    resumed: (
+        node: LavalinkNode,
+        payload: { resumed: true; sessionId: string; op: "ready" },
+        players: LavalinkPlayer[] | InvalidLavalinkRestRequest,
+    ) => void;
 
     /**
      * Event Handler for Nodelink specific events https://nodelink.js.org/docs/api/websocket Fully typed and generic based on the eventName.
@@ -301,14 +321,24 @@ export interface NodeManagerEvents {
      * });
      * ```
      */
-    "nodeLinkEvent": (...args: {
-        [K in NodeLinkEventTypes]: [node: LavalinkNode, event: K, player: Player, track: Track | null, payload: NodeLinkEventPayload<K>]
-    }[NodeLinkEventTypes]) => void;
+    nodeLinkEvent: (
+        ...args: {
+            [K in NodeLinkEventTypes]: [
+                node: LavalinkNode,
+                event: K,
+                player: Player,
+                track: Track | null,
+                payload: NodeLinkEventPayload<K>,
+            ];
+        }[NodeLinkEventTypes]
+    ) => void;
 }
 
 export enum ReconnectionState {
     IDLE = "IDLE",
     RECONNECTING = "RECONNECTING",
     PENDING = "PENDING",
-    DESTROYING = "DESTROYING"
+    DESTROYING = "DESTROYING",
 }
+
+export type NodeTypes = "Lavalink" | "NodeLink";

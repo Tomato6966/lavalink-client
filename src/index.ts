@@ -3,6 +3,7 @@ export * from "./structures/Filters";
 export * from "./structures/LavalinkManagerStatics";
 export * from "./structures/Node";
 export * from "./structures/NodeManager";
+export * from "./structures/NodeLink";
 export * from "./structures/Player";
 export * from "./structures/Queue";
 export * from "./structures/Utils";

@@ -21,14 +21,10 @@ export class myCustomStore implements QueueStoreManager {
         return await this.redis.del(this.id(guildId));
     }
     async parse(stringifiedQueueData): Promise<Partial<StoredQueue>> {
-        return typeof stringifiedQueueData === "string"
-            ? JSON.parse(stringifiedQueueData)
-            : stringifiedQueueData;
+        return typeof stringifiedQueueData === "string" ? JSON.parse(stringifiedQueueData) : stringifiedQueueData;
     }
     async stringify(parsedQueueData): Promise<any> {
-        return typeof parsedQueueData === "object"
-            ? JSON.stringify(parsedQueueData)
-            : parsedQueueData;
+        return typeof parsedQueueData === "object" ? JSON.stringify(parsedQueueData) : parsedQueueData;
     }
     // you can add more utils if you need to...
     private id(guildId) {

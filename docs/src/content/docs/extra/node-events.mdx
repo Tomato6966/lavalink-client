@@ -8,45 +8,46 @@ description: "All Events of the Lavalink Node."
 
 ## Node-Manager Events
 
-> *Monitor and manage Lavalink nodes:*
+> _Monitor and manage Lavalink nodes:_
 
 - **`raw`** ➡️ `(node, payload) => {}`
-  *Triggered when raw data is received from the node.*
+  _Triggered when raw data is received from the node._
 
 - **`disconnect`** ➡️ `(node, reason) => {}`
-  *Triggered when the node disconnects. Reason for disconnection is provided.*
+  _Triggered when the node disconnects. Reason for disconnection is provided._
 
 - **`connect`** ➡️ `(node) => {}`
-  *Triggered when the node successfully connects.*
+  _Triggered when the node successfully connects._
 
 - **`reconnecting`** ➡️ `(node) => {}`
-  *Triggered when the node is attempting to reconnect.*
+  _Triggered when the node is attempting to reconnect._
 
 - **`reconnectinprogress`** ➡️ `(node) => {}`
-  *Triggered when the node reconnection process started (because of NodeOptions#retryDelay).*
+  _Triggered when the node reconnection process started (because of NodeOptions#retryDelay)._
 
 - **`create`** ➡️ `(node) => {}`
-  *Triggered when a new node is created.*
+  _Triggered when a new node is created._
 
 - **`destroy`** ➡️ `(node) => {}`
-  *Triggered when a node is destroyed.*
+  _Triggered when a node is destroyed._
 
 - **`error`** ➡️ `(node, error, payload) => {}`
-  *Triggered when an error occurs with the node.*
+  _Triggered when an error occurs with the node._
 
 - **`resumed`** ➡️ `(node, payload, players) => {}`
-  *Triggered when the node resumes.*
-  *Resuming needs to be handled manually; ensure to add the players to the manager.*
+  _Triggered when the node resumes._
+  _Resuming needs to be handled manually; ensure to add the players to the manager._
 
 ## Example: Listening to Node Events
 
 ```js
 client.lavalink.nodeManager.on("create", (node, payload) => {
-  console.log(`The Lavalink Node #${node.id} connected`);
+    console.log(`The Lavalink Node #${node.id} connected`);
 });
 
 // For all node-based errors:
 client.lavalink.nodeManager.on("error", (node, error, payload) => {
-  console.error(`The Lavalink Node #${node.id} errored: `, error);
-  console.error(`Error Payload: `, payload);
+    console.error(`The Lavalink Node #${node.id} errored: `, error);
+    console.error(`Error Payload: `, payload);
 });
+```

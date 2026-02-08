@@ -2,6 +2,29 @@
     "name": "testbot",
     "version": "1.1.0",
     "description": "",
+    "keywords": [
+        "advanced",
+        "bot",
+        "client",
+        "discord",
+        "lavalink",
+        "lavalink-v4",
+        "music",
+        "typescript"
+    ],
+    "homepage": "https://tomato6966.github.io/lavalink-client/",
+    "bugs": {
+        "url": "https://github.com/tomato6966/lavalink-client/issues"
+    },
+    "license": "MIT",
+    "author": {
+        "name": "Tomato6966",
+        "url": "https://github.com/tomato6966/"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/tomato6966/lavalink-client.git"
+    },
     "main": "index.ts",
     "scripts": {
         "test": "echo \"Error: no test specified\" && exit 1",
@@ -9,30 +32,6 @@
         "start:bun": "bun ./index.ts",
         "start:deno": "deno ./index.ts"
     },
-    "repository": {
-        "type": "git",
-        "url": "git+https://github.com/tomato6966/lavalink-client.git"
-    },
-    "keywords": [
-        "lavalink",
-        "client",
-        "lavalink-v4",
-        "music",
-        "discord",
-        "bot",
-        "advanced",
-        "typescript"
-    ],
-    "author": {
-        "name": "Tomato6966",
-        "url": "https://github.com/tomato6966/"
-    },
-    "contributers": [],
-    "license": "MIT",
-    "bugs": {
-        "url": "https://github.com/tomato6966/lavalink-client/issues"
-    },
-    "homepage": "https://tomato6966.github.io/lavalink-client/",
     "dependencies": {
         "@redis/client": "^1.6.0",
         "@types/node": "^22.15.18",
@@ -50,7 +49,8 @@
         "typescript": "^5.8.3"
     },
     "engines": {
-        "node": ">=18.0.0",
-        "bun": ">=1.1.27"
-    }
+        "bun": ">=1.1.27",
+        "node": ">=18.0.0"
+    },
+    "contributers": []
 }

@@ -6,14 +6,16 @@ title: Resuming
 description: "How to do resuming on a Lavalink node."
 ---
 
-
-1. You need to enable resuming on a __connected__ Lavalink node : **` node.updateSession(true, 360e3) `**
+1. You need to enable resuming on a **connected** Lavalink node : **`node.updateSession(true, 360e3)`**
 2. The NodeManager#resumed event will emit when the node resumes, you retrieves all fetchedPlayers (fetched by the client), and thus all you need to do is re-create all player instances (and possibly the queues too)
-  - For that is the queuestore useful
-  - To save the playerData you can utilize smt like playerUpdate event.
+
+- For that is the queuestore useful
+- To save the playerData you can utilize smt like playerUpdate event.
 
 ## Resuming full Example
+
 Full code sample: can be found on the [Testbot in here](https://github.com/Tomato6966/lavalink-client/blob/main/testBot/Utils/handleResuming.ts)
+
 ```js
 // but here is the schema:
 client.lavalink.nodeManager.on("connect", (node) => node.updateSession(true, 360e3));

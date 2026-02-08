@@ -5,16 +5,16 @@ import type { BotClient, Event } from "../types/Client";
 
 export async function loadEvents(client: BotClient) {
     const path = join(process.cwd(), "events");
-    const files = readdirSync(path).filter(file => file.endsWith(".ts") || file.endsWith(".js"));
+    const files = readdirSync(path).filter((file) => file.endsWith(".ts") || file.endsWith(".js"));
     for (const file of files) {
-        const filePath = join(path, file)
-        const cmd = await import(filePath).then(v => v.default) as Event;
+        const filePath = join(path, file);
+        const cmd = (await import(filePath).then((v) => v.default)) as Event;
 
         if ("name" in cmd && "execute" in cmd) {
-            client.on(cmd.name, cmd.execute.bind(null, client))
+            client.on(cmd.name, cmd.execute.bind(null, client));
             continue;
         }
 
-        console.warn(`[WARNING] The Event at ${filePath} is missing a required "name" or "execute" property.`)
+        console.warn(`[WARNING] The Event at ${filePath} is missing a required "name" or "execute" property.`);
     }
 }

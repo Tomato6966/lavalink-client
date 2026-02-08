@@ -1,6 +1,7 @@
-import { MiniMap } from "lavalink-client";
 import { readFileSync } from "node:fs";
 import { writeFile } from "node:fs/promises";
+
+import { MiniMap } from "lavalink-client";
 
 export class JSONStore {
     public data = new MiniMap<string, string>();
@@ -11,7 +12,8 @@ export class JSONStore {
     }
 
     async initLoadData() {
-        try { // important to do sync so it's loaded on the initialisation
+        try {
+            // important to do sync so it's loaded on the initialisation
             this.data = new MiniMap(this.JSONtoMap(readFileSync(this.filePath, "utf-8")));
         } catch (error) {
             await writeFile(this.filePath, this.MapToJSON(this.data));

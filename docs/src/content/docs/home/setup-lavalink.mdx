@@ -17,231 +17,227 @@ This sample configuration enables several plugins for additional sources, filter
 
 ```yaml
 server:
-  port: 2333
-  address: 0.0.0.0
+    port: 2333
+    address: 0.0.0.0
 lavalink:
-  server:
-    sources:
-      youtube: false # Using Youtube nativly on lavalink is deprecated, disable it and use https://github.com/lavalink-devs/youtube-source instead.
-    password: "youshallnotpass"
-    bufferDurationMs: 225
-    frameBufferDurationMs: 5000
-    youtubePlaylistLoadLimit: 3
-    opusEncodingQuality: 5
-    resamplingQuality: MEDIUM
-    trackStuckThresholdMs: 5000
-    playerUpdateInterval: 3
-    useSeekGhosting: true
-    youtubeSearchEnabled: true
-    soundcloudSearchEnabled: true
-    gc-warnings: true
-  plugins:
-    - dependency: "com.github.topi314.lavasrc:lavasrc-plugin:4.8.1" # LavaSrc - for extra sources like deezer, spotify, etc. https://github.com/topi314/LavaSrc
-      repository: "https://maven.lavalink.dev/releases"
-    - dependency: "com.github.topi314.lavasearch:lavasearch-plugin:1.0.0" # https://github.com/topi314/LavaSearch
-      repository: "https://maven.lavalink.dev/releases"
-    - dependency: "com.dunctebot:skybot-lavalink-plugin:1.7.0" # https://github.com/DuncteBot/skybot-lavalink-plugin
-      repository: "https://maven.lavalink.dev/releases"
-    - dependency: "com.github.devoxin:lavadspx-plugin:0.0.5" # https://github.com/devoxin/LavaDSPX-Plugin
-      repository: "https://jitpack.io"
-    - dependency: "dev.lavalink.youtube:youtube-plugin:1.16.0" # https://github.com/lavalink-devs/youtube-source
-      snapshot: false
-    - dependency: "com.github.topi314.lavalyrics:lavalyrics-plugin:1.1.0" # https://github.com/topi314/LavaLyrics
-      repository: "https://maven.lavalink.dev/releases"
-    - dependency: "me.duncte123:java-lyrics-plugin:1.6.6" # https://github.com/DuncteBot/java-timed-lyrics
-      repository: "https://maven.lavalink.dev/releases"
+    server:
+        sources:
+            youtube: false # Using Youtube nativly on lavalink is deprecated, disable it and use https://github.com/lavalink-devs/youtube-source instead.
+        password: "youshallnotpass"
+        bufferDurationMs: 225
+        frameBufferDurationMs: 5000
+        youtubePlaylistLoadLimit: 3
+        opusEncodingQuality: 5
+        resamplingQuality: MEDIUM
+        trackStuckThresholdMs: 5000
+        playerUpdateInterval: 3
+        useSeekGhosting: true
+        youtubeSearchEnabled: true
+        soundcloudSearchEnabled: true
+        gc-warnings: true
+    plugins:
+        - dependency: "com.github.topi314.lavasrc:lavasrc-plugin:4.8.1" # LavaSrc - for extra sources like deezer, spotify, etc. https://github.com/topi314/LavaSrc
+          repository: "https://maven.lavalink.dev/releases"
+        - dependency: "com.github.topi314.lavasearch:lavasearch-plugin:1.0.0" # https://github.com/topi314/LavaSearch
+          repository: "https://maven.lavalink.dev/releases"
+        - dependency: "com.dunctebot:skybot-lavalink-plugin:1.7.0" # https://github.com/DuncteBot/skybot-lavalink-plugin
+          repository: "https://maven.lavalink.dev/releases"
+        - dependency: "com.github.devoxin:lavadspx-plugin:0.0.5" # https://github.com/devoxin/LavaDSPX-Plugin
+          repository: "https://jitpack.io"
+        - dependency: "dev.lavalink.youtube:youtube-plugin:1.16.0" # https://github.com/lavalink-devs/youtube-source
+          snapshot: false
+        - dependency: "com.github.topi314.lavalyrics:lavalyrics-plugin:1.1.0" # https://github.com/topi314/LavaLyrics
+          repository: "https://maven.lavalink.dev/releases"
+        - dependency: "me.duncte123:java-lyrics-plugin:1.6.6" # https://github.com/DuncteBot/java-timed-lyrics
+          repository: "https://maven.lavalink.dev/releases"
 plugins:
-  lyrics:
-    countryCode: de
-    geniusApiKey: "<insert>"
-  lavalyrics:
-    sources:
-      - genius
-      - spotify
-      - youtube
-      - deezer
-      - yandexMusic
-  youtube:
-    enabled: true
-    # YouTube's cipher changes are becoming more frequent and complex, making it harder to keep up.
-    # To simplify signature deciphering, you can use a remote cipher server like yt-cipher, a lightweight Deno server with a REST API. More details are available at https://github.com/kikkia/yt-cipher
-    remoteCipher:
-      userAgent: "your_service_name"
-      url: "http://localhost:8001" # The base URL of your remote cipher server.
-      password: "your_secret_password" # The password to authenticate with your remote cipher server.
-    oauth:
-      enabled: false
-      # refreshToken: "Insert your refresh token here" # For more details, please refer to https://github.com/lavalink-devs/youtube-source?tab=readme-ov-file#using-oauth-tokens
-    allowSearch: true
-    allowDirectVideoIds: true
-    allowDirectPlaylistIds: true
-    # For more details about client setup, refer to https://github.com/lavalink-devs/youtube-source?tab=readme-ov-file#available-clients
-    clients:
-      - "ANDROID_MUSIC"
-      - "MUSIC"
-      - "WEB"
-      - "WEBEMBEDDED"
-      - "TVHTML5EMBEDDED"
-    ANDROID_MUSIC:
-      playlistLoading: false
-      videoLoading: true
-      searching: true
-      playback: true
-    MUSIC:
-      playlistLoading: false
-      videoLoading: false
-      searching: true
-      playback: false
-    WEB:
-      playlistLoading: false
-      videoLoading: true
-      searching: true
-      playback: true
-    WEBEMBEDDED:
-      playlistLoading: false
-      videoLoading: false
-      searching: false
-      playback: true
-    TVHTML5EMBEDDED:
-      playlistLoading: false
-      videoLoading: false
-      searching: false
-      playback: true
-  lavasrc:
-    providers:
-      - 'ytsearch:"%ISRC%"'
-      - "dzisrc:%ISRC%"
-
-      - "ytsearch:%QUERY%"
-      - "dzsearch:%QUERY%"
-      - "jssearch:%QUERY%"
-      - "pdsearch:%QUERY%"
-      - "scsearch:%QUERY%"
-      - "tdsearch:%QUERY%"
-    sources:
-      spotify: true # Enable Spotify source
-      applemusic: true # Enable Apple Music source
-      deezer: true # Enable Deezer source
-      jiosaavn: true # Enabled JioSaavn source
-      pandora: true # Enable Pandora source
-      yandexmusic: true # Enable Yandex Music source
-      flowerytts: true # Enable Flowery TTS source
-      youtube: true # Enable YouTube search source (https://github.com/topi314/LavaSearch)
-      tidal: true # Enable Tidal source
-      vkmusic: true # Enable Vk Music source
-      qobuz: true # Enabled qobuz source
-      ytdlp: true # Enable yt-dlp source
-    lyrics-sources:
-      spotify: true # Enable Spotify lyrics source
-      deezer: true # Enable Deezer lyrics source
-      youtube: true # Enable YouTube lyrics source
-      yandexmusic: true # Enable Yandex Music lyrics source
-      vkmusic: true # Enable Vk Music lyrics source
-      lrcLib: true # Enable LRC Library lyrics source (https://lrclib.net)
-    spotify:
-      # clientId & clientSecret are required for using spsearch
-      # clientId: "<insert>"
-      # clientSecret: "<insert>"
-      # spDc: "<insert>" # the sp dc cookie used for accessing the spotify lyrics api
-      preferAnonymousToken: true # Use this to generate and cache anonymous Spotify access tokens from your own endpoint, as Spotify recently updated their implementation.
-      customTokenEndpoint: "http://localhost:8080/api/token" # For more details, please refer to https://github.com/topi314/spotify-tokener
-      resolveArtistsInSearch: true
-      albumLoadLimit: 2 # The number of pages at 50 tracks each
-      countryCode: "US"
-      playlistLoadLimit: 3 # The number of pages at 100 tracks each
-      localFiles: true
-    applemusic:
-      countryCode: "US"
-      mediaAPIToken: "<insert>"
-      playlistLoadLimit: 3 # The number of pages at 300 tracks each
-      albumLoadLimit: 3 # The number of pages at 300 tracks each
-    deezer:
-      masterDecryptionKey: "your master decryption key" # the master key used for decrypting the deezer tracks. (you need to get it from somewhere)
-      arl: "your deezer arl" # the arl cookie used for accessing the deezer api this is not optional anymore
-      formats: ["FLAC", "MP3_320", "MP3_256", "MP3_128", "MP3_64", "AAC_64"] # the formats you want to use for the deezer tracks. "FLAC", "MP3_320", "MP3_256" & "AAC_64" are only available for premium users and require a valid arl
+    lyrics:
+        countryCode: de
+        geniusApiKey: "<insert>"
+    lavalyrics:
+        sources:
+            - genius
+            - spotify
+            - youtube
+            - deezer
+            - yandexMusic
     youtube:
-      countryCode: "US"
-      playlistLoadLimit: 1 # The number of pages at 100 tracks each
-      albumLoadLimit: 1 # The number of pages at 50 tracks each
-      artistLoadLimit: 1 # The number of pages at 10 tracks each
-    yandexmusic:
-      accessToken: "<insert>"
-    tidal:
-      countryCode: "US" # the country code for accessing region-specific content on Tidal (ISO 3166-1 alpha-2).
-      searchLimit: 6 # How many search results should be returned
-      token: "your tidal token" # the token used for accessing the tidal api. See https://github.com/topi314/LavaSrc#tidal
-    qobuz:
-      userOauthToken: "your user oauth token" # This token is needed for authorization in the api. Guide: https://github.com/topi314/LavaSrc#qobuz
-      #      appId : optional (Only pass it when you are using an old userOauthToken)
-      #      appSecret : optional (Only pass it when you are using an old userOauthToken)
-    ytdlp:
-      path: "yt-dlp" # the path to the yt-dlp executable.
-      searchLimit: 10 # How many search results should be returned
-      # customLoadArgs: ["-q", "--no-warnings", "--flat-playlist", "--skip-download", "-J"] # Custom arguments to pass to yt-dlp
-      # customPlaybackArgs: ["-q", "--no-warnings", "-f", "bestaudio", "-J"] # Custom arguments for yt-dlp
-    jiosaavn:
-      decryption: # The decryption configuration for the JioSaavn tracks
-        secretKey: "your_key" # The required secret key used for decryption (Find your own secret key)
-        algorithm: "DES" # The algorithm used for decryption (Default "DES")
-        transformation: "DES/ECB/PKCS5Padding" # The transformation used for decryption (Default "DES/ECB/PKCS5Padding")
-      # proxy: # If defined, JioSaavn HTTP requests will be proxied through here. JioSaavn uses region blocking
-      #   url: "https://example.org" # The HTTP proxy to use
-      #   username: "my-bot" # Optional username to authenticate with the proxy
-      #   password: "youshallpass" # Optional password to authenticate with the proxy
-    pandora:
-      csrfToken: "your csrf token" # X-CsrfToken header from your browser session to pandora.com
-      searchLimit: 6 # How many search results should be returned
-    vkmusic:
-      userToken: "your user token" # This token is needed for authorization in the api. Guide: https://github.com/topi314/LavaSrc#vk-music
-      playlistLoadLimit: 1 # The number of pages at 50 tracks each
-      artistLoadLimit: 1 # The number of pages at 10 tracks each
-      recommendationsLoadLimit: 10 # Number of tracks
-    flowerytts:
-      voice: "Olivia" # (case-sensitive) get default voice from here https://api.flowery.pw/v1/tts/voices
-      translate: false # whether to translate the text to the native language of voice
-      silence: 0 # the silence parameter is in milliseconds. Range is 0 to 10000. The default is 0.
-      speed: 1.0 # the speed parameter is a float between 0.5 and 10. The default is 1.0. (0.5 is half speed, 2.0 is double speed, etc.)
-      audioFormat: "mp3" # supported formats are: mp3, ogg_opus, ogg_vorbis, aac, wav, and flac. Default format is mp3
-  dunctebot:
-    ttsLanguage: "en-US"
-    sources:
-      getyarn: true # www.getyarn.io
-      clypit: true # www.clyp.it
-      tts: true # speak:Words to speak
-      pornhub: true # should be self-explanatory
-      reddit: true # should be self-explanatory
-      ocremix: true # www.ocremix.org
-      tiktok: true # tiktok.com
-      mixcloud: true # mixcloud.com
-      soundgasm: true # soundgasm.net
+        enabled: true
+        # YouTube's cipher changes are becoming more frequent and complex, making it harder to keep up.
+        # To simplify signature deciphering, you can use a remote cipher server like yt-cipher, a lightweight Deno server with a REST API. More details are available at https://github.com/kikkia/yt-cipher
+        remoteCipher:
+            userAgent: "your_service_name"
+            url: "http://localhost:8001" # The base URL of your remote cipher server.
+            password: "your_secret_password" # The password to authenticate with your remote cipher server.
+        oauth:
+            enabled: false
+            # refreshToken: "Insert your refresh token here" # For more details, please refer to https://github.com/lavalink-devs/youtube-source?tab=readme-ov-file#using-oauth-tokens
+        allowSearch: true
+        allowDirectVideoIds: true
+        allowDirectPlaylistIds: true
+        # For more details about client setup, refer to https://github.com/lavalink-devs/youtube-source?tab=readme-ov-file#available-clients
+        clients:
+            - "ANDROID_MUSIC"
+            - "MUSIC"
+            - "WEB"
+            - "WEBEMBEDDED"
+            - "TVHTML5EMBEDDED"
+        ANDROID_MUSIC:
+            playlistLoading: false
+            videoLoading: true
+            searching: true
+            playback: true
+        MUSIC:
+            playlistLoading: false
+            videoLoading: false
+            searching: true
+            playback: false
+        WEB:
+            playlistLoading: false
+            videoLoading: true
+            searching: true
+            playback: true
+        WEBEMBEDDED:
+            playlistLoading: false
+            videoLoading: false
+            searching: false
+            playback: true
+        TVHTML5EMBEDDED:
+            playlistLoading: false
+            videoLoading: false
+            searching: false
+            playback: true
+    lavasrc:
+        providers:
+            - 'ytsearch:"%ISRC%"'
+            - "dzisrc:%ISRC%"
+
+            - "ytsearch:%QUERY%"
+            - "dzsearch:%QUERY%"
+            - "jssearch:%QUERY%"
+            - "pdsearch:%QUERY%"
+            - "scsearch:%QUERY%"
+            - "tdsearch:%QUERY%"
+        sources:
+            spotify: true # Enable Spotify source
+            applemusic: true # Enable Apple Music source
+            deezer: true # Enable Deezer source
+            jiosaavn: true # Enabled JioSaavn source
+            pandora: true # Enable Pandora source
+            yandexmusic: true # Enable Yandex Music source
+            flowerytts: true # Enable Flowery TTS source
+            youtube: true # Enable YouTube search source (https://github.com/topi314/LavaSearch)
+            tidal: true # Enable Tidal source
+            vkmusic: true # Enable Vk Music source
+            qobuz: true # Enabled qobuz source
+            ytdlp: true # Enable yt-dlp source
+        lyrics-sources:
+            spotify: true # Enable Spotify lyrics source
+            deezer: true # Enable Deezer lyrics source
+            youtube: true # Enable YouTube lyrics source
+            yandexmusic: true # Enable Yandex Music lyrics source
+            vkmusic: true # Enable Vk Music lyrics source
+            lrcLib: true # Enable LRC Library lyrics source (https://lrclib.net)
+        spotify:
+            # clientId & clientSecret are required for using spsearch
+            # clientId: "<insert>"
+            # clientSecret: "<insert>"
+            # spDc: "<insert>" # the sp dc cookie used for accessing the spotify lyrics api
+            preferAnonymousToken: true # Use this to generate and cache anonymous Spotify access tokens from your own endpoint, as Spotify recently updated their implementation.
+            customTokenEndpoint: "http://localhost:8080/api/token" # For more details, please refer to https://github.com/topi314/spotify-tokener
+            resolveArtistsInSearch: true
+            albumLoadLimit: 2 # The number of pages at 50 tracks each
+            countryCode: "US"
+            playlistLoadLimit: 3 # The number of pages at 100 tracks each
+            localFiles: true
+        applemusic:
+            countryCode: "US"
+            mediaAPIToken: "<insert>"
+            playlistLoadLimit: 3 # The number of pages at 300 tracks each
+            albumLoadLimit: 3 # The number of pages at 300 tracks each
+        deezer:
+            masterDecryptionKey: "your master decryption key" # the master key used for decrypting the deezer tracks. (you need to get it from somewhere)
+            arl: "your deezer arl" # the arl cookie used for accessing the deezer api this is not optional anymore
+            formats: ["FLAC", "MP3_320", "MP3_256", "MP3_128", "MP3_64", "AAC_64"] # the formats you want to use for the deezer tracks. "FLAC", "MP3_320", "MP3_256" & "AAC_64" are only available for premium users and require a valid arl
+        youtube:
+            countryCode: "US"
+            playlistLoadLimit: 1 # The number of pages at 100 tracks each
+            albumLoadLimit: 1 # The number of pages at 50 tracks each
+            artistLoadLimit: 1 # The number of pages at 10 tracks each
+        yandexmusic:
+            accessToken: "<insert>"
+        tidal:
+            countryCode: "US" # the country code for accessing region-specific content on Tidal (ISO 3166-1 alpha-2).
+            searchLimit: 6 # How many search results should be returned
+            token: "your tidal token" # the token used for accessing the tidal api. See https://github.com/topi314/LavaSrc#tidal
+        qobuz:
+            userOauthToken: "your user oauth token" # This token is needed for authorization in the api. Guide: https://github.com/topi314/LavaSrc#qobuz
+            #      appId : optional (Only pass it when you are using an old userOauthToken)
+            #      appSecret : optional (Only pass it when you are using an old userOauthToken)
+        ytdlp:
+            path: "yt-dlp" # the path to the yt-dlp executable.
+            searchLimit: 10 # How many search results should be returned
+            # customLoadArgs: ["-q", "--no-warnings", "--flat-playlist", "--skip-download", "-J"] # Custom arguments to pass to yt-dlp
+            # customPlaybackArgs: ["-q", "--no-warnings", "-f", "bestaudio", "-J"] # Custom arguments for yt-dlp
+        jiosaavn:
+            decryption: # The decryption configuration for the JioSaavn tracks
+                secretKey: "your_key" # The required secret key used for decryption (Find your own secret key)
+                algorithm: "DES" # The algorithm used for decryption (Default "DES")
+                transformation: "DES/ECB/PKCS5Padding" # The transformation used for decryption (Default "DES/ECB/PKCS5Padding")
+            # proxy: # If defined, JioSaavn HTTP requests will be proxied through here. JioSaavn uses region blocking
+            #   url: "https://example.org" # The HTTP proxy to use
+            #   username: "my-bot" # Optional username to authenticate with the proxy
+            #   password: "youshallpass" # Optional password to authenticate with the proxy
+        pandora:
+            csrfToken: "your csrf token" # X-CsrfToken header from your browser session to pandora.com
+            searchLimit: 6 # How many search results should be returned
+        vkmusic:
+            userToken: "your user token" # This token is needed for authorization in the api. Guide: https://github.com/topi314/LavaSrc#vk-music
+            playlistLoadLimit: 1 # The number of pages at 50 tracks each
+            artistLoadLimit: 1 # The number of pages at 10 tracks each
+            recommendationsLoadLimit: 10 # Number of tracks
+        flowerytts:
+            voice: "Olivia" # (case-sensitive) get default voice from here https://api.flowery.pw/v1/tts/voices
+            translate: false # whether to translate the text to the native language of voice
+            silence: 0 # the silence parameter is in milliseconds. Range is 0 to 10000. The default is 0.
+            speed: 1.0 # the speed parameter is a float between 0.5 and 10. The default is 1.0. (0.5 is half speed, 2.0 is double speed, etc.)
+            audioFormat: "mp3" # supported formats are: mp3, ogg_opus, ogg_vorbis, aac, wav, and flac. Default format is mp3
+    dunctebot:
+        ttsLanguage: "en-US"
+        sources:
+            getyarn: true # www.getyarn.io
+            clypit: true # www.clyp.it
+            tts: true # speak:Words to speak
+            pornhub: true # should be self-explanatory
+            reddit: true # should be self-explanatory
+            ocremix: true # www.ocremix.org
+            tiktok: true # tiktok.com
+            mixcloud: true # mixcloud.com
+            soundgasm: true # soundgasm.net
 metrics:
-  prometheus:
-    enabled: false
-    endpoint: /metrics
+    prometheus:
+        enabled: false
+        endpoint: /metrics
 sentry:
-  dsn: ""
-  environment: ""
+    dsn: ""
+    environment: ""
 logging:
-  file:
-    max-history: 5
-    max-size: 10MB
-  path: ./logs/
-  level:
-    root: DEBUG
-    lavalink: DEBUG
-  request:
-    enabled: true
-    includeClientInfo: true
-    includeHeaders: true
-    includeQueryString: true
-    includePayload: true
-    maxPayloadLength: 10000
-  logback:
-    rollingpolicy:
-      max-file-size: 10MB
-      max-history: 5
+    file:
+        max-history: 5
+        max-size: 10MB
+    path: ./logs/
+    level:
+        root: DEBUG
+        lavalink: DEBUG
+    request:
+        enabled: true
+        includeClientInfo: true
+        includeHeaders: true
+        includeQueryString: true
+        includePayload: true
+        maxPayloadLength: 10000
+    logback:
+        rollingpolicy:
+            max-file-size: 10MB
+            max-history: 5
 ```
-
-
-
-

@@ -8,110 +8,110 @@ description: "All Events of the Lavalink Manager."
 
 ## Player Related Logs
 
-> *Monitor player activities and changes:*
+> _Monitor player activities and changes:_
 
 - **`playerCreate`** ➡️ `(player) => {}`
-  *Triggered when a player is created.*
+  _Triggered when a player is created._
 
 - **`playerDestroy`** ➡️ `(player, reason) => {}`
-  *Triggered when a player is destroyed. Reason for destruction provided.*
+  _Triggered when a player is destroyed. Reason for destruction provided._
 
 - **`playerDisconnect`** ➡️ `(player, voiceChannelId) => {}`
-  *Triggered when a player disconnects from a voice channel.*
+  _Triggered when a player disconnects from a voice channel._
 
 - **`playerMove`** ➡️ `(player, oldChannelId, newChannelId) => {}`
-  *Triggered when a player moves from one channel to another.*
-  *Updating the voice channel is handled automatically by the client.*
+  _Triggered when a player moves from one channel to another._
+  _Updating the voice channel is handled automatically by the client._
 
 - **`playerSocketClosed`** ➡️ `(player, payload) => {}`
-  *Triggered when the player’s socket is closed.*
+  _Triggered when the player’s socket is closed._
 
 - **`playerUpdate`** ➡️ `(player) => {}`
-  *Triggered when the player is updated.*
+  _Triggered when the player is updated._
 
-- **`playerMuteChange`**** ➡️ **`(player, selfMuted, serverMuted) => {}`
-  *Triggered when the player's voice state related to muting changed*
+- **`playerMuteChange`\*\*** ➡️ \**`(player, selfMuted, serverMuted) => {}`
+  *Triggered when the player's voice state related to muting changed\*
 
 - **`playerDeafChange`** ➡️ `(player, selfDeafed, serverDeafed) => {}`
-  *Triggered when the player's voice state related to deafing changed*
+  _Triggered when the player's voice state related to deafing changed_
 
 - **`playerSuppressChange`** ➡️ `(player, suppress) => {}`
-  *Triggered when the player's voice state related to suppressing changed*
+  _Triggered when the player's voice state related to suppressing changed_
 
 - **`playerQueueEmptyStart`** ➡️ `(player, timeoutMs) => {}`
-  *Triggered when the queue empty handler started (the timeout)*
+  _Triggered when the queue empty handler started (the timeout)_
 
 - **`playerQueueEmptyEnd`** ➡️ `(player) => {}`
-  *Triggered when the queue empty handler finished (successfully) and thus destroyed the player*
+  _Triggered when the queue empty handler finished (successfully) and thus destroyed the player_
 
 - **`playerQueueEmptyCancel`** ➡️ `(player) => {}`
-  *Triggered when the queue empty handler cancelled (e.g. because a new track got added)*
+  _Triggered when the queue empty handler cancelled (e.g. because a new track got added)_
 
 - **`playerVoiceJoin`** ➡️ `(player, userId) => {}`~~
-  *Added instead of the playerVoiceEmpty handler, emitted when a user joins the player-vc while there is a player*
-  *Allows you to inmplement a custom playerVoiceEmpty handler*
+  _Added instead of the playerVoiceEmpty handler, emitted when a user joins the player-vc while there is a player_
+  _Allows you to inmplement a custom playerVoiceEmpty handler_
 
 - **`playerVoiceLeave`** ➡️ `(player, userId) => {}`~~
-  *Added instead of the playerVoiceEmpty handler, emitted when a user leaves (or. switches away) the player-vc while there is a player*
-  *Allows you to inmplement a custom playerVoiceEmpty handler*
+  _Added instead of the playerVoiceEmpty handler, emitted when a user leaves (or. switches away) the player-vc while there is a player_
+  _Allows you to inmplement a custom playerVoiceEmpty handler_
 
 ## Track / Manager Related Logs
 
-> *Handle track events and manage playback:*
+> _Handle track events and manage playback:_
 
 - **`trackStart`** ➡️ `(player, track, payload) => {}`
-  *Triggered when a track starts playing.*
+  _Triggered when a track starts playing._
 
 - **`trackStuck`** ➡️ `(player, track, payload) => {}`
-  *Triggered when a track gets stuck (e.g., playback halts).*
+  _Triggered when a track gets stuck (e.g., playback halts)._
 
 - **`trackError`** ➡️ `(player, track, payload) => {}`
-  *Triggered when an error occurs during track playback.*
+  _Triggered when an error occurs during track playback._
 
 - **`trackEnd`** ➡️ `(player, track, payload) => {}`
-  *Triggered when a track finishes playing.*
+  _Triggered when a track finishes playing._
 
 - **`queueEnd`** ➡️ `(player, track, payload) => {}`
-  *Triggered when the queue ends.*
+  _Triggered when the queue ends._
 
 ## SponsorBlock Plugin Logs
 
-> *Events from the SponsorBlock plugin:*
-> *Only triggered when used with the Sponsorblock plugin*
+> _Events from the SponsorBlock plugin:_
+> _Only triggered when used with the Sponsorblock plugin_
 
 - **`SegmentsLoaded`** ➡️ `(player, track, payload) => {}`
-  *Triggered when segments are loaded for a track.*
+  _Triggered when segments are loaded for a track._
 
 - **`SegmentSkipped`** ➡️ `(player, track, payload) => {}`
-  *Triggered when a specific segment is skipped.*
+  _Triggered when a specific segment is skipped._
 
 - **`ChapterStarted`** ➡️ `(player, track, payload) => {}`
-  *Triggered when a specific chapter starts playing.*
+  _Triggered when a specific chapter starts playing._
 
 - **`ChaptersLoaded`** ➡️ `(player, track, payload) => {}`
-  *Triggered when chapters are loaded for a track.*
+  _Triggered when chapters are loaded for a track._
 
 ## Lyrics Plugin Logs
 
-> *Events from the LavaLyrics plugin:*
-> *Only triggered when used with the latest snapshot of the lava-lyrics plugin*
+> _Events from the LavaLyrics plugin:_
+> _Only triggered when used with the latest snapshot of the lava-lyrics plugin_
 
 - **`LyricsLine`** ➡️ `(player, track, payload) => {}`
-  *Triggered when a new lyrics line is received.*
+  _Triggered when a new lyrics line is received._
 
 - **`LyricsFound`** ➡️ `(player, track, payload) => {}`
-  *Triggered when lyrics for a track are found.*
+  _Triggered when lyrics for a track are found._
 
 - **`LyricsNotFound`** ➡️ `(player, track, payload) => {}`
-  *Triggered when lyrics for a track are not found.*
+  _Triggered when lyrics for a track are not found._
 
 ## Debug Logs
 
-> *Internal debugging events from the Lavalink client:*
-> *Only triggered when the **` ManagerOptions#advancedOptions.enableDebugEvents `** is set to **` true `***
+> _Internal debugging events from the Lavalink client:_
+> \*Only triggered when the **`ManagerOptions#advancedOptions.enableDebugEvents`** is set to **`true`\***
 
 - **`debug`** ➡️ `(eventKey, eventData) => {}`
-  *Triggered for various debug logs and errors.*
+  _Triggered for various debug logs and errors._
 
 ## Examples
 
@@ -119,13 +119,13 @@ description: "All Events of the Lavalink Manager."
 import { DebugEvents } from "lavalink-client";
 
 client.lavalink.on("create", (node, payload) => {
-  console.log(`The Lavalink Node #${node.id} connected`);
+    console.log(`The Lavalink Node #${node.id} connected`);
 });
 
 // For all node-based errors:
 client.lavalink.on("error", (node, error, payload) => {
-  console.error(`The Lavalink Node #${node.id} errored: `, error);
-  console.error(`Error Payload: `, payload);
+    console.error(`The Lavalink Node #${node.id} errored: `, error);
+    console.error(`Error Payload: `, payload);
 });
 
 // YOU NEED TO HAVE THE debug EVENT ENABLED
@@ -149,13 +149,13 @@ client.lavalink = new LavalinkManager<myCustomPlayer>({
 */
 client.lavalink.on("debug", (eventKey, eventData) => {
     // skip specific log
-    if(eventKey === DebugEvents.NoAudioDebug && eventData.message === "Manager is not initated yet") return;
+    if (eventKey === DebugEvents.NoAudioDebug && eventData.message === "Manager is not initated yet") return;
     // skip specific event log of a log-level-state "log"
-    if(eventKey === DebugEvents.PlayerUpdateSuccess && eventData.state === "log") return;
+    if (eventKey === DebugEvents.PlayerUpdateSuccess && eventData.state === "log") return;
     console.group("Lavalink-Client-Debug:");
     console.log("-".repeat(20));
     console.debug(`[${eventKey}]`);
-    console.debug(eventData)
+    console.debug(eventData);
     console.log("-".repeat(20));
     console.groupEnd();
 });

@@ -9,6 +9,31 @@ Logs about the changed features.
 
 ---
 
+## **Version 2.9.0**
+
+- Removed the autoChecks options on the manager:
+    - `ManagerOption.autoChecks.pluginValidations` ... default is true, set to false if you want to skip plugin validations
+    - `ManagerOption.autoChecks.sourcesValidations` ... default is true, set to false if you want to skip sources/filters validations
+
+- Added autoChecks options for every single node:
+    - `NodeOption.autoChecks.pluginValidations` ... default is true, set to false if you want to skip plugin validations (if nodeType === "NodeLink" then this will always be false)
+    - `NodeOption.autoChecks.sourcesValidations` ... default is true, set to false if you want to skip sources/filters validations
+
+- Implemented a seperate class for other Audio nodes, atm just a seperate "NodeLink" class.
+
+- Added nodeOptions.nodeType to check if the node is a "NodeLink" or "Lavalink" (default: "Lavalink") node. (setable via nodeOptions.nodeType)
+    - If nodeType = NodeLink, the NodeClass will be NodeLinkNode instead of LavalinkNode.
+
+- Added a Manager.getNode() function, to typed-return a node if you are looking for one.
+
+- Added public options for the autoChecks on node: `_checkForPlugins` and `_checkForSourcesAndFilters`
+    - `_checkForPlugins` ... default is true, set to false if you want to skip plugin validations (if nodeType === "NodeLink" then this will always be false)
+    - `_checkForSourcesAndFilters` ... default is true, set to false if you want to skip sources/filters validations (if nodeType === "NodeLink" then this will always be false)
+
+- Removed eslint + standard resolvers, and instead utilize oxlint and oxfmt and oxc-resolver.
+
+- Enhanced connection stability feature (heartbeating) is now only available for nodeType = "Lavalink".
+
 ## **Version 2.8.0**
 
 - Added global typing for the TrackRequester type via `module augmentation`. ( Thanks to @appujet on Github)
@@ -16,6 +41,7 @@ Logs about the changed features.
 - Fixed typos in the jsdoc documentation
 
 Example for TrackRequester augmentation:
+
 ```ts
 declare module "lavalink-client" {
     export interface TrackRequester {
@@ -25,7 +51,6 @@ declare module "lavalink-client" {
     }
 }
 ```
-
 
 New Queue Utilities:
 
@@ -43,12 +68,12 @@ Example:
 
 ```ts
 this.nodeManager.on("nodeLinkEvent", (node, event, player, track, payload) => {
-  if (event === "SeekEvent") {
-    console.log("new position:", payload.position);
-  }
-  if (event === "FiltersChangedEvent") {
-    console.log("new filters state", payload.filters);
-  }
+    if (event === "SeekEvent") {
+        console.log("new position:", payload.position);
+    }
+    if (event === "FiltersChangedEvent") {
+        console.log("new filters state", payload.filters);
+    }
 });
 ```
 
@@ -69,8 +94,8 @@ More NodeLink Specific / additional features added, in case you are using NodeLi
 
 - Add some private getters to minify the code a little
 - Add new options on the manager:
-  - `ManagerOption.autoChecks.pluginValidations` ... default is true, set to false if you want to skip plugin validations
-  - `ManagerOption.autoChecks.sourcesValidations` ... default is true, set to false if you want to skip sources/filters validations
+    - `ManagerOption.autoChecks.pluginValidations` ... default is true, set to false if you want to skip plugin validations
+    - `ManagerOption.autoChecks.sourcesValidations` ... default is true, set to false if you want to skip sources/filters validations
 
 ## **Version 2.7.4**
 
@@ -121,8 +146,8 @@ Others:
 ## **Version 2.7.0**
 
 - BREAKING CHANGE: When using the `queue.remove()` function, the removed tracks are now added via unshift to the queue.previous array instead of push.
-  - This means that the order of removed tracks is reversed in the previous array.
-  - This was done to maintain consistency with how tracks are added to the previous array when skipped or played.
+    - This means that the order of removed tracks is reversed in the previous array.
+    - This was done to maintain consistency with how tracks are added to the previous array when skipped or played.
 - Added some conditional chaining and further if statements to make the library more robust.
 - Added additional ways of finding the closest track for resolving unresolved tracks. (isrc) and described that process.
 
@@ -162,13 +187,13 @@ if (voice) fttsParams.append("voice", voice);
 if (speed) fttsParams.append("speed", speed);
 
 const response = await player.search(
-  {
-    // For flowerytts you need to send a URL
-    // and if you want to add optiojns, this is how you add the params to the query..
-    query: `${encodeURI(query)}${fttsParams.size ? `?${fttsParams.toString()}` : ""}`,
-    source: "ftts",
-  },
-  interaction.user,
+    {
+        // For flowerytts you need to send a URL
+        // and if you want to add optiojns, this is how you add the params to the query..
+        query: `${encodeURI(query)}${fttsParams.size ? `?${fttsParams.toString()}` : ""}`,
+        source: "ftts",
+    },
+    interaction.user,
 );
 ```
 
@@ -180,10 +205,10 @@ const response = await player.search(
 - The code got **re-formatted and re-structured**, no code-changes are needed to be made, but it's now cleaner & more readable in some areas
 - The same for the testbot Folder(s), also it imports lavalink-client directly, so you can just copy it and move on from it.
 - **Some minor Fixess**:
-  - Autoplay sometimes doesn't get called when previousAutoplay call failed.
-  - remove structuredClone so that it works in bun more stable
-  - Player Options Validation also allows single property objects
-  - Some typos were fixed
+    - Autoplay sometimes doesn't get called when previousAutoplay call failed.
+    - remove structuredClone so that it works in bun more stable
+    - Player Options Validation also allows single property objects
+    - Some typos were fixed
 
 ---
 
@@ -192,7 +217,7 @@ const response = await player.search(
 - **`managerOptions#playerOptions.onDisconnect.autoReconnectOnlyWithTracks`** added to control whether to try reconnecting only when there are tracks in the queue / current track or not
 - Added a new debug log for that
 - Added the try to play the next track if there is no current track
-  - _Fixes a problem where auto-reconnect on-Disconnect while the queue was empty caused the player to get destroyed._
+    - _Fixes a problem where auto-reconnect on-Disconnect while the queue was empty caused the player to get destroyed._
 
 ---
 
@@ -220,14 +245,14 @@ const response = await player.search(
 - Added attributes for git linting
 - Removed the old (gitbook) documentation, and swapped it to a **NEW TSDOC Themed Documentation** via astro.dev and mdx
 - **Added new player events**:
-  - **`playerMuteChange`** ➡️ `(player, selfMuted, serverMuted) => {}`
-  - **`playerDeafChange`** ➡️ `(player, selfDeafed, serverDeafed) => {}`
-  - **`playerSuppressChange`** ➡️ `(player, suppress) => {}`
-  - **`playerQueueEmptyStart`** ➡️ `(player, timeoutMs) => {}` (Queue empty handler started)
-  - **`playerQueueEmptyEnd`** ➡️ `(player) => {}` (Queue empty handler finished/destroyed player)
-  - **`playerQueueEmptyCancel`** ➡️ `(player) => {}` (Queue empty handler cancelled)
-  - **`playerVoiceJoin`** ➡️ `(player, userId) => {}` (User joins player VC)
-  - **`playerVoiceLeave`** ➡️ `(player, userId) => {}` (User leaves player VC)
+    - **`playerMuteChange`** ➡️ `(player, selfMuted, serverMuted) => {}`
+    - **`playerDeafChange`** ➡️ `(player, selfDeafed, serverDeafed) => {}`
+    - **`playerSuppressChange`** ➡️ `(player, suppress) => {}`
+    - **`playerQueueEmptyStart`** ➡️ `(player, timeoutMs) => {}` (Queue empty handler started)
+    - **`playerQueueEmptyEnd`** ➡️ `(player) => {}` (Queue empty handler finished/destroyed player)
+    - **`playerQueueEmptyCancel`** ➡️ `(player) => {}` (Queue empty handler cancelled)
+    - **`playerVoiceJoin`** ➡️ `(player, userId) => {}` (User joins player VC)
+    - **`playerVoiceLeave`** ➡️ `(player, userId) => {}` (User leaves player VC)
 - Removed `playerVoiceEmptyStart`, `playerVoiceEmptyEnd`, and `playerVoiceEmptyCancel` again.
 
 ---
@@ -235,20 +260,20 @@ const response = await player.search(
 ## **Version 2.3.6**
 
 - **Added Lyrics Support**:
-  - **New Player Functions**:
-    - **`player.getCurrentLyrics(false);`**
-    - **`player.getLyrics(track, true);`**
-    - **`player.subscribeLyrics();`**
-    - **`player.unsubscribeLyrics();`**
-  - **New Node Functions**:
-    - **`player.node.lyrics.getCurrent(player.guildId, false);`**
-    - **`player.node.lyrics.get(track, true);`**
-    - **`player.node.lyrics.subscribe(player.guildId);`**
-    - **`player.node.lyrics.unsubscribe(player.guildId);`**
-  - **New Manager Events for Lyrics**:
-    - **`lavalink.on("LyricsLine", (player, track, lyricsLine) => {});`**
-    - **`lavalink.on("LyricsFound", (player, track, data) => {});`**
-    - **`lavalink.on("LyricsNotFound", (player, track, lyricsLine) => {});`**
+    - **New Player Functions**:
+        - **`player.getCurrentLyrics(false);`**
+        - **`player.getLyrics(track, true);`**
+        - **`player.subscribeLyrics();`**
+        - **`player.unsubscribeLyrics();`**
+    - **New Node Functions**:
+        - **`player.node.lyrics.getCurrent(player.guildId, false);`**
+        - **`player.node.lyrics.get(track, true);`**
+        - **`player.node.lyrics.subscribe(player.guildId);`**
+        - **`player.node.lyrics.unsubscribe(player.guildId);`**
+    - **New Manager Events for Lyrics**:
+        - **`lavalink.on("LyricsLine", (player, track, lyricsLine) => {});`**
+        - **`lavalink.on("LyricsFound", (player, track, data) => {});`**
+        - **`lavalink.on("LyricsNotFound", (player, track, lyricsLine) => {});`**
 
 ---
 
@@ -274,8 +299,8 @@ const response = await player.search(
 - Added Missing function calls for the **QueueWatcher** of tracksRemoved within the `queue.remove()` function
 - **Added new DestroyReasons**: `TrackStuckMaxTracksErroredPerTime`, `TrackErrorMaxTracksErroredPerTime`
 - **Added new Prevention Systems for CrashbackLoop recognitions**:
-  - **`managerOptions.playerOptions.maxErrorsPerTime`**: (Default: `{ threshold: 10_000, maxAmount: 3 }`) - Destroys player if too many errors occur in a given time.
-  - **`managerOptions.playerOptions.minAutoPlayMs`**: (Default: `10_000`) - Prevents Autoplay from triggering too quickly after a previous execution to avoid crashback loops.
+    - **`managerOptions.playerOptions.maxErrorsPerTime`**: (Default: `{ threshold: 10_000, maxAmount: 3 }`) - Destroys player if too many errors occur in a given time.
+    - **`managerOptions.playerOptions.minAutoPlayMs`**: (Default: `10_000`) - Prevents Autoplay from triggering too quickly after a previous execution to avoid crashback loops.
 - **Added new Event "debug"**: `LavalinkManager#debug(event:DebugEvents, data:{ state: "log" | "warn" | "error", message:string, functionLayer:string, error?:Error })` - Emitted when `LavalinkManager.options.advancedOptions.enableDebugEvents` is set to `true`.
 
 ---
@@ -303,8 +328,8 @@ const response = await player.search(
 - Fixed a bug in **`player.pause()`** where resuming after a long pause could cause an auto-skip.
 - Fixed the handling of the previous track array (sometimes added "null").
 - **Added new queue functions**:
-  - **`const previousTrack = await player.queue.shiftPrevious()`**: Removes and returns the previously played track from the `player.queue.previous` array.
-  - **`await player.queue.remove(removeQuery)`**: Remove function supporting an array of Tracks/UnresolvedTracks, single Track/UnresolvedTrack, array of track-indexes, or a single track index.
+    - **`const previousTrack = await player.queue.shiftPrevious()`**: Removes and returns the previously played track from the `player.queue.previous` array.
+    - **`await player.queue.remove(removeQuery)`**: Remove function supporting an array of Tracks/UnresolvedTracks, single Track/UnresolvedTrack, array of track-indexes, or a single track index.
 - Added **`track.pluginInfo.clientData?.previousTrack`** handling to prevent a track from being added to the previous track array.
 
 ---
@@ -321,12 +346,12 @@ const extraParams = new URLSearchParams();
 if (voice) extraParams.append(`voice`, voice);
 // ...
 const response = await player.search(
-  {
-    query: `${query}`,
-    extraQueryUrlParams: extraParams,
-    source: "ftts",
-  },
-  interaction.user,
+    {
+        query: `${query}`,
+        extraQueryUrlParams: extraParams,
+        source: "ftts",
+    },
+    interaction.user,
 );
 ```
 
@@ -355,11 +380,11 @@ const response = await player.search(
 - Fixed that, if you **skip and have trackloop enabled, it doesn't skip the track**.
 - **Reworked the Filter Manager for custom filters** via [LavalinkFilterPlugin](https://github.com/rohank05/lavalink-filter-plugin) / [LavalinkLavaDSPX-Plugin](https://github.com/devoxin/LavaDSPX-Plugin/).
 - They now have individual **state-variables (booleans)** under `player.filterManager.filters`:
-  - `player.filterManager.filters.lavalinkLavaDspxPlugin` (`.echo`, `.normalization`, `.highPass`, `.lowPass`)
-  - `player.filterManager.filters.lavalinkFilterPlugin` (`.echo`, `.reverb`)
+    - `player.filterManager.filters.lavalinkLavaDspxPlugin` (`.echo`, `.normalization`, `.highPass`, `.lowPass`)
+    - `player.filterManager.filters.lavalinkFilterPlugin` (`.echo`, `.reverb`)
 - They also now have individual **state-changing-methods** under `player.filterManager`:
-  - `player.filterManager.lavalinkLavaDspxPlugin.toggleEcho(...)`, `.toggleNormalization(...)`, `.toggleHighPass(...)`, `.toggleLowPass(...)`
-  - `player.filterManager.lavalinkFilterPlugin.toggleEcho(...)`, `.toggleReverb(...)`
+    - `player.filterManager.lavalinkLavaDspxPlugin.toggleEcho(...)`, `.toggleNormalization(...)`, `.toggleHighPass(...)`, `.toggleLowPass(...)`
+    - `player.filterManager.lavalinkFilterPlugin.toggleEcho(...)`, `.toggleReverb(...)`
 
 ---
 
@@ -399,10 +424,10 @@ const response = await player.search(
 ## **Version 1.2.1**
 
 - **Adjusted `player.stopPlaying()` parameters**: `stopPlaying(clearQueue:boolean = true, executeAutoplay:boolean = false)`.
-  - Default behavior is now to clear the queue and not execute Autoplay.
+    - Default behavior is now to clear the queue and not execute Autoplay.
 - Fixed that it looped the current track if `repeatmode === "track" / "queue"` when stopping.
 - Implemented a **`parseLavalinkConnUrl(connectionUrl:string)` Util Function** to parse connection data from a URL string in the pattern: `lavalink://<nodeId>:<nodeAuthorization(Password)>@<NodeHost>:<NodePort>`.
-  - Example: `parseLavalinkConnUrl("lavalink://LavalinkNode_1:strong%23password1@localhost:2345")` returns `{ id: "LavalinkNode_1", authorization: "strong#password1", host: "localhost", port: 2345 }`
+    - Example: `parseLavalinkConnUrl("lavalink://LavalinkNode_1:strong%23password1@localhost:2345")` returns `{ id: "LavalinkNode_1", authorization: "strong#password1", host: "localhost", port: 2345 }`
 
 ---
 
@@ -410,14 +435,14 @@ const response = await player.search(
 
 - Added **`player.stopPlaying()`**: **Clears the Queue** and **stops playing**, **without destroying the Player**
 - **Adjusted `Player.skip()`**:
-  - Added `throwError` Property: `player.skip(skipTo?:number = 0, throwError?:boolean = true)`.
-  - If `throwError = false` and the queue is empty, it won't throw an error (behaves like `stopPlaying`).
+    - Added `throwError` Property: `player.skip(skipTo?:number = 0, throwError?:boolean = true)`.
+    - If `throwError = false` and the queue is empty, it won't throw an error (behaves like `stopPlaying`).
 - **Added all Events and Methods from the [SponsorBlock Plugin]** (e.g., `player.getSponsorBlock()`, `player.setSponsorBlock()`, `player.deleteSponsorBlock()`).
-  - **Manager Events added**: `"SegmentsLoaded"`, `"SegmentSkipped"`, `"ChapterStarted"`, `"ChaptersLoaded"`
+    - **Manager Events added**: `"SegmentsLoaded"`, `"SegmentSkipped"`, `"ChapterStarted"`, `"ChaptersLoaded"`
 - Example Bot shows how to "disable" / "enable" Autoplay with bot data variables.
 - Added **`ManagerOptions#emitNewSongsOnly`**: If true, it won't emit the `"trackStart"` Event if track.loop is active or the new current track is the same as the previous one.
 - **Added URL/Query Blacklist/Whitelist options to `ManagerOptions`**:
-  - **`ManagerOptions#linksBlacklist`** (RegExp/strings to block queries/links)
-  - **`ManagerOptions#linksWhitelist`** (RegExp/strings for links only; if no match, request is blocked)
-  - **`ManagerOptions#linksAllowed`** (If set to false, blocks all requests that are links)
+    - **`ManagerOptions#linksBlacklist`** (RegExp/strings to block queries/links)
+    - **`ManagerOptions#linksWhitelist`** (RegExp/strings for links only; if no match, request is blocked)
+    - **`ManagerOptions#linksAllowed`** (If set to false, blocks all requests that are links)
 - **Moved `ManaagerOptions#debugOptions`** to **`ManaagerOptions#advancedOptions.debugOptions`**

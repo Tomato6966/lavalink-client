@@ -14,7 +14,8 @@ export class PlayerSaver extends JSONStore {
         lavalink.on("playerUpdate", (oldPlayer, newPlayer) => {
             const newPlayerData = newPlayer.toJSON();
             // we only save the data if anything changes of what we need later on
-            if (!oldPlayer ||
+            if (
+                !oldPlayer ||
                 oldPlayer.voiceChannelId !== newPlayerData.voiceChannelId ||
                 oldPlayer.textChannelId !== newPlayerData.textChannelId ||
                 oldPlayer.options.selfDeaf !== newPlayerData.options.selfDeaf ||
@@ -25,15 +26,13 @@ export class PlayerSaver extends JSONStore {
                 oldPlayer.options.instaUpdateFiltersFix !== newPlayerData.options.instaUpdateFiltersFix ||
                 oldPlayer.options.vcRegion !== newPlayerData.options.vcRegion
             ) {
-                this.set(newPlayer.guildId, JSON.stringify(
-                    newPlayerData
-                ));
+                this.set(newPlayer.guildId, JSON.stringify(newPlayerData));
             }
         });
     }
     async getAllLastNodeSessions() {
         try {
-            const datas = Array.from(this.data.values())
+            const datas = Array.from(this.data.values());
             const sessionIds = new Map();
             for (const theData of datas) {
                 const json = JSON.parse(theData);
@@ -46,7 +45,7 @@ export class PlayerSaver extends JSONStore {
     }
     async getPlayer(guildId: string) {
         const data = await this.get(guildId);
-        return data ? JSON.parse(data) as PlayerJson : null;
+        return data ? (JSON.parse(data) as PlayerJson) : null;
     }
     async delPlayer(guildId: string) {
         await this.delete(guildId);

@@ -12,27 +12,13 @@
         "esModuleInterop": true,
         "allowSyntheticDefaultImports": true,
         "forceConsistentCasingInFileNames": true,
-        "types": [
-            "node",
-            "ws"
-        ],
-        "lib": [
-            "ESNext",
-            "DOM"
-        ]
+        "types": ["node", "ws"],
+        "lib": ["ESNext", "DOM"]
     },
-    "include": [
-        "src/**/*.ts"
-    ],
-    "exclude": [
-        "node_modules",
-        "dist",
-        "docs",
-        "config",
-        "testBot",
-    ],
+    "include": ["src/**/*.ts"],
+    "exclude": ["node_modules", "dist", "docs", "config", "testBot"],
     "tsc-alias": {
         "verbose": false,
-        "resolveFullPaths": true,
+        "resolveFullPaths": true
     }
 }

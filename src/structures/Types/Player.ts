@@ -1,9 +1,8 @@
 import type { DestroyReasons, DisconnectReasons } from "../Constants";
-
 import type { LavalinkNode } from "../Node";
+
 import type { EQBand, FilterData, LavalinkFilterData } from "./Filters";
 import type { StoredQueue } from "./Queue";
-
 import type { Track, UnresolvedTrack } from "./Track";
 import type { Base64, LavalinkPlayerVoiceOptions } from "./Utils";
 
@@ -46,7 +45,7 @@ export interface PlayerJson {
         ws: number;
         /** Avg. calc. Ping to the lavalink server */
         lavalink: number;
-    }
+    };
     /** Equalizer Bands used in lavalink */
     equalizer: EQBand[];
     /** The Id of the last used node */

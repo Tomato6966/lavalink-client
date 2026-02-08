@@ -1,21 +1,24 @@
 import {
-	AutocompleteInteraction, ChatInputCommandInteraction, Client, SlashCommandBuilder,
-	SlashCommandSubcommandBuilder, SlashCommandSubcommandGroupBuilder,
-	SlashCommandSubcommandsOnlyBuilder
+    AutocompleteInteraction,
+    ChatInputCommandInteraction,
+    Client,
+    SlashCommandBuilder,
+    SlashCommandSubcommandBuilder,
+    SlashCommandSubcommandGroupBuilder,
+    SlashCommandSubcommandsOnlyBuilder,
 } from "discord.js";
+import type { LavalinkManager, MiniMap } from "lavalink-client";
 import { RedisClientType } from "redis";
 
-import { myCustomPlayer } from "../Utils/CustomClasses/customPlayerClass";
-
-import type { LavalinkManager, MiniMap } from "lavalink-client";
 import type { JSONStore } from "../Utils/CustomClasses";
+import { myCustomPlayer } from "../Utils/CustomClasses/customPlayerClass";
 declare type InteractionExecuteFN = (client: BotClient, interaction: ChatInputCommandInteraction<"cached">) => any;
 declare type AutoCompleteExecuteFN = (client: BotClient, interaction: AutocompleteInteraction) => any;
 
 export interface CustomRequester {
-    id: string,
-    username: string,
-    avatar?: string,
+    id: string;
+    username: string;
+    avatar?: string;
 }
 
 export interface Command {
@@ -33,7 +36,7 @@ export interface SubCommand {
 }
 
 export interface Event {
-    name: string,
+    name: string;
     execute: (client: BotClient, ...params: any) => any;
 }
 

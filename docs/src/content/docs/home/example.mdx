@@ -3,17 +3,13 @@ title: Example Guide
 description: Learn how to use the lavalink@v4 Client.
 ---
 
-
 ```ts
 import { LavalinkManager } from "lavalink-client";
 import { Client, GatewayIntentBits } from "discord.js"; // example for a discord bot
 
 // you might want to extend the types of the client, to bind lavalink to it.
 const client = new Client({
-    intents: [
-        GatewayIntentBits.Guilds,
-        GatewayIntentBits.GuildVoiceStates,
-    ]
+    intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildVoiceStates],
 });
 
 // create instance
@@ -24,7 +20,7 @@ client.lavalink = new LavalinkManager({
             host: "localhost",
             port: 2333,
             id: "testnode",
-        }
+        },
     ],
     sendToShard: (guildId, payload) => client.guilds.cache.get(guildId)?.shard?.send(payload),
     autoSkip: true,
@@ -34,46 +30,49 @@ client.lavalink = new LavalinkManager({
     },
 });
 
-client.on("raw", d => client.lavalink.sendRawData(d)); // send raw data to lavalink-client to handle stuff
+client.on("raw", (d) => client.lavalink.sendRawData(d)); // send raw data to lavalink-client to handle stuff
 
 client.on("ready", () => {
     client.lavalink.init(client.user); // init lavalink
 });
-
 ```
 
 # All Events:
 
 ## On **Lavalink-Manager**:
-> *Player related logs*
+
+> _Player related logs_
+
 - `playerCreate` ➡️ `(player) => {}`
 - `playerDestroy` ➡️ `(player, reason) => {}`
 - `playerDisconnect` ➡️ `(player, voiceChannelId) => {}`
 - `playerMove` ➡️ `(player, oldChannelId, newChannelId) => {}`
-  - Updating the voice channel is handled by the client automatically
+    - Updating the voice channel is handled by the client automatically
 - `playerSocketClosed` ➡️ `(player, payload) => {}`
 
-> *Track / Manager related logs*
+> _Track / Manager related logs_
+
 - `trackStart` ➡️ `(player, track, payload) => {}`
 - `trackStuck` ➡️ `(player, track, payload) => {}`
 - `trackError` ➡️ `(player, track, payload) => {}`
 - `trackEnd` ➡️ `(player, track, payload) => {}`
 - `queueEnd` ➡️ `(player, track, payload) => {}`
-- `debug` ➡️ `(eventKey, eventData) => {}` *... for debugging errors, need to enable it via `ManagerOptions#advancedOptions#enableDebugEvents: true`*
+- `debug` ➡️ `(eventKey, eventData) => {}` _... for debugging errors, need to enable it via `ManagerOptions#advancedOptions#enableDebugEvents: true`_
 - `playerUpdate` ➡️ `(player) => {}`
 
 ```js
 client.lavalink.on("create", (node, payload) => {
-  console.log(`The Lavalink Node #${node.id} connected`);
+    console.log(`The Lavalink Node #${node.id} connected`);
 });
 // for all node based errors:
 client.lavalink.on("error", (node, error, payload) => {
-  console.error(`The Lavalink Node #${node.id} errored: `, error);
-  console.error(`Error-Payload: `, payload)
+    console.error(`The Lavalink Node #${node.id} errored: `, error);
+    console.error(`Error-Payload: `, payload);
 });
 ```
 
 ## On **Node-Manager**:
+
 - `raw` ➡️ `(node, payload) => {}`
 - `disconnect` ➡️ `(node, reason) => {}`
 - `connect` ➡️ `(node) => {}`
@@ -82,22 +81,25 @@ client.lavalink.on("error", (node, error, payload) => {
 - `destroy` ➡️ `(node) => {}`
 - `error` ➡️ `(node, error, payload) => {}`
 - `resumed` ➡️ `(node, payload, players) => {}`
-  - Resuming needs to be handled manually by you *(aka add the players to the manager)*
+    - Resuming needs to be handled manually by you _(aka add the players to the manager)_
 - e.g. of listening to node events:
+
 ```ts
 client.lavalink.nodeManager.on("create", (node, payload) => {
-  console.log(`The Lavalink Node #${node.id} connected`);
+    console.log(`The Lavalink Node #${node.id} connected`);
 });
 // for all node based errors:
 client.lavalink.nodeManager.on("error", (node, error, payload) => {
-  console.error(`The Lavalink Node #${node.id} errored: `, error);
-  console.error(`Error-Payload: `, payload)
+    console.error(`The Lavalink Node #${node.id} errored: `, error);
+    console.error(`Error-Payload: `, payload);
 });
 ```
 
 ## How to log queue logs?
+
 > When creating the manager, add the option: `queueOptions.queueChangesWatcher: new myCustomWatcher(botClient)`
 > E.g:
+
 ```ts
 import { QueueChangesWatcher, LavalinkManager } from "lavalink-client";
 
@@ -106,33 +108,40 @@ class myCustomWatcher implements QueueChangesWatcher {
         this.client = client;
     }
     shuffled(guildId, oldStoredQueue, newStoredQueue) {
-        console.log(`${this.client.guilds.cache.get(guildId)?.name || guildId}: Queue got shuffled`)
+        console.log(`${this.client.guilds.cache.get(guildId)?.name || guildId}: Queue got shuffled`);
     }
     tracksAdd(guildId, tracks, position, oldStoredQueue, newStoredQueue) {
-        console.log(`${this.client.guilds.cache.get(guildId)?.name || guildId}: ${tracks.length} Tracks got added into the Queue at position #${position}`);
+        console.log(
+            `${this.client.guilds.cache.get(guildId)?.name || guildId}: ${tracks.length} Tracks got added into the Queue at position #${position}`,
+        );
     }
     tracksRemoved(guildId, tracks, position, oldStoredQueue, newStoredQueue) {
-        console.log(`${this.client.guilds.cache.get(guildId)?.name || guildId}: ${tracks.length} Tracks got removed from the Queue at position #${position}`);
+        console.log(
+            `${this.client.guilds.cache.get(guildId)?.name || guildId}: ${tracks.length} Tracks got removed from the Queue at position #${position}`,
+        );
     }
 }
 
 client.lavalink = new LavalinkManager({
-  // ... other options
-  queueOptions: {
-    queueChangesWatcher: new myCustomWatcher(client)
-  }
-})
+    // ... other options
+    queueOptions: {
+        queueChangesWatcher: new myCustomWatcher(client),
+    },
+});
 ```
 
 ## How to do resuming
 
-1. You need to enable resuming on a __connected__ Lavalink node : **` node.updateSession(true, 360e3) `**
+1. You need to enable resuming on a **connected** Lavalink node : **`node.updateSession(true, 360e3)`**
 2. The NodeManager#resumed event will emit when the node resumes, you retrieves all fetchedPlayers (fetched by the client), and thus all you need to do is re-create all player instances (and possibly the queues too)
-  - For that is the queuestore useful
-  - To save the playerData you can utilize smt like playerUpdate event.
+
+- For that is the queuestore useful
+- To save the playerData you can utilize smt like playerUpdate event.
 
 ## Resuming full Example
+
 Full code sample: can be found on the [Testbot in here](https://github.com/Tomato6966/lavalink-client/blob/main/testBot/Utils/handleResuming.ts)
+
 ```js
 // but here is the schema:
 client.lavalink.nodeManager.on("connect", (node) => node.updateSession(true, 360e3));
@@ -199,7 +208,6 @@ client.lavalink.on("playerDestroy", (player) => {
 })
 ```
 
-
 ## How to Debug the Client
 
 ```ts
@@ -226,13 +234,13 @@ client.lavalink = new LavalinkManager<myCustomPlayer>({
 */
 client.lavalink.on("debug", (eventKey, eventData) => {
     // skip specific log
-    if(eventKey === DebugEvents.NoAudioDebug && eventData.message === "Manager is not initated yet") return;
+    if (eventKey === DebugEvents.NoAudioDebug && eventData.message === "Manager is not initated yet") return;
     // skip specific event log of a log-level-state "log"
-    if(eventKey === DebugEvents.PlayerUpdateSuccess && eventData.state === "log") return;
+    if (eventKey === DebugEvents.PlayerUpdateSuccess && eventData.state === "log") return;
     console.group("Lavalink-Client-Debug:");
     console.log("-".repeat(20));
     console.debug(`[${eventKey}]`);
-    console.debug(eventData)
+    console.debug(eventData);
     console.log("-".repeat(20));
     console.groupEnd();
 });

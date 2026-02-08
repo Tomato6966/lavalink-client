@@ -1,5 +1,5 @@
-import type { LavalinkTrack } from "./Track";
 import type { LavalinkFilterData } from "./Filters";
+import type { LavalinkTrack } from "./Track";
 
 export type NodeLinkEventTypes =
     | "PlayerCreatedEvent"
@@ -83,22 +83,36 @@ export interface MixEndedEvent extends NodeLinkBaseEvent {
     reason: "FINISHED" | "REMOVED" | "ERROR" | "MAIN_ENDED" | string;
 }
 
-export type NodeLinkEventPayload<T extends NodeLinkEventTypes> =
-    T extends "PlayerCreatedEvent" ? PlayerCreatedEvent :
-    T extends "PlayerDestroyedEvent" ? PlayerDestroyedEvent :
-    T extends "PlayerConnectedEvent" ? PlayerConnectedEvent :
-    T extends "PlayerReconnectingEvent" ? PlayerReconnectingEvent :
-    T extends "VolumeChangedEvent" ? VolumeChangedEvent :
-    T extends "FiltersChangedEvent" ? FiltersChangedEvent :
-    T extends "SeekEvent" ? SeekEvent :
-    T extends "PauseEvent" ? PauseEvent :
-    T extends "ConnectionStatusEvent" ? ConnectionStatusEvent :
-    T extends "MixStartedEvent" ? MixStartedEvent :
-    T extends "MixEndedEvent" ? MixEndedEvent :
-    never;
+export type NodeLinkEventPayload<T extends NodeLinkEventTypes> = T extends "PlayerCreatedEvent"
+    ? PlayerCreatedEvent
+    : T extends "PlayerDestroyedEvent"
+      ? PlayerDestroyedEvent
+      : T extends "PlayerConnectedEvent"
+        ? PlayerConnectedEvent
+        : T extends "PlayerReconnectingEvent"
+          ? PlayerReconnectingEvent
+          : T extends "VolumeChangedEvent"
+            ? VolumeChangedEvent
+            : T extends "FiltersChangedEvent"
+              ? FiltersChangedEvent
+              : T extends "SeekEvent"
+                ? SeekEvent
+                : T extends "PauseEvent"
+                  ? PauseEvent
+                  : T extends "ConnectionStatusEvent"
+                    ? ConnectionStatusEvent
+                    : T extends "MixStartedEvent"
+                      ? MixStartedEvent
+                      : T extends "MixEndedEvent"
+                        ? MixEndedEvent
+                        : never;
 
-export type HealthStatusThreshold = { excellent: number, good: number, fair: number, poor: number }
-export type HealthStatusThresholdOptions = { cpu: Partial<HealthStatusThreshold>, memory: Partial<HealthStatusThreshold>, ping: Partial<HealthStatusThreshold> };
+export type HealthStatusThreshold = { excellent: number; good: number; fair: number; poor: number };
+export type HealthStatusThresholdOptions = {
+    cpu: Partial<HealthStatusThreshold>;
+    memory: Partial<HealthStatusThreshold>;
+    ping: Partial<HealthStatusThreshold>;
+};
 export type NodeMetricSummary = {
     cpuLoad: number;
     systemLoad: number;
@@ -108,7 +122,7 @@ export type NodeMetricSummary = {
     uptime: number;
     ping: number;
     frameDeficit: number;
-}
+};
 export type HealthStatusObject = {
     status: HealthStatusKeys;
     performance: HealthPerformanceKeys;
@@ -126,7 +140,7 @@ export type HealthStatusObject = {
         ping: number;
         frameDeficit: number;
     };
-}
+};
 
 export type HealthPerformanceKeys = "excellent" | "good" | "fair" | "poor";
 export type HealthStatusKeys = "healthy" | "degraded" | "critical" | "offline";

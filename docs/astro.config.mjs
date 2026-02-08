@@ -1,7 +1,8 @@
+import starlight from "@astrojs/starlight";
 // @ts-check
 import { defineConfig } from "astro/config";
-import starlight from "@astrojs/starlight";
-import starlightTypeDoc, { typeDocSidebarGroup } from "starlight-typedoc"
+import starlightTypeDoc, { typeDocSidebarGroup } from "starlight-typedoc";
+
 import { optimizeTypeDocTables } from "./post_build.mjs";
 
 // https://astro.build/config
@@ -12,24 +13,23 @@ export default defineConfig({
         starlight({
             title: "Lavalink Client",
             logo: {
-
-                "src": "./src/assets/Lavalink-Client.png"
+                src: "./src/assets/Lavalink-Client.png",
             },
             social: [
                 {
                     icon: "discord",
                     href: "https://discord.gg/lavalink-1082302532421943407",
-                    label: "Support-discord"
+                    label: "Support-discord",
                 },
                 {
                     icon: "seti:github",
                     href: "https://github.com/Tomato6966/lavalink-client",
-                    label: "Github Repository"
+                    label: "Github Repository",
                 },
                 {
                     icon: "email",
                     href: "mailto:chrissy@mivator.com",
-                    label: "Send an Email"
+                    label: "Send an Email",
                 },
             ],
             editLink: {
@@ -84,7 +84,7 @@ export default defineConfig({
                         },
                         {
                             label: "Checkout Docs (Manager-Class)",
-                            link: "/api/lavalinkmanager/classes/lavalinkmanager"
+                            link: "/api/lavalinkmanager/classes/lavalinkmanager",
                         },
                     ],
                 },
@@ -107,8 +107,8 @@ export default defineConfig({
                         {
                             label: "Version-Update-Log",
                             link: "/extra/version-log",
-                        }
-                    ]
+                        },
+                    ],
                 },
                 typeDocSidebarGroup,
                 {
@@ -125,16 +125,14 @@ export default defineConfig({
                 },
                 {
                     label: "Official Lavalink-Discord & - SUPPORT",
-                    link: "https://discord.gg/lavalink-1082302532421943407"
+                    link: "https://discord.gg/lavalink-1082302532421943407",
                 },
                 {
                     label: "Official Lavalink-Web",
-                    link: "https://lavalink.dev"
-                }
+                    link: "https://lavalink.dev",
+                },
             ],
-            customCss: [
-                "./src/styles/global.css"
-            ]
+            customCss: ["./src/styles/global.css"],
         }),
         optimizeTypeDocTables(),
     ],

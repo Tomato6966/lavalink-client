@@ -2,23 +2,24 @@ import { URL } from "node:url";
 import { isRegExp } from "node:util/types";
 
 import { DebugEvents } from "./Constants";
-import { DefaultSources, LavalinkPlugins, SourceLinksRegexes } from "./LavalinkManagerStatics";
-
-import type { LavalinkNodeOptions } from "./Types/Node";
-
-import type {
-    LavalinkSearchPlatform, LavaSearchQuery, MiniMapConstructor, SearchPlatform, SearchQuery, SearchResult
-} from "./Types/Utils";
-
 import type { LavalinkManager } from "./LavalinkManager";
+import { DefaultSources, LavalinkPlugins, SourceLinksRegexes } from "./LavalinkManagerStatics";
 import type { LavalinkNode } from "./Node";
 import type { Player } from "./Player";
+import type { LavalinkNodeOptions } from "./Types/Node";
 import type { LavalinkTrack, Track, UnresolvedQuery, UnresolvedTrack } from "./Types/Track";
+import type {
+    LavalinkSearchPlatform,
+    LavaSearchQuery,
+    MiniMapConstructor,
+    SearchPlatform,
+    SearchQuery,
+    SearchResult,
+} from "./Types/Utils";
 export const TrackSymbol = Symbol("LC-Track");
 export const UnresolvedTrackSymbol = Symbol("LC-Track-Unresolved");
 export const QueueSymbol = Symbol("LC-Queue");
 export const NodeSymbol = Symbol("LC-Node");
-
 
 /** @hidden */
 const escapeRegExp = (str: string): string => str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
@@ -29,14 +30,15 @@ const escapeRegExp = (str: string): string => str.replace(/[.*+?^${}()|[\]\\]/g,
  * @returns
  */
 export function parseLavalinkConnUrl(connectionUrl: string) {
-    if (!connectionUrl.startsWith("lavalink://")) throw new Error(`ConnectionUrl (${connectionUrl}) must start with 'lavalink://'`);
+    if (!connectionUrl.startsWith("lavalink://"))
+        throw new Error(`ConnectionUrl (${connectionUrl}) must start with 'lavalink://'`);
     const parsed = new URL(connectionUrl);
     return {
         authorization: parsed.password,
         id: parsed.username,
         host: parsed.hostname,
         port: Number(parsed.port),
-    }
+    };
 }
 
 export class ManagerUtils {
@@ -49,21 +51,24 @@ export class ManagerUtils {
         return {
             clientData: clientData,
             ...(data.pluginInfo || (data as any).plugin),
-        }
+        };
     }
 
     buildTrack(data: LavalinkTrack | Track, requester: unknown) {
-        if (!data?.encoded || typeof data.encoded !== "string") throw new RangeError("Argument 'data.encoded' must be present.");
+        if (!data?.encoded || typeof data.encoded !== "string")
+            throw new RangeError("Argument 'data.encoded' must be present.");
         if (!data.info) throw new RangeError("Argument 'data.info' must be present.");
         try {
-            let transformedRequester = typeof requester === "object"
-                ? this.getTransformedRequester(requester)
-                : undefined;
+            let transformedRequester =
+                typeof requester === "object" ? this.getTransformedRequester(requester) : undefined;
 
-            if (!transformedRequester && typeof data?.userData?.requester === "object" && data.userData.requester !== null) {
+            if (
+                !transformedRequester &&
+                typeof data?.userData?.requester === "object" &&
+                data.userData.requester !== null
+            ) {
                 transformedRequester = this.getTransformedRequester(data.userData.requester);
             }
-
 
             const r = {
                 encoded: data.encoded,
@@ -81,7 +86,7 @@ export class ManagerUtils {
                 },
                 userData: {
                     ...data.userData,
-                    requester: transformedRequester
+                    requester: transformedRequester,
                 },
                 pluginInfo: this.buildPluginInfo(data, "clientData" in data ? data.clientData : {}),
                 requester: transformedRequester || this.getTransformedRequester(this.LavalinkManager?.options?.client),
@@ -107,31 +112,37 @@ export class ManagerUtils {
      * @param requester
      */
     buildUnresolvedTrack(query: UnresolvedQuery | UnresolvedTrack, requester: unknown) {
-        if (typeof query === "undefined")
-            throw new RangeError('Argument "query" must be present.');
+        if (typeof query === "undefined") throw new RangeError('Argument "query" must be present.');
 
         const unresolvedTrack: UnresolvedTrack = {
             encoded: query.encoded || undefined,
-            info: (query as UnresolvedTrack).info ? (query as UnresolvedTrack).info : (query as UnresolvedQuery).title ? query as UnresolvedQuery : undefined,
+            info: (query as UnresolvedTrack).info
+                ? (query as UnresolvedTrack).info
+                : (query as UnresolvedQuery).title
+                  ? (query as UnresolvedQuery)
+                  : undefined,
             pluginInfo: this.buildPluginInfo(query),
             requester: this.getTransformedRequester(requester),
             async resolve(player: Player) {
                 const closest = await getClosestTrack(this, player);
                 if (!closest) throw new SyntaxError("No closest Track found");
 
-                for (const prop of Object.getOwnPropertyNames(this)) delete this[prop]
+                for (const prop of Object.getOwnPropertyNames(this)) delete this[prop];
                 // delete symbol
                 delete this[UnresolvedTrackSymbol];
                 // assign new symbol
                 Object.defineProperty(this, TrackSymbol, { configurable: true, value: true });
 
                 return Object.assign(this, closest);
-            }
-        }
+            },
+        };
 
         if (!this.isUnresolvedTrack(unresolvedTrack)) throw SyntaxError("Could not build Unresolved Track");
 
-        Object.defineProperty(unresolvedTrack, UnresolvedTrackSymbol, { configurable: true, value: true });
+        Object.defineProperty(unresolvedTrack, UnresolvedTrackSymbol, {
+            configurable: true,
+            value: true,
+        });
         return unresolvedTrack as UnresolvedTrack;
     }
 
@@ -145,7 +156,22 @@ export class ManagerUtils {
         if (!keys.includes("constructor")) return false;
         if (!keys.length) return false;
         // all required functions
-        if (!["connect", "destroy", "destroyPlayer", "fetchAllPlayers", "fetchInfo", "fetchPlayer", "fetchStats", "fetchVersion", "request", "updatePlayer", "updateSession"].every(v => keys.includes(v))) return false;
+        if (
+            ![
+                "connect",
+                "destroy",
+                "destroyPlayer",
+                "fetchAllPlayers",
+                "fetchInfo",
+                "fetchPlayer",
+                "fetchStats",
+                "fetchVersion",
+                "request",
+                "updatePlayer",
+                "updateSession",
+            ].every((v) => keys.includes(v))
+        )
+            return false;
         return true;
     }
 
@@ -159,7 +185,8 @@ export class ManagerUtils {
                 this.LavalinkManager?.emit("debug", DebugEvents.TransformRequesterFunctionFailed, {
                     error: e,
                     functionLayer: "ManagerUtils > getTransformedRequester()",
-                    message: "Your custom transformRequesterFunction failed to execute, please check your function for errors.",
+                    message:
+                        "Your custom transformRequesterFunction failed to execute, please check your function for errors.",
                     state: "error",
                 });
             }
@@ -178,14 +205,37 @@ export class ManagerUtils {
         if ("secure" in data && typeof data.secure !== "boolean" && data.secure !== undefined) return false;
         if ("sessionId" in data && typeof data.sessionId !== "string" && data.sessionId !== undefined) return false;
         if ("id" in data && typeof data.id !== "string" && data.id !== undefined) return false;
-        if ("regions" in data && (!Array.isArray(data.regions) || !data.regions.every(v => typeof v === "string") && data.regions !== undefined)) return false;
-        if ("poolOptions" in data && typeof data.poolOptions !== "object" && data.poolOptions !== undefined) return false;
-        if ("retryAmount" in data && (typeof data.retryAmount !== "number" || isNaN(data.retryAmount) || data.retryAmount <= 0 && data.retryAmount !== undefined)) return false;
-        if ("retryDelay" in data && (typeof data.retryDelay !== "number" || isNaN(data.retryDelay) || data.retryDelay <= 0 && data.retryDelay !== undefined)) return false;
-        if ("requestTimeout" in data && (typeof data.requestTimeout !== "number" || isNaN(data.requestTimeout) || data.requestTimeout <= 0 && data.requestTimeout !== undefined)) return false;
+        if (
+            "regions" in data &&
+            (!Array.isArray(data.regions) ||
+                (!data.regions.every((v) => typeof v === "string") && data.regions !== undefined))
+        )
+            return false;
+        if ("poolOptions" in data && typeof data.poolOptions !== "object" && data.poolOptions !== undefined)
+            return false;
+        if (
+            "retryAmount" in data &&
+            (typeof data.retryAmount !== "number" ||
+                isNaN(data.retryAmount) ||
+                (data.retryAmount <= 0 && data.retryAmount !== undefined))
+        )
+            return false;
+        if (
+            "retryDelay" in data &&
+            (typeof data.retryDelay !== "number" ||
+                isNaN(data.retryDelay) ||
+                (data.retryDelay <= 0 && data.retryDelay !== undefined))
+        )
+            return false;
+        if (
+            "requestTimeout" in data &&
+            (typeof data.requestTimeout !== "number" ||
+                isNaN(data.requestTimeout) ||
+                (data.requestTimeout <= 0 && data.requestTimeout !== undefined))
+        )
+            return false;
         return true;
     }
-
 
     /**
      * Validate tracks based on duration whether they are playble or broken tracks.
@@ -231,7 +281,12 @@ export class ManagerUtils {
     isUnresolvedTrack(data: UnresolvedTrack | Track): data is UnresolvedTrack {
         if (!data) return false;
         if (data[UnresolvedTrackSymbol] === true) return true;
-        return typeof data === "object" && (("info" in data && typeof data.info.title === "string") || typeof data.encoded === "string") && "resolve" in data && typeof data.resolve === "function";
+        return (
+            typeof data === "object" &&
+            (("info" in data && typeof data.info.title === "string") || typeof data.encoded === "string") &&
+            "resolve" in data &&
+            typeof data.resolve === "function"
+        );
     }
 
     /**
@@ -258,31 +313,39 @@ export class ManagerUtils {
         }
     }
 
-
     validateQueryString(node: LavalinkNode, queryString: string, sourceString?: LavalinkSearchPlatform): void {
         if (!node.info) throw new Error("No Lavalink Node was provided");
-        if (this.LavalinkManager.options?.autoChecks?.sourcesValidations && !node.info.sourceManagers?.length) throw new Error("Lavalink Node, has no sourceManagers enabled");
+        if (node._checkForSources && !node.info.sourceManagers?.length)
+            throw new Error("Lavalink Node, has no sourceManagers enabled");
 
-        if (!queryString.trim().length) throw new Error(`Query string is empty, please provide a valid query string.`)
+        if (!queryString.trim().length) throw new Error(`Query string is empty, please provide a valid query string.`);
 
-        if (sourceString === "speak" && queryString.length > 100) throw new Error(`Query is speak, which is limited to 100 characters.`)
+        if (sourceString === "speak" && queryString.length > 100)
+            throw new Error(`Query is speak, which is limited to 100 characters.`);
 
         // checks for blacklisted links / domains / queries
         if (this.LavalinkManager.options?.linksBlacklist?.length > 0) {
             if (this.LavalinkManager.options?.advancedOptions?.enableDebugEvents) {
-            this.LavalinkManager.emit("debug", DebugEvents.ValidatingBlacklistLinks, {
-                state: "log",
-                message: `Validating Query against LavalinkManager.options.linksBlacklist, query: "${queryString}"`,
-                functionLayer: "(LavalinkNode > node | player) > search() > validateQueryString()",
-             });
+                this.LavalinkManager.emit("debug", DebugEvents.ValidatingBlacklistLinks, {
+                    state: "log",
+                    message: `Validating Query against LavalinkManager.options.linksBlacklist, query: "${queryString}"`,
+                    functionLayer: "(LavalinkNode > node | player) > search() > validateQueryString()",
+                });
             }
-             if (this.LavalinkManager.options?.linksBlacklist.some(v => (typeof v === "string" && queryString.toLowerCase().includes(v.toLowerCase())) || (isRegExp(v) && v.test(queryString)))) {
-                throw new Error(`Query string contains a link / word which is blacklisted.`)
-             }
+            if (
+                this.LavalinkManager.options?.linksBlacklist.some(
+                    (v) =>
+                        (typeof v === "string" && queryString.toLowerCase().includes(v.toLowerCase())) ||
+                        (isRegExp(v) && v.test(queryString)),
+                )
+            ) {
+                throw new Error(`Query string contains a link / word which is blacklisted.`);
+            }
         }
 
         if (!/^https?:\/\//.test(queryString)) return;
-        else if (this.LavalinkManager.options?.linksAllowed === false) throw new Error("Using links to make a request is not allowed.")
+        else if (this.LavalinkManager.options?.linksAllowed === false)
+            throw new Error("Using links to make a request is not allowed.");
 
         // checks for if the query is whitelisted (should only work for links, so it skips the check for no link queries)
         if (this.LavalinkManager.options?.linksWhitelist?.length > 0) {
@@ -293,22 +356,38 @@ export class ManagerUtils {
                     functionLayer: "(LavalinkNode > node | player) > search() > validateQueryString()",
                 });
             }
-            if (!this.LavalinkManager.options?.linksWhitelist.some(v => (typeof v === "string" &&  queryString.toLowerCase().includes(v.toLowerCase())) || (isRegExp(v) && v.test(queryString)))) {
-                throw new Error(`Query string contains a link / word which isn't whitelisted.`)
+            if (
+                !this.LavalinkManager.options?.linksWhitelist.some(
+                    (v) =>
+                        (typeof v === "string" && queryString.toLowerCase().includes(v.toLowerCase())) ||
+                        (isRegExp(v) && v.test(queryString)),
+                )
+            ) {
+                throw new Error(`Query string contains a link / word which isn't whitelisted.`);
             }
         }
 
-        if (!this.LavalinkManager.options?.autoChecks?.sourcesValidations) return;
+        if (!node._checkForSources) return;
 
         // missing links: beam.pro local getyarn.io clypit pornhub reddit ocreamix soundgasm
-        if ((SourceLinksRegexes.YoutubeMusicRegex.test(queryString) || SourceLinksRegexes.YoutubeRegex.test(queryString)) && !node.info?.sourceManagers?.includes("youtube")) {
+        if (
+            (SourceLinksRegexes.YoutubeMusicRegex.test(queryString) ||
+                SourceLinksRegexes.YoutubeRegex.test(queryString)) &&
+            !node.info?.sourceManagers?.includes("youtube")
+        ) {
             throw new Error("Query / Link Provided for this Source but Lavalink Node has not 'youtube' enabled");
         }
-        if ((SourceLinksRegexes.SoundCloudMobileRegex.test(queryString) || SourceLinksRegexes.SoundCloudRegex.test(queryString)) && !node.info?.sourceManagers?.includes("soundcloud")) {
+        if (
+            (SourceLinksRegexes.SoundCloudMobileRegex.test(queryString) ||
+                SourceLinksRegexes.SoundCloudRegex.test(queryString)) &&
+            !node.info?.sourceManagers?.includes("soundcloud")
+        ) {
             throw new Error("Query / Link Provided for this Source but Lavalink Node has not 'soundcloud' enabled");
         }
         if (SourceLinksRegexes.bandcamp.test(queryString) && !node.info?.sourceManagers?.includes("bandcamp")) {
-            throw new Error("Query / Link Provided for this Source but Lavalink Node has not 'bandcamp' enabled (introduced with lavaplayer 2.2.0 or lavalink 4.0.6)");
+            throw new Error(
+                "Query / Link Provided for this Source but Lavalink Node has not 'bandcamp' enabled (introduced with lavaplayer 2.2.0 or lavalink 4.0.6)",
+            );
         }
         if (SourceLinksRegexes.TwitchTv.test(queryString) && !node.info?.sourceManagers?.includes("twitch")) {
             throw new Error("Query / Link Provided for this Source but Lavalink Node has not 'twitch' enabled");
@@ -335,7 +414,9 @@ export class ManagerUtils {
             throw new Error("Query / Link Provided for this Source but Lavalink Node has not 'yandexmusic' enabled");
         }
         if (SourceLinksRegexes.jiosaavn.test(queryString) && !node.info?.sourceManagers?.includes("jiosaavn")) {
-            throw new Error("Query / Link Provided for this Source but Lavalink Node has not 'jiosaavn' (via jiosaavn-plugin) enabled");
+            throw new Error(
+                "Query / Link Provided for this Source but Lavalink Node has not 'jiosaavn' (via jiosaavn-plugin) enabled",
+            );
         }
         if (SourceLinksRegexes.tidal.test(queryString) && !node.info?.sourceManagers?.includes("tidal")) {
             throw new Error("Query / Link Provided for this Source but Lavalink Node has not 'tidal' enabled");
@@ -347,13 +428,23 @@ export class ManagerUtils {
     }
 
     transformQuery(query: SearchQuery) {
-        const sourceOfQuery = typeof query === "string" ? undefined : (DefaultSources[(query.source?.trim?.()?.toLowerCase?.()) ?? this.LavalinkManager?.options?.playerOptions?.defaultSearchPlatform?.toLowerCase?.()] ?? (query.source?.trim?.()?.toLowerCase?.()));
+        const sourceOfQuery =
+            typeof query === "string"
+                ? undefined
+                : (DefaultSources[
+                      query.source?.trim?.()?.toLowerCase?.() ??
+                          this.LavalinkManager?.options?.playerOptions?.defaultSearchPlatform?.toLowerCase?.()
+                  ] ?? query.source?.trim?.()?.toLowerCase?.());
         const Query = {
             query: typeof query === "string" ? query : query.query,
             extraQueryUrlParams: typeof query !== "string" ? query.extraQueryUrlParams : undefined,
-            source: sourceOfQuery ?? this.LavalinkManager?.options?.playerOptions?.defaultSearchPlatform?.toLowerCase?.()
-        }
-        const foundSource = Object.keys(DefaultSources).find(source => Query.query?.toLowerCase?.()?.startsWith(`${source}:`.toLowerCase()))?.trim?.()?.toLowerCase?.() as SearchPlatform | undefined;
+            source:
+                sourceOfQuery ?? this.LavalinkManager?.options?.playerOptions?.defaultSearchPlatform?.toLowerCase?.(),
+        };
+        const foundSource = Object.keys(DefaultSources)
+            .find((source) => Query.query?.toLowerCase?.()?.startsWith(`${source}:`.toLowerCase()))
+            ?.trim?.()
+            ?.toLowerCase?.() as SearchPlatform | undefined;
         // ignore links...
         if (foundSource && !["https", "http"].includes(foundSource) && DefaultSources[foundSource]) {
             Query.source = DefaultSources[foundSource]; // set the source to ytsearch:
@@ -364,14 +455,28 @@ export class ManagerUtils {
 
     transformLavaSearchQuery(query: LavaSearchQuery) {
         // transform the query object
-        const sourceOfQuery = typeof query === "string" ? undefined : (DefaultSources[(query.source?.trim?.()?.toLowerCase?.()) ?? this.LavalinkManager?.options?.playerOptions?.defaultSearchPlatform?.toLowerCase?.()] ?? (query.source?.trim?.()?.toLowerCase?.()));
+        const sourceOfQuery =
+            typeof query === "string"
+                ? undefined
+                : (DefaultSources[
+                      query.source?.trim?.()?.toLowerCase?.() ??
+                          this.LavalinkManager?.options?.playerOptions?.defaultSearchPlatform?.toLowerCase?.()
+                  ] ?? query.source?.trim?.()?.toLowerCase?.());
         const Query = {
             query: typeof query === "string" ? query : query.query,
-            types: query.types ? ["track", "playlist", "artist", "album", "text"].filter(v => query.types?.find(x => x.toLowerCase().startsWith(v))) : ["track", "playlist", "artist", "album", /*"text"*/],
-            source: sourceOfQuery ?? this.LavalinkManager?.options?.playerOptions?.defaultSearchPlatform?.toLowerCase?.()
-        }
+            types: query.types
+                ? ["track", "playlist", "artist", "album", "text"].filter((v) =>
+                      query.types?.find((x) => x.toLowerCase().startsWith(v)),
+                  )
+                : ["track", "playlist", "artist", "album" /*"text"*/],
+            source:
+                sourceOfQuery ?? this.LavalinkManager?.options?.playerOptions?.defaultSearchPlatform?.toLowerCase?.(),
+        };
 
-        const foundSource = Object.keys(DefaultSources).find(source => Query.query.toLowerCase().startsWith(`${source}:`.toLowerCase()))?.trim?.()?.toLowerCase?.() as SearchPlatform | undefined;
+        const foundSource = Object.keys(DefaultSources)
+            .find((source) => Query.query.toLowerCase().startsWith(`${source}:`.toLowerCase()))
+            ?.trim?.()
+            ?.toLowerCase?.() as SearchPlatform | undefined;
         if (foundSource && DefaultSources[foundSource]) {
             Query.source = DefaultSources[foundSource]; // set the source to ytsearch:
             Query.query = Query.query.slice(`${foundSource}:`.length, Query.query.length); // remove ytsearch: from the query
@@ -384,9 +489,9 @@ export class ManagerUtils {
         const source = DefaultSources[sourceString.toLowerCase().trim()] as LavalinkSearchPlatform;
         if (!source) throw new Error(`Lavalink Node SearchQuerySource: '${sourceString}' is not available`);
 
-        if (!node.info) throw new Error("Lavalink Node does not have any info cached yet, not ready yet!")
+        if (!node.info) throw new Error("Lavalink Node does not have any info cached yet, not ready yet!");
 
-        if(!this.LavalinkManager.options?.autoChecks?.sourcesValidations) return;
+        if (!node._checkForSources) return;
 
         if (source === "amsearch" && !node.info?.sourceManagers?.includes("applemusic")) {
             throw new Error("Lavalink Node has not 'applemusic' enabled, which is required to have 'amsearch' work");
@@ -397,19 +502,33 @@ export class ManagerUtils {
         if (source === "dzsearch" && !node.info?.sourceManagers?.includes("deezer")) {
             throw new Error("Lavalink Node has not 'deezer' enabled, which is required to have 'dzsearch' work");
         }
-        if (source === "dzisrc" && node.info?.sourceManagers?.includes("deezer") && !node.info?.sourceManagers?.includes("http")) {
+        if (
+            source === "dzisrc" &&
+            node.info?.sourceManagers?.includes("deezer") &&
+            !node.info?.sourceManagers?.includes("http")
+        ) {
             throw new Error("Lavalink Node has not 'http' enabled, which is required to have 'dzisrc' to work");
         }
         if (source === "jsrec" && !node.info?.sourceManagers?.includes("jiosaavn")) {
-            throw new Error("Lavalink Node has not 'jiosaavn' (via jiosaavn-plugin) enabled, which is required to have 'jsrec' to work");
+            throw new Error(
+                "Lavalink Node has not 'jiosaavn' (via jiosaavn-plugin) enabled, which is required to have 'jsrec' to work",
+            );
         }
         if (source === "jssearch" && !node.info?.sourceManagers?.includes("jiosaavn")) {
-            throw new Error("Lavalink Node has not 'jiosaavn' (via jiosaavn-plugin) enabled, which is required to have 'jssearch' to work");
+            throw new Error(
+                "Lavalink Node has not 'jiosaavn' (via jiosaavn-plugin) enabled, which is required to have 'jssearch' to work",
+            );
         }
         if (source === "scsearch" && !node.info?.sourceManagers?.includes("soundcloud")) {
             throw new Error("Lavalink Node has not 'soundcloud' enabled, which is required to have 'scsearch' work");
         }
-        if (source === "speak" && this.LavalinkManager.options?.autoChecks?.pluginValidations && !node.info?.plugins?.find(c => c.name.toLowerCase().includes(LavalinkPlugins.DuncteBot_Plugin.toLowerCase()))) {
+        if (
+            source === "speak" &&
+            node._checkForPlugins &&
+            !node.info?.plugins?.find((c) =>
+                c.name.toLowerCase().includes(LavalinkPlugins.DuncteBot_Plugin.toLowerCase()),
+            )
+        ) {
             throw new Error("Lavalink Node has not 'speak' enabled, which is required to have 'speak' work");
         }
         if (source === "tdsearch" && !node.info?.sourceManagers?.includes("tidal")) {
@@ -418,10 +537,23 @@ export class ManagerUtils {
         if (source === "tdrec" && !node.info?.sourceManagers?.includes("tidal")) {
             throw new Error("Lavalink Node has not 'tidal' enabled, which is required to have 'tdrec' work");
         }
-        if (source === "tts" && this.LavalinkManager.options?.autoChecks?.pluginValidations && !node.info?.plugins?.find(c => c.name.toLowerCase().includes(LavalinkPlugins.GoogleCloudTTS.toLowerCase()))) {
+        if (
+            source === "tts" &&
+            node._checkForPlugins &&
+            !node.info?.plugins?.find((c) =>
+                c.name.toLowerCase().includes(LavalinkPlugins.GoogleCloudTTS.toLowerCase()),
+            )
+        ) {
             throw new Error("Lavalink Node has not 'tts' enabled, which is required to have 'tts' work");
         }
-        if (source === "ftts" && !(node.info?.sourceManagers?.includes("ftts") || node.info?.sourceManagers?.includes("flowery-tts") || node.info?.sourceManagers?.includes("flowerytts"))) {
+        if (
+            source === "ftts" &&
+            !(
+                node.info?.sourceManagers?.includes("ftts") ||
+                node.info?.sourceManagers?.includes("flowery-tts") ||
+                node.info?.sourceManagers?.includes("flowerytts")
+            )
+        ) {
             throw new Error("Lavalink Node has not 'flowery-tts' enabled, which is required to have 'ftts' work");
         }
         if (source === "ymsearch" && !node.info?.sourceManagers?.includes("yandexmusic")) {
@@ -494,7 +626,7 @@ export class MiniMap<K, V> extends Map<K, V> {
     ): MiniMap<K, V2>;
     public filter<This>(fn: (this: This, value: V, key: K, miniMap: this) => boolean, thisArg: This): MiniMap<K, V>;
     public filter(fn: (value: V, key: K, miniMap: this) => boolean, thisArg?: unknown): MiniMap<K, V> {
-        if (typeof thisArg !== 'undefined') fn = fn.bind(thisArg);
+        if (typeof thisArg !== "undefined") fn = fn.bind(thisArg);
         const results = new this.constructor[Symbol.species]<K, V>();
         for (const [key, val] of this) {
             if (fn(val, key, this)) results.set(key, val);
@@ -519,7 +651,7 @@ export class MiniMap<K, V> extends Map<K, V> {
     public map<T>(fn: (value: V, key: K, miniMap: this) => T): T[];
     public map<This, T>(fn: (this: This, value: V, key: K, miniMap: this) => T, thisArg: This): T[];
     public map<T>(fn: (value: V, key: K, miniMap: this) => T, thisArg?: unknown): T[] {
-        if (typeof thisArg !== 'undefined') fn = fn.bind(thisArg);
+        if (typeof thisArg !== "undefined") fn = fn.bind(thisArg);
         const iter = this.entries();
         return Array.from({ length: this.size }, (): T => {
             const [key, value] = iter.next().value;
@@ -530,23 +662,26 @@ export class MiniMap<K, V> extends Map<K, V> {
 }
 
 export async function queueTrackEnd(player: Player, dontShiftQueue: boolean = false) {
-    if (player.queue.current && !player.queue.current?.pluginInfo?.clientData?.previousTrack) { // If there was a current Track already and repeatmode === true, add it to the queue.
+    if (player.queue.current && !player.queue.current?.pluginInfo?.clientData?.previousTrack) {
+        // If there was a current Track already and repeatmode === true, add it to the queue.
         player.queue.previous.unshift(player.queue.current);
-        if (player.queue.previous.length > player.queue.options.maxPreviousTracks) player.queue.previous.splice(player.queue.options.maxPreviousTracks, player.queue.previous.length);
+        if (player.queue.previous.length > player.queue.options.maxPreviousTracks)
+            player.queue.previous.splice(player.queue.options.maxPreviousTracks, player.queue.previous.length);
         await player.queue.utils.save();
     }
 
     // and if repeatMode == queue, add it back to the queue!
-    if (player.repeatMode === "queue" && player.queue.current) player.queue.tracks.push(player.queue.current)
+    if (player.repeatMode === "queue" && player.queue.current) player.queue.tracks.push(player.queue.current);
     // change the current Track to the next upcoming one
-    const nextSong = dontShiftQueue ? null : player.queue.tracks.shift() as Track;
+    const nextSong = dontShiftQueue ? null : (player.queue.tracks.shift() as Track);
 
     try {
-        if (nextSong && player.LavalinkManager.utils.isUnresolvedTrack(nextSong)) await (nextSong as UnresolvedTrack).resolve(player);
+        if (nextSong && player.LavalinkManager.utils.isUnresolvedTrack(nextSong))
+            await (nextSong as UnresolvedTrack).resolve(player);
 
         player.queue.current = nextSong || null;
         // save it in the DB
-        await player.queue.utils.save()
+        await player.queue.utils.save();
     } catch (error) {
         if (player.LavalinkManager.options?.advancedOptions?.enableDebugEvents) {
             player.LavalinkManager.emit("debug", DebugEvents.PlayerPlayUnresolvedTrackFailed, {
@@ -560,7 +695,12 @@ export async function queueTrackEnd(player: Player, dontShiftQueue: boolean = fa
         player.LavalinkManager.emit("trackError", player, player.queue.current, error);
 
         // try to play the next track if possible
-        if (!dontShiftQueue && player.LavalinkManager.options?.autoSkipOnResolveError === true && player.queue.tracks[0]) return queueTrackEnd(player);
+        if (
+            !dontShiftQueue &&
+            player.LavalinkManager.options?.autoSkipOnResolveError === true &&
+            player.queue.tracks[0]
+        )
+            return queueTrackEnd(player);
     }
 
     // return the new current Track
@@ -570,24 +710,34 @@ export async function queueTrackEnd(player: Player, dontShiftQueue: boolean = fa
 async function applyUnresolvedData(resTrack: Track, data: UnresolvedTrack, utils: ManagerUtils) {
     if (!resTrack?.info || !data?.info) return;
     if (data.info.uri) resTrack.info.uri = data.info.uri;
-    if (utils?.LavalinkManager?.options?.playerOptions?.useUnresolvedData === true) { // overwrite values
+    if (utils?.LavalinkManager?.options?.playerOptions?.useUnresolvedData === true) {
+        // overwrite values
         if (data.info.artworkUrl?.length) resTrack.info.artworkUrl = data.info.artworkUrl;
         if (data.info.title?.length) resTrack.info.title = data.info.title;
         if (data.info.author?.length) resTrack.info.author = data.info.author;
-    } else { // only overwrite if undefined / invalid
-        if ((resTrack.info.title === 'Unknown title' || resTrack.info.title === "Unspecified description") && resTrack.info.title != data.info.title) resTrack.info.title = data.info.title;
+    } else {
+        // only overwrite if undefined / invalid
+        if (
+            (resTrack.info.title === "Unknown title" || resTrack.info.title === "Unspecified description") &&
+            resTrack.info.title != data.info.title
+        )
+            resTrack.info.title = data.info.title;
         if (resTrack.info.author !== data.info.author) resTrack.info.author = data.info.author;
         if (resTrack.info.artworkUrl !== data.info.artworkUrl) resTrack.info.artworkUrl = data.info.artworkUrl;
     }
-    for (const key of Object.keys(data.info)) if (typeof resTrack.info[key] === "undefined" && key !== "resolve" && data.info[key]) resTrack.info[key] = data.info[key]; // add non-existing values
+    for (const key of Object.keys(data.info))
+        if (typeof resTrack.info[key] === "undefined" && key !== "resolve" && data.info[key])
+            resTrack.info[key] = data.info[key]; // add non-existing values
     return resTrack;
 }
 
 async function getClosestTrack(data: UnresolvedTrack, player: Player): Promise<Track | undefined> {
     if (!player || !player.node) throw new RangeError("No player with a lavalink node was provided");
-    if (player.LavalinkManager.utils.isTrack(data)) return player.LavalinkManager.utils.buildTrack(data, data.requester);
+    if (player.LavalinkManager.utils.isTrack(data))
+        return player.LavalinkManager.utils.buildTrack(data, data.requester);
     if (!player.LavalinkManager.utils.isUnresolvedTrack(data)) throw new RangeError("Track is not an unresolved Track");
-    if (!data?.info?.title && typeof data.encoded !== "string" && !data.info.uri) throw new SyntaxError("the track uri / title / encoded Base64 string is required for unresolved tracks")
+    if (!data?.info?.title && typeof data.encoded !== "string" && !data.info.uri)
+        throw new SyntaxError("the track uri / title / encoded Base64 string is required for unresolved tracks");
     if (!data.requester) throw new SyntaxError("The requester is required");
     // try to decode the track, if possible
     if (typeof data.encoded === "string") {
@@ -596,44 +746,68 @@ async function getClosestTrack(data: UnresolvedTrack, player: Player): Promise<T
     }
     // try to fetch the track via a uri if possible
     if (typeof data.info.uri === "string") {
-        const r = await player.search({ query: data?.info?.uri }, data.requester).then(v => v.tracks?.[0] as Track | undefined);
+        const r = await player
+            .search({ query: data?.info?.uri }, data.requester)
+            .then((v) => v.tracks?.[0] as Track | undefined);
         if (r) return applyUnresolvedData(r, data, player.LavalinkManager.utils);
     }
     // search the track as closely as possible
-    const query = [data.info?.title, data.info?.author].filter(str => !!str).join(" by ");
+    const query = [data.info?.title, data.info?.author].filter((str) => !!str).join(" by ");
     const sourceName = data.info?.sourceName;
 
-    return await player.search({
-        query, source: sourceName !== "twitch" && sourceName !== "flowery-tts" ? sourceName : player.LavalinkManager.options?.playerOptions?.defaultSearchPlatform,
-    }, data.requester).then((res: SearchResult) => {
-        let trackToUse = null;
-        // try to find via author name OR title
-        if ((data.info?.title || data.info?.author) && !trackToUse) trackToUse = res.tracks.find(track =>
-            // find via author name (i ... case insensitve)
-            [data.info?.author || "", `${data.info?.author} - Topic`].some(name => new RegExp(`^${escapeRegExp(name)}$`, "i").test(track.info?.author)) ||
-            // find via title (i ... case insensitve)
-            new RegExp(`^${escapeRegExp(data.info?.title)}$`, "i").test(track.info?.title)
-        );
-        // try to find via isrc (isrc's are not fully unique, finding via author / track title is more reliable, but this is a good alternative approach if everything else fails, and it's more accurate than findig via duration)
-        if (data.info?.isrc && !trackToUse) trackToUse = res.tracks.find(track => track.info?.isrc === data.info?.isrc);
-        // try to find via duration
-        if (data.info?.duration && !trackToUse) trackToUse = res.tracks.find(track => (track.info?.duration >= (data.info?.duration - 1500)) && (track?.info.duration <= (data.info?.duration + 1500)));
-        // apply unresolved data and return the track
-        return applyUnresolvedData(trackToUse || res.tracks[0], data, player.LavalinkManager.utils);
-    });
+    return await player
+        .search(
+            {
+                query,
+                source:
+                    sourceName !== "twitch" && sourceName !== "flowery-tts"
+                        ? sourceName
+                        : player.LavalinkManager.options?.playerOptions?.defaultSearchPlatform,
+            },
+            data.requester,
+        )
+        .then((res: SearchResult) => {
+            let trackToUse = null;
+            // try to find via author name OR title
+            if ((data.info?.title || data.info?.author) && !trackToUse)
+                trackToUse = res.tracks.find(
+                    (track) =>
+                        // find via author name (i ... case insensitve)
+                        [data.info?.author || "", `${data.info?.author} - Topic`].some((name) =>
+                            new RegExp(`^${escapeRegExp(name)}$`, "i").test(track.info?.author),
+                        ) ||
+                        // find via title (i ... case insensitve)
+                        new RegExp(`^${escapeRegExp(data.info?.title)}$`, "i").test(track.info?.title),
+                );
+            // try to find via isrc (isrc's are not fully unique, finding via author / track title is more reliable, but this is a good alternative approach if everything else fails, and it's more accurate than findig via duration)
+            if (data.info?.isrc && !trackToUse)
+                trackToUse = res.tracks.find((track) => track.info?.isrc === data.info?.isrc);
+            // try to find via duration
+            if (data.info?.duration && !trackToUse)
+                trackToUse = res.tracks.find(
+                    (track) =>
+                        track.info?.duration >= data.info?.duration - 1500 &&
+                        track?.info.duration <= data.info?.duration + 1500,
+                );
+            // apply unresolved data and return the track
+            return applyUnresolvedData(trackToUse || res.tracks[0], data, player.LavalinkManager.utils);
+        });
 }
-
 
 export function safeStringify(obj: any, padding = 0) {
     const seen = new WeakSet();
-    return JSON.stringify(obj, (key, value) => {
-        if (typeof value === "function") return undefined; // Funktion skippen
-        if (typeof value === "symbol") return undefined;   // Symbol skippen
-        if (typeof value === "bigint") return value.toString(); // BigInt to String
-        if (typeof value === "object" && value !== null) {
-            if (seen.has(value)) return "[Circular]";
-            seen.add(value);
-        }
-        return value;
-    }, padding);
+    return JSON.stringify(
+        obj,
+        (key, value) => {
+            if (typeof value === "function") return undefined; // Funktion skippen
+            if (typeof value === "symbol") return undefined; // Symbol skippen
+            if (typeof value === "bigint") return value.toString(); // BigInt to String
+            if (typeof value === "object" && value !== null) {
+                if (seen.has(value)) return "[Circular]";
+                seen.add(value);
+            }
+            return value;
+        },
+        padding,
+    );
 }

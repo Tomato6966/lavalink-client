@@ -1,13 +1,27 @@
 import type { DebugEvents } from "../Constants";
 import type { LavalinkManager } from "../LavalinkManager";
-
 import type { Player } from "../Player";
 
 import type { LavalinkNodeOptions } from "./Node";
 import type { DestroyReasonsType, PlayerJson, PlayerOptions } from "./Player";
 import type { ManagerQueueOptions } from "./Queue";
 import type { Track, UnresolvedTrack } from "./Track";
-import type { GuildShardPayload, SearchPlatform, SponsorBlockChaptersLoaded, SponsorBlockChapterStarted, SponsorBlockSegmentSkipped, SponsorBlockSegmentsLoaded, TrackExceptionEvent, TrackEndEvent, TrackStuckEvent, WebSocketClosedEvent, TrackStartEvent, LyricsFoundEvent, LyricsNotFoundEvent, LyricsLineEvent } from "./Utils";
+import type {
+    GuildShardPayload,
+    SearchPlatform,
+    SponsorBlockChaptersLoaded,
+    SponsorBlockChapterStarted,
+    SponsorBlockSegmentSkipped,
+    SponsorBlockSegmentsLoaded,
+    TrackExceptionEvent,
+    TrackEndEvent,
+    TrackStuckEvent,
+    WebSocketClosedEvent,
+    TrackStartEvent,
+    LyricsFoundEvent,
+    LyricsNotFoundEvent,
+    LyricsLineEvent,
+} from "./Utils";
 
 /**
  * The events from the lavalink Manager
@@ -17,49 +31,53 @@ export interface LavalinkManagerEvents<CustomPlayerT extends Player = Player> {
      * Emitted when a Track started playing.
      * @event Manager#trackStart
      */
-    "trackStart": (player: CustomPlayerT, track: Track | null, payload: TrackStartEvent) => void;
+    trackStart: (player: CustomPlayerT, track: Track | null, payload: TrackStartEvent) => void;
     /**
      * Emitted when a Track finished.
      * @event Manager#trackEnd
      */
-    "trackEnd": (player: CustomPlayerT, track: Track | null, payload: TrackEndEvent) => void;
+    trackEnd: (player: CustomPlayerT, track: Track | null, payload: TrackEndEvent) => void;
     /**
      * Emitted when a Track got stuck while playing.
      * @event Manager#trackStuck
      */
-    "trackStuck": (player: CustomPlayerT, track: Track | null, payload: TrackStuckEvent) => void;
+    trackStuck: (player: CustomPlayerT, track: Track | null, payload: TrackStuckEvent) => void;
     /**
      * Emitted when a Track errored.
      * @event Manager#trackError
      */
-    "trackError": (player: CustomPlayerT, track: Track | UnresolvedTrack | null, payload: TrackExceptionEvent) => void;
+    trackError: (player: CustomPlayerT, track: Track | UnresolvedTrack | null, payload: TrackExceptionEvent) => void;
     /**
      * Emitted when the Playing finished and no more tracks in the queue.
      * @event Manager#queueEnd
      */
-    "queueEnd": (player: CustomPlayerT, track: Track | UnresolvedTrack | null, payload: TrackEndEvent | TrackStuckEvent | TrackExceptionEvent) => void;
+    queueEnd: (
+        player: CustomPlayerT,
+        track: Track | UnresolvedTrack | null,
+        payload: TrackEndEvent | TrackStuckEvent | TrackExceptionEvent,
+    ) => void;
     /**
      * Emitted when a Player is created.
      * @event Manager#playerCreate
      */
-    "playerCreate": (player: CustomPlayerT) => void;
+    playerCreate: (player: CustomPlayerT) => void;
     /**
      * Emitted when a Player is moved within the channel.
      * @event Manager#playerMove
      */
-    "playerMove": (player: CustomPlayerT, oldVoiceChannelId: string, newVoiceChannelId: string) => void;
+    playerMove: (player: CustomPlayerT, oldVoiceChannelId: string, newVoiceChannelId: string) => void;
     /**
      * Emitted when a Player is disconnected from a channel.
      * @event Manager#playerDisconnect
      */
-    "playerDisconnect": (player: CustomPlayerT, voiceChannelId: string) => void;
+    playerDisconnect: (player: CustomPlayerT, voiceChannelId: string) => void;
     /**
      * Emitted when a Player automatically reconnects after a disconnect.
      * This event is triggered when the player successfully reconnects to the voice channel
      * and resumes playback after being disconnected (requires onDisconnect.autoReconnect to be enabled).
      * @event Manager#playerReconnect
      */
-    "playerReconnect": (player: CustomPlayerT, voiceChannelId: string) => void;
+    playerReconnect: (player: CustomPlayerT, voiceChannelId: string) => void;
     /**
      * Emitted when a Node-Socket got closed for a specific Player.
      * Usually emits when the audio websocket to discord is closed, This can happen for various reasons (normal and abnormal), e.g. when using an expired voice server update. 4xxx codes are usually bad.
@@ -73,66 +91,66 @@ export interface LavalinkManagerEvents<CustomPlayerT extends Player = Player> {
      * @link https://lavalink.dev/api/websocket.html#websocketclosedevent
      * @event Manager#playerSocketClosed
      */
-    "playerSocketClosed": (player: CustomPlayerT, payload: WebSocketClosedEvent) => void;
+    playerSocketClosed: (player: CustomPlayerT, payload: WebSocketClosedEvent) => void;
     /**
      * Emitted when a Player get's destroyed
      * @event Manager#playerDestroy
      */
-    "playerDestroy": (player: CustomPlayerT, destroyReason?: DestroyReasonsType) => void;
+    playerDestroy: (player: CustomPlayerT, destroyReason?: DestroyReasonsType) => void;
 
     /**
      * Always emits when the player (on lavalink side) got updated
      * @event Manager#playerUpdate
      */
-    "playerUpdate": (oldPlayerJson: PlayerJson, newPlayer: CustomPlayerT) => void;
+    playerUpdate: (oldPlayerJson: PlayerJson, newPlayer: CustomPlayerT) => void;
 
     /**
      * Emitted when the player's selfMuted or serverMuted state changed (true -> false | false -> true)
      * @event Manager#playerMuteChange
      */
-    "playerMuteChange": (player: CustomPlayerT, selfMuted: boolean, serverMuted: boolean) => void;
+    playerMuteChange: (player: CustomPlayerT, selfMuted: boolean, serverMuted: boolean) => void;
 
     /**
      * Emitted when the player's selfDeafed or serverDeafed state changed (true -> false | false -> true)
      * @event Manager#playerDeafChange
      */
-    "playerDeafChange": (player: CustomPlayerT, selfDeafed: boolean, serverDeafed: boolean) => void;
+    playerDeafChange: (player: CustomPlayerT, selfDeafed: boolean, serverDeafed: boolean) => void;
 
     /**
      * Emitted when the player's suppressed (true -> false | false -> true)
      * @event Manager#playerSuppressChange
      */
-    "playerSuppressChange": (player: CustomPlayerT, suppress: boolean) => void;
+    playerSuppressChange: (player: CustomPlayerT, suppress: boolean) => void;
 
     /**
      * Emitted when the player's queue got empty, and the timeout started
      * @event Manager#playerQueueEmptyStart
      */
-    "playerQueueEmptyStart": (player: CustomPlayerT, timeoutMs: number) => void;
+    playerQueueEmptyStart: (player: CustomPlayerT, timeoutMs: number) => void;
 
     /**
      * Emitted when the player's queue got empty, and the timeout finished leading to destroying the player
      * @event Manager#playerQueueEmptyEnd
      */
-    "playerQueueEmptyEnd": (player: CustomPlayerT) => void;
+    playerQueueEmptyEnd: (player: CustomPlayerT) => void;
 
     /**
      * Emitted when the player's queue got empty, and the timeout got cancelled becuase a track got re-added to it.
      * @event Manager#playerQueueEmptyEnd
      */
-    "playerQueueEmptyCancel": (player: CustomPlayerT) => void;
+    playerQueueEmptyCancel: (player: CustomPlayerT) => void;
 
     /**
      * Emitted, when a user joins the voice channel, while there is a player existing
      * @event Manager#playerQueueEmptyStart
      */
-    "playerVoiceJoin": (player: CustomPlayerT, userId: string) => void;
+    playerVoiceJoin: (player: CustomPlayerT, userId: string) => void;
 
     /**
      * Emitted, when a user leaves the voice channel, while there is a player existing
      * @event Manager#playerQueueEmptyEnd
      */
-    "playerVoiceLeave": (player: CustomPlayerT, userId: string) => void;
+    playerVoiceLeave: (player: CustomPlayerT, userId: string) => void;
 
     /**
      * SPONSORBLOCK-PLUGIN EVENT
@@ -140,7 +158,11 @@ export interface LavalinkManagerEvents<CustomPlayerT extends Player = Player> {
      * @link https://github.com/topi314/Sponsorblock-Plugin#segmentsloaded
      * @event Manager#trackError
      */
-    "SegmentsLoaded": (player: CustomPlayerT, track: Track | UnresolvedTrack | null, payload: SponsorBlockSegmentsLoaded) => void;
+    SegmentsLoaded: (
+        player: CustomPlayerT,
+        track: Track | UnresolvedTrack | null,
+        payload: SponsorBlockSegmentsLoaded,
+    ) => void;
 
     /**
      * SPONSORBLOCK-PLUGIN EVENT
@@ -148,7 +170,11 @@ export interface LavalinkManagerEvents<CustomPlayerT extends Player = Player> {
      * @link https://github.com/topi314/Sponsorblock-Plugin#segmentskipped
      * @event Manager#trackError
      */
-    "SegmentSkipped": (player: CustomPlayerT, track: Track | UnresolvedTrack | null, payload: SponsorBlockSegmentSkipped) => void;
+    SegmentSkipped: (
+        player: CustomPlayerT,
+        track: Track | UnresolvedTrack | null,
+        payload: SponsorBlockSegmentSkipped,
+    ) => void;
 
     /**
      * SPONSORBLOCK-PLUGIN EVENT
@@ -156,7 +182,11 @@ export interface LavalinkManagerEvents<CustomPlayerT extends Player = Player> {
      * @link https://github.com/topi314/Sponsorblock-Plugin#chapterstarted
      * @event Manager#trackError
      */
-    "ChapterStarted": (player: CustomPlayerT, track: Track | UnresolvedTrack | null, payload: SponsorBlockChapterStarted) => void;
+    ChapterStarted: (
+        player: CustomPlayerT,
+        track: Track | UnresolvedTrack | null,
+        payload: SponsorBlockChapterStarted,
+    ) => void;
 
     /**
      * SPONSORBLOCK-PLUGIN EVENT
@@ -164,7 +194,11 @@ export interface LavalinkManagerEvents<CustomPlayerT extends Player = Player> {
      * @link https://github.com/topi314/Sponsorblock-Plugin#chaptersloaded
      * @event Manager#trackError
      */
-    "ChaptersLoaded": (player: CustomPlayerT, track: Track | UnresolvedTrack | null, payload: SponsorBlockChaptersLoaded) => void;
+    ChaptersLoaded: (
+        player: CustomPlayerT,
+        track: Track | UnresolvedTrack | null,
+        payload: SponsorBlockChaptersLoaded,
+    ) => void;
 
     /**
      * Lavalink-Client Debug Event
@@ -173,32 +207,44 @@ export interface LavalinkManagerEvents<CustomPlayerT extends Player = Player> {
      *
      * @event Manager#debug
      */
-    "debug": (eventKey: DebugEvents, eventData: { message: string, state: "log" | "warn" | "error", error?: Error | string, functionLayer: string }) => void;
+    debug: (
+        eventKey: DebugEvents,
+        eventData: {
+            message: string;
+            state: "log" | "warn" | "error";
+            error?: Error | string;
+            functionLayer: string;
+        },
+    ) => void;
 
     /**
      * Emitted when a Lyrics line is received
      * @link https://github.com/topi314/LavaLyrics
      * @event Manager#LyricsLine
      */
-    "LyricsLine": (player: CustomPlayerT, track: Track | UnresolvedTrack | null, payload: LyricsLineEvent) => void;
+    LyricsLine: (player: CustomPlayerT, track: Track | UnresolvedTrack | null, payload: LyricsLineEvent) => void;
 
     /**
      * Emitted when a Lyrics is found
      * @link https://github.com/topi314/LavaLyrics
      * @event Manager#LyricsFound
      */
-    "LyricsFound": (player: CustomPlayerT, track: Track | UnresolvedTrack | null, payload: LyricsFoundEvent) => void;
+    LyricsFound: (player: CustomPlayerT, track: Track | UnresolvedTrack | null, payload: LyricsFoundEvent) => void;
 
     /**
      * Emitted when a Lyrics is not found
      * @link https://github.com/topi314/LavaLyrics
      * @event Manager#LyricsNotFound
      */
-    "LyricsNotFound": (player: CustomPlayerT, track: Track | UnresolvedTrack | null, payload: LyricsNotFoundEvent) => void;
+    LyricsNotFound: (
+        player: CustomPlayerT,
+        track: Track | UnresolvedTrack | null,
+        payload: LyricsNotFoundEvent,
+    ) => void;
 
-    "playerResumed": (player: CustomPlayerT, track: Track | UnresolvedTrack | null) => void;
+    playerResumed: (player: CustomPlayerT, track: Track | UnresolvedTrack | null) => void;
 
-    "playerPaused": (player: CustomPlayerT, track: Track | UnresolvedTrack | null) => void;
+    playerPaused: (player: CustomPlayerT, track: Track | UnresolvedTrack | null) => void;
 }
 /**
  * The Bot client Options needed for the manager
@@ -254,14 +300,16 @@ export interface ManagerPlayerOptions<CustomPlayerT extends Player = Player> {
 }
 
 export type DeepRequired<T> = {
-    [K in keyof T]-?: NonNullable<T[K]> extends object
-    ? DeepRequired<NonNullable<T[K]>>
-    : NonNullable<T[K]>;
+    [K in keyof T]-?: NonNullable<T[K]> extends object ? DeepRequired<NonNullable<T[K]>> : NonNullable<T[K]>;
 };
 
 export type RequiredManagerOptions<T extends Player> = DeepRequired<ManagerOptions<T>>;
 
-type PlayerConstructor<T extends Player = Player> = new (options: PlayerOptions, LavalinkManager: LavalinkManager, dontEmitPlayerCreateEvent?: boolean) => T;
+type PlayerConstructor<T extends Player = Player> = new (
+    options: PlayerOptions,
+    LavalinkManager: LavalinkManager,
+    dontEmitPlayerCreateEvent?: boolean,
+) => T;
 
 /** Manager Options used to create the manager */
 export interface ManagerOptions<CustomPlayerT extends Player = Player> {
@@ -291,17 +339,10 @@ export interface ManagerOptions<CustomPlayerT extends Player = Player> {
     linksBlacklist?: (RegExp | string)[];
     /** If links should be allowed or not. If set to false, it will throw an error if a link was provided. */
     linksAllowed?: boolean;
-    /** If the library should automatically check something, on default everything is enabled */
-    autoChecks?: {
-        /** Whether or not the client should check if the requested source's plugin is available on the node. */
-        pluginValidations?: boolean;
-        /** Whether or not the client should check if the requested source is available on the node */
-        sourcesValidations?: boolean;
-    };
     /** Advanced Options for the Library, which may or may not be "library breaking" */
     advancedOptions?: {
         /** Max duration for that the filter fix duration works (in ms) - default is 8mins */
-        maxFilterFixDuration?: number,
+        maxFilterFixDuration?: number;
         /** Enable Debug event */
         enableDebugEvents?: boolean;
         /** optional */
@@ -316,7 +357,7 @@ export interface ManagerOptions<CustomPlayerT extends Player = Player> {
                 debugLog?: boolean;
                 /** If you get 'Error: Use Player#destroy("reason") not LavalinkManager#deletePlayer() to stop the Player' put it on true */
                 dontThrowError?: boolean;
-            }
-        }
-    }
+            };
+        };
+    };
 }

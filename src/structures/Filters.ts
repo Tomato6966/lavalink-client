@@ -1,8 +1,14 @@
 import { audioOutputsData, EQList } from "./Constants";
-import { safeStringify } from "./Utils";
-
 import type { Player } from "./Player";
-import type { AudioOutputs, EQBand, FilterData, LavalinkFilterData, PlayerFilters, TimescaleFilter } from "./Types/Filters";
+import type {
+    AudioOutputs,
+    EQBand,
+    FilterData,
+    LavalinkFilterData,
+    PlayerFilters,
+    TimescaleFilter,
+} from "./Types/Filters";
+import { safeStringify } from "./Utils";
 /**
  * The FilterManager for each player
  */
@@ -10,55 +16,59 @@ import type { AudioOutputs, EQBand, FilterData, LavalinkFilterData, PlayerFilter
 const DEFAULT_FILTER_DATAS: FilterData = {
     volume: 1,
     lowPass: {
-        smoothing: 0
+        smoothing: 0,
     },
     karaoke: {
         level: 0,
         monoLevel: 0,
         filterBand: 0,
-        filterWidth: 0
+        filterWidth: 0,
     },
     timescale: {
         speed: 1, // 0 = x
         pitch: 1, // 0 = x
-        rate: 1 // 0 = x
+        rate: 1, // 0 = x
     },
     rotation: {
-        rotationHz: 0
+        rotationHz: 0,
     },
     tremolo: {
         frequency: 0, // 0 < x
-        depth: 0// 0 < x = 1
+        depth: 0, // 0 < x = 1
     },
     vibrato: {
         frequency: 0, // 0 < x <= 14
-        depth: 0     // 0 < x <= 1
+        depth: 0, // 0 < x <= 1
     },
     channelMix: audioOutputsData.stereo,
     pluginFilters: {
         "lavalink-filter-plugin": {
             echo: {
                 delay: 0, // in seconds
-                decay: 0 // 0 < 1
+                decay: 0, // 0 < 1
             },
             reverb: {
                 delays: [], // [0.037, 0.042, 0.048, 0.053]
-                gains: [] // [0.84, 0.83, 0.82, 0.81]
-            }
+                gains: [], // [0.84, 0.83, 0.82, 0.81]
+            },
         },
-        "high-pass": { // Cuts off frequencies lower than the specified {cutoffFrequency}.
+        "high-pass": {
+            // Cuts off frequencies lower than the specified {cutoffFrequency}.
             // "cutoffFrequency": 1475, // Integer, higher than zero, in Hz.
             // "boostFactor": 1.0    // Float, higher than 0.0. This alters volume output. A value of 1.0 means no volume change.
         },
-        "low-pass": { // Cuts off frequencies higher than the specified {cutoffFrequency}.
+        "low-pass": {
+            // Cuts off frequencies higher than the specified {cutoffFrequency}.
             // "cutoffFrequency": 284, // Integer, higher than zero, in Hz.
             // "boostFactor": 1.24389    // Float, higher than 0.0. This alters volume output. A value of 1.0 means no volume change.
         },
-        "normalization": { // Attenuates peaking where peaks are defined as having a higher value than {maxAmplitude}.
+        normalization: {
+            // Attenuates peaking where peaks are defined as having a higher value than {maxAmplitude}.
             // "maxAmplitude": 0.6327, // Float, within the range of 0.0 - 1.0. A value of 0.0 mutes the output.
             // "adaptive": true    // false
         },
-        "echo": { // Self-explanatory; provides an echo effect.
+        echo: {
+            // Self-explanatory; provides an echo effect.
             // "echoLength": 0.5649, // Float, higher than 0.0, in seconds (1.0 = 1 second).
             // "decay": 0.4649       // Float, within the range of 0.0 - 1.0. A value of 1.0 means no decay, and a value of 0.0 means
         },
@@ -73,7 +83,7 @@ const DEFAULT_FILTER_DATAS: FilterData = {
         offset: 0,
         scale: 1
     }*/
-}
+};
 export class FilterManager {
     public static EQList = EQList;
     /** The Equalizer bands currently applied to the Lavalink Server */
@@ -102,29 +112,11 @@ export class FilterManager {
             echo: false,
         },
         audioOutput: "stereo",
-    }
+    };
     /** The Filter Data sent to Lavalink, only if the filter is enabled (ofc.) */
     public data: FilterData = structuredClone(DEFAULT_FILTER_DATAS);
     /** The Player assigned to this Filter Manager */
     public player: Player;
-
-    private get _LManager() {
-        return this.player.LavalinkManager;
-    }
-
-    /**
-     * Returns whether the plugin validations are enabled or not
-     */
-    private get _checkForPlugins() {
-        return !!this._LManager.options?.autoChecks?.pluginValidations;
-    }
-    /**
-     * Returns whether the source validations are enabled or not
-     */
-    private get _checkForSources() {
-        return !!this._LManager.options?.autoChecks?.sourcesValidations;
-    }
-
     /** The Constructor for the FilterManager */
     constructor(player: Player) {
         /** Assign the player to the filter manager */
@@ -154,21 +146,26 @@ export class FilterManager {
         if (!this.filters.vibrato) delete sendData.vibrato;
 
         if (!this.filters.lavalinkFilterPlugin.echo) delete sendData.pluginFilters?.["lavalink-filter-plugin"]?.echo;
-        if (!this.filters.lavalinkFilterPlugin.reverb) delete sendData.pluginFilters?.["lavalink-filter-plugin"]?.reverb;
+        if (!this.filters.lavalinkFilterPlugin.reverb)
+            delete sendData.pluginFilters?.["lavalink-filter-plugin"]?.reverb;
 
         if (!this.filters.lavalinkLavaDspxPlugin.echo) delete sendData.pluginFilters?.echo;
         if (!this.filters.lavalinkLavaDspxPlugin.normalization) delete sendData.pluginFilters?.normalization;
         if (!this.filters.lavalinkLavaDspxPlugin.highPass) delete sendData.pluginFilters?.["high-pass"];
         if (!this.filters.lavalinkLavaDspxPlugin.lowPass) delete sendData.pluginFilters?.["low-pass"];
 
-        if (sendData.pluginFilters?.["lavalink-filter-plugin"] && Object.values(sendData.pluginFilters?.["lavalink-filter-plugin"]).length === 0) delete sendData.pluginFilters["lavalink-filter-plugin"];
+        if (
+            sendData.pluginFilters?.["lavalink-filter-plugin"] &&
+            Object.values(sendData.pluginFilters?.["lavalink-filter-plugin"]).length === 0
+        )
+            delete sendData.pluginFilters["lavalink-filter-plugin"];
         if (sendData.pluginFilters && Object.values(sendData.pluginFilters).length === 0) delete sendData.pluginFilters;
         if (!this.filters.lowPass) delete sendData.lowPass;
         if (!this.filters.karaoke) delete sendData.karaoke;
         if (!this.filters.rotation) delete sendData.rotation;
         if (this.filters.audioOutput === "stereo") delete sendData.channelMix;
 
-        if (Object.values(this.data.timescale ?? {}).every(v => v === 1)) delete sendData.timescale;
+        if (Object.values(this.data.timescale ?? {}).every((v) => v === 1)) delete sendData.timescale;
 
         if (!this.player.node.sessionId) throw new Error("The Lavalink-Node is either not ready or not up to date");
 
@@ -179,9 +176,10 @@ export class FilterManager {
             // delete disabled filters
             if (key === "pluginFilters") {
                 // for(const key of [...Object.keys(sendData.pluginFilters)]) {
-                //     // if (this._checkForPlugins && !this.player?.node?.info?.plugins?.find?.(v => v.name === key)) delete sendData[key];
+                //     // if (this.player.node._checkForPlugins && !this.player?.node?.info?.plugins?.find?.(v => v.name === key)) delete sendData[key];
                 // }
-            } else if (this._checkForSources && !this.player?.node?.info?.filters?.includes?.(key)) delete sendData[key];
+            } else if (this.player.node._checkForSources && !this.player?.node?.info?.filters?.includes?.(key))
+                delete sendData[key];
         }
 
         const now = performance.now();
@@ -192,8 +190,8 @@ export class FilterManager {
             guildId: this.player.guildId,
             playerOptions: {
                 filters: sendData,
-            }
-        })
+            },
+        });
 
         this.player.ping.lavalink = Math.round((performance.now() - now) / 10) / 100;
         return;
@@ -204,19 +202,22 @@ export class FilterManager {
     }
 
     private getLavalinkFilterData(): LavalinkFilterData["pluginFilters"]["lavalink-filter-plugin"] {
-        return (this.data.pluginFilters?.["lavalink-filter-plugin"] || {
-            echo: {
-                decay: this.data.pluginFilters?.echo?.decay && !this.data.pluginFilters?.echo?.echoLength
-                    ? this.data.pluginFilters?.echo?.decay
-                    : 0,
-                delay: (this.data.pluginFilters?.echo as { decay: number, delay: number })?.delay || 0
-            },
-            reverb: {
-                gains: [],
-                delays: [],
-                ...((this.data.pluginFilters as { reverb: { gains: number[], delays: number[] } })?.reverb)
+        return (
+            this.data.pluginFilters?.["lavalink-filter-plugin"] || {
+                echo: {
+                    decay:
+                        this.data.pluginFilters?.echo?.decay && !this.data.pluginFilters?.echo?.echoLength
+                            ? this.data.pluginFilters?.echo?.decay
+                            : 0,
+                    delay: (this.data.pluginFilters?.echo as { decay: number; delay: number })?.delay || 0,
+                },
+                reverb: {
+                    gains: [],
+                    delays: [],
+                    ...(this.data.pluginFilters as { reverb: { gains: number[]; delays: number[] } })?.reverb,
+                },
             }
-        });
+        );
     }
 
     /**
@@ -236,25 +237,36 @@ export class FilterManager {
         this.data = this.data ?? {};
 
         this.filters.rotation = this.privateNot0(this.data.rotation?.rotationHz);
-        this.filters.vibrato = this.privateNot0(this.data.vibrato?.frequency) || this.privateNot0(this.data.vibrato?.depth);
-        this.filters.tremolo = this.privateNot0(this.data.tremolo?.frequency) || this.privateNot0(this.data.tremolo?.depth);
+        this.filters.vibrato =
+            this.privateNot0(this.data.vibrato?.frequency) || this.privateNot0(this.data.vibrato?.depth);
+        this.filters.tremolo =
+            this.privateNot0(this.data.tremolo?.frequency) || this.privateNot0(this.data.tremolo?.depth);
 
         const lavalinkFilterData = this.getLavalinkFilterData();
         this.filters.lavalinkFilterPlugin = {
-            echo: this.privateNot0(lavalinkFilterData?.echo?.decay) || this.privateNot0(lavalinkFilterData?.echo?.delay),
-            reverb: this.privateNot0(lavalinkFilterData?.reverb?.delays?.length) || this.privateNot0(lavalinkFilterData?.reverb?.gains?.length)
+            echo:
+                this.privateNot0(lavalinkFilterData?.echo?.decay) || this.privateNot0(lavalinkFilterData?.echo?.delay),
+            reverb:
+                this.privateNot0(lavalinkFilterData?.reverb?.delays?.length) ||
+                this.privateNot0(lavalinkFilterData?.reverb?.gains?.length),
         };
         this.filters.lavalinkLavaDspxPlugin = {
             lowPass: Object.values(this.data.pluginFilters?.["low-pass"] || {})?.length > 0,
             highPass: Object.values(this.data.pluginFilters?.["high-pass"] || {})?.length > 0,
             normalization: Object.values(this.data.pluginFilters?.normalization || {})?.length > 0,
-            echo: Object.values(this.data.pluginFilters?.echo || {})?.length > 0 && typeof (this.data.pluginFilters?.echo as { decay: number, delay: number })?.delay === "undefined"
+            echo:
+                Object.values(this.data.pluginFilters?.echo || {})?.length > 0 &&
+                typeof (this.data.pluginFilters?.echo as { decay: number; delay: number })?.delay === "undefined",
         };
         this.filters.lowPass = this.privateNot0(this.data.lowPass?.smoothing);
-        this.filters.karaoke = Object.values(this.data.karaoke ?? {}).some(v => v !== 0);
+        this.filters.karaoke = Object.values(this.data.karaoke ?? {}).some((v) => v !== 0);
         if ((this.filters.nightcore || this.filters.vaporwave) && oldFilterTimescale) {
-            if (oldFilterTimescale.pitch !== this.data.timescale?.pitch || oldFilterTimescale.rate !== this.data.timescale?.rate || oldFilterTimescale.speed !== this.data.timescale?.speed) {
-                this.filters.custom = Object.values(this.data.timescale || {}).some(v => v !== 1);
+            if (
+                oldFilterTimescale.pitch !== this.data.timescale?.pitch ||
+                oldFilterTimescale.rate !== this.data.timescale?.rate ||
+                oldFilterTimescale.speed !== this.data.timescale?.speed
+            ) {
+                this.filters.custom = Object.values(this.data.timescale || {}).some((v) => v !== 1);
                 this.filters.nightcore = false;
                 this.filters.vaporwave = false;
             }
@@ -341,8 +353,10 @@ export class FilterManager {
      * ```
      */
     public async setAudioOutput(type: AudioOutputs): Promise<FilterManager> {
-        if (this._checkForSources && !this.player?.node?.info?.filters?.includes?.("channelMix")) throw new Error("Node#Info#filters does not include the 'channelMix' Filter (Node has it not enable)")
-        if (!type || !audioOutputsData[type]) throw "Invalid audio type added, must be 'mono' / 'stereo' / 'left' / 'right'"
+        if (this.player.node._checkForSources && !this.player?.node?.info?.filters?.includes?.("channelMix"))
+            throw new Error("Node#Info#filters does not include the 'channelMix' Filter (Node has it not enable)");
+        if (!type || !audioOutputsData[type])
+            throw "Invalid audio type added, must be 'mono' / 'stereo' / 'left' / 'right'";
 
         this.data = this.data ?? {};
 
@@ -364,13 +378,14 @@ export class FilterManager {
      * ```
      */
     public async setSpeed(speed = 1): Promise<FilterManager> {
-        if (this._checkForSources && !this.player?.node?.info?.filters?.includes?.("timescale")) throw new Error("Node#Info#filters does not include the 'timescale' Filter (Node has it not enable)")
+        if (this.player.node._checkForSources && !this.player?.node?.info?.filters?.includes?.("timescale"))
+            throw new Error("Node#Info#filters does not include the 'timescale' Filter (Node has it not enable)");
 
         this.data = this.data ?? {};
 
         this.filters.nightcore = false;
         this.filters.vaporwave = false;
-        this.data.timescale = { ...DEFAULT_FILTER_DATAS.timescale, speed }
+        this.data.timescale = { ...DEFAULT_FILTER_DATAS.timescale, speed };
 
         this.isCustomFilterActive();
 
@@ -389,13 +404,14 @@ export class FilterManager {
      * ```
      */
     public async setPitch(pitch = 1): Promise<FilterManager> {
-        if (this._checkForSources && !this.player?.node?.info?.filters?.includes?.("timescale")) throw new Error("Node#Info#filters does not include the 'timescale' Filter (Node has it not enable)")
+        if (this.player.node._checkForSources && !this.player?.node?.info?.filters?.includes?.("timescale"))
+            throw new Error("Node#Info#filters does not include the 'timescale' Filter (Node has it not enable)");
 
         this.data = this.data ?? {};
 
         this.filters.nightcore = false;
         this.filters.vaporwave = false;
-        this.data.timescale = { ...DEFAULT_FILTER_DATAS.timescale, pitch }
+        this.data.timescale = { ...DEFAULT_FILTER_DATAS.timescale, pitch };
 
         this.isCustomFilterActive();
 
@@ -414,13 +430,14 @@ export class FilterManager {
      * ```
      */
     public async setRate(rate = 1): Promise<FilterManager> {
-        if (this._checkForSources && !this.player?.node?.info?.filters?.includes?.("timescale")) throw new Error("Node#Info#filters does not include the 'timescale' Filter (Node has it not enable)")
+        if (this.player.node._checkForSources && !this.player?.node?.info?.filters?.includes?.("timescale"))
+            throw new Error("Node#Info#filters does not include the 'timescale' Filter (Node has it not enable)");
 
         this.data = this.data ?? {};
 
         this.filters.nightcore = false;
         this.filters.vaporwave = false;
-        this.data.timescale = { ...DEFAULT_FILTER_DATAS.timescale, rate }
+        this.data.timescale = { ...DEFAULT_FILTER_DATAS.timescale, rate };
 
         this.isCustomFilterActive();
 
@@ -442,7 +459,8 @@ export class FilterManager {
      * ```
      */
     public async toggleRotation(rotationHz = 0.2): Promise<FilterManager> {
-        if (this._checkForSources && !this.player?.node?.info?.filters?.includes?.("rotation")) throw new Error("Node#Info#filters does not include the 'rotation' Filter (Node has it not enable)")
+        if (this.player.node._checkForSources && !this.player?.node?.info?.filters?.includes?.("rotation"))
+            throw new Error("Node#Info#filters does not include the 'rotation' Filter (Node has it not enable)");
 
         this.data = this.data ?? {};
 
@@ -471,7 +489,8 @@ export class FilterManager {
      * ```
      */
     public async toggleVibrato(frequency = 10, depth = 1): Promise<FilterManager> {
-        if (this._checkForSources && !this.player?.node?.info?.filters?.includes?.("vibrato")) throw new Error("Node#Info#filters does not include the 'vibrato' Filter (Node has it not enable)")
+        if (this.player.node._checkForSources && !this.player?.node?.info?.filters?.includes?.("vibrato"))
+            throw new Error("Node#Info#filters does not include the 'vibrato' Filter (Node has it not enable)");
 
         this.data = this.data ?? {};
 
@@ -497,14 +516,15 @@ export class FilterManager {
      * ```
      */
     public async toggleTremolo(frequency = 4, depth = 0.8): Promise<FilterManager> {
-        if (this._checkForSources && !this.player?.node?.info?.filters?.includes?.("tremolo")) throw new Error("Node#Info#filters does not include the 'tremolo' Filter (Node has it not enable)")
+        if (this.player.node._checkForSources && !this.player?.node?.info?.filters?.includes?.("tremolo"))
+            throw new Error("Node#Info#filters does not include the 'tremolo' Filter (Node has it not enable)");
 
         this.data = this.data ?? {};
 
         this.data.tremolo = this.filters.tremolo ? DEFAULT_FILTER_DATAS.tremolo : { depth, frequency };
 
         this.filters.tremolo = !this.filters.tremolo;
-        await this.applyPlayerFilters()
+        await this.applyPlayerFilters();
         return this;
     }
     /**
@@ -522,8 +542,8 @@ export class FilterManager {
      * ```
      */
     public async toggleLowPass(smoothing = 20): Promise<FilterManager> {
-
-        if (this._checkForSources && !this.player?.node?.info?.filters?.includes?.("lowPass")) throw new Error("Node#Info#filters does not include the 'lowPass' Filter (Node has it not enable)")
+        if (this.player.node._checkForSources && !this.player?.node?.info?.filters?.includes?.("lowPass"))
+            throw new Error("Node#Info#filters does not include the 'lowPass' Filter (Node has it not enable)");
 
         this.data = this.data ?? {};
 
@@ -537,7 +557,6 @@ export class FilterManager {
      * Lavalink LavaDspx Plugin Filters
      */
     lavalinkLavaDspxPlugin = {
-
         /**
          * Enables / Disables the LowPass effect, (Optional: provide your Own Data)
          * @param {number} boostFactor set the boost factor of the filter
@@ -554,14 +573,19 @@ export class FilterManager {
          * ```
          */
         toggleLowPass: async (boostFactor = 1.0, cutoffFrequency = 80): Promise<FilterManager> => {
-            if (this._checkForPlugins && !this.player?.node?.info?.plugins?.find?.(v => v.name === "lavadspx-plugin")) throw new Error("Node#Info#plugins does not include the lavadspx plugin")
-            if (this._checkForSources && !this.player?.node?.info?.filters?.includes?.("low-pass")) throw new Error("Node#Info#filters does not include the 'low-pass' Filter (Node has it not enable)")
+            if (
+                this.player.node._checkForPlugins &&
+                !this.player?.node?.info?.plugins?.find?.((v) => v.name === "lavadspx-plugin")
+            )
+                throw new Error("Node#Info#plugins does not include the lavadspx plugin");
+            if (this.player.node._checkForSources && !this.player?.node?.info?.filters?.includes?.("low-pass"))
+                throw new Error("Node#Info#filters does not include the 'low-pass' Filter (Node has it not enable)");
 
             this.data = this.data ?? {};
             this.data.pluginFilters = this.data.pluginFilters ?? {};
 
-            if (this.filters.lavalinkLavaDspxPlugin.lowPass) delete this.data.pluginFilters["low-pass"]
-            else this.data.pluginFilters["low-pass"] = { boostFactor, cutoffFrequency }
+            if (this.filters.lavalinkLavaDspxPlugin.lowPass) delete this.data.pluginFilters["low-pass"];
+            else this.data.pluginFilters["low-pass"] = { boostFactor, cutoffFrequency };
 
             this.filters.lavalinkLavaDspxPlugin.lowPass = !this.filters.lavalinkLavaDspxPlugin.lowPass;
             await this.applyPlayerFilters();
@@ -584,14 +608,19 @@ export class FilterManager {
          * ```
          */
         toggleHighPass: async (boostFactor = 1.0, cutoffFrequency = 80): Promise<FilterManager> => {
-            if (this._checkForPlugins && !this.player?.node?.info?.plugins?.find?.(v => v.name === "lavadspx-plugin")) throw new Error("Node#Info#plugins does not include the lavadspx plugin")
-            if (this._checkForSources && !this.player?.node?.info?.filters?.includes?.("high-pass")) throw new Error("Node#Info#filters does not include the 'high-pass' Filter (Node has it not enable)")
+            if (
+                this.player.node._checkForPlugins &&
+                !this.player?.node?.info?.plugins?.find?.((v) => v.name === "lavadspx-plugin")
+            )
+                throw new Error("Node#Info#plugins does not include the lavadspx plugin");
+            if (this.player.node._checkForSources && !this.player?.node?.info?.filters?.includes?.("high-pass"))
+                throw new Error("Node#Info#filters does not include the 'high-pass' Filter (Node has it not enable)");
 
             this.data = this.data ?? {};
             this.data.pluginFilters = this.data.pluginFilters ?? {};
 
-            if (this.filters.lavalinkLavaDspxPlugin.highPass) delete this.data.pluginFilters["high-pass"]
-            else this.data.pluginFilters["high-pass"] = { boostFactor, cutoffFrequency }
+            if (this.filters.lavalinkLavaDspxPlugin.highPass) delete this.data.pluginFilters["high-pass"];
+            else this.data.pluginFilters["high-pass"] = { boostFactor, cutoffFrequency };
 
             this.filters.lavalinkLavaDspxPlugin.highPass = !this.filters.lavalinkLavaDspxPlugin.highPass;
             await this.applyPlayerFilters();
@@ -614,14 +643,21 @@ export class FilterManager {
          * ```
          */
         toggleNormalization: async (maxAmplitude: number = 0.75, adaptive: boolean = true): Promise<FilterManager> => {
-            if (this._checkForPlugins && !this.player?.node?.info?.plugins?.find?.(v => v.name === "lavadspx-plugin")) throw new Error("Node#Info#plugins does not include the lavadspx plugin")
-            if (this._checkForSources && !this.player?.node?.info?.filters?.includes?.("normalization")) throw new Error("Node#Info#filters does not include the 'normalization' Filter (Node has it not enable)")
+            if (
+                this.player.node._checkForPlugins &&
+                !this.player?.node?.info?.plugins?.find?.((v) => v.name === "lavadspx-plugin")
+            )
+                throw new Error("Node#Info#plugins does not include the lavadspx plugin");
+            if (this.player.node._checkForSources && !this.player?.node?.info?.filters?.includes?.("normalization"))
+                throw new Error(
+                    "Node#Info#filters does not include the 'normalization' Filter (Node has it not enable)",
+                );
 
             this.data = this.data ?? {};
             this.data.pluginFilters = this.data.pluginFilters ?? {};
 
-            if (this.filters.lavalinkLavaDspxPlugin.normalization) delete this.data.pluginFilters.normalization
-            else this.data.pluginFilters.normalization = { adaptive, maxAmplitude }
+            if (this.filters.lavalinkLavaDspxPlugin.normalization) delete this.data.pluginFilters.normalization;
+            else this.data.pluginFilters.normalization = { adaptive, maxAmplitude };
 
             this.filters.lavalinkLavaDspxPlugin.normalization = !this.filters.lavalinkLavaDspxPlugin.normalization;
             await this.applyPlayerFilters();
@@ -644,8 +680,13 @@ export class FilterManager {
          * ```
          */
         toggleEcho: async (decay: number = 0.5, echoLength: number = 0.5): Promise<FilterManager> => {
-            if (this._checkForPlugins && !this.player?.node?.info?.plugins?.find?.(v => v.name === "lavadspx-plugin")) throw new Error("Node#Info#plugins does not include the lavadspx plugin")
-            if (this._checkForSources && !this.player?.node?.info?.filters?.includes?.("echo")) throw new Error("Node#Info#filters does not include the 'echo' Filter (Node has it not enable)")
+            if (
+                this.player.node._checkForPlugins &&
+                !this.player?.node?.info?.plugins?.find?.((v) => v.name === "lavadspx-plugin")
+            )
+                throw new Error("Node#Info#plugins does not include the lavadspx plugin");
+            if (this.player.node._checkForSources && !this.player?.node?.info?.filters?.includes?.("echo"))
+                throw new Error("Node#Info#filters does not include the 'echo' Filter (Node has it not enable)");
 
             this.data = this.data ?? {};
             this.data.pluginFilters = this.data.pluginFilters ?? {};
@@ -656,8 +697,8 @@ export class FilterManager {
             this.filters.lavalinkLavaDspxPlugin.echo = !this.filters.lavalinkLavaDspxPlugin.echo;
             await this.applyPlayerFilters();
             return this;
-        }
-    }
+        },
+    };
     /**
      * LavalinkFilter Plugin specific Filters
      */
@@ -678,8 +719,15 @@ export class FilterManager {
          * ```
          */
         toggleEcho: async (delay = 4, decay = 0.8): Promise<FilterManager> => {
-            if (this._checkForPlugins && !this.player?.node?.info?.plugins?.find?.(v => v.name === "lavalink-filter-plugin")) throw new Error("Node#Info#plugins does not include the lavalink-filter-plugin plugin")
-            if (this._checkForSources && !this.player?.node?.info?.filters?.includes?.("echo")) throw new Error("Node#Info#filters does not include the 'echo' Filter (Node has it not enable aka not installed!)")
+            if (
+                this.player.node._checkForPlugins &&
+                !this.player?.node?.info?.plugins?.find?.((v) => v.name === "lavalink-filter-plugin")
+            )
+                throw new Error("Node#Info#plugins does not include the lavalink-filter-plugin plugin");
+            if (this.player.node._checkForSources && !this.player?.node?.info?.filters?.includes?.("echo"))
+                throw new Error(
+                    "Node#Info#filters does not include the 'echo' Filter (Node has it not enable aka not installed!)",
+                );
 
             this.data = this.data ?? {};
 
@@ -689,9 +737,9 @@ export class FilterManager {
                 ...this.data.pluginFilters,
                 ["lavalink-filter-plugin"]: {
                     reverb: this.data.pluginFilters?.["lavalink-filter-plugin"]?.reverb ?? reverb,
-                    echo: this.filters.lavalinkFilterPlugin.echo ? echo : { delay, decay }
-                }
-            }
+                    echo: this.filters.lavalinkFilterPlugin.echo ? echo : { delay, decay },
+                },
+            };
 
             this.filters.lavalinkFilterPlugin.echo = !this.filters.lavalinkFilterPlugin.echo;
 
@@ -714,9 +762,19 @@ export class FilterManager {
          * // when it's enabled before calling the toggle function, it disables it, so you might need to do some if/else logic.
          * ```
          */
-        toggleReverb: async (delays = [0.037, 0.042, 0.048, 0.053], gains = [0.84, 0.83, 0.82, 0.81]): Promise<FilterManager> => {
-            if (this._checkForPlugins && !this.player?.node?.info?.plugins?.find?.(v => v.name === "lavalink-filter-plugin")) throw new Error("Node#Info#plugins does not include the lavalink-filter-plugin plugin")
-            if (this._checkForSources && !this.player?.node?.info?.filters?.includes?.("reverb")) throw new Error("Node#Info#filters does not include the 'reverb' Filter (Node has it not enable aka not installed!)")
+        toggleReverb: async (
+            delays = [0.037, 0.042, 0.048, 0.053],
+            gains = [0.84, 0.83, 0.82, 0.81],
+        ): Promise<FilterManager> => {
+            if (
+                this.player.node._checkForPlugins &&
+                !this.player?.node?.info?.plugins?.find?.((v) => v.name === "lavalink-filter-plugin")
+            )
+                throw new Error("Node#Info#plugins does not include the lavalink-filter-plugin plugin");
+            if (this.player.node._checkForSources && !this.player?.node?.info?.filters?.includes?.("reverb"))
+                throw new Error(
+                    "Node#Info#filters does not include the 'reverb' Filter (Node has it not enable aka not installed!)",
+                );
 
             this.data = this.data ?? {};
 
@@ -726,15 +784,15 @@ export class FilterManager {
                 ...this.data.pluginFilters,
                 ["lavalink-filter-plugin"]: {
                     echo: this.data.pluginFilters?.["lavalink-filter-plugin"]?.echo ?? echo,
-                    reverb: this.filters.lavalinkFilterPlugin.reverb ? reverb : { delays, gains }
-                }
-            }
+                    reverb: this.filters.lavalinkFilterPlugin.reverb ? reverb : { delays, gains },
+                },
+            };
 
             this.filters.lavalinkFilterPlugin.reverb = !this.filters.lavalinkFilterPlugin.reverb;
             await this.applyPlayerFilters();
             return this;
-        }
-    }
+        },
+    };
     /**
      * Enables / Disables a Nightcore-like filter Effect. Disables/Overrides both: custom and Vaporwave Filter
      * @param {number} speed set the speed of the filter
@@ -751,8 +809,13 @@ export class FilterManager {
      * // when it's enabled before calling the toggle function, it disables it, so you might need to do some if/else logic.
      * ```
      */
-    public async toggleNightcore(speed = 1.289999523162842, pitch = 1.289999523162842, rate = 0.9365999523162842): Promise<FilterManager> {
-        if (this._checkForSources && !this.player?.node?.info?.filters?.includes?.("timescale")) throw new Error("Node#Info#filters does not include the 'timescale' Filter (Node has it not enable)")
+    public async toggleNightcore(
+        speed = 1.289999523162842,
+        pitch = 1.289999523162842,
+        rate = 0.9365999523162842,
+    ): Promise<FilterManager> {
+        if (this.player.node._checkForSources && !this.player?.node?.info?.filters?.includes?.("timescale"))
+            throw new Error("Node#Info#filters does not include the 'timescale' Filter (Node has it not enable)");
 
         this.data = this.data ?? {};
 
@@ -781,8 +844,13 @@ export class FilterManager {
      * // when it's enabled before calling the toggle function, it disables it, so you might need to do some if/else logic.
      * ```
      */
-    public async toggleVaporwave(speed = 0.8500000238418579, pitch = 0.800000011920929, rate = 1): Promise<FilterManager> {
-        if (this._checkForSources && !this.player?.node?.info?.filters?.includes?.("timescale")) throw new Error("Node#Info#filters does not include the 'timescale' Filter (Node has it not enable)")
+    public async toggleVaporwave(
+        speed = 0.8500000238418579,
+        pitch = 0.800000011920929,
+        rate = 1,
+    ): Promise<FilterManager> {
+        if (this.player.node._checkForSources && !this.player?.node?.info?.filters?.includes?.("timescale"))
+            throw new Error("Node#Info#filters does not include the 'timescale' Filter (Node has it not enable)");
 
         this.data = this.data ?? {};
 
@@ -813,11 +881,14 @@ export class FilterManager {
      * ```
      */
     public async toggleKaraoke(level = 1, monoLevel = 1, filterBand = 220, filterWidth = 100): Promise<FilterManager> {
-        if (this._checkForSources && !this.player?.node?.info?.filters?.includes?.("karaoke")) throw new Error("Node#Info#filters does not include the 'karaoke' Filter (Node has it not enable)")
+        if (this.player.node._checkForSources && !this.player?.node?.info?.filters?.includes?.("karaoke"))
+            throw new Error("Node#Info#filters does not include the 'karaoke' Filter (Node has it not enable)");
 
         this.data = this.data ?? {};
 
-        this.data.karaoke = this.filters.karaoke ? DEFAULT_FILTER_DATAS.karaoke : { level, monoLevel, filterBand, filterWidth };
+        this.data.karaoke = this.filters.karaoke
+            ? DEFAULT_FILTER_DATAS.karaoke
+            : { level, monoLevel, filterBand, filterWidth };
 
         this.filters.karaoke = !this.filters.karaoke;
         await this.applyPlayerFilters();
@@ -836,10 +907,12 @@ export class FilterManager {
      * ```
      */
     public isCustomFilterActive(): boolean {
-        this.filters.custom = !this.filters.nightcore && !this.filters.vaporwave && Object.values(this.data.timescale).some(d => d !== 1);
+        this.filters.custom =
+            !this.filters.nightcore &&
+            !this.filters.vaporwave &&
+            Object.values(this.data.timescale).some((d) => d !== 1);
         return this.filters.custom;
     }
-
 
     /**
      * Sets the players equalizer bands using one of the predefined presets.
@@ -878,7 +951,8 @@ export class FilterManager {
     public async setEQ(bands: EQBand | EQBand[]): Promise<this> {
         if (!Array.isArray(bands)) bands = [bands];
 
-        if (!bands.length || !bands.every((band) => safeStringify(Object.keys(band).sort()) === '["band","gain"]')) throw new TypeError("Bands must be a non-empty object array containing 'band' and 'gain' properties.");
+        if (!bands.length || !bands.every((band) => safeStringify(Object.keys(band).sort()) === '["band","gain"]'))
+            throw new TypeError("Bands must be a non-empty object array containing 'band' and 'gain' properties.");
 
         for (const { band, gain } of bands) this.equalizerBands[band] = { band, gain };
 
@@ -886,13 +960,13 @@ export class FilterManager {
 
         const now = performance.now();
 
-        if (this.player.options.instaUpdateFiltersFix === true) this.filterUpdatedState = true
+        if (this.player.options.instaUpdateFiltersFix === true) this.filterUpdatedState = true;
 
         await this.player.node.updatePlayer({
             guildId: this.player.guildId,
             playerOptions: {
-                filters: { equalizer: this.equalizerBands }
-            }
+                filters: { equalizer: this.equalizerBands },
+            },
         });
 
         this.player.ping.lavalink = Math.round((performance.now() - now) / 10) / 100;
@@ -914,4 +988,3 @@ export class FilterManager {
         return this.setEQ(Array.from({ length: 15 }, (_v, i) => ({ band: i, gain: 0 })));
     }
 }
-

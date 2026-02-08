@@ -1,43 +1,43 @@
 name: Deploy to GitHub Pages
 
 on:
-  push:
-    branches: [ main ]
-  workflow_dispatch:
+    push:
+        branches: [main]
+    workflow_dispatch:
 
 permissions:
-  contents: read
-  pages: write
-  id-token: write
+    contents: read
+    pages: write
+    id-token: write
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
-    if: github.repository == 'Tomato6966/lavalink-client'
-    steps:
-      - name: Checkout your repository using git
-        uses: actions/checkout@v4
+    build:
+        runs-on: ubuntu-latest
+        if: github.repository == 'Tomato6966/lavalink-client'
+        steps:
+            - name: Checkout your repository using git
+              uses: actions/checkout@v4
 
-      - name: Setup Bun.js
-        uses: oven-sh/setup-bun@v2
-        with:
-          bun-version: 1.1.27
-      # Need to install the main dependencies too for typedoc
-      - name: Install dependencies and build
-        run: bun install --no-frozen-lockfile
+            - name: Setup Bun.js
+              uses: oven-sh/setup-bun@v2
+              with:
+                  bun-version: 1.1.27
+            # Need to install the main dependencies too for typedoc
+            - name: Install dependencies and build
+              run: bun install --no-frozen-lockfile
 
-      - name: Install, build, and upload your site
-        uses: withastro/action@v3
-        with:
-          path: ./docs
-          package-manager: bun
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+            - name: Install, build, and upload your site
+              uses: withastro/action@v3
+              with:
+                  path: ./docs
+                  package-manager: bun
+    deploy:
+        needs: build
+        runs-on: ubuntu-latest
+        environment:
+            name: github-pages
+            url: ${{ steps.deployment.outputs.page_url }}
+        steps:
+            - name: Deploy to GitHub Pages
+              id: deployment
+              uses: actions/deploy-pages@v4

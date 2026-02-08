@@ -1,0 +1,15 @@
+{
+    "tabWidth": 4,
+    "printWidth": 120,
+    "experimentalSortImports": {
+        "groups": [
+            ["side-effect"],
+            ["builtin"],
+            ["external", "type-external"],
+            ["internal", "type-internal"],
+            ["parent", "type-parent"],
+            ["sibling", "type-sibling"],
+            ["index", "type-index"]
+        ]
+    }
+}

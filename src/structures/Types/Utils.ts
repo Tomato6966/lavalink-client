@@ -9,111 +9,144 @@ import type { LavalinkTrack, PluginInfo, Track, UnresolvedTrack } from "./Track"
 export type Opaque<T, K> = T & { __opaque__: K };
 
 /** Opqaue tyep for integernumber */
-export type IntegerNumber = Opaque<number, 'Int'>;
+export type IntegerNumber = Opaque<number, "Int">;
 
 /** Opqaue tyep for floatnumber */
-export type FloatNumber = Opaque<number, 'Float'>;
+export type FloatNumber = Opaque<number, "Float">;
 
 export type LavaSrcSearchPlatformBase =
-    "spsearch" |
-    "sprec" |
-    "amsearch" |
-    "dzsearch" |
-    "dzisrc" |
-    "dzrec" |
-    "ymsearch" |
-    "ymrec" |
-    "vksearch" |
-    "vkrec" |
-    "tdsearch" |
-    "tdrec" |
-    "qbsearch" |
-    "qbisrc" |
-    "qbrec" |
-    "pdsearch" |
-    "pdisrc" |
-    "pdrec";
+    | "spsearch"
+    | "sprec"
+    | "amsearch"
+    | "dzsearch"
+    | "dzisrc"
+    | "dzrec"
+    | "ymsearch"
+    | "ymrec"
+    | "vksearch"
+    | "vkrec"
+    | "tdsearch"
+    | "tdrec"
+    | "qbsearch"
+    | "qbisrc"
+    | "qbrec"
+    | "pdsearch"
+    | "pdisrc"
+    | "pdrec";
 export type LavaSrcSearchPlatform = LavaSrcSearchPlatformBase | "ftts";
 
 export type JioSaavnSearchPlatform = "jssearch" | "jsrec";
 
-export type DuncteSearchPlatform =
-    "speak" |
-    "phsearch" |
-    "pornhub" |
-    "porn" |
-    "tts";
+export type DuncteSearchPlatform = "speak" | "phsearch" | "pornhub" | "porn" | "tts";
 
 export type LavalinkClientSearchPlatform = "bcsearch";
 export type LavalinkClientSearchPlatformResolve = "bandcamp" | "bc";
 
-export type LavalinkSearchPlatform = "ytsearch" |
-    "ytmsearch" |
-    "scsearch" |
-    "bcsearch" |
-    LavaSrcSearchPlatform |
-    DuncteSearchPlatform |
-    JioSaavnSearchPlatform |
-    LavalinkClientSearchPlatform;
+export type LavalinkSearchPlatform =
+    | "ytsearch"
+    | "ytmsearch"
+    | "scsearch"
+    | "bcsearch"
+    | LavaSrcSearchPlatform
+    | DuncteSearchPlatform
+    | JioSaavnSearchPlatform
+    | LavalinkClientSearchPlatform;
 
 export type ClientCustomSearchPlatformUtils = "local" | "http" | "https" | "link" | "uri";
 
 export type ClientSearchPlatform =
-    ClientCustomSearchPlatformUtils | // for file/link requests
-    "youtube" | "yt" |
-    "youtube music" | "youtubemusic" | "ytm" | "musicyoutube" | "music youtube" |
-    "soundcloud" | "sc" |
-    "am" | "apple music" | "applemusic" | "apple" | "musicapple" | "music apple" |
-    "sp" | "spsuggestion" | "spotify" | "spotify.com" | "spotifycom" |
-    "dz" | "deezer" |
-    "yandex" | "yandex music" | "yandexmusic" | "vk" | "vk music" | "vkmusic" | "tidal" | "tidal music" | "qobuz" |
-    "pandora" | "pd" | "pandora music" | "pandoramusic" |
-    "flowerytts" | "flowery" | "flowery.tts" | LavalinkClientSearchPlatformResolve | LavalinkClientSearchPlatform | "js" | "jiosaavn" | "td" | "tidal" | "tdrec";
+    | ClientCustomSearchPlatformUtils // for file/link requests
+    | "youtube"
+    | "yt"
+    | "youtube music"
+    | "youtubemusic"
+    | "ytm"
+    | "musicyoutube"
+    | "music youtube"
+    | "soundcloud"
+    | "sc"
+    | "am"
+    | "apple music"
+    | "applemusic"
+    | "apple"
+    | "musicapple"
+    | "music apple"
+    | "sp"
+    | "spsuggestion"
+    | "spotify"
+    | "spotify.com"
+    | "spotifycom"
+    | "dz"
+    | "deezer"
+    | "yandex"
+    | "yandex music"
+    | "yandexmusic"
+    | "vk"
+    | "vk music"
+    | "vkmusic"
+    | "tidal"
+    | "tidal music"
+    | "qobuz"
+    | "pandora"
+    | "pd"
+    | "pandora music"
+    | "pandoramusic"
+    | "flowerytts"
+    | "flowery"
+    | "flowery.tts"
+    | LavalinkClientSearchPlatformResolve
+    | LavalinkClientSearchPlatform
+    | "js"
+    | "jiosaavn"
+    | "td"
+    | "tidal"
+    | "tdrec";
 
 export type SearchPlatform = LavalinkSearchPlatform | ClientSearchPlatform;
 
-export type SourcesRegex = "YoutubeRegex" |
-    "YoutubeMusicRegex" |
-    "SoundCloudRegex" |
-    "SoundCloudMobileRegex" |
-    "DeezerTrackRegex" |
-    "DeezerArtistRegex" |
-    "DeezerEpisodeRegex" |
-    "DeezerMixesRegex" |
-    "DeezerPageLinkRegex" |
-    "DeezerPlaylistRegex" |
-    "DeezerAlbumRegex" |
-    "AllDeezerRegex" |
-    "AllDeezerRegexWithoutPageLink" |
-    "SpotifySongRegex" |
-    "SpotifyPlaylistRegex" |
-    "SpotifyArtistRegex" |
-    "SpotifyEpisodeRegex" |
-    "SpotifyShowRegex" |
-    "SpotifyAlbumRegex" |
-    "AllSpotifyRegex" |
-    "mp3Url" |
-    "m3uUrl" |
-    "m3u8Url" |
-    "mp4Url" |
-    "m4aUrl" |
-    "wavUrl" |
-    "aacpUrl" |
-    "tiktok" |
-    "mixcloud" |
-    "musicYandex" |
-    "radiohost" |
-    "bandcamp" |
-    "jiosaavn" |
-    "appleMusic" |
-    "tidal" |
-    "PandoraTrackRegex" |
-    "PandoraAlbumRegex" |
-    "PandoraArtistRegex" |
-    "PandoraPlaylistRegex" |
-    "AllPandoraRegex" |
-    "TwitchTv" |
-    "vimeo";
+export type SourcesRegex =
+    | "YoutubeRegex"
+    | "YoutubeMusicRegex"
+    | "SoundCloudRegex"
+    | "SoundCloudMobileRegex"
+    | "DeezerTrackRegex"
+    | "DeezerArtistRegex"
+    | "DeezerEpisodeRegex"
+    | "DeezerMixesRegex"
+    | "DeezerPageLinkRegex"
+    | "DeezerPlaylistRegex"
+    | "DeezerAlbumRegex"
+    | "AllDeezerRegex"
+    | "AllDeezerRegexWithoutPageLink"
+    | "SpotifySongRegex"
+    | "SpotifyPlaylistRegex"
+    | "SpotifyArtistRegex"
+    | "SpotifyEpisodeRegex"
+    | "SpotifyShowRegex"
+    | "SpotifyAlbumRegex"
+    | "AllSpotifyRegex"
+    | "mp3Url"
+    | "m3uUrl"
+    | "m3u8Url"
+    | "mp4Url"
+    | "m4aUrl"
+    | "wavUrl"
+    | "aacpUrl"
+    | "tiktok"
+    | "mixcloud"
+    | "musicYandex"
+    | "radiohost"
+    | "bandcamp"
+    | "jiosaavn"
+    | "appleMusic"
+    | "tidal"
+    | "PandoraTrackRegex"
+    | "PandoraAlbumRegex"
+    | "PandoraArtistRegex"
+    | "PandoraPlaylistRegex"
+    | "AllPandoraRegex"
+    | "TwitchTv"
+    | "vimeo";
 
 export interface PlaylistInfo {
     /** The playlist name */
@@ -133,26 +166,26 @@ export interface PlaylistInfo {
 }
 
 export interface SearchResult {
-    loadType: LoadTypes,
-    exception: Exception | null,
-    pluginInfo: PluginInfo,
-    playlist: PlaylistInfo | null,
-    tracks: Track[]
+    loadType: LoadTypes;
+    exception: Exception | null;
+    pluginInfo: PluginInfo;
+    playlist: PlaylistInfo | null;
+    tracks: Track[];
 }
 
 export interface UnresolvedSearchResult {
-    loadType: LoadTypes,
-    exception: Exception | null,
-    pluginInfo: PluginInfo,
-    playlist: PlaylistInfo | null,
-    tracks: UnresolvedTrack[]
+    loadType: LoadTypes;
+    exception: Exception | null;
+    pluginInfo: PluginInfo;
+    playlist: PlaylistInfo | null;
+    tracks: UnresolvedTrack[];
 }
 
 /**
  * @internal
  */
 export interface MiniMapConstructor {
-    new(): MiniMap<unknown, unknown>;
+    new (): MiniMap<unknown, unknown>;
     new <K, V>(entries?: ReadonlyArray<readonly [K, V]> | null): MiniMap<K, V>;
     new <K, V>(iterable: Iterable<readonly [K, V]>): MiniMap<K, V>;
     readonly prototype: MiniMap<unknown, unknown>;
@@ -164,7 +197,9 @@ export type PlayerEvents =
     | TrackEndEvent
     | TrackStuckEvent
     | TrackExceptionEvent
-    | WebSocketClosedEvent | SponsorBlockSegmentEvents | LyricsEvent;
+    | WebSocketClosedEvent
+    | SponsorBlockSegmentEvents
+    | LyricsEvent;
 
 export type Severity = "COMMON" | "SUSPICIOUS" | "FAULT";
 
@@ -220,7 +255,11 @@ export interface WebSocketClosedEvent extends PlayerEvent {
 /**
  * Types & Events for Sponsorblock-plugin from Lavalink: https://github.com/topi314/Sponsorblock-Plugin#segmentsloaded
  */
-export type SponsorBlockSegmentEvents = SponsorBlockSegmentSkipped | SponsorBlockSegmentsLoaded | SponsorBlockChapterStarted | SponsorBlockChaptersLoaded;
+export type SponsorBlockSegmentEvents =
+    | SponsorBlockSegmentSkipped
+    | SponsorBlockSegmentsLoaded
+    | SponsorBlockChapterStarted
+    | SponsorBlockChaptersLoaded;
 
 export type SponsorBlockSegmentEventType = "SegmentSkipped" | "SegmentsLoaded" | "ChaptersLoaded" | "ChapterStarted";
 
@@ -234,7 +273,7 @@ export interface SponsorBlockSegmentsLoaded extends PlayerEvent {
         start: number;
         /* In Milliseconds */
         end: number;
-    }[]
+    }[];
 }
 export interface SponsorBlockSegmentSkipped extends PlayerEvent {
     type: "SegmentSkipped";
@@ -246,7 +285,7 @@ export interface SponsorBlockSegmentSkipped extends PlayerEvent {
         start: number;
         /* In Milliseconds */
         end: number;
-    }
+    };
 }
 
 export interface SponsorBlockChapterStarted extends PlayerEvent {
@@ -261,9 +300,8 @@ export interface SponsorBlockChapterStarted extends PlayerEvent {
         end: number;
         /* In Milliseconds */
         duration: number;
-    }
+    };
 }
-
 
 export interface SponsorBlockChaptersLoaded extends PlayerEvent {
     type: "ChaptersLoaded";
@@ -277,7 +315,7 @@ export interface SponsorBlockChaptersLoaded extends PlayerEvent {
         end: number;
         /* In Milliseconds */
         duration: number;
-    }[]
+    }[];
 }
 
 /**
@@ -316,33 +354,20 @@ export interface LyricsLineEvent extends PlayerEvent {
     skipped: boolean;
 }
 
-export type LoadTypes =
-    | "track"
-    | "playlist"
-    | "search"
-    | "error"
-    | "empty";
+export type LoadTypes = "track" | "playlist" | "search" | "error" | "empty";
 
-export type State =
-    | "CONNECTED"
-    | "CONNECTING"
-    | "DISCONNECTED"
-    | "DISCONNECTING"
-    | "DESTROYING";
+export type State = "CONNECTED" | "CONNECTING" | "DISCONNECTED" | "DISCONNECTING" | "DESTROYING";
 
 export type PlayerEventType =
     | "TrackStartEvent"
     | "TrackEndEvent"
     | "TrackExceptionEvent"
     | "TrackStuckEvent"
-    | "WebSocketClosedEvent" | SponsorBlockSegmentEventType | LyricsEventType;
+    | "WebSocketClosedEvent"
+    | SponsorBlockSegmentEventType
+    | LyricsEventType;
 
-export type TrackEndReason =
-    | "finished"
-    | "loadFailed"
-    | "stopped"
-    | "replaced"
-    | "cleanup";
+export type TrackEndReason = "finished" | "loadFailed" | "stopped" | "replaced" | "cleanup";
 
 export interface InvalidLavalinkRestRequest {
     /** Rest Request Data for when it was made */
@@ -368,10 +393,10 @@ export interface LavalinkPlayerVoice {
     /** Whether or not the player is connected */
     connected?: boolean;
     /** The Ping to the voice server */
-    ping?: number
+    ping?: number;
 }
 
-export type LavalinkPlayerVoiceOptions = Omit<LavalinkPlayerVoice, 'connected' | 'ping'>;
+export type LavalinkPlayerVoiceOptions = Omit<LavalinkPlayerVoice, "connected" | "ping">;
 
 export interface FailingAddress {
     /** The failing address */
@@ -382,7 +407,11 @@ export interface FailingAddress {
     failingTime: string;
 }
 
-export type RoutePlannerTypes = "RotatingIpRoutePlanner" | "NanoIpRoutePlanner" | "RotatingNanoIpRoutePlanner" | "BalancingIpRoutePlanner";
+export type RoutePlannerTypes =
+    | "RotatingIpRoutePlanner"
+    | "NanoIpRoutePlanner"
+    | "RotatingNanoIpRoutePlanner"
+    | "BalancingIpRoutePlanner";
 
 export interface RoutePlanner {
     class?: RoutePlannerTypes;
@@ -393,7 +422,7 @@ export interface RoutePlanner {
             type: "Inet4Address" | "Inet6Address";
             /** 	The size of the ip block */
             size: string;
-        },
+        };
         /** The failing addresses */
         failingAddresses: FailingAddress[];
         /** The number of rotations */
@@ -406,7 +435,7 @@ export interface RoutePlanner {
         currentAddressIndex?: string;
         /** The information in which /64 block ips are chosen. This number increases on each ban. */
         blockIndex?: string;
-    }
+    };
 }
 
 export interface Session {
@@ -431,7 +460,6 @@ export interface GuildShardPayload {
         self_deaf: boolean;
     };
 }
-
 
 export interface PlayerUpdateInfo {
     /** guild id of the player */
@@ -464,20 +492,19 @@ export interface LavalinkPlayer {
         connected: boolean;
         /** Ping to voice server */
         ping: number;
-    }
+    };
 }
-
 
 export interface ChannelDeletePacket {
     /** Packet key for channel delete */
-    t: "CHANNEL_DELETE",
+    t: "CHANNEL_DELETE";
     /** data which is sent and relevant */
     d: {
         /** guild id */
         guild_id: string;
         /** Channel id */
         id: string;
-    }
+    };
 }
 export interface VoiceState {
     /** OP key from lavalink */
@@ -542,55 +569,65 @@ export interface NodeMessage extends NodeStats {
     guildId: string;
 }
 
-
-
 /** Specific types to filter for lavasearch, will be filtered to correct types */
-export type LavaSearchType = "track" | "album" | "artist" | "playlist" | "text" | "tracks" | "albums" | "artists" | "playlists" | "texts";
+export type LavaSearchType =
+    | "track"
+    | "album"
+    | "artist"
+    | "playlist"
+    | "text"
+    | "tracks"
+    | "albums"
+    | "artists"
+    | "playlists"
+    | "texts";
 
 export interface LavaSearchFilteredResponse {
     /** The Information of a playlist provided by lavasearch */
-    info: PlaylistInfo,
+    info: PlaylistInfo;
     /** additional plugin information */
-    pluginInfo: PluginInfo,
+    pluginInfo: PluginInfo;
     /** List of tracks  */
-    tracks: Track[]
+    tracks: Track[];
 }
 
 export interface LavaSearchResponse {
     /** An array of tracks, only present if track is in types */
-    tracks: Track[],
+    tracks: Track[];
     /** An array of albums, only present if album is in types */
-    albums: LavaSearchFilteredResponse[],
+    albums: LavaSearchFilteredResponse[];
     /** 	An array of artists, only present if artist is in types */
-    artists: LavaSearchFilteredResponse[],
+    artists: LavaSearchFilteredResponse[];
     /** 	An array of playlists, only present if playlist is in types */
-    playlists: LavaSearchFilteredResponse[],
+    playlists: LavaSearchFilteredResponse[];
     /** An array of text results, only present if text is in types */
     texts: {
-        text: string,
-        pluginInfo: PluginInfo
-    }[],
+        text: string;
+        pluginInfo: PluginInfo;
+    }[];
     /** Addition result data provided by plugins */
-    pluginInfo: PluginInfo
+    pluginInfo: PluginInfo;
 }
 
 /** SearchQuery Object for raw lavalink requests */
-export type SearchQuery = {
-    /** lavalink search Query / identifier string */
-    query: string,
-    /** Extra url query params to use, e.g. for flowertts */
-    extraQueryUrlParams?: URLSearchParams;
-    /** Source to append to the search query string */
-    source?: SearchPlatform
-} | /** Our just the search query / identifier string */ string;
+export type SearchQuery =
+    | {
+          /** lavalink search Query / identifier string */
+          query: string;
+          /** Extra url query params to use, e.g. for flowertts */
+          extraQueryUrlParams?: URLSearchParams;
+          /** Source to append to the search query string */
+          source?: SearchPlatform;
+      }
+    | /** Our just the search query / identifier string */ string;
 /** SearchQuery Object for Lavalink LavaSearch Plugin requests */
 export type LavaSearchQuery = {
     /** lavalink search Query / identifier string */
-    query: string,
+    query: string;
     /** Source to append to the search query string */
-    source: LavaSrcSearchPlatformBase,
+    source: LavaSrcSearchPlatformBase;
     /** The Types to filter the search to */
-    types?: LavaSearchType[]
+    types?: LavaSearchType[];
 };
 
-export type Awaitable<T> = Promise<T> | T
+export type Awaitable<T> = Promise<T> | T;

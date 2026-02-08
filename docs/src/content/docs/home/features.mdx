@@ -6,41 +6,41 @@ description: Easy, flexible and feature-rich lavalink@v4 Client. Both for Beginn
 - 💯 Lavalink v4 Supported only (with many Lavalink Plugins)
 
 - ✅ Player-Destroy Reasons like:
-  - Channel got deleted, Player got disconnected...
+    - Channel got deleted, Player got disconnected...
 
 - ✨ Choose able queue stores (maps, collections, redis, databases, ...)
-  - You can create your own queueStore, thus make it easy to sync queues accross multiple connections (e.g. dashboard-bot)
-  - Automated Queue Sync methods
-  - Automated unresolveable Tracks (save the queries as Partial Track Objects -> Fetch the tracks only once they are gonna play)
+    - You can create your own queueStore, thus make it easy to sync queues accross multiple connections (e.g. dashboard-bot)
+    - Automated Queue Sync methods
+    - Automated unresolveable Tracks (save the queries as Partial Track Objects -> Fetch the tracks only once they are gonna play)
 
 - � Advanced Queue Filtering & Searching
-  - Filter tracks by title, author, duration, source, and more
-  - Find specific tracks with flexible search criteria
-  - Sort queue by duration, title, or author
-  - Get track ranges for custom implementations
+    - Filter tracks by title, author, duration, source, and more
+    - Find specific tracks with flexible search criteria
+    - Sort queue by duration, title, or author
+    - Get track ranges for custom implementations
 
 - �😍 Included Filter & Equalizer Management
 
-- 👍 Multiple Player Options *for easier use*
-  - onDisconnect -> Player Destroy / auto Reconnect *on when its queue got empty*
-  - onEmptyQueue -> Player Destroy / leave After x Time
-  - instaFixFilter -> seek the player after applying a filter, to instantly apply it's effect (only works for little-durational-songs)
-  - applyVolumeAsFilter -> instead of using lavalink.volume, it uses lavalink.filters.volume which is much different!
+- 👍 Multiple Player Options _for easier use_
+    - onDisconnect -> Player Destroy / auto Reconnect _on when its queue got empty_
+    - onEmptyQueue -> Player Destroy / leave After x Time
+    - instaFixFilter -> seek the player after applying a filter, to instantly apply it's effect (only works for little-durational-songs)
+    - applyVolumeAsFilter -> instead of using lavalink.volume, it uses lavalink.filters.volume which is much different!
 
 - 🛡️ Lavalink Validations
-  - It only let's you use the filters / plugins / sources, if Lavalink actually has it enabled
+    - It only let's you use the filters / plugins / sources, if Lavalink actually has it enabled
 
 - 🛡️ Client Validations
-  - Allows you to whitelist links and even blacklist links / words / domain names, so that it doesn't allow requests you don't want!
-  - Checks almost all Lavalink Requests for out of bound errors, right before the request is made to prevent process breaking errors.
+    - Allows you to whitelist links and even blacklist links / words / domain names, so that it doesn't allow requests you don't want!
+    - Checks almost all Lavalink Requests for out of bound errors, right before the request is made to prevent process breaking errors.
 
 - 🧑‍💻 Memory friendly and easy style
-  - Only the required data is displayed, and the store-way & types match Lavalink#IMPLEMENTATION.md
+    - Only the required data is displayed, and the store-way & types match Lavalink#IMPLEMENTATION.md
 
 - 😘 Automated Handlings
-  - Skips the songs, on TrackEnd, TrackStuck, TrackError,
-  - Destroys the player on channeldelete
-  - Pauses / resumes the player if it get's muted / unmuted (server-wide) [soon]
-  - ...
+    - Skips the songs, on TrackEnd, TrackStuck, TrackError,
+    - Destroys the player on channeldelete
+    - Pauses / resumes the player if it get's muted / unmuted (server-wide) [soon]
+    - ...
 
 - 😁 Much much more!
