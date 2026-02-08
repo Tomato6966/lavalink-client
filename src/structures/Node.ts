@@ -263,7 +263,7 @@ export class LavalinkNode {
      * player.node.rawRequest(`/loadtracks?identifier=Never gonna give you up`, (options) => options.method = "GET");
      * ```
      */
-    private async rawRequest(
+    public async rawRequest(
         endpoint: string,
         modify?: ModifyRequest,
     ): Promise<{

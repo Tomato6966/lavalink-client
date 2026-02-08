@@ -41,6 +41,43 @@ const DEFAULT_FILTER_DATAS: FilterData = {
         depth: 0, // 0 < x <= 1
     },
     channelMix: audioOutputsData.stereo,
+    // NODELINK SPECIFIC
+    echo: {
+        delay: 0,
+        feedback: 0,
+        mix: 0,
+    },
+    chorus: {
+        rate: 0,
+        depth: 0,
+        delay: 0,
+        mix: 0,
+        feedback: 0,
+    },
+    compressor: {
+        threshold: 0,
+        ratio: 1,
+        attack: 0,
+        release: 0,
+        gain: 0,
+    },
+    highPass: {
+        smoothing: 0,
+    },
+    phaser: {
+        stages: 0,
+        rate: 0,
+        depth: 0,
+        feedback: 0,
+        mix: 0,
+        minFrequency: 0,
+        maxFrequency: 0,
+    },
+    spatial: {
+        depth: 0,
+        rate: 0,
+    },
+    // LAVALINK-FILTER-PLUGIN SPECIFIC
     pluginFilters: {
         "lavalink-filter-plugin": {
             echo: {
@@ -101,6 +138,12 @@ export class FilterManager {
         tremolo: false,
         vibrato: false,
         lowPass: false,
+        nodeLinkEcho: false,
+        nodeLinkChorus: false,
+        nodeLinkCompressor: false,
+        nodeLinkHighPass: false,
+        nodeLinkPhaser: false,
+        nodeLinkSpatial: false,
         lavalinkFilterPlugin: {
             echo: false,
             reverb: false,
@@ -164,6 +207,15 @@ export class FilterManager {
         if (!this.filters.karaoke) delete sendData.karaoke;
         if (!this.filters.rotation) delete sendData.rotation;
         if (this.filters.audioOutput === "stereo") delete sendData.channelMix;
+
+
+        if (!this.filters.nodeLinkEcho) delete sendData.echo;
+        if (!this.filters.nodeLinkChorus) delete sendData.chorus;
+        if (!this.filters.nodeLinkCompressor) delete sendData.compressor;
+        if (!this.filters.nodeLinkHighPass) delete sendData.highPass;
+        if (!this.filters.nodeLinkPhaser) delete sendData.phaser;
+        if (!this.filters.nodeLinkSpatial) delete sendData.spatial;
+
 
         if (Object.values(this.data.timescale ?? {}).every((v) => v === 1)) delete sendData.timescale;
 
@@ -259,6 +311,32 @@ export class FilterManager {
                 typeof (this.data.pluginFilters?.echo as { decay: number; delay: number })?.delay === "undefined",
         };
         this.filters.lowPass = this.privateNot0(this.data.lowPass?.smoothing);
+        this.filters.nodeLinkEcho =
+            this.privateNot0(this.data.echo?.delay) ||
+            this.privateNot0(this.data.echo?.feedback) ||
+            this.privateNot0(this.data.echo?.mix);
+        this.filters.nodeLinkChorus =
+            this.privateNot0(this.data.chorus?.rate) ||
+            this.privateNot0(this.data.chorus?.depth) ||
+            this.privateNot0(this.data.chorus?.delay) ||
+            this.privateNot0(this.data.chorus?.mix) ||
+            this.privateNot0(this.data.chorus?.feedback);
+        this.filters.nodeLinkCompressor =
+            this.privateNot0(this.data.compressor?.threshold) ||
+            this.privateNot0(this.data.compressor?.ratio) ||
+            this.privateNot0(this.data.compressor?.attack) ||
+            this.privateNot0(this.data.compressor?.release) ||
+            this.privateNot0(this.data.compressor?.gain);
+        this.filters.nodeLinkHighPass = this.privateNot0(this.data.highPass?.smoothing);
+        this.filters.nodeLinkPhaser =
+            this.privateNot0(this.data.phaser?.stages) ||
+            this.privateNot0(this.data.phaser?.rate) ||
+            this.privateNot0(this.data.phaser?.depth) ||
+            this.privateNot0(this.data.phaser?.feedback) ||
+            this.privateNot0(this.data.phaser?.mix) ||
+            this.privateNot0(this.data.phaser?.minFrequency) ||
+            this.privateNot0(this.data.phaser?.maxFrequency);
+        this.filters.nodeLinkSpatial = this.privateNot0(this.data.spatial?.depth) || this.privateNot0(this.data.spatial?.rate);
         this.filters.karaoke = Object.values(this.data.karaoke ?? {}).some((v) => v !== 0);
         if ((this.filters.nightcore || this.filters.vaporwave) && oldFilterTimescale) {
             if (
@@ -299,6 +377,12 @@ export class FilterManager {
         this.filters.karaoke = false;
         this.filters.karaoke = false;
         this.filters.volume = false;
+        this.filters.nodeLinkEcho = false;
+        this.filters.nodeLinkChorus = false;
+        this.filters.nodeLinkCompressor = false;
+        this.filters.nodeLinkHighPass = false;
+        this.filters.nodeLinkPhaser = false;
+        this.filters.nodeLinkSpatial = false;
         this.filters.audioOutput = "stereo";
 
         this.data = structuredClone(DEFAULT_FILTER_DATAS);

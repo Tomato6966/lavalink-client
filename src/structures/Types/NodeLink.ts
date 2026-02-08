@@ -161,3 +161,114 @@ export type ListMixerLayersResponse = {
         startTime: number;
     }[]
 }
+
+
+export type ConnectionMetricsResponse = {
+    status: string,
+    metrics: {
+        speed: {
+            bps: number,
+            kbps: number,
+            mbps: number
+        },
+        downloadedBytes: number,
+        durationSeconds: number,
+        timestamp: number
+    }
+}
+
+
+export type NodeLinkLyricsSynced = {
+    loadType: string,
+    data: {
+        synced: true,
+        lang: string,
+        source: string,
+        lines: [
+            {
+                text: string,
+                time: number,
+                duration: number
+            },
+            {
+                text: string,
+                time: number,
+                duration: number
+            },
+            {
+                text: string,
+                time: number,
+                duration: number
+            }
+        ]
+    }
+}
+
+export type NodeLinkLyricsPlain = {
+    loadType: string,
+    data: {
+        synced: false,
+        lang: string,
+        source: string,
+        lines: [
+            {
+                text: string,
+                time: null,
+                duration: null
+            },
+            {
+                text: string,
+                time: null,
+                duration: null
+            },
+            {
+                text: string,
+                time: null,
+                duration: null
+            }
+        ]
+    }
+}
+
+export type NodeLinkLyrics = NodeLinkLyricsSynced | NodeLinkLyricsPlain;
+
+export type NodeLinkNoLyrics = {
+    loadType: string,
+    data: {}
+}
+
+
+export type NodeLinkChapter = {
+    title: string,
+    startTime: number,
+    thumbnails: [
+        {
+            url: string,
+            width: number,
+            height: number
+        }
+    ],
+    duration: number,
+    endTime: number
+}
+
+
+export type DirectStreamResponse = {
+    url: string,
+    protocol: string,
+    format: string,
+    hlsUrl: string | null,
+    formats: {
+        itag: number,
+        mimeType: string,
+        qualityLabel: string,
+        bitrate: number
+    }[]
+}
+
+export type YoutubeOAuthResponse = {
+    access_token: string;
+    expires_in: number;
+    scope: string;
+    token_type: string;
+}

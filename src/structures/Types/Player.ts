@@ -109,11 +109,13 @@ export interface LavalinkPlayOptions extends BasePlayOptions {
         userData?: anyObject;
         /** The Track requester for when u provide encodedTrack / identifer */
         requester?: unknown;
+        /** NodeLink Specific audioTrackId option */
+        audioTrackId?: string;
     };
 }
 export interface PlayOptions extends LavalinkPlayOptions {
     /** Whether to not replace the track if a play payload is sent. */
     noReplace?: boolean;
     /** Adds track on queue and skips to it */
-    clientTrack?: Track | UnresolvedTrack;
+    clientTrack?: (Track | UnresolvedTrack) & { audioTrackId?: string }
 }

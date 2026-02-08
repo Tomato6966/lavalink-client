@@ -23,6 +23,18 @@ export interface PlayerFilters {
     lowPass: boolean;
     /** audio Output (default stereo, mono sounds the fullest and best for not-stereo tracks) */
     audioOutput: AudioOutputs;
+    /** if NodeLink echo filter is enabled / not */
+    nodeLinkEcho: boolean;
+    /** if NodeLink chorus filter is enabled / not */
+    nodeLinkChorus: boolean;
+    /** if NodeLink compressor filter is enabled / not */
+    nodeLinkCompressor: boolean;
+    /** if NodeLink highpass filter is enabled / not */
+    nodeLinkHighPass: boolean;
+    /** if NodeLink phaser filter is enabled / not */
+    nodeLinkPhaser: boolean;
+    /** if NodeLink spatial filter is enabled / not */
+    nodeLinkSpatial: boolean;
     /** Lavalink Volume FILTER (not player Volume, think of it as a gain booster) */
     volume: boolean;
     /** Filters for the Lavalink Filter Plugin */
@@ -142,6 +154,88 @@ export interface ChannelMixFilter {
 }
 
 /**
+ * Creates delay-based echo with feedback control
+ */
+export interface NodeLink_EchoFilter {
+    /** Delay time in milliseconds (0 to 5000ms) */
+    delay?: number;
+    /** Amount of signal fed back into the delay (0.0 to 1.0) */
+    feedback?: number;
+    /** Dry/wet mix ratio (0.0 = dry only, 1.0 = wet only) */
+    mix?: number;
+}
+
+/**
+ * Simulates multiple voices playing together with modulated delays
+ */
+export interface NodeLink_ChorusFilter {
+    /** LFO modulation rate in Hz */
+    rate?: number;
+    /** Modulation depth (0.0 to 1.0) */
+    depth?: number;
+    /** Base delay time in milliseconds (1 to 45ms) */
+    delay?: number;
+    /** Dry/wet mix ratio (0.0 to 1.0) */
+    mix?: number;
+    /** Feedback amount (0.0 to 0.95) */
+    feedback?: number;
+}
+
+/**
+ * Dynamic range compression for balanced audio levels
+ */
+export interface NodeLink_CompressorFilter {
+    /** Threshold level in dB (when compression starts) */
+    threshold?: number;
+    /** Compression ratio (1.0 = no compression, higher = more compression) */
+    ratio?: number;
+    /** Attack time in milliseconds (how fast compression engages) */
+    attack?: number;
+    /** Release time in milliseconds (how fast compression disengages) */
+    release?: number;
+    /** Makeup gain in dB (compensates for volume reduction) */
+    gain?: number;
+}
+
+/**
+ * Filters out low frequencies, letting high frequencies pass through
+ */
+export interface NodeLink_HighPassFilter {
+    /** Smoothing factor (must be > 1.0 to enable) */
+    smoothing?: number;
+}
+
+/**
+ * Sweeps all-pass filters across the frequency spectrum for a swooshing effect
+ */
+export interface NodeLink_PhaserFilter {
+    /** Number of filter stages (2 to 12, more = stronger effect) */
+    stages?: number;
+    /** LFO sweep rate in Hz */
+    rate?: number;
+    /** Modulation depth (0.0 to 1.0) */
+    depth?: number;
+    /** Feedback amount (0.0 to 0.9) */
+    feedback?: number;
+    /** Dry/wet mix ratio (0.0 to 1.0) */
+    mix?: number;
+    /** Minimum sweep frequency in Hz */
+    minFrequency?: number;
+    /** Maximum sweep frequency in Hz */
+    maxFrequency?: number;
+}
+
+/**
+ * Creates spatial audio using cross-channel delays and modulation
+ */
+export interface NodeLink_SpatialFilter {
+    /** Effect depth (0.0 to 1.0) */
+    depth?: number;
+    /** Modulation rate in Hz */
+    rate?: number;
+}
+
+/**
  * Higher frequencies get suppressed, while lower frequencies pass through this filter, thus the name low pass.
  * Any smoothing values equal to or less than 1.0 will disable the filter.
  */
@@ -162,6 +256,12 @@ export interface FilterData {
     distortion?: DistortionFilter;
     channelMix?: ChannelMixFilter;
     lowPass?: LowPassFilter;
+    echo?: NodeLink_EchoFilter;
+    chorus?: NodeLink_ChorusFilter;
+    compressor?: NodeLink_CompressorFilter;
+    highPass?: NodeLink_HighPassFilter;
+    phaser?: NodeLink_PhaserFilter;
+    spatial?: NodeLink_SpatialFilter;
     pluginFilters?: {
         "lavalink-filter-plugin"?: {
             echo?: {

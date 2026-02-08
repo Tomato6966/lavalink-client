@@ -285,7 +285,11 @@ export class Player {
                 encoded: options.clientTrack?.encoded,
                 requester: options.clientTrack?.requester,
                 userData: options.clientTrack?.userData,
+                audioTrackId: options.track?.audioTrackId ?? options.clientTrack?.audioTrackId,
             };
+            if (options.track.audioTrackId && !this.node.isNodeLink()) {
+                delete options.track.audioTrackId;
+            }
         }
         // if either encoded or identifier is provided generate the data to play them
         if (options?.track?.encoded || options?.track?.identifier) {
@@ -315,6 +319,7 @@ export class Player {
                             : {}),
                         ...options.track.userData,
                     },
+                    audioTrackId: options.track.audioTrackId,
                 }).filter((v) => typeof v[1] !== "undefined"),
             ) as LavalinkPlayOptions["track"];
 
@@ -323,6 +328,10 @@ export class Player {
                 message: `Player was called to play something, with a specific track provided. Replacing the current Track and resolving the track on trackStart Event.`,
                 functionLayer: "Player > play()",
             });
+
+            if (track.audioTrackId && !this.node.isNodeLink()) {
+                delete track.audioTrackId;
+            }
 
             return this.node.updatePlayer({
                 guildId: this.guildId,
@@ -417,6 +426,7 @@ export class Player {
                         ...options?.track?.userData,
                         ...this.queue.current?.userData,
                     },
+                    audioTrackId: options?.track?.audioTrackId,
                 },
                 volume: this.lavalinkVolume,
                 position: options?.position ?? 0,
@@ -427,6 +437,9 @@ export class Player {
             }).filter((v) => typeof v[1] !== "undefined"),
         ) as Partial<LavalinkPlayOptions>;
 
+        if (finalOptions.track.audioTrackId && !this.node.isNodeLink()) {
+            delete finalOptions.track.audioTrackId;
+        }
         if (
             (typeof finalOptions.position !== "undefined" && isNaN(finalOptions.position)) ||
             (typeof finalOptions.position === "number" && finalOptions.position < 0) ||

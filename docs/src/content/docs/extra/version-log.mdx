@@ -34,6 +34,20 @@ Logs about the changed features.
 
 - Enhanced connection stability feature (heartbeating) is now only available for nodeType = "Lavalink".
 
+- Expose `node.rawRequest` to public, so you can use it for your own requests.
+
+- Added all nodelink specific features (in the seperate NodeLinkNode class, which can be type asserted via `node.isNodeLink()`):
+    - `node.getYoutubeOAUTH()`
+    - `node.updateYoutubeOAUTH()`
+    - `node.getChapters()`
+    - `node.getLyrics()`
+    - `node.getDirectStream()`
+    - `node.getMixerLayers()`
+    - `node.addMixerLayer()`
+    - `node.removeMixerLayer()`
+    - `node.updateMixerLayer()`
+
+
 ## **Version 2.8.0**
 
 - Added global typing for the TrackRequester type via `module augmentation`. ( Thanks to @appujet on Github)
