@@ -352,7 +352,6 @@ export const RecommendationsStrings = {
     checkConnectivity: "Check node connectivity and restart if needed",
 };
 
-
 export const NodeLinkExclusiveEvents: NodeLinkEventTypes[] = [
     "PlayerCreatedEvent",
     "PlayerDestroyedEvent",

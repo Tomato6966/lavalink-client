@@ -54,7 +54,8 @@ export function PlayerEvents(client: BotClient) {
         .on("playerSocketClosed", (player, payload) => {
             logPlayer(client, player, "Player socket got closed from lavalink :: ", payload);
         })
-        .on("playerUpdate", (player) => { // eslint-disable-line @typescript-eslint/no-unused-vars
+        .on("playerUpdate", (player) => {
+            // eslint-disable-line @typescript-eslint/no-unused-vars
             // use this event to udpate the player in the your cache if you want to save the player's data(s) externally!
             /**
              *
@@ -72,12 +73,14 @@ export function PlayerEvents(client: BotClient) {
             // e.g. "unmute the player again"
             // if(serverMuted === true)  client.guilds.cache.get(player.guildId)?.members.me?.voice.setMute(false, "Auto unmute the player");
         })
-        .on("playerDeafChange", (player, selfDeaf, serverDeaf) => { // eslint-disable-line @typescript-eslint/no-unused-vars
+        .on("playerDeafChange", (player, selfDeaf, serverDeaf) => {
+            // eslint-disable-line @typescript-eslint/no-unused-vars
             logPlayer(client, player, "INFO: playerDeafChange");
             // e.g. "re-deaf the player" because ppl think this way the bot saves traffic
             // if(serverDeaf === false) client.guilds.cache.get(player.guildId)?.members.me?.voice.setDeaf(true, "Auto re-deaf the player");
         })
-        .on("playerSuppressChange", (player, suppress) => { // eslint-disable-line @typescript-eslint/no-unused-vars
+        .on("playerSuppressChange", (player, suppress) => {
+            // eslint-disable-line @typescript-eslint/no-unused-vars
             logPlayer(client, player, "INFO: playerSuppressChange");
             // e.g. you could automatically unsuppress the bot so he's allowed to speak
         })
@@ -180,7 +183,8 @@ export function PlayerEvents(client: BotClient) {
 
             sendPlayerMessage(client, player, { embeds });
         })
-        .on("trackEnd", (player, track, payload) => { // eslint-disable-line
+        .on("trackEnd", (player, track, payload) => {
+            // eslint-disable-line
             logPlayer(client, player, "Finished Playing :: ", track?.info?.title);
         })
         .on("trackError", (player, track, payload) => {
@@ -196,7 +200,8 @@ export function PlayerEvents(client: BotClient) {
                 payload,
             );
         })
-        .on("queueEnd", (player, track, payload) => {  // eslint-disable-line
+        .on("queueEnd", (player, track, payload) => {
+            // eslint-disable-line
             logPlayer(client, player, "No more tracks in the queue, after playing :: ", track?.info?.title || track);
             sendPlayerMessage(client, player, {
                 embeds: [new EmbedBuilder().setColor("Red").setTitle("❌ Queue Ended").setTimestamp()],

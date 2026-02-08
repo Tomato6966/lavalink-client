@@ -12,7 +12,7 @@ import { autoPlayFunction, requesterTransformer } from "./Utils/OptionalFunction
 
 // you can declare a global type for the requester used via the requesterTransformer
 declare module "lavalink-client" {
-    export interface TrackRequester extends CustomRequester { }
+    export interface TrackRequester extends CustomRequester {}
 }
 
 const client = new Client({

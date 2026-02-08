@@ -236,7 +236,9 @@ export class NodeManager extends EventEmitter {
      * @param node The node to get
      * @returns The node that was retrieved
      */
-    public getNode(node: LavalinkNodeIdentifier | LavalinkNode | NodeLinkNode): LavalinkNode | NodeLinkNode | undefined {
+    public getNode(
+        node: LavalinkNodeIdentifier | LavalinkNode | NodeLinkNode,
+    ): LavalinkNode | NodeLinkNode | undefined {
         const decodeNode = typeof node === "string" ? this.nodes.get(node) : node;
         if (!decodeNode) return undefined;
         if (decodeNode.nodeType === "NodeLink") return decodeNode as NodeLinkNode;

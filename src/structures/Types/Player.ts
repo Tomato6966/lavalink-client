@@ -117,5 +117,5 @@ export interface PlayOptions extends LavalinkPlayOptions {
     /** Whether to not replace the track if a play payload is sent. */
     noReplace?: boolean;
     /** Adds track on queue and skips to it */
-    clientTrack?: (Track | UnresolvedTrack) & { audioTrackId?: string }
+    clientTrack?: (Track | UnresolvedTrack) & { audioTrackId?: string };
 }

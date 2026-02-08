@@ -1,12 +1,29 @@
+import { ReadableStream } from "stream/web";
+
 import { LavalinkNode } from "./Node";
 import type { NodeManager } from "./NodeManager";
 import { Player } from "./Player";
+import {
+    NodeLink_ChorusFilter,
+    NodeLink_CompressorFilter,
+    NodeLink_EchoFilter,
+    NodeLink_HighPassFilter,
+    NodeLink_PhaserFilter,
+    NodeLink_SpatialFilter,
+} from "./Types/Filters";
 import type { LavalinkNodeOptions } from "./Types/Node";
-import { AddMixerLayerResponse, ConnectionMetricsResponse, DirectStreamResponse, ListMixerLayersResponse, NodeLinkChapter, NodeLinkLyrics, NodeLinkNoLyrics, YoutubeOAuthResponse } from "./Types/NodeLink";
+import {
+    AddMixerLayerResponse,
+    ConnectionMetricsResponse,
+    DirectStreamResponse,
+    ListMixerLayersResponse,
+    NodeLinkChapter,
+    NodeLinkLyrics,
+    NodeLinkNoLyrics,
+    YoutubeOAuthResponse,
+} from "./Types/NodeLink";
 import { Track, UnresolvedTrack } from "./Types/Track";
-import { NodeLink_ChorusFilter, NodeLink_CompressorFilter, NodeLink_EchoFilter, NodeLink_HighPassFilter, NodeLink_PhaserFilter, NodeLink_SpatialFilter } from "./Types/Filters";
 import { safeStringify } from "./Utils";
-import { ReadableStream } from "stream/web";
 
 export class NodeLinkNode extends LavalinkNode {
     public nodeType = "NodeLink" as const;
@@ -29,20 +46,17 @@ export class NodeLinkNode extends LavalinkNode {
      */
     public async addMixerLayer(player: Player, trackToAdd: Track, volume: number): Promise<AddMixerLayerResponse> {
         if (!this.sessionId) throw new Error("The Lavalink Node is either not ready, or not up to date!");
-        return await this.request(
-            `/sessions/${this.sessionId}/players/${player.guildId}/mix`,
-            (m) => {
-                m.method = "POST";
-                m.body = safeStringify({
-                    track: {
-                        encoded: trackToAdd.encoded,
-                        //identifier: trackToAdd.info?.identifier, // atm not supported
-                        userData: trackToAdd.userData,
-                    },
-                    volume: (volume / 100).toFixed(2),
-                })
-            }
-        ) as AddMixerLayerResponse;
+        return (await this.request(`/sessions/${this.sessionId}/players/${player.guildId}/mix`, (m) => {
+            m.method = "POST";
+            m.body = safeStringify({
+                track: {
+                    encoded: trackToAdd.encoded,
+                    //identifier: trackToAdd.info?.identifier, // atm not supported
+                    userData: trackToAdd.userData,
+                },
+                volume: (volume / 100).toFixed(2),
+            });
+        })) as AddMixerLayerResponse;
     }
 
     /**
@@ -52,12 +66,9 @@ export class NodeLinkNode extends LavalinkNode {
      */
     public async listMixerLayers(player: Player): Promise<ListMixerLayersResponse> {
         if (!this.sessionId) throw new Error("The Lavalink Node is either not ready, or not up to date!");
-        return await this.request(
-            `/sessions/${this.sessionId}/players/${player.guildId}/mix`,
-            (m) => {
-                m.method = "GET";
-            }
-        ) as ListMixerLayersResponse;
+        return (await this.request(`/sessions/${this.sessionId}/players/${player.guildId}/mix`, (m) => {
+            m.method = "GET";
+        })) as ListMixerLayersResponse;
     }
 
     /**
@@ -69,15 +80,12 @@ export class NodeLinkNode extends LavalinkNode {
      */
     public async updateMixerLayerVolume(player: Player, mixId: string, volume: number) {
         if (!this.sessionId) throw new Error("The Lavalink Node is either not ready, or not up to date!");
-        await this.request(
-            `/sessions/${this.sessionId}/players/${player.guildId}/mix/${mixId}`,
-            (m) => {
-                m.method = "PATCH";
-                m.body = safeStringify({
-                    volume: (volume / 100).toFixed(2),
-                })
-            }
-        );
+        await this.request(`/sessions/${this.sessionId}/players/${player.guildId}/mix/${mixId}`, (m) => {
+            m.method = "PATCH";
+            m.body = safeStringify({
+                volume: (volume / 100).toFixed(2),
+            });
+        });
         return true;
     }
 
@@ -89,12 +97,9 @@ export class NodeLinkNode extends LavalinkNode {
      */
     public async removeMixerLayer(player: Player, mixId: string) {
         if (!this.sessionId) throw new Error("The Lavalink Node is either not ready, or not up to date!");
-        await this.request(
-            `/sessions/${this.sessionId}/players/${player.guildId}/mix/${mixId}`,
-            (m) => {
-                m.method = "DELETE";
-            }
-        );
+        await this.request(`/sessions/${this.sessionId}/players/${player.guildId}/mix/${mixId}`, (m) => {
+            m.method = "DELETE";
+        });
         return true;
     }
 
@@ -109,7 +114,11 @@ export class NodeLinkNode extends LavalinkNode {
          * @param player The player to apply the filter to
          * @param options The echo filter options
          */
-        echo: async (player: Player, options: NodeLink_EchoFilter, disableFilter: boolean = false): Promise<boolean> => {
+        echo: async (
+            player: Player,
+            options: NodeLink_EchoFilter,
+            disableFilter: boolean = false,
+        ): Promise<boolean> => {
             if (disableFilter) delete player.filterManager.data.echo;
             else player.filterManager.data.echo = options;
             await player.filterManager.applyPlayerFilters();
@@ -120,7 +129,11 @@ export class NodeLinkNode extends LavalinkNode {
          * @param player The player to apply the filter to
          * @param options The chorus filter options
          */
-        chorus: async (player: Player, options: NodeLink_ChorusFilter, disableFilter: boolean = false): Promise<boolean> => {
+        chorus: async (
+            player: Player,
+            options: NodeLink_ChorusFilter,
+            disableFilter: boolean = false,
+        ): Promise<boolean> => {
             if (disableFilter) delete player.filterManager.data.chorus;
             else player.filterManager.data.chorus = options;
             await player.filterManager.applyPlayerFilters();
@@ -131,7 +144,11 @@ export class NodeLinkNode extends LavalinkNode {
          * @param player The player to apply the filter to
          * @param options The compressor filter options
          */
-        compressor: async (player: Player, options: NodeLink_CompressorFilter, disableFilter: boolean = false): Promise<boolean> => {
+        compressor: async (
+            player: Player,
+            options: NodeLink_CompressorFilter,
+            disableFilter: boolean = false,
+        ): Promise<boolean> => {
             if (disableFilter) delete player.filterManager.data.compressor;
             else player.filterManager.data.compressor = options;
             await player.filterManager.applyPlayerFilters();
@@ -142,7 +159,11 @@ export class NodeLinkNode extends LavalinkNode {
          * @param player The player to apply the filter to
          * @param options The highpass filter options
          */
-        highPass: async (player: Player, options: NodeLink_HighPassFilter, disableFilter: boolean = false): Promise<boolean> => {
+        highPass: async (
+            player: Player,
+            options: NodeLink_HighPassFilter,
+            disableFilter: boolean = false,
+        ): Promise<boolean> => {
             if (disableFilter) delete player.filterManager.data.highPass;
             else player.filterManager.data.highPass = options;
             await player.filterManager.applyPlayerFilters();
@@ -153,7 +174,11 @@ export class NodeLinkNode extends LavalinkNode {
          * @param player The player to apply the filter to
          * @param options The phaser filter options
          */
-        phaser: async (player: Player, options: NodeLink_PhaserFilter, disableFilter: boolean = false): Promise<boolean> => {
+        phaser: async (
+            player: Player,
+            options: NodeLink_PhaserFilter,
+            disableFilter: boolean = false,
+        ): Promise<boolean> => {
             if (disableFilter) delete player.filterManager.data.phaser;
             else player.filterManager.data.phaser = options;
             await player.filterManager.applyPlayerFilters();
@@ -164,7 +189,11 @@ export class NodeLinkNode extends LavalinkNode {
          * @param player The player to apply the filter to
          * @param options The spatial filter options
          */
-        spatial: async (player: Player, options: NodeLink_SpatialFilter, disableFilter: boolean = false): Promise<boolean> => {
+        spatial: async (
+            player: Player,
+            options: NodeLink_SpatialFilter,
+            disableFilter: boolean = false,
+        ): Promise<boolean> => {
             if (disableFilter) delete player.filterManager.data.spatial;
             else player.filterManager.data.spatial = options;
             await player.filterManager.applyPlayerFilters();
@@ -185,8 +214,8 @@ export class NodeLinkNode extends LavalinkNode {
             player.filterManager.checkFiltersState();
             await player.filterManager.applyPlayerFilters();
             return true;
-        }
-    }
+        },
+    };
 
     /**
      * Retrieve Lyrics of Youtube Videos.
@@ -196,18 +225,21 @@ export class NodeLinkNode extends LavalinkNode {
      * @link {https://nodelink.js.org/docs/api/nodelink-features#lyrics--chapters}
      * @returns NodeLinkLyrics either synced/unsynced or NodeLinkNoLyrics
      */
-    public async nodeLinkLyrics(player: Player, track?: Track | UnresolvedTrack, language: string = "en"): Promise<NodeLinkLyrics | NodeLinkNoLyrics> {
+    public async nodeLinkLyrics(
+        player: Player,
+        track?: Track | UnresolvedTrack,
+        language: string = "en",
+    ): Promise<NodeLinkLyrics | NodeLinkNoLyrics> {
         if (!this.sessionId) throw new Error("The Lavalink Node is either not ready, or not up to date!");
         const encodedTrack = track?.encoded || player.queue.current?.encoded;
         if (!encodedTrack) throw new Error("No track provided");
-        return await this.request(
+        return (await this.request(
             `/sessions/${this.sessionId}/players/${player.guildId}/lyrics?encodedTrack=${encodedTrack}&lang=${language}`,
             (m) => {
                 m.method = "GET";
-            }
-        ) as NodeLinkLyrics | NodeLinkNoLyrics;
+            },
+        )) as NodeLinkLyrics | NodeLinkNoLyrics;
     }
-
 
     /**
      * Retrieve Chapters of Youtube Videos.
@@ -220,12 +252,12 @@ export class NodeLinkNode extends LavalinkNode {
         if (!this.sessionId) throw new Error("The Lavalink Node is either not ready, or not up to date!");
         const encodedTrack = track?.encoded || player.queue.current?.encoded;
         if (!encodedTrack) throw new Error("No track provided");
-        return await this.request(
+        return (await this.request(
             `/sessions/${this.sessionId}/players/${player.guildId}/chapters?encodedTrack=${encodedTrack}`,
             (m) => {
                 m.method = "GET";
-            }
-        ) as NodeLinkChapter[];
+            },
+        )) as NodeLinkChapter[];
     }
 
     /**
@@ -233,12 +265,9 @@ export class NodeLinkNode extends LavalinkNode {
      * @returns
      */
     public async getConnectionMetrics(): Promise<ConnectionMetricsResponse> {
-        return await this.request(
-            `/connection`,
-            (m) => {
-                m.method = "GET";
-            }
-        ) as ConnectionMetricsResponse;
+        return (await this.request(`/connection`, (m) => {
+            m.method = "GET";
+        })) as ConnectionMetricsResponse;
     }
 
     /**
@@ -246,12 +275,9 @@ export class NodeLinkNode extends LavalinkNode {
      * @link {https://nodelink.js.org/docs/api/nodelink-features#direct-streaming}
      */
     public async getDirectStream(track: Track | UnresolvedTrack): Promise<DirectStreamResponse> {
-        return await this.request(
-            `/trackstream?encodedTrack=${track.encoded}`,
-            (m) => {
-                m.method = "GET";
-            }
-        ) as DirectStreamResponse;
+        return (await this.request(`/trackstream?encodedTrack=${track.encoded}`, (m) => {
+            m.method = "GET";
+        })) as DirectStreamResponse;
     }
 
     /**
@@ -263,17 +289,19 @@ export class NodeLinkNode extends LavalinkNode {
      * @param filters The filters to apply to the stream
      * @returns Returns a raw PCM stream with Content-Type: audio/l16;rate=48000;channels=2.
      */
-    public async loadDirectStream(track: Track | UnresolvedTrack, volume: number, position: number, filters: object | string): Promise<ReadableStream> {
+    public async loadDirectStream(
+        track: Track | UnresolvedTrack,
+        volume: number,
+        position: number,
+        filters: object | string,
+    ): Promise<ReadableStream> {
         let requestPath = `/loadstream?encodedTrack=${track.encoded}`;
         if (volume && volume > 0 && volume <= 100) requestPath += `&volume=${(volume / 100).toFixed(2)}`;
         if (position && position > 0) requestPath += `&position=${position}`;
         if (filters) requestPath += `&filters=${typeof filters === "object" ? safeStringify(filters) : filters}`;
-        const res = await this.rawRequest(
-            requestPath,
-            (m) => {
-                m.method = "GET";
-            }
-        );
+        const res = await this.rawRequest(requestPath, (m) => {
+            m.method = "GET";
+        });
         return res.response as unknown as ReadableStream;
     }
 
@@ -288,7 +316,7 @@ export class NodeLinkNode extends LavalinkNode {
     public async changeAudioTrackLanguage(player: Player, language_audioTrackId: string) {
         if (!this.sessionId) throw new Error("The Lavalink Node is either not ready, or not up to date!");
 
-        const res = (await this.request(`/sessions/${this.sessionId}/players/${player.guildId}`, (r) => {
+        const res = await this.request(`/sessions/${this.sessionId}/players/${player.guildId}`, (r) => {
             r.method = "PATCH";
 
             r.headers!["Content-Type"] = "application/json";
@@ -297,10 +325,10 @@ export class NodeLinkNode extends LavalinkNode {
                 track: {
                     encoded: player.queue.current?.encoded,
                     position: player.position,
-                    audioTrackId: language_audioTrackId
-                }
+                    audioTrackId: language_audioTrackId,
+                },
             });
-        }));
+        });
 
         return res;
     }
@@ -312,16 +340,16 @@ export class NodeLinkNode extends LavalinkNode {
     public async updateYoutubeConfig(refreshToken?: string, visitorData?: string) {
         if (!this.sessionId) throw new Error("The Lavalink Node is either not ready, or not up to date!");
 
-        const res = (await this.request(`/youtube/config`, (r) => {
+        const res = await this.request(`/youtube/config`, (r) => {
             r.method = "PATCH";
 
             r.headers!["Content-Type"] = "application/json";
 
             r.body = safeStringify({
                 refreshToken: refreshToken,
-                visitorData: visitorData
+                visitorData: visitorData,
             });
-        }));
+        });
 
         return res;
     }
@@ -329,9 +357,9 @@ export class NodeLinkNode extends LavalinkNode {
     public async getYoutubeConfig(validate: boolean = false) {
         if (!this.sessionId) throw new Error("The Lavalink Node is either not ready, or not up to date!");
 
-        const res = (await this.request(`/youtube/config${validate ? "?validate=true" : ""}`, (r) => {
+        const res = await this.request(`/youtube/config${validate ? "?validate=true" : ""}`, (r) => {
             r.method = "GET";
-        }));
+        });
 
         return res as {
             refreshToken: string;
@@ -347,12 +375,9 @@ export class NodeLinkNode extends LavalinkNode {
     public async getYoutubeOAUTH(refreshToken: string) {
         if (!this.sessionId) throw new Error("The Lavalink Node is either not ready, or not up to date!");
 
-        return await this.request(
-            `/youtube/oauth?refreshToken=${refreshToken}`,
-            (m) => {
-                m.method = "GET";
-            }
-        ) as YoutubeOAuthResponse;
+        return (await this.request(`/youtube/oauth?refreshToken=${refreshToken}`, (m) => {
+            m.method = "GET";
+        })) as YoutubeOAuthResponse;
     }
 
     /**
@@ -361,15 +386,12 @@ export class NodeLinkNode extends LavalinkNode {
     public async updateYoutubeOAUTH(refreshToken: string) {
         if (!this.sessionId) throw new Error("The Lavalink Node is either not ready, or not up to date!");
 
-        return await this.request(
-            `/youtube/oauth`,
-            (m) => {
-                m.method = "POST";
-                m.body = safeStringify({
-                    refreshToken: refreshToken
-                });
-            }
-        ) as YoutubeOAuthResponse;
+        return (await this.request(`/youtube/oauth`, (m) => {
+            m.method = "POST";
+            m.body = safeStringify({
+                refreshToken: refreshToken,
+            });
+        })) as YoutubeOAuthResponse;
     }
 }
 

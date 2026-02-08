@@ -89,26 +89,26 @@ export interface MixEndedEvent extends NodeLinkBaseEvent {
 export type NodeLinkEventPayload<T extends NodeLinkEventTypes> = T extends "PlayerCreatedEvent"
     ? PlayerCreatedEvent
     : T extends "PlayerDestroyedEvent"
-    ? PlayerDestroyedEvent
-    : T extends "PlayerConnectedEvent"
-    ? PlayerConnectedEvent
-    : T extends "PlayerReconnectingEvent"
-    ? PlayerReconnectingEvent
-    : T extends "VolumeChangedEvent"
-    ? VolumeChangedEvent
-    : T extends "FiltersChangedEvent"
-    ? FiltersChangedEvent
-    : T extends "SeekEvent"
-    ? SeekEvent
-    : T extends "PauseEvent"
-    ? PauseEvent
-    : T extends "ConnectionStatusEvent"
-    ? ConnectionStatusEvent
-    : T extends "MixStartedEvent"
-    ? MixStartedEvent
-    : T extends "MixEndedEvent"
-    ? MixEndedEvent
-    : never;
+      ? PlayerDestroyedEvent
+      : T extends "PlayerConnectedEvent"
+        ? PlayerConnectedEvent
+        : T extends "PlayerReconnectingEvent"
+          ? PlayerReconnectingEvent
+          : T extends "VolumeChangedEvent"
+            ? VolumeChangedEvent
+            : T extends "FiltersChangedEvent"
+              ? FiltersChangedEvent
+              : T extends "SeekEvent"
+                ? SeekEvent
+                : T extends "PauseEvent"
+                  ? PauseEvent
+                  : T extends "ConnectionStatusEvent"
+                    ? ConnectionStatusEvent
+                    : T extends "MixStartedEvent"
+                      ? MixStartedEvent
+                      : T extends "MixEndedEvent"
+                        ? MixEndedEvent
+                        : never;
 
 export type HealthStatusThreshold = { excellent: number; good: number; fair: number; poor: number };
 export type HealthStatusThresholdOptions = {
@@ -148,12 +148,11 @@ export type HealthStatusObject = {
 export type HealthPerformanceKeys = "excellent" | "good" | "fair" | "poor";
 export type HealthStatusKeys = "healthy" | "degraded" | "critical" | "offline";
 
-
 export type AddMixerLayerResponse = {
     id: string;
-    track: LavalinkTrack,
+    track: LavalinkTrack;
     volume: number;
-}
+};
 
 export type ListMixerLayersResponse = {
     mixes: {
@@ -162,116 +161,112 @@ export type ListMixerLayersResponse = {
         volume: number;
         position: number;
         startTime: number;
-    }[]
-}
-
+    }[];
+};
 
 export type ConnectionMetricsResponse = {
-    status: string,
+    status: string;
     metrics: {
         speed: {
-            bps: number,
-            kbps: number,
-            mbps: number
-        },
-        downloadedBytes: number,
-        durationSeconds: number,
-        timestamp: number
-    }
-}
-
+            bps: number;
+            kbps: number;
+            mbps: number;
+        };
+        downloadedBytes: number;
+        durationSeconds: number;
+        timestamp: number;
+    };
+};
 
 export type NodeLinkLyricsSynced = {
-    loadType: string,
+    loadType: string;
     data: {
-        synced: true,
-        lang: string,
-        source: string,
+        synced: true;
+        lang: string;
+        source: string;
         lines: [
             {
-                text: string,
-                time: number,
-                duration: number
+                text: string;
+                time: number;
+                duration: number;
             },
             {
-                text: string,
-                time: number,
-                duration: number
+                text: string;
+                time: number;
+                duration: number;
             },
             {
-                text: string,
-                time: number,
-                duration: number
-            }
-        ]
-    }
-}
+                text: string;
+                time: number;
+                duration: number;
+            },
+        ];
+    };
+};
 
 export type NodeLinkLyricsPlain = {
-    loadType: string,
+    loadType: string;
     data: {
-        synced: false,
-        lang: string,
-        source: string,
+        synced: false;
+        lang: string;
+        source: string;
         lines: [
             {
-                text: string,
-                time: null,
-                duration: null
+                text: string;
+                time: null;
+                duration: null;
             },
             {
-                text: string,
-                time: null,
-                duration: null
+                text: string;
+                time: null;
+                duration: null;
             },
             {
-                text: string,
-                time: null,
-                duration: null
-            }
-        ]
-    }
-}
+                text: string;
+                time: null;
+                duration: null;
+            },
+        ];
+    };
+};
 
 export type NodeLinkLyrics = NodeLinkLyricsSynced | NodeLinkLyricsPlain;
 
 export type NodeLinkNoLyrics = {
-    loadType: string,
-    data: {}
-}
-
+    loadType: string;
+    data: {};
+};
 
 export type NodeLinkChapter = {
-    title: string,
-    startTime: number,
+    title: string;
+    startTime: number;
     thumbnails: [
         {
-            url: string,
-            width: number,
-            height: number
-        }
-    ],
-    duration: number,
-    endTime: number
-}
-
+            url: string;
+            width: number;
+            height: number;
+        },
+    ];
+    duration: number;
+    endTime: number;
+};
 
 export type DirectStreamResponse = {
-    url: string,
-    protocol: string,
-    format: string,
-    hlsUrl: string | null,
+    url: string;
+    protocol: string;
+    format: string;
+    hlsUrl: string | null;
     formats: {
-        itag: number,
-        mimeType: string,
-        qualityLabel: string,
-        bitrate: number
-    }[]
-}
+        itag: number;
+        mimeType: string;
+        qualityLabel: string;
+        bitrate: number;
+    }[];
+};
 
 export type YoutubeOAuthResponse = {
     access_token: string;
     expires_in: number;
     scope: string;
     token_type: string;
-}
+};

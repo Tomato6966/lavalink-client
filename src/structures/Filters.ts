@@ -208,14 +208,12 @@ export class FilterManager {
         if (!this.filters.rotation) delete sendData.rotation;
         if (this.filters.audioOutput === "stereo") delete sendData.channelMix;
 
-
         if (!this.filters.nodeLinkEcho) delete sendData.echo;
         if (!this.filters.nodeLinkChorus) delete sendData.chorus;
         if (!this.filters.nodeLinkCompressor) delete sendData.compressor;
         if (!this.filters.nodeLinkHighPass) delete sendData.highPass;
         if (!this.filters.nodeLinkPhaser) delete sendData.phaser;
         if (!this.filters.nodeLinkSpatial) delete sendData.spatial;
-
 
         if (Object.values(this.data.timescale ?? {}).every((v) => v === 1)) delete sendData.timescale;
 
@@ -336,7 +334,8 @@ export class FilterManager {
             this.privateNot0(this.data.phaser?.mix) ||
             this.privateNot0(this.data.phaser?.minFrequency) ||
             this.privateNot0(this.data.phaser?.maxFrequency);
-        this.filters.nodeLinkSpatial = this.privateNot0(this.data.spatial?.depth) || this.privateNot0(this.data.spatial?.rate);
+        this.filters.nodeLinkSpatial =
+            this.privateNot0(this.data.spatial?.depth) || this.privateNot0(this.data.spatial?.rate);
         this.filters.karaoke = Object.values(this.data.karaoke ?? {}).some((v) => v !== 0);
         if ((this.filters.nightcore || this.filters.vaporwave) && oldFilterTimescale) {
             if (

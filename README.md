@@ -112,7 +112,7 @@ pnpm add tomato6966/lavalink-client
 This client can be used with nodelink too, but because nodelink's websocket is different than the one from lavalink, you need to disable a few things on the NODE OPTIONS / NODE PROPERTIES:
 
 ```ts
-nodeOptions.nodeType = "NodeLink"
+nodeOptions.nodeType = "NodeLink";
 ```
 
 this can be done directly when creating the node in the lavalinkmanager.
@@ -156,13 +156,12 @@ Now if you want to use NodeLink specific functions, you can use the type asserti
 ```ts
 if (node.isNodeLink()) {
     // node is now typed as NodeLink
-    node.addMixerLayer()
-} else if(node.isLavalinkNode()) {
+    node.addMixerLayer();
+} else if (node.isLavalinkNode()) {
     // node is now typed as LavalinkNode
 } else {
     // node is now typed as whatever it is..
 }
-
 ```
 
 or you have to assert the type...
@@ -197,109 +196,142 @@ client.lavalink.nodeManager.on("nodeLinkEvent", (node, eventName, player, track,
     switch (eventName) {
         // -------------Player LifeCycle Events-------------
         // https://nodelink.js.org/docs/api/websocket#playercreatedevent
-        case "PlayerCreatedEvent": {
-            // { "guildId": "987654321098765432", "track": null, "paused": false, "volume": 100 }
-            const playerInfo = payload.player;
-            console.log(`Player created in guildId: ${playerInfo.guildId}`);
-        } break;
+        case "PlayerCreatedEvent":
+            {
+                // { "guildId": "987654321098765432", "track": null, "paused": false, "volume": 100 }
+                const playerInfo = payload.player;
+                console.log(`Player created in guildId: ${playerInfo.guildId}`);
+            }
+            break;
         // https://nodelink.js.org/docs/api/websocket#playerdestroyedevent
-        case "PlayerDestroyedEvent": {
-            // "987654321098765432"
-            const playerInfo = payload.guildId;
-            console.log(`Player destroyed in guildId: ${playerInfo.guildId}`);
-        } break;
+        case "PlayerDestroyedEvent":
+            {
+                // "987654321098765432"
+                const playerInfo = payload.guildId;
+                console.log(`Player destroyed in guildId: ${playerInfo.guildId}`);
+            }
+            break;
         // https://nodelink.js.org/docs/api/websocket#playerconnectedevent
-        case "PlayerConnectedEvent": {
-            // { "sessionId": "abc", "token": "token", "endpoint": "us-central123.discord.media", "channelId": "123456789012345678" }
-            const playerInfo = payload.voice;
-            console.log(`Player connected in guildId: ${playerInfo.guildId}`);
-        } break;
+        case "PlayerConnectedEvent":
+            {
+                // { "sessionId": "abc", "token": "token", "endpoint": "us-central123.discord.media", "channelId": "123456789012345678" }
+                const playerInfo = payload.voice;
+                console.log(`Player connected in guildId: ${playerInfo.guildId}`);
+            }
+            break;
         // https://nodelink.js.org/docs/api/websocket#playerreconnectingevent
-        case "PlayerReconnectingEvent": {
-            // { "sessionId": "abc", "token": "token", "endpoint": "us-central123.discord.media", "channelId": "123456789012345678" }
-            const playerInfo = payload.voice;
-            console.log(`Player reconnecting in guildId: ${playerInfo.guildId}`);
-        } break;
+        case "PlayerReconnectingEvent":
+            {
+                // { "sessionId": "abc", "token": "token", "endpoint": "us-central123.discord.media", "channelId": "123456789012345678" }
+                const playerInfo = payload.voice;
+                console.log(`Player reconnecting in guildId: ${playerInfo.guildId}`);
+            }
+            break;
 
         // -------------Player State Events-------------
         // https://nodelink.js.org/docs/api/websocket#volumechangedevent
-        case "VolumeChangedEvent": {
-            // "guildId": "987654321098765432",
-            // "volume": 100
-            const { guildId, volume } = payload;
-            console.log(`Player volume changed in guildId: ${guildId} to ${volume}`);
-        } break;
+        case "VolumeChangedEvent":
+            {
+                // "guildId": "987654321098765432",
+                // "volume": 100
+                const { guildId, volume } = payload;
+                console.log(`Player volume changed in guildId: ${guildId} to ${volume}`);
+            }
+            break;
         // https://nodelink.js.org/docs/api/websocket#filterschangedevent
-        case "FiltersChangedEvent": {
-            // { ...Filtersdata... }
-            const { guildId, filters } = payload;
-            console.log(`Player filters changed in guildId: ${guildId}, new Data: `, filters);
-        } break;
+        case "FiltersChangedEvent":
+            {
+                // { ...Filtersdata... }
+                const { guildId, filters } = payload;
+                console.log(`Player filters changed in guildId: ${guildId}, new Data: `, filters);
+            }
+            break;
         // https://nodelink.js.org/docs/api/websocket#seekevent
-        case "SeekEvent": {
-            // "guildId": "987654321098765432",
-            // "position": 10000,
-            const { guildId, position } = payload;
-            console.log(`Player seeked in guildId: ${guildId}, new position: ${position}`);
-        } break;
+        case "SeekEvent":
+            {
+                // "guildId": "987654321098765432",
+                // "position": 10000,
+                const { guildId, position } = payload;
+                console.log(`Player seeked in guildId: ${guildId}, new position: ${position}`);
+            }
+            break;
         // https://nodelink.js.org/docs/api/websocket#pauseevent
-        case "PauseEvent": {
-            // "guildId": "987654321098765432",
-            // "paused": true
-            const { guildId, paused } = payload;
-            console.log(`Player paused in guildId: ${guildId}, paused true/false: ${paused}`);
-        } break;
+        case "PauseEvent":
+            {
+                // "guildId": "987654321098765432",
+                // "paused": true
+                const { guildId, paused } = payload;
+                console.log(`Player paused in guildId: ${guildId}, paused true/false: ${paused}`);
+            }
+            break;
         // https://nodelink.js.org/docs/api/websocket#connectionstatusevent
-        case "ConnectionStatusEvent": {
-            // "guildId": "987654321098765432",
-            // "status": "CONNECTED"
-            // "metrics": { ... }
-            const { guildId, status, metrics } = payload;
-            console.log(`Player connection status changed in guildId: ${guildId}, status: ${status}, metrics: `, metrics);
-        } break;
+        case "ConnectionStatusEvent":
+            {
+                // "guildId": "987654321098765432",
+                // "status": "CONNECTED"
+                // "metrics": { ... }
+                const { guildId, status, metrics } = payload;
+                console.log(
+                    `Player connection status changed in guildId: ${guildId}, status: ${status}, metrics: `,
+                    metrics,
+                );
+            }
+            break;
 
         // -------------LYRICS EVENTS-------------
         // https://nodelink.js.org/docs/api/websocket#lyrics-events
-        case "LyricsFoundEvent": {
-            // "guildId": "987654321098765432",
-            // "lyrics": "..."
-            const { guildId, lyrics } = payload;
-            console.log(`Lyrics found in guildId: ${guildId}, lyrics: `, lyrics);
-        } break;
+        case "LyricsFoundEvent":
+            {
+                // "guildId": "987654321098765432",
+                // "lyrics": "..."
+                const { guildId, lyrics } = payload;
+                console.log(`Lyrics found in guildId: ${guildId}, lyrics: `, lyrics);
+            }
+            break;
         // https://nodelink.js.org/docs/api/websocket#lyricslineevent
-        case "LyricsLineEvent": {
-            // "guildId": "987654321098765432",
-            // "lineIndex": 0,
-            // "line": "..."
-            const { guildId, lineIndex, line } = payload;
-            console.log(`Lyrics line in guildId: ${guildId}, lineIndex: ${lineIndex}, line: `, line);
-        } break;
+        case "LyricsLineEvent":
+            {
+                // "guildId": "987654321098765432",
+                // "lineIndex": 0,
+                // "line": "..."
+                const { guildId, lineIndex, line } = payload;
+                console.log(`Lyrics line in guildId: ${guildId}, lineIndex: ${lineIndex}, line: `, line);
+            }
+            break;
         // https://nodelink.js.org/docs/api/websocket#lyricsnotfoundevent
-        case "LyricsNotFoundEvent": {
-            // "guildId": "987654321098765432",
-            const { guildId } = payload;
-            console.log(`Lyrics not found in guildId: ${guildId}`);
-        } break;
-
+        case "LyricsNotFoundEvent":
+            {
+                // "guildId": "987654321098765432",
+                const { guildId } = payload;
+                console.log(`Lyrics not found in guildId: ${guildId}`);
+            }
+            break;
 
         // -------------AUDIO MIXER EVENTS-------------
         // https://nodelink.js.org/docs/api/websocket#mixstartedevent
-        case "MixStartedEvent": {
-            // "guildId": "987654321098765432",
-            // "mixId": "123456789012345678"
-            // "volume": 0.8,
-            // "track": { ...TrackData... }
-            const { guildId, mixId, volume, track } = payload.player;
-            console.log(`Player mix started in guildId: ${guildId}, mixId: ${mixId}, volume: ${volume}, track: `, track);
-        } break;
+        case "MixStartedEvent":
+            {
+                // "guildId": "987654321098765432",
+                // "mixId": "123456789012345678"
+                // "volume": 0.8,
+                // "track": { ...TrackData... }
+                const { guildId, mixId, volume, track } = payload.player;
+                console.log(
+                    `Player mix started in guildId: ${guildId}, mixId: ${mixId}, volume: ${volume}, track: `,
+                    track,
+                );
+            }
+            break;
         // https://nodelink.js.org/docs/api/websocket#mixendedevent
-        case "MixEndedEvent": {
-            //  "guildId": "987654321098765432",
-            //  "mixId": "123456789012345678",
-            //  "reason": "USER_STOPPED"
-            const { guildId, mixId, reason } = payload;
-            console.log(`Player mix ended in guildId: ${guildId}, mixId: ${mixId}, reason: ${reason}`);
-        } break;
+        case "MixEndedEvent":
+            {
+                //  "guildId": "987654321098765432",
+                //  "mixId": "123456789012345678",
+                //  "reason": "USER_STOPPED"
+                const { guildId, mixId, reason } = payload;
+                console.log(`Player mix ended in guildId: ${guildId}, mixId: ${mixId}, reason: ${reason}`);
+            }
+            break;
     }
 });
 ```

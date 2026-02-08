@@ -83,12 +83,12 @@ export class Player {
         serverMute: boolean;
         suppress: boolean;
     } = {
-            selfDeaf: false,
-            selfMute: false,
-            serverDeaf: false,
-            serverMute: false,
-            suppress: false,
-        };
+        selfDeaf: false,
+        selfMute: false,
+        serverDeaf: false,
+        serverMute: false,
+        suppress: false,
+    };
 
     /** Custom data for the player */
     private readonly data: Record<string, unknown> = {};
@@ -272,10 +272,10 @@ export class Player {
                 options.clientTrack.userData = {
                     ...(typeof options?.clientTrack?.requester === "object"
                         ? {
-                            requester: this.LavalinkManager.utils.getTransformedRequester(
-                                options?.clientTrack?.requester || {},
-                            ) as anyObject,
-                        }
+                              requester: this.LavalinkManager.utils.getTransformedRequester(
+                                  options?.clientTrack?.requester || {},
+                              ) as anyObject,
+                          }
                         : {}),
                     ...options?.clientTrack.userData,
                     ...options.track?.userData,
@@ -312,10 +312,10 @@ export class Player {
                     userData: {
                         ...(typeof options?.track?.requester === "object"
                             ? {
-                                requester: this.LavalinkManager.utils.getTransformedRequester(
-                                    options?.track?.requester || {},
-                                ),
-                            }
+                                  requester: this.LavalinkManager.utils.getTransformedRequester(
+                                      options?.track?.requester || {},
+                                  ),
+                              }
                             : {}),
                         ...options.track.userData,
                     },
@@ -367,10 +367,10 @@ export class Player {
                     this.queue.current.userData = {
                         ...(typeof this.queue.current?.requester === "object"
                             ? {
-                                requester: this.LavalinkManager.utils.getTransformedRequester(
-                                    this.queue.current?.requester || {},
-                                ) as anyObject,
-                            }
+                                  requester: this.LavalinkManager.utils.getTransformedRequester(
+                                      this.queue.current?.requester || {},
+                                  ) as anyObject,
+                              }
                             : {}),
                         ...this.queue.current?.userData,
                         ...options.track?.userData,
@@ -418,10 +418,10 @@ export class Player {
                     userData: {
                         ...(typeof this.queue.current?.requester === "object"
                             ? {
-                                requester: this.LavalinkManager.utils.getTransformedRequester(
-                                    this.queue.current?.requester || {},
-                                ),
-                            }
+                                  requester: this.LavalinkManager.utils.getTransformedRequester(
+                                      this.queue.current?.requester || {},
+                                  ),
+                              }
                             : {}),
                         ...options?.track?.userData,
                         ...this.queue.current?.userData,
