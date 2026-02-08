@@ -799,8 +799,6 @@ export class Queue {
         sortBy: "duration" | "title" | "author" | ((a: Track | UnresolvedTrack, b: Track | UnresolvedTrack) => number),
         order: "asc" | "desc" = "asc",
     ): Promise<this> {
-        const oldStored = typeof this.queueChanges?.tracksAdd === "function" ? this.utils.toJSON() : null;
-
         if (typeof sortBy === "function") {
             this.tracks.sort(sortBy);
         } else {

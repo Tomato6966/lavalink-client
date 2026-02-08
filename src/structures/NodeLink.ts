@@ -2,7 +2,7 @@ import { LavalinkNode } from "./Node";
 import type { NodeManager } from "./NodeManager";
 import { Player } from "./Player";
 import type { LavalinkNodeOptions } from "./Types/Node";
-import { AddMixerLayerResponse, ConnectionMetricsResponse, DirectStreamResponse, ListMixerLayersResponse, NodeLinkChapter, NodeLinkLyrics, NodeLinkLyricsPlain, NodeLinkLyricsSynced, NodeLinkNoLyrics, YoutubeOAuthResponse } from "./Types/NodeLink";
+import { AddMixerLayerResponse, ConnectionMetricsResponse, DirectStreamResponse, ListMixerLayersResponse, NodeLinkChapter, NodeLinkLyrics, NodeLinkNoLyrics, YoutubeOAuthResponse } from "./Types/NodeLink";
 import { Track, UnresolvedTrack } from "./Types/Track";
 import { NodeLink_ChorusFilter, NodeLink_CompressorFilter, NodeLink_EchoFilter, NodeLink_HighPassFilter, NodeLink_PhaserFilter, NodeLink_SpatialFilter } from "./Types/Filters";
 import { safeStringify } from "./Utils";

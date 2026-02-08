@@ -1,3 +1,4 @@
+/* eslint-disable no-unsafe-declaration-merging */
 import { URL } from "node:url";
 import { isRegExp } from "node:util/types";
 
@@ -119,8 +120,8 @@ export class ManagerUtils {
             info: (query as UnresolvedTrack).info
                 ? (query as UnresolvedTrack).info
                 : (query as UnresolvedQuery).title
-                  ? (query as UnresolvedQuery)
-                  : undefined,
+                    ? (query as UnresolvedQuery)
+                    : undefined,
             pluginInfo: this.buildPluginInfo(query),
             requester: this.getTransformedRequester(requester),
             async resolve(player: Player) {
@@ -432,9 +433,9 @@ export class ManagerUtils {
             typeof query === "string"
                 ? undefined
                 : (DefaultSources[
-                      query.source?.trim?.()?.toLowerCase?.() ??
-                          this.LavalinkManager?.options?.playerOptions?.defaultSearchPlatform?.toLowerCase?.()
-                  ] ?? query.source?.trim?.()?.toLowerCase?.());
+                    query.source?.trim?.()?.toLowerCase?.() ??
+                    this.LavalinkManager?.options?.playerOptions?.defaultSearchPlatform?.toLowerCase?.()
+                ] ?? query.source?.trim?.()?.toLowerCase?.());
         const Query = {
             query: typeof query === "string" ? query : query.query,
             extraQueryUrlParams: typeof query !== "string" ? query.extraQueryUrlParams : undefined,
@@ -459,15 +460,15 @@ export class ManagerUtils {
             typeof query === "string"
                 ? undefined
                 : (DefaultSources[
-                      query.source?.trim?.()?.toLowerCase?.() ??
-                          this.LavalinkManager?.options?.playerOptions?.defaultSearchPlatform?.toLowerCase?.()
-                  ] ?? query.source?.trim?.()?.toLowerCase?.());
+                    query.source?.trim?.()?.toLowerCase?.() ??
+                    this.LavalinkManager?.options?.playerOptions?.defaultSearchPlatform?.toLowerCase?.()
+                ] ?? query.source?.trim?.()?.toLowerCase?.());
         const Query = {
             query: typeof query === "string" ? query : query.query,
             types: query.types
                 ? ["track", "playlist", "artist", "album", "text"].filter((v) =>
-                      query.types?.find((x) => x.toLowerCase().startsWith(v)),
-                  )
+                    query.types?.find((x) => x.toLowerCase().startsWith(v)),
+                )
                 : ["track", "playlist", "artist", "album" /*"text"*/],
             source:
                 sourceOfQuery ?? this.LavalinkManager?.options?.playerOptions?.defaultSearchPlatform?.toLowerCase?.(),

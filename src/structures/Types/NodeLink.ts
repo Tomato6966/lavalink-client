@@ -1,5 +1,5 @@
 import type { LavalinkFilterData } from "./Filters";
-import type { LavalinkTrack, LavalinkTrackInfo } from "./Track";
+import type { LavalinkTrack } from "./Track";
 
 export type NodeLinkEventTypes =
     | "PlayerCreatedEvent"
@@ -12,7 +12,10 @@ export type NodeLinkEventTypes =
     | "PauseEvent"
     | "ConnectionStatusEvent"
     | "MixStartedEvent"
-    | "MixEndedEvent";
+    | "MixEndedEvent"
+    | "LyricsFoundEvent"
+    | "LyricsLineEvent"
+    | "LyricsNotFoundEvent";
 
 export interface NodeLinkBaseEvent {
     op: "event";

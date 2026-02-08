@@ -37,16 +37,26 @@ Logs about the changed features.
 - Expose `node.rawRequest` to public, so you can use it for your own requests.
 
 - Added all nodelink specific features (in the seperate NodeLinkNode class, which can be type asserted via `node.isNodeLink()`):
-    - `node.getYoutubeOAUTH()`
-    - `node.updateYoutubeOAUTH()`
-    - `node.getChapters()`
-    - `node.getLyrics()`
-    - `node.getDirectStream()`
-    - `node.getMixerLayers()`
-    - `node.addMixerLayer()`
-    - `node.removeMixerLayer()`
-    - `node.updateMixerLayer()`
+    - `node.getYoutubeOAUTH(refreshToken)`: Exchange a Refresh Token for an Access Token. [Docs](https://nodelink.js.org/docs/api/nodelink-features#oauth)
+    - `node.updateYoutubeOAUTH(refreshToken)`: Update the OAUTH token. [Docs](https://nodelink.js.org/docs/api/nodelink-features#oauth)
+    - `node.getChapters(player, track?)`: Retrieve Chapters of Youtube Videos. [Docs](https://nodelink.js.org/docs/api/nodelink-features#loadchapters)
+    - `node.nodeLinkLyrics(player, track?, language?)`: Retrieve Lyrics of Youtube Videos. [Docs](https://nodelink.js.org/docs/api/nodelink-features#lyrics--chapters)
+    - `node.getDirectStream(track)`: Stream audio directly from NodeLink. [Docs](https://nodelink.js.org/docs/api/nodelink-features#direct-streaming)
+    - `node.listMixerLayers(player)`: Retrieves a list of currently active mix layers. [Docs](https://nodelink.js.org/docs/api/rest#get-active-mixes)
+    - `node.addMixerLayer(player, track, volume)`: Adds a new audio track to be mixed. [Docs](https://nodelink.js.org/docs/api/rest#add-mix-layer)
+    - `node.removeMixerLayer(player, mixId)`: Removes a specific mix layer. [Docs](https://nodelink.js.org/docs/api/rest#remove-mix-layer)
+    - `node.updateMixerLayerVolume(player, mixId, volume)`: Updates the volume of a specific mix layer. [Docs](https://nodelink.js.org/docs/api/rest#update-mix-volume)
+    - `node.changeAudioTrackLanguage(player, language_audioTrackId)`: Changes the current language of the audio. [Docs](https://nodelink.js.org/docs/api/nodelink-features#additional-filters)
+    - `node.updateYoutubeConfig(refreshToken?, visitorData?)`: Updates the YouTube configuration. [Docs](https://nodelink.js.org/docs/api/nodelink-features#update-config)
+    - `node.getYoutubeConfig(validate?)`: Gets the YouTube configuration.
+    - `node.getConnectionMetrics()`: Get connection metrics. [Docs](https://nodelink.js.org/docs/api/rest#node-information)
+    - `node.loadDirectStream(track, volume, position, filters)`: Stream raw PCM audio. [Docs](https://nodelink.js.org/docs/api/nodelink-features#loadstream)
 
+- Now sanetizing the User-Name header field (manager.init.username) to prevent the "Invalid User-Agent" error.
+
+- Added info on how to use nodeLink and listen to all events.
+
+- Nodelink hasn't been fully tested yet, so expect some potential issues/bugs, please test, report and open issues at:  https://github.com/Tomato6966/lavalink-client/issues
 
 ## **Version 2.8.0**
 

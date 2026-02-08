@@ -1,3 +1,4 @@
+/* eslint-disable */
 import { inspect } from "util";
 
 import { EmbedBuilder, MessageFlags, SlashCommandBuilder } from "discord.js";

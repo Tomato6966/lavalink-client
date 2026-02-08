@@ -16,6 +16,7 @@ export class JSONStore {
             // important to do sync so it's loaded on the initialisation
             this.data = new MiniMap(this.JSONtoMap(readFileSync(this.filePath, "utf-8")));
         } catch (error) {
+            console.error("initloaddata error", error);
             await writeFile(this.filePath, this.MapToJSON(this.data));
         }
     }

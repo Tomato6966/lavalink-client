@@ -1,4 +1,5 @@
 import type { AudioOutputs, ChannelMixFilter, EQBand } from "./Types/Filters";
+import { NodeLinkEventTypes } from "./Types/NodeLink";
 
 /**
  * Debug events for more detailed logging
@@ -350,3 +351,21 @@ export const RecommendationsStrings = {
     nodeOffline: "Node is offline or disconnected",
     checkConnectivity: "Check node connectivity and restart if needed",
 };
+
+
+export const NodeLinkExclusiveEvents: NodeLinkEventTypes[] = [
+    "PlayerCreatedEvent",
+    "PlayerDestroyedEvent",
+    "PlayerConnectedEvent",
+    "PlayerReconnectingEvent",
+    "VolumeChangedEvent",
+    "FiltersChangedEvent",
+    "SeekEvent",
+    "PauseEvent",
+    "ConnectionStatusEvent",
+    "MixStartedEvent",
+    "MixEndedEvent",
+    "LyricsFoundEvent",
+    "LyricsLineEvent",
+    "LyricsNotFoundEvent",
+];

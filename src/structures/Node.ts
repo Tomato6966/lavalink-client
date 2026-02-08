@@ -2,7 +2,7 @@ import { isAbsolute } from "path";
 
 import WebSocket from "ws";
 
-import { DebugEvents, DestroyReasons, validSponsorBlocks, RecommendationsStrings } from "./Constants";
+import { DebugEvents, DestroyReasons, validSponsorBlocks, RecommendationsStrings, NodeLinkExclusiveEvents } from "./Constants";
 import type { NodeManager } from "./NodeManager";
 import type { Player } from "./Player";
 import { ReconnectionState } from "./Types/Node";
@@ -1866,19 +1866,6 @@ export class LavalinkNode {
 
         // https://nodelink.js.org/docs/differences#websocket-events
         const NodeLinkEventType = payload.type as NodeLinkEventTypes;
-        const NodeLinkExclusiveEvents: NodeLinkEventTypes[] = [
-            "PlayerCreatedEvent",
-            "PlayerDestroyedEvent",
-            "PlayerConnectedEvent",
-            "PlayerReconnectingEvent",
-            "VolumeChangedEvent",
-            "FiltersChangedEvent",
-            "SeekEvent",
-            "PauseEvent",
-            "ConnectionStatusEvent",
-            "MixStartedEvent",
-            "MixEndedEvent",
-        ];
         if (NodeLinkExclusiveEvents.includes(NodeLinkEventType) && (!this.info || this.info.isNodelink)) {
             return this.nodeLinkEventHandler(
                 NodeLinkEventType,
