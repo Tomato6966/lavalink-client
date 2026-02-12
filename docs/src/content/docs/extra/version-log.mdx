@@ -9,11 +9,18 @@ Logs about the changed features.
 
 ---
 
+## **Version 2.9.1**
+
+- Introduce a `ManagerOption.playerOptions.allowCustomSources` Option, to allow to use "source" in the search query, which lavalink-client doesn't officially support yet (not in the `DEFAULT_SOURCES` object) This will allow you to make requests to sources, which lavalink-client doesn't support.
+
+- Add JSDoc for all ManagerUtils.
+- New ManagerUtils + cleaner source extractions.
+
 ## **Version 2.9.0**
 
 - Removed the autoChecks options on the manager:
-    - `ManagerOption.autoChecks.pluginValidations` ... default is true, set to false if you want to skip plugin validations
-    - `ManagerOption.autoChecks.sourcesValidations` ... default is true, set to false if you want to skip sources/filters validations
+    - ~~`ManagerOption.autoChecks.pluginValidations`~~ -> Now configured per node: `NodeOption.autoChecks.pluginValidations`
+    - ~~`ManagerOption.autoChecks.sourcesValidations`~~ -> Now configured per node: `NodeOption.autoChecks.sourcesValidations`
 
 - Added autoChecks options for every single node:
     - `NodeOption.autoChecks.pluginValidations` ... default is true, set to false if you want to skip plugin validations (if nodeType === "NodeLink" then this will always be false)

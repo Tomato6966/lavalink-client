@@ -59,6 +59,7 @@ client.lavalink = new LavalinkManager({
         applyVolumeAsFilter: false,
         clientBasedPositionUpdateInterval: 50, // in ms to up-calc player.position
         defaultSearchPlatform: "ytmsearch",
+        allowCustomSources: false, // set to true if you want to allow custom sources which lavalink-client does not support (yet)
         volumeDecrementer: 0.75, // on client 100% == on lavalink 75%
         requesterTransformer: requesterTransformer,
         onDisconnect: {

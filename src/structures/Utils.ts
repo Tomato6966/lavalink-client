@@ -3,8 +3,9 @@ import { URL } from "node:url";
 import { isRegExp } from "node:util/types";
 
 import { DebugEvents } from "./Constants";
-import type { LavalinkManager } from "./LavalinkManager";
 import { DefaultSources, LavalinkPlugins, SourceLinksRegexes } from "./LavalinkManagerStatics";
+
+import type { LavalinkManager } from "./LavalinkManager";
 import type { LavalinkNode } from "./Node";
 import type { Player } from "./Player";
 import type { LavalinkNodeOptions } from "./Types/Node";
@@ -48,6 +49,12 @@ export class ManagerUtils {
         this.LavalinkManager = LavalinkManager;
     }
 
+    /**
+     * Builds a pluginInfo object based on the provided data, extracting relevant information from the data and clientData parameters. This function is used to construct the pluginInfo property for tracks, allowing for consistent handling of plugin-related information across different track sources and formats.
+     * @param data
+     * @param clientData
+     * @returns
+     */
     buildPluginInfo(data: any, clientData: any = {}) {
         return {
             clientData: clientData,
@@ -55,6 +62,12 @@ export class ManagerUtils {
         };
     }
 
+    /**
+     * Builds a Track object from the provided data and requester information. It validates the presence of required properties in the data, transforms the requester using a custom transformer function if provided, and constructs a Track object with the appropriate properties and plugin information. The function also includes error handling to ensure that the input data is valid and provides debug information if track building fails.
+     * @param data
+     * @param requester
+     * @returns
+     */
     buildTrack(data: LavalinkTrack | Track, requester: unknown) {
         if (!data?.encoded || typeof data.encoded !== "string")
             throw new RangeError("Argument 'data.encoded' must be present.");
@@ -176,6 +189,11 @@ export class ManagerUtils {
         return true;
     }
 
+    /**
+     * Gets the transformed requester based on the LavalinkManager options. If a custom requester transformer function is provided in the player options, it applies that function to the requester; otherwise, it returns the requester as is. The function also includes error handling to catch any exceptions that may occur during the transformation process and emits a debug event if the transformation fails.
+     * @param requester
+     * @returns
+     */
     getTransformedRequester(requester: unknown) {
         try {
             return typeof this.LavalinkManager?.options?.playerOptions?.requesterTransformer === "function"
@@ -298,6 +316,12 @@ export class ManagerUtils {
         return typeof data === "object" && !("info" in data) && typeof data.title === "string";
     }
 
+    /**
+     * Gets the closest track by resolving the provided UnresolvedTrack using the getClosestTrack function. It includes error handling to catch any exceptions that may occur during the resolution process and emits a debug event if the resolution fails. The function returns a Promise that resolves to a Track object if successful, or undefined if no closest track is found.
+     * @param data
+     * @param player
+     * @returns
+     */
     async getClosestTrack(data: UnresolvedTrack, player: Player): Promise<Track | undefined> {
         try {
             return getClosestTrack(data, player);
@@ -314,7 +338,14 @@ export class ManagerUtils {
         }
     }
 
-    validateQueryString(node: LavalinkNode, queryString: string, sourceString?: LavalinkSearchPlatform): void {
+    /**
+     * Validates the query string against various criteria, including checking for empty strings, length limits for specific sources, blacklisted links or words, and ensuring that the Lavalink node has the necessary source managers enabled for the provided query. The function also includes debug event emissions to assist with troubleshooting and understanding the validation process.
+     * @param node
+     * @param queryString
+     * @param sourceString
+     * @returns
+     */
+    validateQueryString(node: LavalinkNode, queryString: string, sourceString?: SearchPlatform): void {
         if (!node.info) throw new Error("No Lavalink Node was provided");
         if (node._checkForSources && !node.info.sourceManagers?.length)
             throw new Error("Lavalink Node, has no sourceManagers enabled");
@@ -428,67 +459,115 @@ export class ManagerUtils {
         return;
     }
 
-    transformQuery(query: SearchQuery) {
-        const sourceOfQuery =
-            typeof query === "string"
-                ? undefined
-                : (DefaultSources[
-                      query.source?.trim?.()?.toLowerCase?.() ??
-                          this.LavalinkManager?.options?.playerOptions?.defaultSearchPlatform?.toLowerCase?.()
-                  ] ?? query.source?.trim?.()?.toLowerCase?.());
-        const Query = {
-            query: typeof query === "string" ? query : query.query,
-            extraQueryUrlParams: typeof query !== "string" ? query.extraQueryUrlParams : undefined,
-            source:
-                sourceOfQuery ?? this.LavalinkManager?.options?.playerOptions?.defaultSearchPlatform?.toLowerCase?.(),
-        };
+    /**
+     * Finds the source of a query string by checking if it starts with a valid source prefix defined in the DefaultSources object. If a valid source prefix is found, it returns the corresponding SearchPlatform; otherwise, it returns null. This function is useful for determining the intended search platform for a given query string, allowing for more accurate search results when the user specifies a source (e.g., "ytsearch:Never Gonna Give You Up" would indicate that the search should be performed on YouTube).
+     * @param queryString
+     * @returns
+     */
+    findSourceOfQuery(queryString: string) {
         const foundSource = Object.keys(DefaultSources)
-            .find((source) => Query.query?.toLowerCase?.()?.startsWith(`${source}:`.toLowerCase()))
+            .find((source) => queryString?.toLowerCase?.()?.startsWith(`${source}:`.toLowerCase()))
             ?.trim?.()
             ?.toLowerCase?.() as SearchPlatform | undefined;
         // ignore links...
         if (foundSource && !["https", "http"].includes(foundSource) && DefaultSources[foundSource]) {
-            Query.source = DefaultSources[foundSource]; // set the source to ytsearch:
-            Query.query = Query.query.slice(`${foundSource}:`.length, Query.query.length); // remove ytsearch: from the query
+           return foundSource;
         }
-        return Query;
+        return null;
     }
 
+    /**
+     * Extracts the source from the query if it starts with a valid source prefix (e.g., "ytsearch:") and updates the searchQuery object accordingly.
+     * @param searchQuery
+     * @returns The updated searchQuery object with the extracted source and modified query string.
+     */
+    extractSourceOfQuery<T extends { query: string; source?: string }>(searchQuery: T): T {
+        const foundSource = this.findSourceOfQuery(searchQuery.query);
+        // if query is like youtube:never gonna give you up, then this.findSourceOfQuery will return "youtube" as a valid source, since it's inside DEFAULT_SOURCES. Then it will be assigned as the proper source and removed from the query.
+        if (foundSource) {
+            searchQuery.source = DefaultSources[foundSource];
+            searchQuery.query = searchQuery.query.slice(`${foundSource}:`.length, searchQuery.query.length); // remove ytsearch: from the query
+        }
+        return searchQuery;
+    }
+
+    /**
+     * Converts a string to lowercase if the input is a string, otherwise returns the input as is. This is useful for ensuring that search platform identifiers are case-insensitive while allowing other types of input to pass through unchanged.
+     * @param input
+     * @returns
+     */
+    typedLowerCase<T extends unknown>(input: T) {
+        if(!input) return input;
+        if (typeof input === "string") return input.toLowerCase() as unknown as T;
+        return input;
+    }
+
+    /**
+     * Transforms a search query by determining the appropriate search platform based on the query string and the default search platform specified in the LavalinkManager options. It checks if the query string starts with a valid source prefix and extracts it if present. The function returns an object containing the modified query string, any extra URL parameters, and the determined search platform to be used for the search operation.
+     * @param query
+     * @returns
+     */
+    transformQuery(query: SearchQuery) {
+        const typedDefault = this.typedLowerCase(this.LavalinkManager?.options?.playerOptions?.defaultSearchPlatform);
+        if(typeof query === "string") {
+            const Query = {
+                query: query,
+                extraQueryUrlParams: undefined,
+                source: typedDefault,
+            };
+            return this.extractSourceOfQuery(Query);
+        }
+        const providedSource = query?.source?.trim?.()?.toLowerCase?.() as LavalinkSearchPlatform | undefined;
+        const validSourceExtracted = DefaultSources[providedSource ?? typedDefault];
+        return this.extractSourceOfQuery({
+            query: query.query,
+            extraQueryUrlParams: query.extraQueryUrlParams,
+            source: validSourceExtracted ?? providedSource ?? typedDefault,
+        });
+    }
+
+    /**
+     * Transforms a LavaSearchQuery by determining the appropriate search platform based on the query string and the default search platform specified in the LavalinkManager options. It checks if the query string starts with a valid source prefix and extracts it if present. The function returns an object containing the modified query string, any extra URL parameters, the determined search platform to be used for the search operation, and the types of search (track, playlist, artist, album, text) to be performed.
+     * @param query
+     * @returns
+     */
     transformLavaSearchQuery(query: LavaSearchQuery) {
+        const typedDefault = this.typedLowerCase(this.LavalinkManager?.options?.playerOptions?.defaultSearchPlatform);
+        if(typeof query === "string") {
+            const Query = {
+                query: query,
+                extraQueryUrlParams: undefined,
+                source: typedDefault,
+            };
+            return this.extractSourceOfQuery(Query);
+        }
+        const providedSource = query?.source?.trim?.()?.toLowerCase?.() as LavalinkSearchPlatform | undefined;
+        const validSourceExtracted = DefaultSources[providedSource ?? typedDefault];
         // transform the query object
-        const sourceOfQuery =
-            typeof query === "string"
-                ? undefined
-                : (DefaultSources[
-                      query.source?.trim?.()?.toLowerCase?.() ??
-                          this.LavalinkManager?.options?.playerOptions?.defaultSearchPlatform?.toLowerCase?.()
-                  ] ?? query.source?.trim?.()?.toLowerCase?.());
         const Query = {
-            query: typeof query === "string" ? query : query.query,
+            query: query.query,
             types: query.types
                 ? ["track", "playlist", "artist", "album", "text"].filter((v) =>
                       query.types?.find((x) => x.toLowerCase().startsWith(v)),
                   )
                 : ["track", "playlist", "artist", "album" /*"text"*/],
             source:
-                sourceOfQuery ?? this.LavalinkManager?.options?.playerOptions?.defaultSearchPlatform?.toLowerCase?.(),
+                validSourceExtracted ?? providedSource ?? typedDefault,
         };
 
-        const foundSource = Object.keys(DefaultSources)
-            .find((source) => Query.query.toLowerCase().startsWith(`${source}:`.toLowerCase()))
-            ?.trim?.()
-            ?.toLowerCase?.() as SearchPlatform | undefined;
-        if (foundSource && DefaultSources[foundSource]) {
-            Query.source = DefaultSources[foundSource]; // set the source to ytsearch:
-            Query.query = Query.query.slice(`${foundSource}:`.length, Query.query.length); // remove ytsearch: from the query
-        }
-        return Query;
+        return this.extractSourceOfQuery(Query);
     }
 
+    /**
+     * Validates the provided source string against the capabilities of the Lavalink node. It checks if the source string is supported by the node's enabled source managers and plugins, throwing errors if any required sources or plugins are missing for the specified search platform. This ensures that search queries are only executed with compatible sources based on the node's configuration.
+     * @param node
+     * @param sourceString
+     * @returns
+     */
     validateSourceString(node: LavalinkNode, sourceString: SearchPlatform) {
         if (!sourceString) throw new Error(`No SourceString was provided`);
         const source = DefaultSources[sourceString.toLowerCase().trim()] as LavalinkSearchPlatform;
-        if (!source) throw new Error(`Lavalink Node SearchQuerySource: '${sourceString}' is not available`);
+        if (!source && !!this.LavalinkManager.options.playerOptions.allowCustomSources) throw new Error(`Lavalink-Client does not support SearchQuerySource: '${sourceString}'. You can disable this check by setting 'ManagerOptions.PlayerOptions.allowCustomSources' to true`);
 
         if (!node.info) throw new Error("Lavalink Node does not have any info cached yet, not ready yet!");
 

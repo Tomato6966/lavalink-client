@@ -266,6 +266,8 @@ export interface ManagerPlayerOptions<CustomPlayerT extends Player = Player> {
     clientBasedPositionUpdateInterval?: number;
     /** What should be used as a searchPlatform, if no source was provided during the query */
     defaultSearchPlatform?: SearchPlatform;
+    /** Allow custom sources which lavalink-client does not support (yet) */
+    allowCustomSources?: boolean;
     /** Applies the volume via a filter, not via the lavalink volume transformer */
     applyVolumeAsFilter?: boolean;
     /** Transforms the saved data of a requested user */
