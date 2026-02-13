@@ -3,9 +3,8 @@ import { URL } from "node:url";
 import { isRegExp } from "node:util/types";
 
 import { DebugEvents } from "./Constants";
-import { DefaultSources, LavalinkPlugins, SourceLinksRegexes } from "./LavalinkManagerStatics";
-
 import type { LavalinkManager } from "./LavalinkManager";
+import { DefaultSources, LavalinkPlugins, SourceLinksRegexes } from "./LavalinkManagerStatics";
 import type { LavalinkNode } from "./Node";
 import type { Player } from "./Player";
 import type { LavalinkNodeOptions } from "./Types/Node";
@@ -471,7 +470,7 @@ export class ManagerUtils {
             ?.toLowerCase?.() as SearchPlatform | undefined;
         // ignore links...
         if (foundSource && !["https", "http"].includes(foundSource) && DefaultSources[foundSource]) {
-           return foundSource;
+            return foundSource;
         }
         return null;
     }
@@ -497,7 +496,7 @@ export class ManagerUtils {
      * @returns
      */
     typedLowerCase<T extends unknown>(input: T) {
-        if(!input) return input;
+        if (!input) return input;
         if (typeof input === "string") return input.toLowerCase() as unknown as T;
         return input;
     }
@@ -509,7 +508,7 @@ export class ManagerUtils {
      */
     transformQuery(query: SearchQuery) {
         const typedDefault = this.typedLowerCase(this.LavalinkManager?.options?.playerOptions?.defaultSearchPlatform);
-        if(typeof query === "string") {
+        if (typeof query === "string") {
             const Query = {
                 query: query,
                 extraQueryUrlParams: undefined,
@@ -533,9 +532,10 @@ export class ManagerUtils {
      */
     transformLavaSearchQuery(query: LavaSearchQuery) {
         const typedDefault = this.typedLowerCase(this.LavalinkManager?.options?.playerOptions?.defaultSearchPlatform);
-        if(typeof query === "string") {
+        if (typeof query === "string") {
             const Query = {
                 query: query,
+                types: [],
                 extraQueryUrlParams: undefined,
                 source: typedDefault,
             };
@@ -551,8 +551,7 @@ export class ManagerUtils {
                       query.types?.find((x) => x.toLowerCase().startsWith(v)),
                   )
                 : ["track", "playlist", "artist", "album" /*"text"*/],
-            source:
-                validSourceExtracted ?? providedSource ?? typedDefault,
+            source: validSourceExtracted ?? providedSource ?? typedDefault,
         };
 
         return this.extractSourceOfQuery(Query);
@@ -567,7 +566,10 @@ export class ManagerUtils {
     validateSourceString(node: LavalinkNode, sourceString: SearchPlatform) {
         if (!sourceString) throw new Error(`No SourceString was provided`);
         const source = DefaultSources[sourceString.toLowerCase().trim()] as LavalinkSearchPlatform;
-        if (!source && !!this.LavalinkManager.options.playerOptions.allowCustomSources) throw new Error(`Lavalink-Client does not support SearchQuerySource: '${sourceString}'. You can disable this check by setting 'ManagerOptions.PlayerOptions.allowCustomSources' to true`);
+        if (!source && !!this.LavalinkManager.options.playerOptions.allowCustomSources)
+            throw new Error(
+                `Lavalink-Client does not support SearchQuerySource: '${sourceString}'. You can disable this check by setting 'ManagerOptions.PlayerOptions.allowCustomSources' to true`,
+            );
 
         if (!node.info) throw new Error("Lavalink Node does not have any info cached yet, not ready yet!");
 
