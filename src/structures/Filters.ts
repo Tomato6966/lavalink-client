@@ -374,7 +374,7 @@ export class FilterManager {
         this.filters.tremolo = false;
         this.filters.vibrato = false;
         this.filters.karaoke = false;
-        this.filters.karaoke = false;
+        this.filters.vaporwave = false;
         this.filters.volume = false;
         this.filters.nodeLinkEcho = false;
         this.filters.nodeLinkChorus = false;
@@ -468,7 +468,7 @@ export class FilterManager {
 
         this.filters.nightcore = false;
         this.filters.vaporwave = false;
-        this.data.timescale = { ...DEFAULT_FILTER_DATAS.timescale, speed };
+        this.data.timescale = { ...(this.data.timescale ?? DEFAULT_FILTER_DATAS.timescale), speed };
 
         this.isCustomFilterActive();
 
@@ -494,7 +494,7 @@ export class FilterManager {
 
         this.filters.nightcore = false;
         this.filters.vaporwave = false;
-        this.data.timescale = { ...DEFAULT_FILTER_DATAS.timescale, pitch };
+        this.data.timescale = { ...(this.data.timescale ?? DEFAULT_FILTER_DATAS.timescale), pitch };
 
         this.isCustomFilterActive();
 
@@ -520,7 +520,7 @@ export class FilterManager {
 
         this.filters.nightcore = false;
         this.filters.vaporwave = false;
-        this.data.timescale = { ...DEFAULT_FILTER_DATAS.timescale, rate };
+        this.data.timescale = { ...(this.data.timescale ?? DEFAULT_FILTER_DATAS.timescale), rate };
 
         this.isCustomFilterActive();
 
