@@ -949,6 +949,15 @@ export class Player {
                             functionLayer: "Player > changeNode()",
                         });
                     });
+                } else {
+                    await this.setSponsorBlock().catch((error) => {
+                        this._emitDebugEvent(DebugEvents.PlayerChangeNode, {
+                            state: "error",
+                            error: error,
+                            message: `Player > changeNode() Unable to set SponsorBlock Segments`,
+                            functionLayer: "Player > changeNode()",
+                        });
+                    });
                 }
             }
             await this.node.updatePlayer({
