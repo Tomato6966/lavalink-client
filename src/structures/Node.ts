@@ -406,12 +406,12 @@ export class LavalinkNode {
             res.loadType === "playlist"
                 ? res.data?.tracks
                 : res.loadType === "track"
-                  ? [res.data]
-                  : res.loadType === "search"
-                    ? Array.isArray(res.data)
-                        ? res.data
-                        : [res.data]
-                    : [];
+                    ? [res.data]
+                    : res.loadType === "search"
+                        ? Array.isArray(res.data)
+                            ? res.data
+                            : [res.data]
+                        : [];
 
         if (throwOnEmpty === true && (res.loadType === "empty" || !resTracks.length)) {
             this._emitDebugEvent(DebugEvents.SearchNothingFound, {
@@ -429,44 +429,44 @@ export class LavalinkNode {
             playlist:
                 res.loadType === "playlist"
                     ? {
-                          name: res.data.info?.name || res.data.pluginInfo?.name || null,
-                          title: res.data.info?.name || res.data.pluginInfo?.name || null,
-                          author: res.data.info?.author || res.data.pluginInfo?.author || null,
-                          thumbnail:
-                              res.data.info?.artworkUrl ||
-                              res.data.pluginInfo?.artworkUrl ||
-                              (typeof res.data?.info?.selectedTrack !== "number" || res.data?.info?.selectedTrack === -1
-                                  ? null
-                                  : resTracks[res.data?.info?.selectedTrack]
+                        name: res.data.info?.name || res.data.pluginInfo?.name || null,
+                        title: res.data.info?.name || res.data.pluginInfo?.name || null,
+                        author: res.data.info?.author || res.data.pluginInfo?.author || null,
+                        thumbnail:
+                            res.data.info?.artworkUrl ||
+                            res.data.pluginInfo?.artworkUrl ||
+                            (typeof res.data?.info?.selectedTrack !== "number" || res.data?.info?.selectedTrack === -1
+                                ? null
+                                : resTracks[res.data?.info?.selectedTrack]
                                     ? resTracks[res.data?.info?.selectedTrack]?.info?.artworkUrl ||
-                                      resTracks[res.data?.info?.selectedTrack]?.info?.pluginInfo?.artworkUrl
+                                    resTracks[res.data?.info?.selectedTrack]?.info?.pluginInfo?.artworkUrl
                                     : null) ||
-                              null,
-                          uri:
-                              res.data.info?.url ||
-                              res.data.info?.uri ||
-                              res.data.info?.link ||
-                              res.data.pluginInfo?.url ||
-                              res.data.pluginInfo?.uri ||
-                              res.data.pluginInfo?.link ||
-                              null,
-                          selectedTrack:
-                              typeof res.data?.info?.selectedTrack !== "number" || res.data?.info?.selectedTrack === -1
-                                  ? null
-                                  : resTracks[res.data?.info?.selectedTrack]
+                            null,
+                        uri:
+                            res.data.info?.url ||
+                            res.data.info?.uri ||
+                            res.data.info?.link ||
+                            res.data.pluginInfo?.url ||
+                            res.data.pluginInfo?.uri ||
+                            res.data.pluginInfo?.link ||
+                            null,
+                        selectedTrack:
+                            typeof res.data?.info?.selectedTrack !== "number" || res.data?.info?.selectedTrack === -1
+                                ? null
+                                : resTracks[res.data?.info?.selectedTrack]
                                     ? this._LManager.utils.buildTrack(
-                                          resTracks[res.data?.info?.selectedTrack],
-                                          requestUser,
-                                      )
+                                        resTracks[res.data?.info?.selectedTrack],
+                                        requestUser,
+                                    )
                                     : null,
-                          duration: resTracks.length
-                              ? resTracks.reduce(
-                                    (acc: number, cur: Track & { info: Track["info"] & { length?: number } }) =>
-                                        acc + (cur?.info?.duration || cur?.info?.length || 0),
-                                    0,
-                                )
-                              : 0,
-                      }
+                        duration: resTracks.length
+                            ? resTracks.reduce(
+                                (acc: number, cur: Track & { info: Track["info"] & { length?: number } }) =>
+                                    acc + (cur?.info?.duration || cur?.info?.length || 0),
+                                0,
+                            )
+                            : 0,
+                    }
                     : null,
             tracks: (resTracks.length
                 ? resTracks.map((t) => this._LManager.utils.buildTrack(t, requestUser))
@@ -1330,22 +1330,22 @@ export class LavalinkNode {
                 metrics.players === 0
                     ? 200
                     : metrics.cpuLoad > 0
-                      ? Math.max(
+                        ? Math.max(
                             0,
                             Math.floor(((cpuThresholds.fair - metrics.cpuLoad) / metrics.cpuLoad) * metrics.players),
                         )
-                      : 200;
+                        : 200;
             const memoryCapacity =
                 metrics.players === 0
                     ? 200
                     : metrics.memoryUsage > 0
-                      ? Math.max(
+                        ? Math.max(
                             0,
                             Math.floor(
                                 ((memoryThresholds.fair - metrics.memoryUsage) / metrics.memoryUsage) * metrics.players,
                             ),
                         )
-                      : 200;
+                        : 200;
 
             // Use the more conservative estimate, capped at a reasonable maximum
             estimatedRemainingCapacity = Math.min(Math.min(cpuCapacity, memoryCapacity), 500);
@@ -1773,12 +1773,13 @@ export class LavalinkNode {
         if (!error) return;
         this.NodeManager.emit("error", this, error);
         this.reconnectionState = ReconnectionState.IDLE;
-        this.reconnect();
         if (this.options.closeOnError) {
             if (this.heartBeatInterval) clearInterval(this.heartBeatInterval);
             if (this.pingTimeout) clearTimeout(this.pingTimeout);
             this.socket?.close(500, "Node-Error - Force Reconnect");
+            return;
         }
+        this.reconnect();
     }
 
     /** @private util function for handling message events from websocket */
@@ -1823,8 +1824,8 @@ export class LavalinkNode {
                         payload.state.ping >= 0
                             ? payload.state.ping
                             : player.ping.ws <= 0 && player.connected
-                              ? null
-                              : player.ping.ws || 0;
+                                ? null
+                                : player.ping.ws || 0;
 
                     if (!player.createdTimeStamp && payload.state.time) player.createdTimeStamp = payload.state.time;
 
@@ -2059,7 +2060,7 @@ export class LavalinkNode {
                 (v) => Date.now() - v < this._LManager.options.playerOptions.maxErrorsPerTime?.threshold,
             );
             player.set("internal_erroredTracksTimestamps", [...oldTimestamps, Date.now()]);
-            if (oldTimestamps.length > this._LManager.options.playerOptions.maxErrorsPerTime?.maxAmount) {
+            if (oldTimestamps.length >= this._LManager.options.playerOptions.maxErrorsPerTime?.maxAmount) {
                 this._emitDebugEvent(DebugEvents.TrackStuckMaxTracksErroredPerTime, {
                     state: "log",
                     message: `trackStuck Event was triggered too often within a given threshold (LavalinkManager.options.playerOptions.maxErrorsPerTime). Threshold: "${this._LManager.options.playerOptions.maxErrorsPerTime?.threshold}ms", maxAmount: "${this._LManager.options.playerOptions.maxErrorsPerTime?.maxAmount}"`,
@@ -2106,7 +2107,7 @@ export class LavalinkNode {
                 (v) => Date.now() - v < this._LManager.options.playerOptions.maxErrorsPerTime?.threshold,
             );
             player.set("internal_erroredTracksTimestamps", [...oldTimestamps, Date.now()]);
-            if (oldTimestamps.length > this._LManager.options.playerOptions.maxErrorsPerTime?.maxAmount) {
+            if (oldTimestamps.length >= this._LManager.options.playerOptions.maxErrorsPerTime?.maxAmount) {
                 this._emitDebugEvent(DebugEvents.TrackErrorMaxTracksErroredPerTime, {
                     state: "log",
                     message: `TrackError Event was triggered too often within a given threshold (LavalinkManager.options.playerOptions.maxErrorsPerTime). Threshold: "${this._LManager.options.playerOptions.maxErrorsPerTime?.threshold}ms", maxAmount: "${this._LManager.options.playerOptions.maxErrorsPerTime?.maxAmount}"`,

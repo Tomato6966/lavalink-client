@@ -44,7 +44,7 @@
 
 ## 📦 Installation
 
-**Latest Stable Version: `v2.5.x`**
+**Latest Stable Version: `v2.9.x`**
 
 <details>
 <summary><strong>👉 via NPM</strong></summary>
