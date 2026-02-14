@@ -950,6 +950,8 @@ export class Player {
                         });
                     });
                 } else {
+                    // Even without user-set categories, we must call setSponsorBlock() with defaults
+                    // so the SponsorBlock plugin registers its event listeners (ChapterStarted/ChapterLoaded) on the new node.
                     await this.setSponsorBlock().catch((error) => {
                         this._emitDebugEvent(DebugEvents.PlayerChangeNode, {
                             state: "error",
