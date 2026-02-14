@@ -468,7 +468,7 @@ export class FilterManager {
 
         this.filters.nightcore = false;
         this.filters.vaporwave = false;
-        this.data.timescale = { ...(this.data.timescale ?? DEFAULT_FILTER_DATAS.timescale), speed };
+        this.data.timescale = { ...DEFAULT_FILTER_DATAS.timescale, ...this.data.timescale, speed };
 
         this.isCustomFilterActive();
 
@@ -494,7 +494,7 @@ export class FilterManager {
 
         this.filters.nightcore = false;
         this.filters.vaporwave = false;
-        this.data.timescale = { ...(this.data.timescale ?? DEFAULT_FILTER_DATAS.timescale), pitch };
+        this.data.timescale = { ...DEFAULT_FILTER_DATAS.timescale, ...this.data.timescale, pitch };
 
         this.isCustomFilterActive();
 
@@ -520,7 +520,7 @@ export class FilterManager {
 
         this.filters.nightcore = false;
         this.filters.vaporwave = false;
-        this.data.timescale = { ...(this.data.timescale ?? DEFAULT_FILTER_DATAS.timescale), rate };
+        this.data.timescale = { ...DEFAULT_FILTER_DATAS.timescale, ...this.data.timescale, rate };
 
         this.isCustomFilterActive();
 

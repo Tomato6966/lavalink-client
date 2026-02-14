@@ -1777,9 +1777,9 @@ export class LavalinkNode {
             if (this.heartBeatInterval) clearInterval(this.heartBeatInterval);
             if (this.pingTimeout) clearTimeout(this.pingTimeout);
             this.socket?.close(500, "Node-Error - Force Reconnect");
-        } else {
-            this.reconnect();
+            return;
         }
+        this.reconnect();
     }
 
     /** @private util function for handling message events from websocket */
