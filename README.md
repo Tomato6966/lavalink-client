@@ -359,6 +359,7 @@ This client powers various Discord bots:
     - [All Time Bot](https://top.gg/bot/1163027457671180418) (@PeterGamez)
     - [BeatDock](https://github.com/lazaroagomez/BeatDock) (@lazaroagomez)
     - [Nazha](https://top.gg/bot/1124681788070055967) (@Nazha-Team)
+    - [Arii Music](https://arimusic.me/) (@friston_ae)
 
 ---
 
