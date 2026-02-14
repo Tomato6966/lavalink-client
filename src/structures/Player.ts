@@ -949,7 +949,7 @@ export class Player {
                             functionLayer: "Player > changeNode()",
                         });
                     });
-                } else {
+                } else if (this.LavalinkManager.options?.playerOptions?.enforceSponsorBlockRequestForEventEnablement !== false) {
                     // Even without user-set categories, we must call setSponsorBlock() with defaults
                     // so the SponsorBlock plugin registers its event listeners (ChapterStarted/ChapterLoaded) on the new node.
                     await this.setSponsorBlock().catch((error) => {

@@ -132,6 +132,7 @@ export class LavalinkManager<CustomPlayerT extends Player = Player> extends Even
                     threshold: options?.playerOptions?.maxErrorsPerTime?.threshold ?? 35_000,
                     maxAmount: options?.playerOptions?.maxErrorsPerTime?.maxAmount ?? 3,
                 },
+                enforceSponsorBlockRequestForEventEnablement: options?.playerOptions?.enforceSponsorBlockRequestForEventEnablement ?? true,
             },
             linksWhitelist: options?.linksWhitelist ?? [],
             linksBlacklist: options?.linksBlacklist ?? [],
