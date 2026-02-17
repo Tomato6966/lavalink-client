@@ -321,7 +321,7 @@ export class FilterManager {
             this.privateNot0(this.data.chorus?.feedback);
         this.filters.nodeLinkCompressor =
             this.privateNot0(this.data.compressor?.threshold) ||
-            this.privateNot0(this.data.compressor?.ratio) ||
+            this.data.compressor?.ratio > 1 ||
             this.privateNot0(this.data.compressor?.attack) ||
             this.privateNot0(this.data.compressor?.release) ||
             this.privateNot0(this.data.compressor?.gain);
