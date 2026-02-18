@@ -221,8 +221,8 @@ export class FilterManager {
 
         sendData.equalizer = [...this.equalizerBands];
         if (sendData.equalizer.length === 0) delete sendData.equalizer;
-        if (this.player.node.nodeType !== 'Lavalink') {
-            if (sendData.equalizer?.every((eq) => eq.gain === 0)) {
+        if (this.player.node.nodeType !== 'Lavalink' && sendData.equalizer) {
+            if (sendData.equalizer.every((eq) => eq.gain === 0)) {
                 delete sendData.equalizer; 
             } else {
                 await this.player.node.updatePlayer({ 
