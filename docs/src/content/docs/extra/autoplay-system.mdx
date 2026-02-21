@@ -1,0 +1,108 @@
+---
+editUrl: false
+next: true
+prev: true
+title: Autoplay-System
+description: "How to do make an autoplaying system."
+---
+
+1. Provide the autoplayFunction in the manageroptions: `ManagerOption.playerOptions.onEmptyQueue.autoPlayFunction`
+2. This function will be called BEFORE the queueEnd event, and **if at least 1 track get's added to the queue**, the queueEnd event will not be emitted, and the playing will continue.
+
+Hot-Tipp: You can use player variables in order to enable/disable this system during runtime, e.g. by `player.set("autoplay_disabled", true)` and check it in the autoplayFunction by `const isAutoPlayDisabled = player.get("autoplay_disabled") === true;`
+
+E.g.:
+```ts
+client.lavalink = new LavalinkManager<myCustomPlayer>({
+    nodes: [
+        {
+            authorization: "chrissy_localhost",
+            host: "localhost",
+            port: 2333,
+        },
+    ],
+    sendToShard: (guildId, payload) => client.guilds.cache.get(guildId)?.shard?.send(payload),
+    client: {
+        // client: client.user
+        id: envConfig.clientId, // REQUIRED! (at least after the .init)
+        username: "TESTBOT",
+    },
+    playerOptions: {
+        onEmptyQueue: {
+            autoPlayFunction: autoPlayFunction,
+        },
+    },
+});
+
+// this is my SAMPLE for the autoplay function
+async function autoPlayFunction(player, lastPlayedTrack) {
+    // just do player.set("autoplay_disabled", true) if you want to "disable" autoplay
+    // and do player.set("autoplay_disabled", false) if you want to "enable" it again (it's enabled on default)
+    const isAutoPlayDisabled = player.get("autoplay_disabled") === true;
+    console.log("AUTOPLAY is triggerd", isAutoPlayDisabled ? "and isn't disabled" : "but is disabled");
+    if (isAutoPlayDisabled) return;
+    if (!lastPlayedTrack) return console.log("Autoplay doesn't have a lastPlayedTrack to use for references");
+
+    // if the last track was from spotify, you can use sprec
+    if (lastPlayedTrack.info.sourceName === "spotify") {
+        const filtered = player.queue.previous.filter((v) => v.info.sourceName === "spotify").slice(0, 5);
+        const ids = filtered.map(
+            (v) => v.info.identifier || v.info.uri.split("/")?.reverse()?.[0] || v.info.uri.split("/")?.reverse()?.[1],
+        );
+        if (ids.length >= 2) {
+            const res = await player
+                .search(
+                    {
+                        query: `seed_tracks=${ids.join(",")}`, //`seed_artists=${artistIds.join(",")}&seed_genres=${genre.join(",")}&seed_tracks=${trackIds.join(",")}`;
+                        source: "sprec",
+                    },
+                    lastPlayedTrack.requester,
+                )
+                .then((response) => {
+                    response.tracks = response.tracks.filter(
+                        (v) => v.info.identifier !== lastPlayedTrack.info.identifier,
+                    ); // remove the lastPlayed track if it's in there..
+                    return response;
+                })
+                .catch(console.warn);
+            if (res && res.tracks.length)
+                await player.queue.add(
+                    res.tracks.slice(0, 5).map((track) => {
+                        // transform the track plugininfo so you can figure out if the track is from autoplay or not.
+                        track.pluginInfo.clientData = { ...track.pluginInfo.clientData, fromAutoplay: true };
+                        return track;
+                    }),
+                );
+        }
+        return;
+    }
+
+    // if it was from youtube you can use youtube's recommended lists generation
+    if (lastPlayedTrack.info.sourceName === "youtube" || lastPlayedTrack.info.sourceName === "youtubemusic") {
+        const res = await player
+            .search(
+                {
+                    query: `https://www.youtube.com/watch?v=${lastPlayedTrack.info.identifier}&list=RD${lastPlayedTrack.info.identifier}`,
+                    source: "youtube",
+                },
+                lastPlayedTrack.requester,
+            )
+            .then((response) => {
+                response.tracks = response.tracks.filter((v) => v.info.identifier !== lastPlayedTrack.info.identifier); // remove the lastPlayed track if it's in there..
+                return response;
+            })
+            .catch(console.warn);
+        if (res && res.tracks.length)
+            await player.queue.add(
+                res.tracks.slice(0, 5).map((track) => {
+                    // transform the track plugininfo so you can figure out if the track is from autoplay or not.
+                    track.pluginInfo.clientData = { ...track.pluginInfo.clientData, fromAutoplay: true };
+                    return track;
+                }),
+            );
+        return;
+    }
+    return;
+};
+
+```
