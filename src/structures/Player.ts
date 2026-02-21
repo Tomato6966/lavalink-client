@@ -1,11 +1,13 @@
 import { DebugEvents } from "./Constants";
-import type { DestroyReasons } from "./Constants";
 import { bandCampSearch } from "./CustomSearches/BandCampSearch";
 import { FilterManager } from "./Filters";
+import { Queue, QueueSaver } from "./Queue";
+import { queueTrackEnd } from "./Utils";
+
+import type { DestroyReasons } from "./Constants";
 import type { LavalinkManager } from "./LavalinkManager";
 import type { LavalinkNode } from "./Node";
 import type { NodeLinkNode } from "./NodeLink";
-import { Queue, QueueSaver } from "./Queue";
 import type { SponsorBlockSegment } from "./Types/Node";
 import type {
     anyObject,
@@ -17,7 +19,6 @@ import type {
 } from "./Types/Player";
 import type { Track, UnresolvedTrack } from "./Types/Track";
 import type { LavalinkPlayerVoiceOptions, LavaSearchQuery, SearchQuery } from "./Types/Utils";
-import { queueTrackEnd } from "./Utils";
 export class Player {
     /** Filter Manager per player */
     public filterManager: FilterManager;
@@ -481,6 +482,19 @@ export class Player {
     }
 
     /**
+     * The old JSON of the player, used for the "playerClientUpdate" event, which is emitted on every update of the player via a function call, so that you can compare the old data with the new data and do something with it if you want to.
+     */
+    public oldJSON:PlayerJson = this.toJSON();
+
+    /**
+     * Emits the "playerClientUpdate" event, which is emitted on every update of the player via a function call, so that you can compare the old data with the new data and do something with it if you want to.
+     */
+    public triggerPlayerClientUpdate() {
+        this.LavalinkManager.emit("playerClientUpdate", this.oldJSON, this);
+        this.oldJSON = this.toJSON();
+    }
+
+    /**
      * Set the Volume for the Player
      * @param volume The Volume in percent
      * @param ignoreVolumeDecrementer If it should ignore the volumedecrementer option
@@ -505,6 +519,8 @@ export class Player {
                 0,
             ),
         );
+
+        this.triggerPlayerClientUpdate();
 
         const now = performance.now();
         if (this.LavalinkManager.options.playerOptions.applyVolumeAsFilter) {
@@ -583,6 +599,7 @@ export class Player {
         this.paused = true;
         this.lastPositionChange = null; // needs to removed to not cause issues
         const now = performance.now();
+        this.triggerPlayerClientUpdate();
         await this.node.updatePlayer({ guildId: this.guildId, playerOptions: { paused: true } });
         this.ping.lavalink = Math.round((performance.now() - now) / 10) / 100;
         // emit the event
@@ -597,6 +614,7 @@ export class Player {
         if (!this.paused) throw new Error("Player isn't paused - not able to resume.");
         this.paused = false;
         const now = performance.now();
+        this.triggerPlayerClientUpdate();
         await this.node.updatePlayer({ guildId: this.guildId, playerOptions: { paused: false } });
         this.ping.lavalink = Math.round((performance.now() - now) / 10) / 100;
         // emit the event
@@ -625,6 +643,7 @@ export class Player {
         this.lastPosition = position;
 
         const now = performance.now();
+        this.triggerPlayerClientUpdate();
         await this.node.updatePlayer({ guildId: this.guildId, playerOptions: { position } });
         this.ping.lavalink = Math.round((performance.now() - now) / 10) / 100;
 
@@ -639,6 +658,7 @@ export class Player {
         if (!["off", "track", "queue"].includes(repeatMode))
             throw new RangeError("Repeatmode must be either 'off', 'track', or 'queue'");
         this.repeatMode = repeatMode;
+        this.triggerPlayerClientUpdate();
         return this;
     }
 
@@ -1047,7 +1067,7 @@ export class Player {
             nodeId: this.node?.id,
             nodeSessionId: this.node?.sessionId,
             ping: this.ping,
-            queue: this.queue.utils.toJSON(),
+            queue: this.queue?.utils?.toJSON?.(),
         } as PlayerJson;
     }
 }

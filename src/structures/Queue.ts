@@ -1,6 +1,7 @@
 import type { ManagerQueueOptions, QueueChangesWatcher, QueueStoreManager, StoredQueue } from "./Types/Queue";
 import type { Track, UnresolvedTrack } from "./Types/Track";
 import { ManagerUtils, MiniMap, QueueSymbol } from "./Utils";
+
 export class QueueSaver {
     /**
      * The queue store manager
@@ -240,8 +241,8 @@ export class Queue {
          * @returns {{current:Track|null, previous:Track[], tracks:Track[]}}The Queue, but in a raw State, which allows easier handling for the QueueStoreManager
          */
         toJSON: (): StoredQueue => {
-            if (this.previous.length > this.options.maxPreviousTracks)
-                this.previous.splice(this.options.maxPreviousTracks, this.previous.length);
+            if (this.previous?.length > this.options?.maxPreviousTracks)
+                this.previous?.splice(this.options?.maxPreviousTracks, this.previous.length);
             return {
                 current: this.current ? { ...this.current } : null,
                 previous: this.previous ? [...this.previous] : [],
