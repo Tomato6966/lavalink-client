@@ -60,7 +60,7 @@ export class QueueSaver {
 
 export class DefaultQueueStore implements QueueStoreManager {
     private data = new MiniMap<string, StoredQueue>();
-    constructor() { }
+    constructor() {}
 
     /**
      * Get the queue for a guild
@@ -159,19 +159,19 @@ export class Queue {
         this.current = this.managerUtils.isTrack(data.current) ? data.current : null;
         this.previous =
             Array.isArray(data.previous) &&
-                data.previous.some(
-                    (track) => this.managerUtils.isTrack(track) || this.managerUtils.isUnresolvedTrack(track),
-                )
+            data.previous.some(
+                (track) => this.managerUtils.isTrack(track) || this.managerUtils.isUnresolvedTrack(track),
+            )
                 ? data.previous.filter(
-                    (track) => this.managerUtils.isTrack(track) || this.managerUtils.isUnresolvedTrack(track),
-                )
+                      (track) => this.managerUtils.isTrack(track) || this.managerUtils.isUnresolvedTrack(track),
+                  )
                 : [];
         this.tracks =
             Array.isArray(data.tracks) &&
-                data.tracks.some((track) => this.managerUtils.isTrack(track) || this.managerUtils.isUnresolvedTrack(track))
+            data.tracks.some((track) => this.managerUtils.isTrack(track) || this.managerUtils.isUnresolvedTrack(track))
                 ? data.tracks.filter(
-                    (track) => this.managerUtils.isTrack(track) || this.managerUtils.isUnresolvedTrack(track),
-                )
+                      (track) => this.managerUtils.isTrack(track) || this.managerUtils.isUnresolvedTrack(track),
+                  )
                 : [];
 
         Object.defineProperty(this, QueueSymbol, { configurable: true, value: true });
@@ -286,15 +286,15 @@ export class Queue {
             predicate:
                 | ((track: Track | UnresolvedTrack, index: number) => boolean)
                 | {
-                    title?: string;
-                    author?: string;
-                    duration?: number | { min?: number; max?: number };
-                    uri?: string;
-                    identifier?: string;
-                    sourceName?: string;
-                    isStream?: boolean;
-                    isSeekable?: boolean;
-                },
+                      title?: string;
+                      author?: string;
+                      duration?: number | { min?: number; max?: number };
+                      uri?: string;
+                      identifier?: string;
+                      sourceName?: string;
+                      isStream?: boolean;
+                      isSeekable?: boolean;
+                  },
         ): Array<{ track: Track | UnresolvedTrack; index: number }> => {
             if (typeof predicate === "function") {
                 return this.tracks
@@ -375,15 +375,15 @@ export class Queue {
             predicate:
                 | ((track: Track | UnresolvedTrack, index: number) => boolean)
                 | {
-                    title?: string;
-                    author?: string;
-                    duration?: number | { min?: number; max?: number };
-                    uri?: string;
-                    identifier?: string;
-                    sourceName?: string;
-                    isStream?: boolean;
-                    isSeekable?: boolean;
-                },
+                      title?: string;
+                      author?: string;
+                      duration?: number | { min?: number; max?: number };
+                      uri?: string;
+                      identifier?: string;
+                      sourceName?: string;
+                      isStream?: boolean;
+                      isSeekable?: boolean;
+                  },
         ): { track: Track | UnresolvedTrack; index: number } | null => {
             const results = this.utils.filterTracks(predicate);
             return results.length > 0 ? results[0] : null;
@@ -502,12 +502,12 @@ export class Queue {
         // remove the tracks (and add the new ones)
         const spliced = TrackOrTracks
             ? this.tracks.splice(
-                index,
-                amount,
-                ...(Array.isArray(TrackOrTracks) ? TrackOrTracks : [TrackOrTracks])
-                    .flat(2)
-                    .filter((v) => this.managerUtils.isTrack(v) || this.managerUtils.isUnresolvedTrack(v)),
-            )
+                  index,
+                  amount,
+                  ...(Array.isArray(TrackOrTracks) ? TrackOrTracks : [TrackOrTracks])
+                      .flat(2)
+                      .filter((v) => this.managerUtils.isTrack(v) || this.managerUtils.isUnresolvedTrack(v)),
+              )
             : this.tracks.splice(index, amount);
         // Log if available
         if (typeof this.queueChanges?.tracksRemoved === "function")
@@ -556,13 +556,13 @@ export class Queue {
      */
     public async remove<
         T extends
-        | Track
-        | UnresolvedTrack
-        | number
-        | Track[]
-        | UnresolvedTrack[]
-        | number[]
-        | (number | Track | UnresolvedTrack)[],
+            | Track
+            | UnresolvedTrack
+            | number
+            | Track[]
+            | UnresolvedTrack[]
+            | number[]
+            | (number | Track | UnresolvedTrack)[],
     >(removeQueryTrack: T): Promise<{ removed: (Track | UnresolvedTrack)[] } | null> {
         if (
             removeQueryTrack === null ||
@@ -732,15 +732,15 @@ export class Queue {
         predicate:
             | ((track: Track | UnresolvedTrack, index: number) => boolean)
             | {
-                title?: string;
-                author?: string;
-                duration?: number | { min?: number; max?: number };
-                uri?: string;
-                identifier?: string;
-                sourceName?: string;
-                isStream?: boolean;
-                isSeekable?: boolean;
-            },
+                  title?: string;
+                  author?: string;
+                  duration?: number | { min?: number; max?: number };
+                  uri?: string;
+                  identifier?: string;
+                  sourceName?: string;
+                  isStream?: boolean;
+                  isSeekable?: boolean;
+              },
     ): Array<{ track: Track | UnresolvedTrack; index: number }> {
         return this.utils.filterTracks(predicate);
     }
@@ -762,15 +762,15 @@ export class Queue {
         predicate:
             | ((track: Track | UnresolvedTrack, index: number) => boolean)
             | {
-                title?: string;
-                author?: string;
-                duration?: number | { min?: number; max?: number };
-                uri?: string;
-                identifier?: string;
-                sourceName?: string;
-                isStream?: boolean;
-                isSeekable?: boolean;
-            },
+                  title?: string;
+                  author?: string;
+                  duration?: number | { min?: number; max?: number };
+                  uri?: string;
+                  identifier?: string;
+                  sourceName?: string;
+                  isStream?: boolean;
+                  isSeekable?: boolean;
+              },
     ): { track: Track | UnresolvedTrack; index: number } | null {
         return this.utils.findTrack(predicate);
     }

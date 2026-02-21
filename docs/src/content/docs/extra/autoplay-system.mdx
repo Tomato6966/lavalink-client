@@ -12,6 +12,7 @@ description: "How to do make an autoplaying system."
 Hot-Tipp: You can use player variables in order to enable/disable this system during runtime, e.g. by `player.set("autoplay_disabled", true)` and check it in the autoplayFunction by `const isAutoPlayDisabled = player.get("autoplay_disabled") === true;`
 
 E.g.:
+
 ```ts
 client.lavalink = new LavalinkManager<myCustomPlayer>({
     nodes: [
@@ -103,6 +104,5 @@ async function autoPlayFunction(player, lastPlayedTrack) {
         return;
     }
     return;
-};
-
+}
 ```

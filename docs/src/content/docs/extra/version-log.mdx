@@ -10,26 +10,27 @@ Logs about the changed features.
 ---
 
 ## **Version 2.9.2**
+
 - Major fixes that may or may not change the behavior of some features, so please check the changelog for more details. - https://github.com/Tomato6966/lavalink-client/pull/174
 - Stuff fixed:
-  - the queue utils sync used a wrong length for the previous.
-  - some nullish checks were missing for the queueOptions.
-  - removed a race condition for the Node.ts error handler
-  - 2 fixes for filter.ts:
-    - resetFilters didn't check for the vaporwave filter, because of copy-paste-issue.
-    - setSpeed / setPitch / setRate overwrite each others values instead of accomodating each other...
-    - (NEW OPTION) `ManagerOptions.playerOptions.enforceSponsorBlockRequestForEventEnablement` If this is true, then on changeNode, the sponsorblocksystem will be enabled on defeault. (default: true)
+    - the queue utils sync used a wrong length for the previous.
+    - some nullish checks were missing for the queueOptions.
+    - removed a race condition for the Node.ts error handler
+    - 2 fixes for filter.ts:
+        - resetFilters didn't check for the vaporwave filter, because of copy-paste-issue.
+        - setSpeed / setPitch / setRate overwrite each others values instead of accomodating each other...
+        - (NEW OPTION) `ManagerOptions.playerOptions.enforceSponsorBlockRequestForEventEnablement` If this is true, then on changeNode, the sponsorblocksystem will be enabled on defeault. (default: true)
 
 - New Event: `playerClientUpdate`
-    * Always emits when the player (on client side) got updated via a function-call.
-    * This is useful for example, if you want to save the player data on every update, or similar.
-    * Emits only when you call one of those functions:
-    * player.pause()
-    * player.resume()
-    * player.seek()
-    * player.setRepeatMode()
-    * player.setVolume()
-    * and on every call of the filterManager.
+    - Always emits when the player (on client side) got updated via a function-call.
+    - This is useful for example, if you want to save the player data on every update, or similar.
+    - Emits only when you call one of those functions:
+    - player.pause()
+    - player.resume()
+    - player.seek()
+    - player.setRepeatMode()
+    - player.setVolume()
+    - and on every call of the filterManager.
 
 ## **Version 2.9.1**
 

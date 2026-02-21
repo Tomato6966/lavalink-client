@@ -104,7 +104,6 @@ export interface LavalinkManagerEvents<CustomPlayerT extends Player = Player> {
      */
     playerUpdate: (oldPlayerJson: PlayerJson, newPlayer: CustomPlayerT) => void;
 
-
     /**
      * Always emits when the player (on client side) got updated via a function-call.
      * This is useful for example, if you want to save the player data on every update, or similar.
