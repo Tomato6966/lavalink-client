@@ -315,6 +315,14 @@ export interface ManagerPlayerOptions<CustomPlayerT extends Player = Player> {
     };
     /* If to override the data from the Unresolved Track. for unresolved tracks */
     useUnresolvedData?: boolean;
+    /**
+     * If true (default), when changing nodes, `setSponsorBlock()` with default categories is called
+     * even if the user never explicitly set categories. This is needed so the SponsorBlock plugin
+     * registers its event listeners (ChapterStarted/ChapterLoaded) on the new node.
+     * Set to false to disable this behavior if you don't use SponsorBlock events.
+     * @default true
+     */
+    enforceSponsorBlockRequestForEventEnablement?: boolean;
 }
 
 export type DeepRequired<T> = {
