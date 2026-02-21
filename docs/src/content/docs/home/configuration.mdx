@@ -72,6 +72,10 @@ client.lavalink = new LavalinkManager({
             autoPlayFunction: autoPlayFunction,
         },
         useUnresolvedData: true,
+        // If true (default), setSponsorBlock() with defaults is called on node change
+        // to ensure SponsorBlock plugin events (ChapterStarted/ChapterLoaded) work on the new node.
+        // Set to false if you don't use SponsorBlock events.
+        enforceSponsorBlockRequestForEventEnablement: true,
     },
     queueOptions: {
         maxPreviousTracks: 10,
