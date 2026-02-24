@@ -998,6 +998,7 @@ export class Player {
                         token: this.voice.token,
                         endpoint: this.voice.endpoint,
                         sessionId: this.voice.sessionId,
+                        channelId: this.voice.channelId,
                     },
                 },
             });
