@@ -74,6 +74,7 @@ export class Player {
         endpoint: null,
         sessionId: null,
         token: null,
+        channelId: undefined,
     };
 
     public voiceState: {
