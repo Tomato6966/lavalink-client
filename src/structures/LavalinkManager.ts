@@ -618,6 +618,7 @@ export class LavalinkManager<CustomPlayerT extends Player = Player> extends Even
                                 token: update.token,
                                 endpoint: update.endpoint,
                                 sessionId: sessionId2Use,
+                                channelId: player.voice.channelId,
                             },
                         },
                     });
@@ -671,6 +672,7 @@ export class LavalinkManager<CustomPlayerT extends Player = Player> extends Even
                     this.emit("playerMove", player, player.voiceChannelId, update.channel_id);
 
                 player.voice.sessionId = update.session_id || player.voice.sessionId;
+                player.voice.channelId = update.channel_id;
 
                 if (!player.voice.sessionId) {
                     this._emitDebugEvent(DebugEvents.NoAudioDebug, {
