@@ -10,4 +10,7 @@ export default defineConfig({
     dts: true,
     clean: true,
     bundle: true,
+    outExtension: ({ format }) => ({
+        js: format === "esm" ? ".mjs" : ".js",
+    }),
 });
