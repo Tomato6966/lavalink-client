@@ -74,6 +74,7 @@ export class Player {
         endpoint: null,
         sessionId: null,
         token: null,
+        channelId: undefined,
     };
 
     public voiceState: {
@@ -997,6 +998,7 @@ export class Player {
                         token: this.voice.token,
                         endpoint: this.voice.endpoint,
                         sessionId: this.voice.sessionId,
+                        channelId: this.voice.channelId,
                     },
                 },
             });
