@@ -1,4 +1,4 @@
-import { ReadableStream } from "stream/web";
+import { ReadableStream } from "node:stream/web";
 
 import { LavalinkNode } from "./Node";
 import type { NodeManager } from "./NodeManager";

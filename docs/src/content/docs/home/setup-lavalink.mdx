@@ -36,20 +36,14 @@ lavalink:
         soundcloudSearchEnabled: true
         gc-warnings: true
     plugins:
-        - dependency: "com.github.topi314.lavasrc:lavasrc-plugin:4.8.1" # LavaSrc - for extra sources like deezer, spotify, etc. https://github.com/topi314/LavaSrc
-          repository: "https://maven.lavalink.dev/releases"
+        - dependency: "dev.lavalink.youtube:youtube-plugin:1.18.0" # https://github.com/lavalink-devs/youtube-source
+        - dependency: "com.github.topi314.lavasrc:lavasrc-plugin:4.8.1" # https://github.com/topi314/LavaSrc
         - dependency: "com.github.topi314.lavasearch:lavasearch-plugin:1.0.0" # https://github.com/topi314/LavaSearch
-          repository: "https://maven.lavalink.dev/releases"
         - dependency: "com.dunctebot:skybot-lavalink-plugin:1.7.0" # https://github.com/DuncteBot/skybot-lavalink-plugin
-          repository: "https://maven.lavalink.dev/releases"
         - dependency: "com.github.devoxin:lavadspx-plugin:0.0.5" # https://github.com/devoxin/LavaDSPX-Plugin
           repository: "https://jitpack.io"
-        - dependency: "dev.lavalink.youtube:youtube-plugin:1.16.0" # https://github.com/lavalink-devs/youtube-source
-          snapshot: false
         - dependency: "com.github.topi314.lavalyrics:lavalyrics-plugin:1.1.0" # https://github.com/topi314/LavaLyrics
-          repository: "https://maven.lavalink.dev/releases"
         - dependency: "me.duncte123:java-lyrics-plugin:1.6.6" # https://github.com/DuncteBot/java-timed-lyrics
-          repository: "https://maven.lavalink.dev/releases"
 plugins:
     lyrics:
         countryCode: de
@@ -81,31 +75,21 @@ plugins:
             - "MUSIC"
             - "WEB"
             - "WEBEMBEDDED"
-            - "TVHTML5EMBEDDED"
+            - "TVHTML5_SIMPLY"
         ANDROID_MUSIC:
-            playlistLoading: false
             videoLoading: true
             searching: true
             playback: true
         MUSIC:
-            playlistLoading: false
-            videoLoading: false
             searching: true
             playback: false
         WEB:
-            playlistLoading: false
             videoLoading: true
             searching: true
             playback: true
         WEBEMBEDDED:
-            playlistLoading: false
-            videoLoading: false
-            searching: false
             playback: true
-        TVHTML5EMBEDDED:
-            playlistLoading: false
-            videoLoading: false
-            searching: false
+        TVHTML5_SIMPLY:
             playback: true
     lavasrc:
         providers:

@@ -1,4 +1,4 @@
-import { EventEmitter } from "events";
+import { EventEmitter } from "node:events";
 
 import { DebugEvents, DestroyReasons } from "./Constants";
 import { NodeManager } from "./NodeManager";
@@ -593,9 +593,11 @@ export class LavalinkManager<CustomPlayerT extends Player = Player> extends Even
 
             if ("token" in update) {
                 if (!player.node?.sessionId) throw new Error("Lavalink Node is either not ready or not up to date");
+                // REQUIRED for lavalink and voice connections
                 const sessionId2Use =
                     player.voice?.sessionId || ("sessionId" in update ? (update.sessionId as string) : undefined);
-                const channelId2Use = 
+                // REQUIRED for DAVE "Discord’s audio and video end-to-end encryption (“E2EE A/V” or “E2EE” for short)"
+                const channelId2Use =
                     player.voice?.channelId || ("channel_id" in update ? (update.channel_id as string) : undefined);
                 if (!sessionId2Use) {
                     this.emit("debug", DebugEvents.NoAudioDebug, {
@@ -607,7 +609,12 @@ export class LavalinkManager<CustomPlayerT extends Player = Player> extends Even
                         console.debug(
                             "Lavalink-Client-Debug | NO-AUDIO [::] sendRawData function, Can't send updatePlayer for voice token session - Missing sessionId",
                             {
-                                voice: { token: update.token, endpoint: update.endpoint, sessionId: sessionId2Use, channelId: channelId2Use },
+                                voice: {
+                                    token: update.token,
+                                    endpoint: update.endpoint,
+                                    sessionId: sessionId2Use,
+                                    channelId: channelId2Use,
+                                },
                                 update,
                                 playerVoice: player.voice,
                             },
@@ -622,7 +629,12 @@ export class LavalinkManager<CustomPlayerT extends Player = Player> extends Even
                         console.debug(
                             "Lavalink-Client-Debug | NO-AUDIO [::] sendRawData function, Can't send updatePlayer for voice token session - Missing channelId",
                             {
-                                voice: { token: update.token, endpoint: update.endpoint, sessionId: sessionId2Use, channelId: channelId2Use },
+                                voice: {
+                                    token: update.token,
+                                    endpoint: update.endpoint,
+                                    sessionId: sessionId2Use,
+                                    channelId: channelId2Use,
+                                },
                                 update,
                                 playerVoice: player.voice,
                             },
@@ -648,7 +660,12 @@ export class LavalinkManager<CustomPlayerT extends Player = Player> extends Even
                         console.debug(
                             "Lavalink-Client-Debug | NO-AUDIO [::] sendRawData function, Sent updatePlayer for voice token session",
                             {
-                                voice: { token: update.token, endpoint: update.endpoint, sessionId: sessionId2Use, channelId: channelId2Use },
+                                voice: {
+                                    token: update.token,
+                                    endpoint: update.endpoint,
+                                    sessionId: sessionId2Use,
+                                    channelId: channelId2Use,
+                                },
                                 playerVoice: player.voice,
                                 update,
                             },

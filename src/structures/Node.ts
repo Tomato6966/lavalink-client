@@ -1,4 +1,4 @@
-import { isAbsolute } from "path";
+import { isAbsolute } from "node:path";
 
 import WebSocket from "ws";
 
