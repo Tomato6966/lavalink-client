@@ -1,6 +1,4 @@
-import { isAbsolute } from "node:path";
-
-import WebSocket from "ws";
+import { isAbsolute } from "path";
 
 import {
     DebugEvents,
@@ -70,8 +68,8 @@ import { NodeSymbol, queueTrackEnd, safeStringify } from "./Utils";
 export class LavalinkNode {
     private heartBeatPingTimestamp: number = 0;
     private heartBeatPongTimestamp: number = 0;
-    private heartBeatInterval?: NodeJS.Timeout;
-    private pingTimeout?: NodeJS.Timeout;
+    private heartBeatInterval?: ReturnType<typeof setInterval>;
+    private pingTimeout?: ReturnType<typeof setTimeout>;
 
     public nodeType: NodeTypes = "Lavalink";
     public isAlive: boolean = false;
@@ -124,11 +122,18 @@ export class LavalinkNode {
     /** The Node Manager of this Node */
     private NodeManager: NodeManager | null = null;
     /** The Reconnection Timeout */
-    private reconnectTimeout?: NodeJS.Timeout = undefined;
+    private reconnectTimeout?: ReturnType<typeof setTimeout> = undefined;
     /** The Reconnection Attempt counter (array of datetimes when it tried it.) */
     private reconnectAttempts: number[] = [];
-    /** The Socket of the Lavalink */
-    private socket: WebSocket | null = null;
+    /** The Socket of the Lavalink (Bun's native WebSocket) */
+    private socket: InstanceType<typeof globalThis.WebSocket> | null = null;
+    /** Stored handlers for cleanup (Bun WebSocket uses addEventListener) */
+    private _socketHandlers: {
+        open: () => void;
+        close: (ev: CloseEvent) => void;
+        message: (ev: MessageEvent) => void;
+        error: (ev: Event) => void;
+    } | null = null;
     /** Version of what the Lavalink Server should be */
     private version = "v4";
 
@@ -188,7 +193,7 @@ export class LavalinkNode {
      * ```
      */
     public get connected(): boolean {
-        return this.socket && this.socket.readyState === WebSocket.OPEN;
+        return this.socket ? this.socket.readyState === globalThis.WebSocket.OPEN : false;
     }
 
     /**
@@ -652,15 +657,44 @@ export class LavalinkNode {
             this.sessionId = this.options.sessionId || sessionId;
         }
 
-        this.socket = new WebSocket(
+        // Bun's WebSocket constructor accepts optional second argument with headers (not in DOM type def)
+        this.socket = new (globalThis.WebSocket as typeof globalThis.WebSocket & {
+            new (url: string, init?: { headers?: Record<string, string> }): InstanceType<typeof globalThis.WebSocket>;
+        })(
             `ws${this.options.secure ? "s" : ""}://${this.options.host}:${this.options.port}/v4/websocket`,
             { headers },
         );
-        this.socket.on("open", this.open.bind(this));
-        this.socket.on("close", (code, reason) => this.close(code, reason?.toString()));
-        this.socket.on("message", this.message.bind(this));
-        this.socket.on("error", this.error.bind(this));
-        // this.socket.on("ping", () => this.heartBeat("ping")); // lavalink doesn'T send ping periodically, therefore we use the stats message
+        const h = (this._socketHandlers = {
+            open: () => this.open(),
+            close: (ev: CloseEvent) => this.close(ev.code, ev.reason || ""),
+            message: (ev: MessageEvent) => {
+                const d = ev.data;
+                if (d instanceof Blob) {
+                    d.arrayBuffer().then((ab) => this.message(Buffer.from(ab)));
+                } else {
+                    this.message(d as Buffer | string);
+                }
+            },
+            error: (ev: Event) =>
+                this.error(
+                    ev instanceof Error ? ev : new Error(ev instanceof ErrorEvent ? ev.message : "WebSocket error"),
+                ),
+        });
+        this.socket.addEventListener("open", h.open);
+        this.socket.addEventListener("close", h.close);
+        this.socket.addEventListener("message", h.message);
+        this.socket.addEventListener("error", h.error);
+    }
+
+    /** Remove all socket listeners (Bun WebSocket has no removeAllListeners) */
+    private _removeSocketListeners(): void {
+        if (!this.socket || !this._socketHandlers) return;
+        const h = this._socketHandlers;
+        this.socket.removeEventListener("open", h.open);
+        this.socket.removeEventListener("close", h.close);
+        this.socket.removeEventListener("message", h.message);
+        this.socket.removeEventListener("error", h.error);
+        this._socketHandlers = null;
     }
 
     private heartBeat(): void {
@@ -688,7 +722,7 @@ export class LavalinkNode {
                 functionLayer: "LavalinkNode > nodeEvent > stats > heartBeat() > timeoutHit",
             });
             this.isAlive = false;
-            this.socket.terminate();
+            this.socket.close(1006, "Connection terminated");
         }, 65_000); // the stats endpoint get's sent every 60s. se wee add a 5s buffer to make sure we don't miss any stats message
     }
     /**
@@ -730,7 +764,7 @@ export class LavalinkNode {
         // If no players, proceed with socket cleanup immediately
         if (!players?.size) {
             this.socket?.close(1000, "Node-Destroy");
-            this.socket?.removeAllListeners();
+            this._removeSocketListeners();
             this.socket = null;
             this.resetReconnectionAttempts();
 
@@ -808,7 +842,7 @@ export class LavalinkNode {
         // Handle all player operations first, then clean up the socket
         return void handlePlayerOperations().finally(() => {
             this.socket?.close(1000, "Node-Destroy");
-            this.socket?.removeAllListeners();
+            this._removeSocketListeners();
             this.socket = null;
             this.resetReconnectionAttempts();
 
@@ -840,7 +874,7 @@ export class LavalinkNode {
         if (!this.connected) return;
 
         this.socket?.close(1000, "Node-Disconnect");
-        this.socket?.removeAllListeners();
+        this._removeSocketListeners();
         this.socket = null;
         this.reconnectionState = ReconnectionState.IDLE;
 
@@ -1691,22 +1725,28 @@ export class LavalinkNode {
 
             if (this.heartBeatInterval) clearInterval(this.heartBeatInterval);
 
-            if (this.options.heartBeatInterval > 0) {
-                // everytime a pong happens, set this.isAlive to true
-                this.socket.on("pong", () => {
+            // Bun's WebSocket has no .ping()/.on("pong"); use only stats-based heartbeat when unavailable
+            if (
+                this.options.heartBeatInterval > 0 &&
+                typeof (this.socket as unknown as { ping?: () => void; on?: (ev: string, fn: () => void) => void })
+                    ?.ping === "function" &&
+                typeof (this.socket as unknown as { on?: (ev: string, fn: () => void) => void })?.on === "function"
+            ) {
+                const sockWithPing = this.socket as unknown as {
+                    ping: () => void;
+                    on: (ev: string, fn: () => void) => void;
+                };
+                sockWithPing.on("pong", () => {
                     this.heartBeatPongTimestamp = performance.now();
                     this.isAlive = true;
                 });
-
-                // every x ms send a ping to lavalink to retrieve a pong later on
                 this.heartBeatInterval = setInterval(() => {
                     if (!this.socket)
                         return console.error("Node-Heartbeat-Interval - Socket not available - maybe reconnecting?");
                     if (!this.isAlive) return this.close(500, "Node-Heartbeat-Timeout");
-
                     this.isAlive = false;
                     this.heartBeatPingTimestamp = performance.now();
-                    this.socket?.ping?.();
+                    sockWithPing.ping();
                 }, this.options.heartBeatInterval || 30_000);
             }
         }
@@ -1730,7 +1770,7 @@ export class LavalinkNode {
 
         try {
             if (this.socket) {
-                this.socket.removeAllListeners();
+                this._removeSocketListeners();
                 this.socket = null;
             }
         } catch (e) {

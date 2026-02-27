@@ -28,29 +28,23 @@
     "main": "index.ts",
     "scripts": {
         "test": "echo \"Error: no test specified\" && exit 1",
-        "start": "npx ts-node -r tsconfig-paths/register index.ts",
+        "start": "bun run index.ts",
         "start:bun": "bun ./index.ts",
         "start:deno": "deno ./index.ts"
     },
     "dependencies": {
         "@redis/client": "^1.6.0",
-        "@types/node": "^22.15.18",
-        "@types/ws": "^8.18.1",
         "discord.js": "^14.19.3",
         "dotenv": "^16.5.0",
         "lavalink-client": "file:..",
         "redis": "^4.7.0",
-        "ts-node": "^10.9.2",
-        "ws": "^8.18.2"
+        "tslib": "^2.8.1"
     },
     "devDependencies": {
-        "tsconfig-paths": "^4.2.0",
-        "tslib": "^2.8.1",
         "typescript": "^5.8.3"
     },
     "engines": {
-        "bun": ">=1.1.27",
-        "node": ">=18.0.0"
+        "bun": ">=1.1.27"
     },
     "contributers": []
 }

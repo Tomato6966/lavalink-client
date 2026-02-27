@@ -1,4 +1,4 @@
-import { EventEmitter } from "node:events";
+import { EventEmitter } from "events";
 
 import { DebugEvents, DestroyReasons } from "./Constants";
 import { NodeManager } from "./NodeManager";

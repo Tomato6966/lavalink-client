@@ -14,7 +14,7 @@
         "esModuleInterop": true,
         "experimentalDecorators": true,
         "sourceMap": true,
-        "types": ["node", "ws"]
+        "types": ["bun"]
     },
     "include": ["**/*.ts"],
     "exclude": ["node_modules", "dist"]

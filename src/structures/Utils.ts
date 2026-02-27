@@ -1,6 +1,5 @@
 /* eslint-disable no-unsafe-declaration-merging */
-import { URL } from "node:url";
-import { isRegExp } from "node:util/types";
+import { isRegExp } from "util/types";
 
 import { DebugEvents } from "./Constants";
 import type { LavalinkManager } from "./LavalinkManager";
