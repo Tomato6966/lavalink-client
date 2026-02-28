@@ -244,6 +244,24 @@ export class LavalinkManager<CustomPlayerT extends Player = Player> extends Even
         this.emit("debug", name, eventData);
     }
 
+    private static readonly _noAudioDebugPrefix = "Lavalink-Client-Debug | NO-AUDIO [::] sendRawData function, ";
+
+    /**
+     * Emits NoAudioDebug and optionally logs to console when debugOptions.noAudio is enabled.
+     */
+    private _debugNoAudio(
+        state: "log" | "warn" | "error",
+        functionLayer: string,
+        messages: { message: string; consoleMessage?: string },
+        ...consoleArgs: unknown[]
+    ): void {
+        this._emitDebugEvent(DebugEvents.NoAudioDebug, { state, functionLayer, message: messages.message });
+        if (this.options?.advancedOptions?.debugOptions?.noAudio === true) {
+            const consoleMsg = messages.consoleMessage ?? messages.message;
+            console.debug(LavalinkManager._noAudioDebugPrefix + consoleMsg, ...consoleArgs);
+        }
+    }
+
     /**
      * Create the Lavalink Manager
      * @param options
@@ -496,29 +514,18 @@ export class LavalinkManager<CustomPlayerT extends Player = Player> extends Even
      */
     public async sendRawData(data: VoicePacket | VoiceServer | VoiceState | ChannelDeletePacket): Promise<void> {
         if (!this.initiated) {
-            this._emitDebugEvent(DebugEvents.NoAudioDebug, {
-                state: "log",
+            this._debugNoAudio("log", "LavalinkManager > sendRawData()", {
                 message: "Manager is not initated yet",
-                functionLayer: "LavalinkManager > sendRawData()",
+                consoleMessage: "manager is not initated yet",
             });
-            if (this.options?.advancedOptions?.debugOptions?.noAudio === true)
-                console.debug(
-                    "Lavalink-Client-Debug | NO-AUDIO [::] sendRawData function, manager is not initated yet",
-                );
             return;
         }
 
         if (!("t" in data)) {
-            this._emitDebugEvent(DebugEvents.NoAudioDebug, {
-                state: "error",
+            this._debugNoAudio("error", "LavalinkManager > sendRawData()", {
                 message: "No 't' in payload-data of the raw event:",
-                functionLayer: "LavalinkManager > sendRawData()",
-            });
-            if (this.options?.advancedOptions?.debugOptions?.noAudio === true)
-                console.debug(
-                    "Lavalink-Client-Debug | NO-AUDIO [::] sendRawData function, no 't' in payload-data of the raw event:",
-                    data,
-                );
+                consoleMessage: "no 't' in payload-data of the raw event:",
+            }, data);
             return;
         }
 
@@ -535,59 +542,35 @@ export class LavalinkManager<CustomPlayerT extends Player = Player> extends Even
         if (["VOICE_STATE_UPDATE", "VOICE_SERVER_UPDATE"].includes(data.t)) {
             const update = ("d" in data ? data.d : data) as VoiceServer | VoiceState;
             if (!update) {
-                this._emitDebugEvent(DebugEvents.NoAudioDebug, {
-                    state: "warn",
+                this._debugNoAudio("warn", "LavalinkManager > sendRawData()", {
                     message: `No Update data found in payload :: ${safeStringify(data, 2)}`,
-                    functionLayer: "LavalinkManager > sendRawData()",
-                });
-                if (this.options?.advancedOptions?.debugOptions?.noAudio === true)
-                    console.debug(
-                        "Lavalink-Client-Debug | NO-AUDIO [::] sendRawData function, no update data found in payload:",
-                        data,
-                    );
+                    consoleMessage: "no update data found in payload:",
+                }, data);
                 return;
             }
 
             if (!("token" in update) && !("session_id" in update)) {
-                this._emitDebugEvent(DebugEvents.NoAudioDebug, {
-                    state: "error",
+                this._debugNoAudio("error", "LavalinkManager > sendRawData()", {
                     message: `No 'token' nor 'session_id' found in payload :: ${safeStringify(data, 2)}`,
-                    functionLayer: "LavalinkManager > sendRawData()",
-                });
-                if (this.options?.advancedOptions?.debugOptions?.noAudio === true)
-                    console.debug(
-                        "Lavalink-Client-Debug | NO-AUDIO [::] sendRawData function, no 'token' nor 'session_id' found in payload:",
-                        data,
-                    );
+                    consoleMessage: "no 'token' nor 'session_id' found in payload:",
+                }, data);
                 return;
             }
 
             const player = this.getPlayer(update.guild_id);
 
             if (!player) {
-                this._emitDebugEvent(DebugEvents.NoAudioDebug, {
-                    state: "warn",
+                this._debugNoAudio("warn", "LavalinkManager > sendRawData()", {
                     message: `No Lavalink Player found via key: 'guild_id' of update-data :: ${safeStringify(update, 2)}`,
-                    functionLayer: "LavalinkManager > sendRawData()",
-                });
-                if (this.options?.advancedOptions?.debugOptions?.noAudio === true)
-                    console.debug(
-                        "Lavalink-Client-Debug | NO-AUDIO [::] sendRawData function, No Lavalink Player found via key: 'guild_id' of update-data:",
-                        update,
-                    );
+                    consoleMessage: "No Lavalink Player found via key: 'guild_id' of update-data:",
+                }, update);
                 return;
             }
 
             if (player.get("internal_destroystatus") === true) {
-                this._emitDebugEvent(DebugEvents.NoAudioDebug, {
-                    state: "warn",
-                    message: `Player is in a destroying state. can't signal the voice states`,
-                    functionLayer: "LavalinkManager > sendRawData()",
+                this._debugNoAudio("warn", "LavalinkManager > sendRawData()", {
+                    message: "Player is in a destroying state. can't signal the voice states",
                 });
-                if (this.options?.advancedOptions?.debugOptions?.noAudio === true)
-                    console.debug(
-                        "Lavalink-Client-Debug | NO-AUDIO [::] sendRawData function, Player is in a destroying state. can't signal the voice states",
-                    );
                 return;
             }
 
@@ -597,79 +580,35 @@ export class LavalinkManager<CustomPlayerT extends Player = Player> extends Even
                 const sessionId2Use =
                     player.voice?.sessionId || ("sessionId" in update ? (update.sessionId as string) : undefined);
                 // REQUIRED for DAVE "Discord’s audio and video end-to-end encryption (“E2EE A/V” or “E2EE” for short)"
-                const channelId2Use =
-                    player.voice?.channelId || ("channel_id" in update ? (update.channel_id as string) : undefined);
+                const channelId2Use = player.voice?.channelId || ("channel_id" in update ? (update.channel_id as string) : undefined);
+
+                const voiceData = {
+                    token: update.token,
+                    endpoint: update.endpoint,
+                    sessionId: sessionId2Use,
+                    channelId: channelId2Use,
+                };
                 if (!sessionId2Use) {
-                    this.emit("debug", DebugEvents.NoAudioDebug, {
-                        state: "error",
-                        message: `Can't send updatePlayer for voice token session - Missing sessionId :: ${safeStringify({ voice: { token: update.token, endpoint: update.endpoint, sessionId: sessionId2Use, channelId: channelId2Use }, update, playerVoice: player.voice }, 2)}`,
-                        functionLayer: "LavalinkManager > sendRawData()",
-                    });
-                    if (this.options?.advancedOptions?.debugOptions?.noAudio === true)
-                        console.debug(
-                            "Lavalink-Client-Debug | NO-AUDIO [::] sendRawData function, Can't send updatePlayer for voice token session - Missing sessionId",
-                            {
-                                voice: {
-                                    token: update.token,
-                                    endpoint: update.endpoint,
-                                    sessionId: sessionId2Use,
-                                    channelId: channelId2Use,
-                                },
-                                update,
-                                playerVoice: player.voice,
-                            },
-                        );
+                    this._debugNoAudio("error", "LavalinkManager > sendRawData()", {
+                        message: `Can't send updatePlayer for voice token session - Missing sessionId :: ${safeStringify({ voice: voiceData, update, playerVoice: player.voice }, 2)}`,
+                        consoleMessage: "Can't send updatePlayer for voice token session - Missing sessionId",
+                    }, { voice: voiceData, update, playerVoice: player.voice });
                 } else if (!channelId2Use) {
-                    this.emit("debug", DebugEvents.NoAudioDebug, {
-                        state: "error",
-                        message: `Can't send updatePlayer for voice token session - Missing channelId :: ${safeStringify({ voice: { token: update.token, endpoint: update.endpoint, sessionId: sessionId2Use, channelId: channelId2Use }, update, playerVoice: player.voice }, 2)}`,
-                        functionLayer: "LavalinkManager > sendRawData()",
-                    });
-                    if (this.options?.advancedOptions?.debugOptions?.noAudio === true)
-                        console.debug(
-                            "Lavalink-Client-Debug | NO-AUDIO [::] sendRawData function, Can't send updatePlayer for voice token session - Missing channelId",
-                            {
-                                voice: {
-                                    token: update.token,
-                                    endpoint: update.endpoint,
-                                    sessionId: sessionId2Use,
-                                    channelId: channelId2Use,
-                                },
-                                update,
-                                playerVoice: player.voice,
-                            },
-                        );
+                    this._debugNoAudio("error", "LavalinkManager > sendRawData()", {
+                        message: `Can't send updatePlayer for voice token session - Missing channelId :: ${safeStringify({ voice: voiceData, update, playerVoice: player.voice }, 2)}`,
+                        consoleMessage: "Can't send updatePlayer for voice token session - Missing channelId",
+                    }, { voice: voiceData, update, playerVoice: player.voice });
                 } else {
                     await player.node.updatePlayer({
                         guildId: player.guildId,
                         playerOptions: {
-                            voice: {
-                                token: update.token,
-                                endpoint: update.endpoint,
-                                sessionId: sessionId2Use,
-                                channelId: channelId2Use,
-                            },
+                            voice: voiceData,
                         },
                     });
-                    this._emitDebugEvent(DebugEvents.NoAudioDebug, {
-                        state: "log",
-                        message: `Sent updatePlayer for voice token session :: ${safeStringify({ voice: { token: update.token, endpoint: update.endpoint, sessionId: sessionId2Use, channelId: channelId2Use }, update, playerVoice: player.voice }, 2)}`,
-                        functionLayer: "LavalinkManager > sendRawData()",
-                    });
-                    if (this.options?.advancedOptions?.debugOptions?.noAudio === true)
-                        console.debug(
-                            "Lavalink-Client-Debug | NO-AUDIO [::] sendRawData function, Sent updatePlayer for voice token session",
-                            {
-                                voice: {
-                                    token: update.token,
-                                    endpoint: update.endpoint,
-                                    sessionId: sessionId2Use,
-                                    channelId: channelId2Use,
-                                },
-                                playerVoice: player.voice,
-                                update,
-                            },
-                        );
+                    this._debugNoAudio("log", "LavalinkManager > sendRawData()", {
+                        message: `Sent updatePlayer for voice token session :: ${safeStringify({ voice: voiceData, update, playerVoice: player.voice }, 2)}`,
+                        consoleMessage: "Sent updatePlayer for voice token session",
+                    }, { voice: voiceData, playerVoice: player.voice, update });
                 }
                 return;
             }
@@ -684,20 +623,10 @@ export class LavalinkManager<CustomPlayerT extends Player = Player> extends Even
                     );
                 }
 
-                this._emitDebugEvent(DebugEvents.NoAudioDebug, {
-                    state: "warn",
+                this._debugNoAudio("warn", "LavalinkManager > sendRawData()", {
                     message: `voice update user is not equal to provided client id of the LavalinkManager.options.client.id :: user: "${update.user_id}" manager client id: "${this.options?.client.id}"`,
-                    functionLayer: "LavalinkManager > sendRawData()",
-                });
-
-                if (this.options?.advancedOptions?.debugOptions?.noAudio === true)
-                    console.debug(
-                        "Lavalink-Client-Debug | NO-AUDIO [::] sendRawData function, voice update user is not equal to provided client id of the manageroptions#client#id",
-                        "user:",
-                        update.user_id,
-                        "manager client id:",
-                        this.options?.client.id,
-                    );
+                    consoleMessage: "voice update user is not equal to provided client id of the manageroptions#client#id",
+                }, "user:", update.user_id, "manager client id:", this.options?.client.id);
                 return;
             }
 
@@ -706,18 +635,13 @@ export class LavalinkManager<CustomPlayerT extends Player = Player> extends Even
                     this.emit("playerMove", player, player.voiceChannelId, update.channel_id);
 
                 player.voice.sessionId = update.session_id || player.voice.sessionId;
-                player.voice.channelId = update.channel_id;
+                player.voice.channelId = update.channel_id || player.voice.channelId;
 
                 if (!player.voice.sessionId) {
-                    this._emitDebugEvent(DebugEvents.NoAudioDebug, {
-                        state: "warn",
+                    this._debugNoAudio("warn", "LavalinkManager > sendRawData()", {
                         message: `Function to assing sessionId provided, but no found in Payload: ${safeStringify({ update, playerVoice: player.voice }, 2)}`,
-                        functionLayer: "LavalinkManager > sendRawData()",
+                        consoleMessage: `Function to assing sessionId provided, but no found in Payload: ${safeStringify(update, 2)}`,
                     });
-                    if (this.options?.advancedOptions?.debugOptions?.noAudio === true)
-                        console.debug(
-                            `Lavalink-Client-Debug | NO-AUDIO [::] sendRawData function, Function to assing sessionId provided, but no found in Payload: ${safeStringify(update, 2)}`,
-                        );
                 }
 
                 player.voiceChannelId = update.channel_id;
