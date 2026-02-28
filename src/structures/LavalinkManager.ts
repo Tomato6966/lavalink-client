@@ -522,10 +522,15 @@ export class LavalinkManager<CustomPlayerT extends Player = Player> extends Even
         }
 
         if (!("t" in data)) {
-            this._debugNoAudio("error", "LavalinkManager > sendRawData()", {
-                message: "No 't' in payload-data of the raw event:",
-                consoleMessage: "no 't' in payload-data of the raw event:",
-            }, data);
+            this._debugNoAudio(
+                "error",
+                "LavalinkManager > sendRawData()",
+                {
+                    message: "No 't' in payload-data of the raw event:",
+                    consoleMessage: "no 't' in payload-data of the raw event:",
+                },
+                data,
+            );
             return;
         }
 
@@ -542,28 +547,43 @@ export class LavalinkManager<CustomPlayerT extends Player = Player> extends Even
         if (["VOICE_STATE_UPDATE", "VOICE_SERVER_UPDATE"].includes(data.t)) {
             const update = ("d" in data ? data.d : data) as VoiceServer | VoiceState;
             if (!update) {
-                this._debugNoAudio("warn", "LavalinkManager > sendRawData()", {
-                    message: `No Update data found in payload :: ${safeStringify(data, 2)}`,
-                    consoleMessage: "no update data found in payload:",
-                }, data);
+                this._debugNoAudio(
+                    "warn",
+                    "LavalinkManager > sendRawData()",
+                    {
+                        message: `No Update data found in payload :: ${safeStringify(data, 2)}`,
+                        consoleMessage: "no update data found in payload:",
+                    },
+                    data,
+                );
                 return;
             }
 
             if (!("token" in update) && !("session_id" in update)) {
-                this._debugNoAudio("error", "LavalinkManager > sendRawData()", {
-                    message: `No 'token' nor 'session_id' found in payload :: ${safeStringify(data, 2)}`,
-                    consoleMessage: "no 'token' nor 'session_id' found in payload:",
-                }, data);
+                this._debugNoAudio(
+                    "error",
+                    "LavalinkManager > sendRawData()",
+                    {
+                        message: `No 'token' nor 'session_id' found in payload :: ${safeStringify(data, 2)}`,
+                        consoleMessage: "no 'token' nor 'session_id' found in payload:",
+                    },
+                    data,
+                );
                 return;
             }
 
             const player = this.getPlayer(update.guild_id);
 
             if (!player) {
-                this._debugNoAudio("warn", "LavalinkManager > sendRawData()", {
-                    message: `No Lavalink Player found via key: 'guild_id' of update-data :: ${safeStringify(update, 2)}`,
-                    consoleMessage: "No Lavalink Player found via key: 'guild_id' of update-data:",
-                }, update);
+                this._debugNoAudio(
+                    "warn",
+                    "LavalinkManager > sendRawData()",
+                    {
+                        message: `No Lavalink Player found via key: 'guild_id' of update-data :: ${safeStringify(update, 2)}`,
+                        consoleMessage: "No Lavalink Player found via key: 'guild_id' of update-data:",
+                    },
+                    update,
+                );
                 return;
             }
 
@@ -580,7 +600,8 @@ export class LavalinkManager<CustomPlayerT extends Player = Player> extends Even
                 const sessionId2Use =
                     player.voice?.sessionId || ("sessionId" in update ? (update.sessionId as string) : undefined);
                 // REQUIRED for DAVE "Discord’s audio and video end-to-end encryption (“E2EE A/V” or “E2EE” for short)"
-                const channelId2Use = player.voice?.channelId || ("channel_id" in update ? (update.channel_id as string) : undefined);
+                const channelId2Use =
+                    player.voice?.channelId || ("channel_id" in update ? (update.channel_id as string) : undefined);
 
                 const voiceData = {
                     token: update.token,
@@ -589,15 +610,25 @@ export class LavalinkManager<CustomPlayerT extends Player = Player> extends Even
                     channelId: channelId2Use,
                 };
                 if (!sessionId2Use) {
-                    this._debugNoAudio("error", "LavalinkManager > sendRawData()", {
-                        message: `Can't send updatePlayer for voice token session - Missing sessionId :: ${safeStringify({ voice: voiceData, update, playerVoice: player.voice }, 2)}`,
-                        consoleMessage: "Can't send updatePlayer for voice token session - Missing sessionId",
-                    }, { voice: voiceData, update, playerVoice: player.voice });
+                    this._debugNoAudio(
+                        "error",
+                        "LavalinkManager > sendRawData()",
+                        {
+                            message: `Can't send updatePlayer for voice token session - Missing sessionId :: ${safeStringify({ voice: voiceData, update, playerVoice: player.voice }, 2)}`,
+                            consoleMessage: "Can't send updatePlayer for voice token session - Missing sessionId",
+                        },
+                        { voice: voiceData, update, playerVoice: player.voice },
+                    );
                 } else if (!channelId2Use) {
-                    this._debugNoAudio("error", "LavalinkManager > sendRawData()", {
-                        message: `Can't send updatePlayer for voice token session - Missing channelId :: ${safeStringify({ voice: voiceData, update, playerVoice: player.voice }, 2)}`,
-                        consoleMessage: "Can't send updatePlayer for voice token session - Missing channelId",
-                    }, { voice: voiceData, update, playerVoice: player.voice });
+                    this._debugNoAudio(
+                        "error",
+                        "LavalinkManager > sendRawData()",
+                        {
+                            message: `Can't send updatePlayer for voice token session - Missing channelId :: ${safeStringify({ voice: voiceData, update, playerVoice: player.voice }, 2)}`,
+                            consoleMessage: "Can't send updatePlayer for voice token session - Missing channelId",
+                        },
+                        { voice: voiceData, update, playerVoice: player.voice },
+                    );
                 } else {
                     await player.node.updatePlayer({
                         guildId: player.guildId,
@@ -605,10 +636,15 @@ export class LavalinkManager<CustomPlayerT extends Player = Player> extends Even
                             voice: voiceData,
                         },
                     });
-                    this._debugNoAudio("log", "LavalinkManager > sendRawData()", {
-                        message: `Sent updatePlayer for voice token session :: ${safeStringify({ voice: voiceData, update, playerVoice: player.voice }, 2)}`,
-                        consoleMessage: "Sent updatePlayer for voice token session",
-                    }, { voice: voiceData, playerVoice: player.voice, update });
+                    this._debugNoAudio(
+                        "log",
+                        "LavalinkManager > sendRawData()",
+                        {
+                            message: `Sent updatePlayer for voice token session :: ${safeStringify({ voice: voiceData, update, playerVoice: player.voice }, 2)}`,
+                            consoleMessage: "Sent updatePlayer for voice token session",
+                        },
+                        { voice: voiceData, playerVoice: player.voice, update },
+                    );
                 }
                 return;
             }
@@ -623,10 +659,19 @@ export class LavalinkManager<CustomPlayerT extends Player = Player> extends Even
                     );
                 }
 
-                this._debugNoAudio("warn", "LavalinkManager > sendRawData()", {
-                    message: `voice update user is not equal to provided client id of the LavalinkManager.options.client.id :: user: "${update.user_id}" manager client id: "${this.options?.client.id}"`,
-                    consoleMessage: "voice update user is not equal to provided client id of the manageroptions#client#id",
-                }, "user:", update.user_id, "manager client id:", this.options?.client.id);
+                this._debugNoAudio(
+                    "warn",
+                    "LavalinkManager > sendRawData()",
+                    {
+                        message: `voice update user is not equal to provided client id of the LavalinkManager.options.client.id :: user: "${update.user_id}" manager client id: "${this.options?.client.id}"`,
+                        consoleMessage:
+                            "voice update user is not equal to provided client id of the manageroptions#client#id",
+                    },
+                    "user:",
+                    update.user_id,
+                    "manager client id:",
+                    this.options?.client.id,
+                );
                 return;
             }
 
