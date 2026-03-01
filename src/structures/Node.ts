@@ -1069,7 +1069,6 @@ export class LavalinkNode {
         /**
          * unsubscribe from lyrics updates for a guild
          * @param guildId the guild id of the player
-         * @param skipTrackSource wether to skip the track source or not
          * @returns request data of the request
          *
          * @example
@@ -1079,7 +1078,7 @@ export class LavalinkNode {
          * // const lyrics = await player.unsubscribeLyrics();
          * ```
          */
-        unsubscribe: async (guildId: string, skipTrackSource?: boolean): Promise<void> => {
+        unsubscribe: async (guildId: string): Promise<void> => {
             if (!this.sessionId) throw new Error("the Lavalink-Node is either not ready, or not up to date!");
 
             if (this._checkForPlugins && !this.info?.plugins?.find?.((v) => v.name === "lavalyrics-plugin"))
@@ -1087,7 +1086,7 @@ export class LavalinkNode {
                     `there is no lavalyrics-plugin available in the lavalink node (required for lyrics): ${this.id}`,
                 );
 
-            return await this.request(`/sessions/${this.sessionId}/players/${guildId}/lyrics/subscribe?skipTrackSource=${skipTrackSource ?? false}`, (options) => {
+            return await this.request(`/sessions/${this.sessionId}/players/${guildId}/lyrics/subscribe`, (options) => {
                 options.method = "DELETE";
             });
         },
