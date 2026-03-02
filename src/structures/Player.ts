@@ -183,11 +183,31 @@ export class Player {
     }
 
     /**
+     * Set custom data. (Deprecated - Use Player#setData instead.)
+     * @param key
+     * @param value
+     * @deprecated Use Player#setData instead.
+     */
+    public set(key: string, value: unknown) {
+        this.data[key] = value;
+        return this;
+    }
+
+    /**
+     * Get custom data. (Deprecated - Use Player#getData instead.)
+     * @param key
+     * @deprecated Use Player#getData instead.
+     */
+    public get<T>(key: string): T {
+        return this.data[key] as T;
+    }
+
+    /**
      * Set custom data.
      * @param key
      * @param value
      */
-    public set(key: string, value: unknown) {
+    public setData(key: string, value: unknown) {
         this.data[key] = value;
         return this;
     }
@@ -196,7 +216,7 @@ export class Player {
      * Get custom data.
      * @param key
      */
-    public get<T>(key: string): T {
+    public getData<T>(key: string): T {
         return this.data[key] as T;
     }
 
