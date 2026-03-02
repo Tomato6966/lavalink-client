@@ -869,15 +869,16 @@ export class Player {
     }
 
     /**
-     * Subscribe to the lyrics event on a specific guild to active live lyrics events
+     * Subscribe to the lyrics event on a specific guild to active live lyrics events}
+     * @param skipTrackSource If true, it will not try to get the lyrics from the track source
      * @returns The unsubscribe function
      * @example
      * ```ts
      * const lyrics = await player.subscribeLyrics();
      * ```
      */
-    public subscribeLyrics() {
-        return this.node.lyrics.subscribe(this.guildId);
+    public subscribeLyrics(skipTrackSource?: boolean) {
+        return this.node.lyrics.subscribe(this.guildId, skipTrackSource);
     }
 
     /**
