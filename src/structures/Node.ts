@@ -1062,9 +1062,12 @@ export class LavalinkNode {
                     `there is no lavalyrics-plugin available in the lavalink node (required for lyrics): ${this.id}`,
                 );
 
-            return await this.request(`/sessions/${this.sessionId}/players/${guildId}/lyrics/subscribe?skipTrackSource=${skipTrackSource ?? false}`, (options) => {
-                options.method = "POST";
-            });
+            return await this.request(
+                `/sessions/${this.sessionId}/players/${guildId}/lyrics/subscribe?skipTrackSource=${skipTrackSource ?? false}`,
+                (options) => {
+                    options.method = "POST";
+                },
+            );
         },
         /**
          * unsubscribe from lyrics updates for a guild

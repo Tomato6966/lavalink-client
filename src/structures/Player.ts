@@ -201,9 +201,9 @@ export class Player {
     }
 
     /**
-    * Delete specific custom data.
-    * @param key
-    */
+     * Delete specific custom data.
+     * @param key
+     */
     public deleteData(key: string) {
         if (key.startsWith("internal_")) return this; // protect internal keys
         delete this.data[key];
