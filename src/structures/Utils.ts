@@ -36,7 +36,7 @@ export function parseLavalinkConnUrl(connectionUrl: string) {
     const parsed = new URL(connectionUrl);
     return {
         authorization: parsed.password,
-        nodeType: connectionUrl.startsWith("lavalink://") ? "Lavalink" : "NodeLink" as NodeTypes,
+        nodeType: (connectionUrl.startsWith("lavalink://") ? "Lavalink" : "NodeLink") as NodeTypes,
         id: parsed.username,
         host: parsed.hostname,
         port: Number(parsed.port),
