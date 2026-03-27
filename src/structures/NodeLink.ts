@@ -17,6 +17,7 @@ import {
     ConnectionMetricsResponse,
     DirectStreamResponse,
     ListMixerLayersResponse,
+    MeaningResponse,
     NodeLinkChapter,
     NodeLinkLyrics,
     NodeLinkNoLyrics,
@@ -38,6 +39,37 @@ export class NodeLinkNode extends LavalinkNode {
     }
 
     /**
+     * Uses the gapless feature to set the next track to be played.
+     * @param player current player
+     * @param track if no track provided, it will use the next track from queue
+     */
+    public async setNextTrackGapLess(player: Player, track?: Track | UnresolvedTrack) {
+        if (!this.sessionId) throw new Error("The Lavalink Node is either not ready, or not up to date!");
+        const nextTrack = track || player.queue.tracks[0];
+        if(!nextTrack) throw new Error("No track provided");
+        await this.updatePlayer({
+            guildId: player.guildId,
+            // @ts-expect-error - nextTrack is not a valid property of LavalinkPlayOptions but for NodeLink it is
+            playerOptions: { nextTrack: { encoded: nextTrack.encoded, userData: nextTrack.userData || {} }}
+        });
+        return true;
+    }
+    
+    /**
+     * Retrieves the meaning of a track.
+     * @param track 
+     * @returns {MeaningResponse} 
+     * @link {https://nodelink.js.org/docs/api/nodelink-features#meaning-system}
+     */
+    public async getMeaning(track?: Track | UnresolvedTrack) {
+        if (!this.sessionId) throw new Error("The Lavalink Node is either not ready, or not up to date!");
+        const encodedTrack = track?.encoded;
+        if (!encodedTrack) throw new Error("No track provided");
+        return (await this.request(`/meaning?encodedTrack=${encodedTrack}`, (m) => {
+            m.method = "GET";
+        })) as MeaningResponse;
+    }
+    /**
      * Adds a new audio track to be mixed over the current playback.
      * @param player The player to add the mixer layer to.
      * @param trackToAdd The track to add to the mixer layer.
@@ -54,7 +86,7 @@ export class NodeLinkNode extends LavalinkNode {
                     //identifier: trackToAdd.info?.identifier, // atm not supported
                     userData: trackToAdd.userData,
                 },
-                volume: (volume / 100).toFixed(2),
+                volume: volume / 100,
             });
         })) as AddMixerLayerResponse;
     }
@@ -83,7 +115,7 @@ export class NodeLinkNode extends LavalinkNode {
         await this.request(`/sessions/${this.sessionId}/players/${player.guildId}/mix/${mixId}`, (m) => {
             m.method = "PATCH";
             m.body = safeStringify({
-                volume: (volume / 100).toFixed(2),
+                volume: volume / 100,
             });
         });
         return true;
@@ -296,7 +328,7 @@ export class NodeLinkNode extends LavalinkNode {
         filters: object | string,
     ): Promise<ReadableStream> {
         let requestPath = `/loadstream?encodedTrack=${track.encoded}`;
-        if (volume && volume > 0 && volume <= 100) requestPath += `&volume=${(volume / 100).toFixed(2)}`;
+        if (volume && volume > 0 && volume <= 100) requestPath += `&volume=${volume / 100}`;
         if (position && position > 0) requestPath += `&position=${position}`;
         if (filters) requestPath += `&filters=${typeof filters === "object" ? safeStringify(filters) : filters}`;
         const res = await this.rawRequest(requestPath, (m) => {

@@ -270,3 +270,16 @@ export type YoutubeOAuthResponse = {
     scope: string;
     token_type: string;
 };
+
+
+export type MeaningResponse = {
+    loadType: "meaning";
+    data: {
+        title: string;
+        description: string;
+        paragraphs: string[];
+        url: string;
+        provider: string;
+        type: string;
+    };
+};
