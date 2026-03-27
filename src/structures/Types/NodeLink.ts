@@ -271,7 +271,6 @@ export type YoutubeOAuthResponse = {
     token_type: string;
 };
 
-
 export type MeaningResponse = {
     loadType: "meaning";
     data: {

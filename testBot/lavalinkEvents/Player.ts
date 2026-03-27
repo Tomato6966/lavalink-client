@@ -65,10 +65,10 @@ export function PlayerEvents(client: BotClient) {
             logPlayer(client, player, "INFO: playerMuteChange", { selfMuted, serverMuted });
             // e.g. what you could do is when the bot get's server muted, you could pause the player, and unpause it when unmuted again
             if (serverMuted) {
-                player.set("paused_of_servermute", true);
+                player.setData("paused_of_servermute", true);
                 player.pause();
             } else {
-                if (player.get("paused_of_servermute") && player.paused) player.resume();
+                if (player.getData("paused_of_servermute") && player.paused) player.resume();
             }
             // e.g. "unmute the player again"
             // if(serverMuted === true)  client.guilds.cache.get(player.guildId)?.members.me?.voice.setMute(false, "Auto unmute the player");

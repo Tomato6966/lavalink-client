@@ -40,7 +40,7 @@ export default {
         // to fix the "song get's skipped on unpause", we need to re-play the current song but on the same position to create a new playback stream
         // the issue happens wshen you pause for a too long duration
         // you can add handlings, like if pause-duration < 30s return player.resume();
-        // to get pause duration you can intruduce a custom variavble like player.set("custom_pause_timestamp", Date.now()) -> player.get("custom_pause_timestamp")
+        // to get pause duration you can intruduce a custom variavble like player.setData("custom_pause_timestamp", Date.now()) -> player.getData("custom_pause_timestamp")
         return await player.play({
             track: {
                 encoded: player.queue.current.encoded,

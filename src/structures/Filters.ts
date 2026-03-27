@@ -249,8 +249,8 @@ export class FilterManager {
         return;
     }
 
-    private privateNot0(value: number | undefined): boolean {
-        return typeof value === "number" && value !== 0;
+    private privateNot0(value: number | undefined, numToCheckAgains: number = 0): boolean {
+        return typeof value === "number" && value !== numToCheckAgains;
     }
 
     private getLavalinkFilterData(): LavalinkFilterData["pluginFilters"]["lavalink-filter-plugin"] {
@@ -323,7 +323,7 @@ export class FilterManager {
             this.privateNot0(this.data.chorus?.feedback);
         this.filters.nodeLinkCompressor =
             this.privateNot0(this.data.compressor?.threshold) ||
-            this.privateNot0(this.data.compressor?.ratio) ||
+            this.privateNot0(this.data.compressor?.ratio, 1) || // here "1" is the default
             this.privateNot0(this.data.compressor?.attack) ||
             this.privateNot0(this.data.compressor?.release) ||
             this.privateNot0(this.data.compressor?.gain);

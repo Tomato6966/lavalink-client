@@ -26,7 +26,7 @@ export class PlayerSaver extends JSONStore {
                 oldPlayer.options.instaUpdateFiltersFix !== newPlayerData.options.instaUpdateFiltersFix ||
                 oldPlayer.options.vcRegion !== newPlayerData.options.vcRegion
             ) {
-                this.set(newPlayer.guildId, JSON.stringify(newPlayerData));
+                this.setData(newPlayer.guildId, JSON.stringify(newPlayerData));
             }
         });
     }
@@ -44,7 +44,7 @@ export class PlayerSaver extends JSONStore {
         }
     }
     async getPlayer(guildId: string) {
-        const data = await this.get(guildId);
+        const data = await this.getData(guildId);
         return data ? (JSON.parse(data) as PlayerJson) : null;
     }
     async delPlayer(guildId: string) {

@@ -1968,7 +1968,7 @@ export class LavalinkNode {
     }
     /** @private util function for handling trackStart event */
     private async trackStart(player: Player, track: Track, payload: TrackStartEvent): Promise<void> {
-        if (!player.get("internal_nodeChanging")) {
+        if (!player.getData("internal_nodeChanging")) {
             // Don't change the playing state if a nodeChange is in progress.
 
             player.playing = true;
@@ -2003,7 +2003,7 @@ export class LavalinkNode {
 
     /** @private util function for handling trackEnd event */
     private async trackEnd(player: Player, track: Track, payload: TrackEndEvent): Promise<void> {
-        if (player.get("internal_nodeChanging") === true) return; // Check if nodeChange is in Progress than stop the trackEnd Event from being triggered.
+        if (player.getData("internal_nodeChanging") === true) return; // Check if nodeChange is in Progress than stop the trackEnd Event from being triggered.
         const trackToUse = track || this.getTrackOfPayload(payload);
         // If a track was forcibly played
         if (payload.reason === "replaced") {
@@ -2016,12 +2016,12 @@ export class LavalinkNode {
             return;
         }
         // If there are no songs in the queue
-        if (!player.queue.tracks.length && (player.repeatMode === "off" || player.get("internal_stopPlaying")))
+        if (!player.queue.tracks.length && (player.repeatMode === "off" || player.getData("internal_stopPlaying")))
             return this.queueEnd(player, track, payload);
         // If a track had an error while starting
         if (["loadFailed", "cleanup"].includes(payload.reason)) {
             //Dont add tracks if the player is already destroying.
-            if (player.get("internal_destroystatus") === true) return;
+            if (player.getData("internal_destroystatus") === true) return;
             await queueTrackEnd(player);
             // if no track available, end queue
             if (!player.queue.current) return this.queueEnd(player, trackToUse, payload);
@@ -2034,7 +2034,7 @@ export class LavalinkNode {
             return;
         }
         // remove tracks from the queue
-        if (player.repeatMode !== "track" || player.get("internal_skipped")) await queueTrackEnd(player);
+        if (player.repeatMode !== "track" || player.getData("internal_skipped")) await queueTrackEnd(player);
         else if (trackToUse && !trackToUse?.pluginInfo?.clientData?.previousTrack) {
             // If there was a current Track already and repeatmode === true, add it to the queue.
             player.queue.previous.unshift(trackToUse as Track);
@@ -2044,7 +2044,7 @@ export class LavalinkNode {
         }
         // if no track available, end queue
         if (!player.queue.current) return this.queueEnd(player, trackToUse, payload);
-        player.set("internal_skipped", false);
+        player.setData("internal_skipped", false);
         // fire event
         this._LManager.emit("trackEnd", player, trackToUse, payload);
         // play track if autoSkip is true
@@ -2060,10 +2060,10 @@ export class LavalinkNode {
             this._LManager.options.playerOptions.maxErrorsPerTime?.threshold > 0 &&
             this._LManager.options.playerOptions.maxErrorsPerTime?.maxAmount >= 0
         ) {
-            const oldTimestamps = ((player.get("internal_erroredTracksTimestamps") as number[]) || []).filter(
+            const oldTimestamps = ((player.getData("internal_erroredTracksTimestamps") as number[]) || []).filter(
                 (v) => Date.now() - v < this._LManager.options.playerOptions.maxErrorsPerTime?.threshold,
             );
-            player.set("internal_erroredTracksTimestamps", [...oldTimestamps, Date.now()]);
+            player.setData("internal_erroredTracksTimestamps", [...oldTimestamps, Date.now()]);
             if (oldTimestamps.length >= this._LManager.options.playerOptions.maxErrorsPerTime?.maxAmount) {
                 this._emitDebugEvent(DebugEvents.TrackStuckMaxTracksErroredPerTime, {
                     state: "log",
@@ -2076,7 +2076,7 @@ export class LavalinkNode {
         }
         this._LManager.emit("trackStuck", player, track || this.getTrackOfPayload(payload), payload);
         // If there are no songs in the queue
-        if (!player.queue.tracks.length && (player.repeatMode === "off" || player.get("internal_stopPlaying"))) {
+        if (!player.queue.tracks.length && (player.repeatMode === "off" || player.getData("internal_stopPlaying"))) {
             try {
                 //Sometimes the trackStuck event triggers from the Lavalink server, but the track continues playing or resumes after. We explicitly end the track in such cases
                 await player.node.updatePlayer({
@@ -2107,10 +2107,10 @@ export class LavalinkNode {
             this._LManager.options.playerOptions.maxErrorsPerTime?.threshold > 0 &&
             this._LManager.options.playerOptions.maxErrorsPerTime?.maxAmount >= 0
         ) {
-            const oldTimestamps = ((player.get("internal_erroredTracksTimestamps") as number[]) || []).filter(
+            const oldTimestamps = ((player.getData("internal_erroredTracksTimestamps") as number[]) || []).filter(
                 (v) => Date.now() - v < this._LManager.options.playerOptions.maxErrorsPerTime?.threshold,
             );
-            player.set("internal_erroredTracksTimestamps", [...oldTimestamps, Date.now()]);
+            player.setData("internal_erroredTracksTimestamps", [...oldTimestamps, Date.now()]);
             if (oldTimestamps.length >= this._LManager.options.playerOptions.maxErrorsPerTime?.maxAmount) {
                 this._emitDebugEvent(DebugEvents.TrackErrorMaxTracksErroredPerTime, {
                     state: "log",
@@ -2212,7 +2212,7 @@ export class LavalinkNode {
             r.body = safeStringify(segments.map((v) => v.toLowerCase()));
         });
 
-        player.set(
+        player.setData(
             "internal_sponsorBlockCategories",
             segments.map((v) => v.toLowerCase()),
         );
@@ -2246,7 +2246,7 @@ export class LavalinkNode {
             r.method = "DELETE";
         });
 
-        player.set("internal_sponsorBlockCategories", []);
+        player.setData("internal_sponsorBlockCategories", []);
 
         this._emitDebugEvent(DebugEvents.DeleteSponsorBlock, {
             state: "log",
@@ -2262,11 +2262,11 @@ export class LavalinkNode {
         track: Track,
         payload: TrackEndEvent | TrackStuckEvent | TrackExceptionEvent,
     ): Promise<void> {
-        if (player.get("internal_nodeChanging") === true) return; // Check if nodeChange is in Progress than stop the queueEnd Event from being triggered.
+        if (player.getData("internal_nodeChanging") === true) return; // Check if nodeChange is in Progress than stop the queueEnd Event from being triggered.
         // add previous track to the queue!
         player.queue.current = null;
         player.playing = false;
-        player.set("internal_stopPlaying", undefined);
+        player.setData("internal_stopPlaying", undefined);
 
         this._emitDebugEvent(DebugEvents.QueueEnded, {
             state: "log",
@@ -2276,7 +2276,7 @@ export class LavalinkNode {
 
         if (
             typeof this._LManager.options?.playerOptions?.onEmptyQueue?.autoPlayFunction === "function" &&
-            typeof player.get("internal_autoplayStopPlaying") === "undefined"
+            typeof player.getData("internal_autoplayStopPlaying") === "undefined"
         ) {
             this._emitDebugEvent(DebugEvents.AutoplayExecution, {
                 state: "log",
@@ -2284,15 +2284,15 @@ export class LavalinkNode {
                 functionLayer: "LavalinkNode > queueEnd() > autoplayFunction",
             });
 
-            const previousAutoplayTime = player.get("internal_previousautoplay") as number;
+            const previousAutoplayTime = player.getData("internal_previousautoplay") as number;
             const duration = previousAutoplayTime ? Date.now() - previousAutoplayTime : 0;
             if (
                 !duration ||
                 duration > this._LManager.options.playerOptions.minAutoPlayMs ||
-                !!player.get("internal_skipped")
+                !!player.getData("internal_skipped")
             ) {
                 await this._LManager.options?.playerOptions?.onEmptyQueue?.autoPlayFunction(player, track);
-                player.set("internal_previousautoplay", Date.now());
+                player.setData("internal_previousautoplay", Date.now());
                 if (player.queue.tracks.length > 0) await queueTrackEnd(player);
                 else
                     this._emitDebugEvent(DebugEvents.AutoplayNoSongsAdded, {
@@ -2313,8 +2313,8 @@ export class LavalinkNode {
             }
         }
 
-        player.set("internal_skipped", false);
-        player.set("internal_autoplayStopPlaying", undefined);
+        player.setData("internal_skipped", false);
+        player.setData("internal_autoplayStopPlaying", undefined);
 
         if (track && !track?.pluginInfo?.clientData?.previousTrack) {
             // If there was a current Track already and repeatmode === true, add it to the queue.
@@ -2349,11 +2349,11 @@ export class LavalinkNode {
                     this._LManager.options.playerOptions.onEmptyQueue?.destroyAfterMs,
                 );
 
-                if (player.get("internal_queueempty")) clearTimeout(player.get("internal_queueempty"));
-                player.set(
+                if (player.getData("internal_queueempty")) clearTimeout(player.getData("internal_queueempty"));
+                player.setData(
                     "internal_queueempty",
                     setTimeout(() => {
-                        player.set("internal_queueempty", undefined);
+                        player.setData("internal_queueempty", undefined);
                         if (player.queue.current) {
                             return this._LManager.emit("playerQueueEmptyCancel", player);
                         }

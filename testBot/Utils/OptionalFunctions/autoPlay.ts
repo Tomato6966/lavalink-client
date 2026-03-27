@@ -1,8 +1,8 @@
 // the autoplay function should have added at least 1 song to the queue once the promise is resolved
 export const autoPlayFunction = async (player, lastPlayedTrack) => {
-    // just do player.set("autoplay_disabled", true) if you want to "disable" autoplay
-    // and do player.set("autoplay_disabled", false) if you want to "enable" it again (it's enabled on default)
-    const isAutoPlayDisabled = player.get("autoplay_disabled") === true;
+    // just do player.setData("autoplay_disabled", true) if you want to "disable" autoplay
+    // and do player.setData("autoplay_disabled", false) if you want to "enable" it again (it's enabled on default)
+    const isAutoPlayDisabled = player.getData("autoplay_disabled") === true;
     console.log("AUTOPLAY is triggerd", isAutoPlayDisabled ? "and isn't disabled" : "but is disabled");
     if (isAutoPlayDisabled) return;
     if (!lastPlayedTrack) return console.log("Autoplay doesn't have a lastPlayedTrack to use for references");

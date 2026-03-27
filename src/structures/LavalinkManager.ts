@@ -424,7 +424,7 @@ export class LavalinkManager<CustomPlayerT extends Player = Player> extends Even
         if (
             typeof oldPlayer.voiceChannelId === "string" &&
             oldPlayer.connected &&
-            !oldPlayer.get("internal_destroywithoutdisconnect")
+            !oldPlayer.getData("internal_destroywithoutdisconnect")
         ) {
             if (!this.options?.advancedOptions?.debugOptions?.playerDestroy?.dontThrowError)
                 throw new Error(
@@ -587,7 +587,7 @@ export class LavalinkManager<CustomPlayerT extends Player = Player> extends Even
                 return;
             }
 
-            if (player.get("internal_destroystatus") === true) {
+            if (player.getData("internal_destroystatus") === true) {
                 this._debugNoAudio("warn", "LavalinkManager > sendRawData()", {
                     message: "Player is in a destroying state. can't signal the voice states",
                 });

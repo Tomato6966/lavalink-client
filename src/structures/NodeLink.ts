@@ -46,19 +46,34 @@ export class NodeLinkNode extends LavalinkNode {
     public async setNextTrackGapLess(player: Player, track?: Track | UnresolvedTrack) {
         if (!this.sessionId) throw new Error("The Lavalink Node is either not ready, or not up to date!");
         const nextTrack = track || player.queue.tracks[0];
-        if(!nextTrack) throw new Error("No track provided");
+        if (!nextTrack) throw new Error("No track provided");
         await this.updatePlayer({
             guildId: player.guildId,
             // @ts-expect-error - nextTrack is not a valid property of LavalinkPlayOptions but for NodeLink it is
-            playerOptions: { nextTrack: { encoded: nextTrack.encoded, userData: nextTrack.userData || {} }}
+            playerOptions: { nextTrack: { encoded: nextTrack.encoded, userData: nextTrack.userData || {} } },
         });
         return true;
     }
-    
+
+    /**
+     * Removes the nextTrackGapLess configuration
+     * @param player current player
+     * @param track if no track provided, it will use the next track from queue
+     */
+    public async removeNextTrackGapLess(player: Player) {
+        if (!this.sessionId) throw new Error("The Lavalink Node is either not ready, or not up to date!");
+        await this.updatePlayer({
+            guildId: player.guildId,
+            // @ts-expect-error - nextTrack is not a valid property of LavalinkPlayOptions but for NodeLink it is
+            playerOptions: { nextTrack: { encoded: null } },
+        });
+        return true;
+    }
+
     /**
      * Retrieves the meaning of a track.
-     * @param track 
-     * @returns {MeaningResponse} 
+     * @param track
+     * @returns {MeaningResponse}
      * @link {https://nodelink.js.org/docs/api/nodelink-features#meaning-system}
      */
     public async getMeaning(track?: Track | UnresolvedTrack) {

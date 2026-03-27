@@ -103,22 +103,31 @@ client.lavalink.nodeManager.on("error", (node, error, payload) => {
 ```ts
 import { QueueChangesWatcher, LavalinkManager } from "lavalink-client";
 
+
+function updateNextTrackGapLess(guildId: string) { // this function is for nodelink users relevant for gapless audio.
+    const player = this.client.lavalink.getPlayer(guildId);
+    if (!player || !player.node.isNodeLink()) return;
+    return player.node.removeNextTrackGapLess(player);
+}
 class myCustomWatcher implements QueueChangesWatcher {
     constructor(client) {
         this.client = client;
     }
     shuffled(guildId, oldStoredQueue, newStoredQueue) {
         console.log(`${this.client.guilds.cache.get(guildId)?.name || guildId}: Queue got shuffled`);
+        updateNextTrackGapLess(guildId);
     }
     tracksAdd(guildId, tracks, position, oldStoredQueue, newStoredQueue) {
         console.log(
             `${this.client.guilds.cache.get(guildId)?.name || guildId}: ${tracks.length} Tracks got added into the Queue at position #${position}`,
         );
+        updateNextTrackGapLess(guildId);
     }
     tracksRemoved(guildId, tracks, position, oldStoredQueue, newStoredQueue) {
         console.log(
             `${this.client.guilds.cache.get(guildId)?.name || guildId}: ${tracks.length} Tracks got removed from the Queue at position #${position}`,
         );
+        updateNextTrackGapLess(guildId);
     }
 }
 

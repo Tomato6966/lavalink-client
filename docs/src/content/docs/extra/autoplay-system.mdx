@@ -9,7 +9,7 @@ description: "How to do make an autoplaying system."
 1. Provide the autoplayFunction in the manageroptions: `ManagerOption.playerOptions.onEmptyQueue.autoPlayFunction`
 2. This function will be called BEFORE the queueEnd event, and **if at least 1 track get's added to the queue**, the queueEnd event will not be emitted, and the playing will continue.
 
-Hot-Tipp: You can use player variables in order to enable/disable this system during runtime, e.g. by `player.set("autoplay_disabled", true)` and check it in the autoplayFunction by `const isAutoPlayDisabled = player.get("autoplay_disabled") === true;`
+Hot-Tipp: You can use player variables in order to enable/disable this system during runtime, e.g. by `player.setData("autoplay_disabled", true)` and check it in the autoplayFunction by `const isAutoPlayDisabled = player.getData("autoplay_disabled") === true;`
 
 E.g.:
 
@@ -37,9 +37,9 @@ client.lavalink = new LavalinkManager<myCustomPlayer>({
 
 // this is my SAMPLE for the autoplay function
 async function autoPlayFunction(player, lastPlayedTrack) {
-    // just do player.set("autoplay_disabled", true) if you want to "disable" autoplay
-    // and do player.set("autoplay_disabled", false) if you want to "enable" it again (it's enabled on default)
-    const isAutoPlayDisabled = player.get("autoplay_disabled") === true;
+    // just do player.setData("autoplay_disabled", true) if you want to "disable" autoplay
+    // and do player.setData("autoplay_disabled", false) if you want to "enable" it again (it's enabled on default)
+    const isAutoPlayDisabled = player.getData("autoplay_disabled") === true;
     console.log("AUTOPLAY is triggerd", isAutoPlayDisabled ? "and isn't disabled" : "but is disabled");
     if (isAutoPlayDisabled) return;
     if (!lastPlayedTrack) return console.log("Autoplay doesn't have a lastPlayedTrack to use for references");

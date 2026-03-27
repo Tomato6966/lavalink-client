@@ -119,7 +119,7 @@ export class Player {
      */
     constructor(options: PlayerOptions, LavalinkManager: LavalinkManager, dontEmitPlayerCreateEvent?: boolean) {
         if (typeof options?.customData === "object")
-            for (const [key, value] of Object.entries(options.customData)) this.set(key, value);
+            for (const [key, value] of Object.entries(options.customData)) this.setData(key, value);
 
         this.options = options;
         this.filterManager = new FilterManager(this);
@@ -254,15 +254,15 @@ export class Player {
      * @param options
      */
     async play(options: Partial<PlayOptions> = {}) {
-        if (this.get("internal_queueempty")) {
+        if (this.getData("internal_queueempty")) {
             this._emitDebugEvent(DebugEvents.PlayerPlayQueueEmptyTimeoutClear, {
                 state: "log",
                 message: `Player was called to play something, while there was a queueEmpty Timeout set, clearing the timeout.`,
                 functionLayer: "Player > play()",
             });
             this.LavalinkManager.emit("playerQueueEmptyCancel", this);
-            clearTimeout(this.get("internal_queueempty"));
-            this.set("internal_queueempty", undefined);
+            clearTimeout(this.getData("internal_queueempty"));
+            this.setData("internal_queueempty", undefined);
         }
 
         // if clientTrack provided, override options.track object
@@ -708,7 +708,7 @@ export class Player {
         if (!this.playing && !this.queue.current) return (this.play(), this);
 
         const now = performance.now();
-        this.set("internal_skipped", true);
+        this.setData("internal_skipped", true);
 
         await this.node.updatePlayer({
             guildId: this.guildId,
@@ -726,20 +726,26 @@ export class Player {
      */
     async stopPlaying(clearQueue: boolean = true, executeAutoplay: boolean = false) {
         // use internal_stopPlaying on true, so that it doesn't utilize current loop states. on trackEnd event
-        this.set("internal_stopPlaying", true);
+        this.setData("internal_stopPlaying", true);
 
         // remove tracks from the queue
         if (this.queue.tracks.length && clearQueue === true) await this.queue.splice(0, this.queue.tracks.length);
 
-        if (executeAutoplay === false) this.set("internal_autoplayStopPlaying", true);
-        else this.set("internal_autoplayStopPlaying", undefined);
+        if (executeAutoplay === false) this.setData("internal_autoplayStopPlaying", true);
+        else this.setData("internal_autoplayStopPlaying", undefined);
 
         const now = performance.now();
 
         // send to lavalink, that it should stop playing
         await this.node.updatePlayer({
             guildId: this.guildId,
-            playerOptions: { track: { encoded: null } },
+            playerOptions: this.node.isNodeLink() ? {
+                track: { encoded: null },
+                // @ts-expect-error - nextTrack is not a valid property of LavalinkPlayOptions but for NodeLink it is
+                nextTrack: { encoded: null }
+            } : {
+                track: { encoded: null }
+            },
         });
         // on some cases the sending of "stopplaying state" from lavalink does not happen, so we hardcode it, just to be sure.
         this.paused = false;
@@ -830,12 +836,12 @@ export class Player {
                 `Lavalink-Client-Debug | PlayerDestroy [::] destroy Function, [guildId ${this.guildId}] - Destroy-Reason: ${String(reason)}`,
             );
 
-        if (this.get("internal_queueempty")) {
-            clearTimeout(this.get("internal_queueempty"));
-            this.set("internal_queueempty", undefined);
+        if (this.getData("internal_queueempty")) {
+            clearTimeout(this.getData("internal_queueempty"));
+            this.setData("internal_queueempty", undefined);
         }
 
-        if (this.get("internal_destroystatus") === true) {
+        if (this.getData("internal_destroystatus") === true) {
             this._emitDebugEvent(DebugEvents.PlayerDestroyingSomewhereElse, {
                 state: "warn",
                 message: `Player is already destroying somewhere else..`,
@@ -848,10 +854,10 @@ export class Player {
                 );
             return;
         }
-        this.set("internal_destroystatus", true);
+        this.setData("internal_destroystatus", true);
         // disconnect player and set VoiceChannel to Null
         if (disconnect) await this.disconnect(true);
-        else this.set("internal_destroywithoutdisconnect", true);
+        else this.setData("internal_destroywithoutdisconnect", true);
         // Destroy the queue
         await this.queue.utils.destroy();
         // delete the player from cache
@@ -938,7 +944,7 @@ export class Player {
         if (!updateNode) throw new Error("Could not find the new Node");
         if (!updateNode.connected) throw new Error("The provided Node is not active or disconnected");
         if (this.node.id === updateNode.id) throw new Error("Player is already on the provided Node");
-        if (this.get("internal_nodeChanging") === true)
+        if (this.getData("internal_nodeChanging") === true)
             throw new Error("Player is already changing the node please wait");
 
         if (checkSources) {
@@ -981,7 +987,7 @@ export class Player {
         const currentTrack = this.queue.current;
         if (!this.voice.endpoint || !this.voice.sessionId || !this.voice.token)
             throw new Error("Voice Data is missing, can't change the node");
-        this.set("internal_nodeChanging", true); // This will stop execution of trackEnd or queueEnd event while changing the node
+        this.setData("internal_nodeChanging", true); // This will stop execution of trackEnd or queueEnd event while changing the node
         if (this.node.connected) await this.node.destroyPlayer(this.guildId); // destroy the player on the currentNode if it's connected
         this.node = updateNode;
         const now = performance.now();
@@ -990,7 +996,7 @@ export class Player {
             const hasSponsorBlock =
                 !this.node._checkForPlugins || this.node.info?.plugins?.find((v) => v.name === "sponsorblock-plugin");
             if (hasSponsorBlock) {
-                const sponsorBlockCategories = this.get("internal_sponsorBlockCategories");
+                const sponsorBlockCategories = this.getData("internal_sponsorBlockCategories");
                 if (Array.isArray(sponsorBlockCategories) && sponsorBlockCategories.length) {
                     await this.setSponsorBlock(sponsorBlockCategories).catch((error) => {
                         this._emitDebugEvent(DebugEvents.PlayerChangeNode, {
@@ -1045,7 +1051,7 @@ export class Player {
             });
             throw new Error(`Failed to change the node: ${error}`);
         } finally {
-            this.set("internal_nodeChanging", undefined);
+            this.setData("internal_nodeChanging", undefined);
         }
     }
 
