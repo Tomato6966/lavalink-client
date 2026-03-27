@@ -139,7 +139,8 @@ export class myCustomStore implements QueueStoreManager {
 
 // Custom Queue Watcher Functions (with couple special features..)
 
-function updateNextTrackGapLess(guildId: string) { // this function is for nodelink users relevant for gapless audio.
+function updateNextTrackGapLess(guildId: string) {
+    // this function is for nodelink users relevant for gapless audio.
     const player = this.client.lavalink.getPlayer(guildId);
     if (!player || !player.node.isNodeLink()) return;
     return player.node.removeNextTrackGapLess(player);
@@ -165,6 +166,4 @@ class myCustomWatcher implements QueueChangesWatcher {
         updateNextTrackGapLess(guildId);
     }
 }
-
-
 ```

@@ -103,8 +103,8 @@ client.lavalink.nodeManager.on("error", (node, error, payload) => {
 ```ts
 import { QueueChangesWatcher, LavalinkManager } from "lavalink-client";
 
-
-function updateNextTrackGapLess(guildId: string) { // this function is for nodelink users relevant for gapless audio.
+function updateNextTrackGapLess(guildId: string) {
+    // this function is for nodelink users relevant for gapless audio.
     const player = this.client.lavalink.getPlayer(guildId);
     if (!player || !player.node.isNodeLink()) return;
     return player.node.removeNextTrackGapLess(player);

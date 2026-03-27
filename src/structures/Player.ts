@@ -739,13 +739,15 @@ export class Player {
         // send to lavalink, that it should stop playing
         await this.node.updatePlayer({
             guildId: this.guildId,
-            playerOptions: this.node.isNodeLink() ? {
-                track: { encoded: null },
-                // @ts-expect-error - nextTrack is not a valid property of LavalinkPlayOptions but for NodeLink it is
-                nextTrack: { encoded: null }
-            } : {
-                track: { encoded: null }
-            },
+            playerOptions: this.node.isNodeLink()
+                ? {
+                      track: { encoded: null },
+                      // @ts-expect-error - nextTrack is not a valid property of LavalinkPlayOptions but for NodeLink it is
+                      nextTrack: { encoded: null },
+                  }
+                : {
+                      track: { encoded: null },
+                  },
         });
         // on some cases the sending of "stopplaying state" from lavalink does not happen, so we hardcode it, just to be sure.
         this.paused = false;

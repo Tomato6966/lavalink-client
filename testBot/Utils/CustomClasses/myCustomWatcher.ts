@@ -33,4 +33,3 @@ export class myCustomWatcher implements QueueChangesWatcher {
         updateNextTrackGapLess(guildId);
     }
 }
-
