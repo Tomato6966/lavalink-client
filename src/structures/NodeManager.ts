@@ -145,7 +145,7 @@ export class NodeManager extends EventEmitter {
         if (this.nodes.has(options.id || `${options.host}:${options.port}`))
             return this.nodes.get(options.id || `${options.host}:${options.port}`) as T;
         const newNode =
-            options.nodeType === "NodeLink" ? new NodeLinkNode(options, this) : new LavalinkNode(options, this);
+            options.nodeType.toUpperCase() === "NodeLink".toUpperCase() ? new NodeLinkNode(options, this) : new LavalinkNode(options, this);
         this.nodes.set(newNode.id, newNode);
         return newNode as T;
     }
@@ -241,7 +241,7 @@ export class NodeManager extends EventEmitter {
     ): LavalinkNode | NodeLinkNode | undefined {
         const decodeNode = typeof node === "string" ? this.nodes.get(node) : node;
         if (!decodeNode) return undefined;
-        if (decodeNode.nodeType === "NodeLink") return decodeNode as NodeLinkNode;
+        if (decodeNode.nodeType.toUpperCase() === "NodeLink".toUpperCase()) return decodeNode as NodeLinkNode;
         return decodeNode as LavalinkNode;
     }
 }

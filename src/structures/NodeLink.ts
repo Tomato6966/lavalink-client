@@ -32,7 +32,7 @@ export class NodeLinkNode extends LavalinkNode {
     constructor(options: LavalinkNodeOptions, manager: NodeManager) {
         super(options, manager);
 
-        if (this.options.nodeType === "Lavalink" && this.constructor.name === "NodeLink") {
+        if (this.options.nodeType.toUpperCase() === "Lavalink".toUpperCase() && this.constructor.name === "NodeLink") {
             return new (LavalinkNode as any)(options, manager);
         }
         this.nodeType = "NodeLink";

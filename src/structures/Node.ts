@@ -150,7 +150,7 @@ export class LavalinkNode {
      * Returns wether the plugin validations are enabled or not
      */
     public get _checkForPlugins() {
-        if (this.nodeType === "NodeLink") return false;
+        if (this.nodeType.toUpperCase() === "NodeLink".toUpperCase()) return false;
         return !!this.options?.autoChecks?.pluginValidations;
     }
     /**
@@ -240,7 +240,7 @@ export class LavalinkNode {
         };
 
         if (
-            this.options.nodeType === "NodeLink" &&
+            this.options.nodeType.toUpperCase() === "NodeLink".toUpperCase() &&
             this.constructor.name === "LavalinkNode" &&
             LavalinkNode._NodeLinkClass
         ) {
@@ -664,7 +664,7 @@ export class LavalinkNode {
     }
 
     private heartBeat(): void {
-        if (this.nodeType !== "Lavalink") return;
+        if (this.nodeType.toUpperCase() !== "Lavalink".toUpperCase()) return;
         this._emitDebugEvent(DebugEvents.HeartBeatTriggered, {
             state: "log",
             message: `Node Socket Heartbeat triggered, resetting old Timeout to 65000ms (should happen every 60s due to /stats event)`,
@@ -1479,7 +1479,7 @@ export class LavalinkNode {
      * @returns true if the node is a NodeLink node
      */
     public isNodeLink(): this is NodeLinkNode {
-        return this.nodeType === "NodeLink";
+        return this.nodeType.toUpperCase() === "NodeLink".toUpperCase();
     }
 
     /**
@@ -1487,7 +1487,7 @@ export class LavalinkNode {
      * @returns true if the node is a Lavalink node
      */
     public isLavalinkNode(): this is LavalinkNode {
-        return this.nodeType === "Lavalink";
+        return this.nodeType.toUpperCase() === "Lavalink".toUpperCase();
     }
 
     /**
@@ -1689,7 +1689,7 @@ export class LavalinkNode {
         // Reset reconnection state on successful connection
         this.resetReconnectionAttempts();
 
-        if (this.nodeType === "Lavalink") {
+        if (this.nodeType.toUpperCase() === "Lavalink".toUpperCase()) {
             // trigger heartbeat-ping timeout - this is to check wether the client lost connection without knowing it
             if (this.options.enablePingOnStatsCheck) this.heartBeat();
 
