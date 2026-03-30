@@ -145,7 +145,7 @@ export class NodeManager extends EventEmitter {
         if (this.nodes.has(options.id || `${options.host}:${options.port}`))
             return this.nodes.get(options.id || `${options.host}:${options.port}`) as T;
         const newNode =
-            options.nodeType.toUpperCase() === "NodeLink".toUpperCase() ? new NodeLinkNode(options, this) : new LavalinkNode(options, this);
+            options.nodeType?.toUpperCase() === "NodeLink".toUpperCase() ? new NodeLinkNode(options, this) : new LavalinkNode(options, this);
         this.nodes.set(newNode.id, newNode);
         return newNode as T;
     }

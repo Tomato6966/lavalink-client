@@ -240,7 +240,7 @@ export class LavalinkNode {
         };
 
         if (
-            this.options.nodeType.toUpperCase() === "NodeLink".toUpperCase() &&
+            this.options.nodeType?.toUpperCase() === "NodeLink".toUpperCase() &&
             this.constructor.name === "LavalinkNode" &&
             LavalinkNode._NodeLinkClass
         ) {
