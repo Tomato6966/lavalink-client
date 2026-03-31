@@ -35,6 +35,8 @@ client.lavalink = new LavalinkManager({
             secure: false,
             retryAmount: 5,
         },
+        // you can also use the util like this, and it will return a valid node option object. must start with: lavalink:// | nodelink://
+        // parseLavalinkConnUrl("nodelink://<nodeId>:<nodeAuthorization(Password)>@<NodeHost>:<NodePort>")
     ],
     sendToShard: (guildId, payload) => client.guilds.cache.get(guildId)?.shard?.send(payload),
     autoSkip: true,

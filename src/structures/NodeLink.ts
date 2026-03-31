@@ -11,7 +11,7 @@ import {
     NodeLink_PhaserFilter,
     NodeLink_SpatialFilter,
 } from "./Types/Filters";
-import type { LavalinkNodeOptions } from "./Types/Node";
+import { NodeType, type LavalinkNodeOptions } from "./Types/Node";
 import {
     AddMixerLayerResponse,
     ConnectionMetricsResponse,
@@ -27,15 +27,16 @@ import { Track, UnresolvedTrack } from "./Types/Track";
 import { safeStringify } from "./Utils";
 
 export class NodeLinkNode extends LavalinkNode {
-    public nodeType = "NodeLink" as const;
+    public nodeType = NodeType.NodeLink;
 
     constructor(options: LavalinkNodeOptions, manager: NodeManager) {
         super(options, manager);
 
-        if (this.options.nodeType === "Lavalink" && this.constructor.name === "NodeLink") {
+        // if wrongly typed, return the proper thing..
+        if (this.options.nodeType === NodeType.Lavalink && (this.constructor.name === "NodeLinkNode" || this.constructor.name === "NodeLink")) {
             return new (LavalinkNode as any)(options, manager);
         }
-        this.nodeType = "NodeLink";
+        this.nodeType = NodeType.NodeLink;
     }
 
     /**

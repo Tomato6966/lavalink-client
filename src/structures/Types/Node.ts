@@ -24,7 +24,7 @@ export type SponsorBlockSegment =
  */
 export interface LavalinkNodeOptions {
     /** Specify the Node-Type of this node. Default: Lavalink */
-    nodeType?: NodeTypes;
+    nodeType?: NodeType;
     /** The Lavalink Server-Ip / Domain-URL */
     host: string;
     /** The Lavalink Connection Port */
@@ -341,4 +341,7 @@ export enum ReconnectionState {
     DESTROYING = "DESTROYING",
 }
 
-export type NodeTypes = "Lavalink" | "NodeLink";
+export enum NodeType {
+    Lavalink = "Lavalink",
+    NodeLink = "NodeLink",
+}

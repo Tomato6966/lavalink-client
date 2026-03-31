@@ -7,7 +7,7 @@ import type { LavalinkManager } from "./LavalinkManager";
 import { DefaultSources, LavalinkPlugins, SourceLinksRegexes } from "./LavalinkManagerStatics";
 import type { LavalinkNode } from "./Node";
 import type { Player } from "./Player";
-import type { LavalinkNodeOptions, NodeTypes } from "./Types/Node";
+import { NodeType, type LavalinkNodeOptions } from "./Types/Node";
 import type { LavalinkTrack, Track, UnresolvedQuery, UnresolvedTrack } from "./Types/Track";
 import type {
     LavalinkSearchPlatform,
@@ -30,13 +30,21 @@ const escapeRegExp = (str: string): string => str.replace(/[.*+?^${}()|[\]\\]/g,
  * @param connectionUrl
  * @returns
  */
-export function parseLavalinkConnUrl(connectionUrl: string) {
-    if (!connectionUrl.startsWith("lavalink://") && !connectionUrl.startsWith("nodelink://"))
+export function parseLavalinkConnUrl(connectionUrl: string): {
+    authorization: string;
+    nodeType: NodeType;
+    id: string;
+    host: string;
+    port: number;
+} {
+    if(!connectionUrl) throw new Error("ConnectionUrl is required");
+    const lowered = connectionUrl.toLowerCase();
+    if (!lowered.startsWith("lavalink://") && !lowered.startsWith("nodelink://"))
         throw new Error(`ConnectionUrl (${connectionUrl}) must start with 'lavalink://' or 'nodelink://'`);
     const parsed = new URL(connectionUrl);
     return {
         authorization: parsed.password,
-        nodeType: (connectionUrl.startsWith("lavalink://") ? "Lavalink" : "NodeLink") as NodeTypes,
+        nodeType: (lowered.startsWith("lavalink://") ? NodeType.Lavalink : NodeType.NodeLink),
         id: parsed.username,
         host: parsed.hostname,
         port: Number(parsed.port),

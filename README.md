@@ -111,8 +111,14 @@ pnpm add tomato6966/lavalink-client
 
 This client can be used with nodelink too, but because nodelink's websocket is different than the one from lavalink, you need to disable a few things on the NODE OPTIONS / NODE PROPERTIES:
 
+Import the NodeType Enum:
+```
+import { NodeType } from "lavalink-client"
+```
+
+// You must assign NodeLink enum to nodeType of the node options, before creating the node.
 ```ts
-nodeOptions.nodeType = "NodeLink";
+nodeOptions.nodeType = NodeType.NodeLink;
 ```
 
 this can be done directly when creating the node in the lavalinkmanager.
@@ -122,7 +128,7 @@ client.lavalink = new LavalinkManager({
     nodes: [
         {
             host: "localhost",
-            nodeType: "NodeLink",
+            nodeType: NodeType.NodeLink, // provide nodeType "nodelink" to it.
         },
     ],
 });
@@ -135,8 +141,10 @@ client.lavalink = new LavalinkManager({
             port: 2333,
             id: "Main Node",
             // set to nodeLink
-            nodeType: "NodeLink",
+            nodeType: NodeType.NodeLink, // provide it here
         },
+        // you can also use the util like this, and it will return a valid node option object. must start with: lavalink:// | nodelink://
+        // parseLavalinkConnUrl("nodelink://<nodeId>:<nodeAuthorization(Password)>@<NodeHost>:<NodePort>")
     ],
     // A function to send voice server updates to the Lavalink client
     sendToShard: (guildId, payload) => {
@@ -392,6 +400,8 @@ client.lavalink = new LavalinkManager({
             port: 2333,
             id: "Main Node",
         },
+        // you can also use the util like this, and it will return a valid node option object.
+        // parseLavalinkConnUrl("nodelink://<nodeId>:<nodeAuthorization(Password)>@<NodeHost>:<NodePort>")
     ],
     // A function to send voice server updates to the Lavalink client
     sendToShard: (guildId, payload) => {
@@ -448,6 +458,8 @@ client.lavalink = new LavalinkManager({
             retryAmount: 5,
             retryDelay: 10_000, // 10 seconds
         },
+        // you can also use the util like this, and it will return a valid node option object. must start with: lavalink:// | nodelink://
+        // parseLavalinkConnUrl("lavalink://<nodeId>:<nodeAuthorization(Password)>@<NodeHost>:<NodePort>")
     ],
     sendToShard: (guildId, payload) => client.guilds.cache.get(guildId)?.shard?.send(payload),
     autoSkip: true, // automatically play the next song of the queue, on: trackend, trackerror, trackexception

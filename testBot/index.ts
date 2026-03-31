@@ -1,5 +1,5 @@
 import { Client, GatewayIntentBits } from "discord.js";
-import { LavalinkManager, MiniMap, parseLavalinkConnUrl } from "lavalink-client";
+import { LavalinkManager, MiniMap, NodeType, parseLavalinkConnUrl } from "lavalink-client";
 import { createClient } from "redis";
 
 import { envConfig } from "./config";
@@ -38,6 +38,10 @@ client.defaultVolume = 100;
  * !   "verySpecialPassword#1" -> "verySpecialPassword%231"
  *       (   do it in nodejs via: encodeURIComponent("verySpecialPassword#1")   )
  *          you can also use this website to encode your password: https://www.url-encode-decode.com/
+ * * URL-Pattern Examples:
+ * "nodelink://<nodeId>:<nodeAuthorization(Password)>@<NodeHost>:<NodePort>"
+ * or
+ * "lavalink://<nodeId>:<nodeAuthorization(Password)>@<NodeHost>:<NodePort>"
  */
 const LavalinkNodesOfEnv = process.env.LAVALINKNODES?.split(" ")
     .filter((v) => v.length)
@@ -59,7 +63,7 @@ console.log(LavalinkNodesOfEnv); // you can then provide the result of here in L
                 authorization: "chrissy_localhost",
                 host: "localhost",
                 port: 2333,
-                nodeType: "Lavalink",
+                nodeType: NodeType.Lavalink,
                 autoChecks: {
                     pluginValidations: true,
                     sourcesValidations: true,

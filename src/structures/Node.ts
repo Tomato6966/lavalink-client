@@ -13,7 +13,7 @@ import { NodeLinkNode } from "./NodeLink";
 import type { NodeManager } from "./NodeManager";
 import type { Player } from "./Player";
 import { ReconnectionState } from "./Types/Node";
-import type {
+import {
     BaseNodeStats,
     LavalinkInfo,
     LavalinkNodeOptions,
@@ -21,7 +21,7 @@ import type {
     ModifyRequest,
     NodeLinkConnectionMetrics,
     NodeStats,
-    NodeTypes,
+    NodeType,
     SponsorBlockSegment,
 } from "./Types/Node";
 import type {
@@ -73,7 +73,7 @@ export class LavalinkNode {
     private heartBeatInterval?: NodeJS.Timeout;
     private pingTimeout?: NodeJS.Timeout;
 
-    public nodeType: NodeTypes = "Lavalink";
+    public nodeType: NodeType = NodeType.Lavalink;
     public isAlive: boolean = false;
     public static _NodeLinkClass: unknown = null;
     /** The provided Options of the Node */
@@ -150,7 +150,7 @@ export class LavalinkNode {
      * Returns wether the plugin validations are enabled or not
      */
     public get _checkForPlugins() {
-        if (this.nodeType === "NodeLink") return false;
+        if (this.nodeType === NodeType.NodeLink) return false;
         return !!this.options?.autoChecks?.pluginValidations;
     }
     /**
@@ -232,6 +232,7 @@ export class LavalinkNode {
             heartBeatInterval: 30_000,
             enablePingOnStatsCheck: true,
             closeOnError: true,
+            nodeType: NodeType.Lavalink,
             ...options,
             autoChecks: {
                 sourcesValidations: options?.autoChecks?.sourcesValidations ?? true,
@@ -240,14 +241,14 @@ export class LavalinkNode {
         };
 
         if (
-            this.options.nodeType === "NodeLink" &&
+            this.options.nodeType === NodeType.NodeLink &&
             this.constructor.name === "LavalinkNode" &&
             LavalinkNode._NodeLinkClass
         ) {
             return new (LavalinkNode._NodeLinkClass as any)(options, manager);
         }
 
-        this.nodeType = this.options.nodeType || "Lavalink";
+        this.nodeType = this.options.nodeType;
 
         this.NodeManager = manager;
         this.validate();
@@ -1472,6 +1473,8 @@ export class LavalinkNode {
             (!Array.isArray(this.options.regions) || !this.options.regions.every((r) => typeof r === "string"))
         )
             throw new SyntaxError("LavalinkNode.regions must be an Array of strings");
+        if(this.options.nodeType && !NodeType[this.options.nodeType])
+            throw new SyntaxError("LavalinkNode.nodeType must be a valid NodeType enum value");
     }
 
     /**
@@ -1479,7 +1482,7 @@ export class LavalinkNode {
      * @returns true if the node is a NodeLink node
      */
     public isNodeLink(): this is NodeLinkNode {
-        return this.nodeType === "NodeLink";
+        return this.nodeType === NodeType.NodeLink;
     }
 
     /**
@@ -1487,7 +1490,7 @@ export class LavalinkNode {
      * @returns true if the node is a Lavalink node
      */
     public isLavalinkNode(): this is LavalinkNode {
-        return this.nodeType === "Lavalink";
+        return this.nodeType === NodeType.Lavalink;
     }
 
     /**

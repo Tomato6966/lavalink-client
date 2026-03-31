@@ -277,48 +277,50 @@ export class LavalinkManager<CustomPlayerT extends Player = Player> extends Even
      *       port: 2333,
      *       id: "testnode"
      *     },
+     *     // you can also use the util like this, and it will return a valid node option object. must start with: lavalink:// | nodelink://
+     *     // parseLavalinkConnUrl("nodelink://<nodeId>:<nodeAuthorization(Password)>@<NodeHost>:<NodePort>")
      *     sendToShard(guildId, payload) => client.guilds.cache.get(guildId)?.shard?.send(payload),
-     *     client: {
-     *       id: process.env.CLIENT_ID,
-     *       username: "TESTBOT"
+     *   ],
+     *   client: {
+     *     id: process.env.CLIENT_ID,
+     *     username: "TESTBOT"
+     *   },
+     *   // optional Options:
+     *   autoSkip: true,
+     *   playerOptions: {
+     *     applyVolumeAsFilter: false,
+     *     clientBasedPositionUpdateInterval: 150,
+     *     defaultSearchPlatform: "ytmsearch",
+     *     allowCustomSources: false,
+     *     volumeDecrementer: 0.75,
+     *     //requesterTransformer: YourRequesterTransformerFunction,
+     *     onDisconnect: {
+     *       autoReconnect: true,
+     *       destroyPlayer: false
      *     },
-     *     // optional Options:
-     *     autoSkip: true,
-     *     playerOptions: {
-     *       applyVolumeAsFilter: false,
-     *       clientBasedPositionUpdateInterval: 150,
-     *       defaultSearchPlatform: "ytmsearch",
-     *       allowCustomSources: false,
-     *       volumeDecrementer: 0.75,
-     *       //requesterTransformer: YourRequesterTransformerFunction,
-     *       onDisconnect: {
-     *         autoReconnect: true,
-     *         destroyPlayer: false
-     *       },
-     *       onEmptyQueue: {
-     *         destroyAfterMs: 30_000,
-     *         //autoPlayFunction: YourAutoplayFunction,
-     *       },
-     *       useUnresolvedData: true
+     *     onEmptyQueue: {
+     *       destroyAfterMs: 30_000,
+     *       //autoPlayFunction: YourAutoplayFunction,
      *     },
-     *     queueOptions: {
-     *       maxPreviousTracks: 25,
-     *       //queueStore: yourCustomQueueStoreManagerClass,
-     *       //queueChangesWatcher: yourCustomQueueChangesWatcherClass
-     *     },
-     *     linksBlacklist: [],
-     *     linksWhitelist: [],
-     *     advancedOptions: {
-     *       maxFilterFixDuration: 600_000,
-     *       debugOptions: {
-     *         noAudio: false,
-     *         playerDestroy: {
-     *           dontThrowError: false,
-     *           debugLogs: false
-     *         }
+     *     useUnresolvedData: true
+     *   },
+     *   queueOptions: {
+     *     maxPreviousTracks: 25,
+     *     //queueStore: yourCustomQueueStoreManagerClass,
+     *     //queueChangesWatcher: yourCustomQueueChangesWatcherClass
+     *   },
+     *   linksBlacklist: [],
+     *   linksWhitelist: [],
+     *   advancedOptions: {
+     *     maxFilterFixDuration: 600_000,
+     *     debugOptions: {
+     *       noAudio: false,
+     *       playerDestroy: {
+     *         dontThrowError: false,
+     *         debugLogs: false
      *       }
      *     }
-     *   ]
+     *   }
      * })
      * ```
      */
