@@ -181,6 +181,8 @@ const node = client.lavalink.lavalinkManager.getNode("id") as NodeLinkNode;
 node.addMixerLayer()
 ```
 
+⚠️ NODELINK does not really require you to run "instaUpdateFiltersFix" on player creation.
+
 ### NodeLink Specific Methods
 
 - **`node.getYoutubeOAUTH(refreshToken)`**: Exchange a Refresh Token for an Access Token. [Docs](https://nodelink.js.org/docs/api/nodelink-features#oauth)
