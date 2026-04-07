@@ -5,8 +5,8 @@ export function NodesEvents(client: BotClient) {
      * NODE EVENTS
      */
     client.lavalink.nodeManager
+        // eslint-disable-next-line
         .on("raw", (node, payload) => {
-            // eslint-disable-line
             //console.debug(node.id, " :: RAW :: ", payload);
         })
         .on("disconnect", (node, reason) => {
@@ -28,8 +28,8 @@ export function NodesEvents(client: BotClient) {
         .on("error", (node, error, payload) => {
             console.log(node.id, " :: ERRORED :: ", error, " :: PAYLOAD :: ", payload);
         })
+        // eslint-disable-next-line
         .on("resumed", (node, payload, players) => {
-            // eslint-disable-line
             // console.log(node.id, " :: RESUMED :: ", Array.isArray(players) ? players.length : players, " PLAYERS STILL PLAYING :: PAYLOAD ::", payload);
         });
 }

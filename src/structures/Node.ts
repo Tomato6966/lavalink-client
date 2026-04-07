@@ -302,7 +302,7 @@ export class LavalinkNode {
 
         const urlToUse = url.toString();
 
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        // eslint-disable-next-line
         const { path, extraQueryUrlParams, ...fetchOptions } = options; // destructure fetch only options
 
         const response = await fetch(urlToUse, fetchOptions);
@@ -1473,7 +1473,7 @@ export class LavalinkNode {
             (!Array.isArray(this.options.regions) || !this.options.regions.every((r) => typeof r === "string"))
         )
             throw new SyntaxError("LavalinkNode.regions must be an Array of strings");
-        if(this.options.nodeType && !NodeType[this.options.nodeType])
+        if (this.options.nodeType && !NodeType[this.options.nodeType])
             throw new SyntaxError("LavalinkNode.nodeType must be a valid NodeType enum value");
     }
 

@@ -75,9 +75,7 @@ export class NodeManager extends EventEmitter {
         this.LavalinkManager = LavalinkManager;
 
         if (this.LavalinkManager.options.nodes)
-            this.LavalinkManager.options.nodes.forEach((node) => {
-                this.createNode(node);
-            });
+            this.LavalinkManager.options.nodes.forEach((node) => this.createNode(node));
     }
 
     /**
@@ -141,7 +139,21 @@ export class NodeManager extends EventEmitter {
      * @param options The options for the node
      * @returns The node that was created
      */
-    public createNode<T extends LavalinkNode | NodeLinkNode>(options: LavalinkNodeOptions): T {
+    public createNode<T extends LavalinkNode | NodeLinkNode>(
+        options: LavalinkNodeOptions | NodeLinkNode | LavalinkNode,
+    ): T {
+        if (options instanceof NodeLinkNode) {
+            const preExistingNode = this.nodes.get(options.id) as T;
+            if (preExistingNode) return preExistingNode;
+            this.nodes.set(options.id, options);
+            return options as T;
+        }
+        if (options instanceof LavalinkNode) {
+            const preExistingNode = this.nodes.get(options.id) as T;
+            if (preExistingNode) return preExistingNode;
+            this.nodes.set(options.id, options);
+            return options as T;
+        }
         if (this.nodes.has(options.id || `${options.host}:${options.port}`))
             return this.nodes.get(options.id || `${options.host}:${options.port}`) as T;
         const newNode =
@@ -157,48 +169,62 @@ export class NodeManager extends EventEmitter {
      */
     public leastUsedNodes(
         sortType: "memory" | "cpuLavalink" | "cpuSystem" | "calls" | "playingPlayers" | "players" = "players",
+        filterForNodeTypes?: (NodeType | NodeLinkNode | LavalinkNode)[],
     ): LavalinkNode[] {
+        const normalizedFilterForNodeTypes = filterForNodeTypes?.length
+            ? filterForNodeTypes
+            : [NodeType.Lavalink, NodeType.NodeLink];
         const connectedNodes = Array.from(this.nodes.values()).filter((node) => node.connected);
+        const normalizedNodeTypes = new Set(
+            normalizedFilterForNodeTypes.map((nodeTypeFilter) =>
+                Object.values(NodeType).includes(nodeTypeFilter as NodeType)
+                    ? (nodeTypeFilter as NodeType)
+                    : (nodeTypeFilter as LavalinkNode | NodeLinkNode).nodeType,
+            ),
+        );
+        const filteredConnectedNodes = connectedNodes.filter((node) => normalizedNodeTypes.has(node.nodeType));
         switch (sortType) {
             case "memory":
                 {
-                    return connectedNodes.sort((a, b) => (a.stats?.memory?.used || 0) - (b.stats?.memory?.used || 0)); // sort after memor
+                    return filteredConnectedNodes.sort(
+                        (a, b) => (a.stats?.memory?.used || 0) - (b.stats?.memory?.used || 0),
+                    ); // sort after memor
                 }
                 break;
             case "cpuLavalink":
                 {
-                    return connectedNodes.sort(
+                    return filteredConnectedNodes.sort(
                         (a, b) => (a.stats?.cpu?.lavalinkLoad || 0) - (b.stats?.cpu?.lavalinkLoad || 0),
                     ); // sort after memor
                 }
                 break;
             case "cpuSystem":
                 {
-                    return connectedNodes.sort(
+                    return filteredConnectedNodes.sort(
                         (a, b) => (a.stats?.cpu?.systemLoad || 0) - (b.stats?.cpu?.systemLoad || 0),
                     ); // sort after memor
                 }
                 break;
             case "calls":
                 {
-                    return connectedNodes.sort((a, b) => a.calls - b.calls); // client sided sorting
+                    return filteredConnectedNodes.sort((a, b) => a.calls - b.calls); // client sided sorting
                 }
                 break;
             case "playingPlayers":
                 {
-                    return connectedNodes.sort(
+                    return filteredConnectedNodes.sort(
                         (a, b) => (a.stats?.playingPlayers || 0) - (b.stats?.playingPlayers || 0),
                     );
                 }
                 break;
             case "players":
                 {
-                    return connectedNodes.sort((a, b) => (a.stats?.players || 0) - (b.stats?.players || 0));
+                    return filteredConnectedNodes.sort((a, b) => (a.stats?.players || 0) - (b.stats?.players || 0));
                 }
                 break;
             default:
                 {
-                    return connectedNodes.sort((a, b) => (a.stats?.players || 0) - (b.stats?.players || 0));
+                    return filteredConnectedNodes.sort((a, b) => (a.stats?.players || 0) - (b.stats?.players || 0));
                 }
                 break;
         }
@@ -233,12 +259,22 @@ export class NodeManager extends EventEmitter {
 
     /**
      * Get a node from the nodeManager
-     * @param node The node to get
+     * @param node The node to get either by idetnifier, by class or by enum
      * @returns The node that was retrieved
      */
     public getNode(
-        node: LavalinkNodeIdentifier | LavalinkNode | NodeLinkNode,
+        node: LavalinkNodeIdentifier | LavalinkNode | NodeLinkNode | NodeType,
     ): LavalinkNode | NodeLinkNode | undefined {
+        if (!!node && Object.values(NodeType).includes(node as NodeType)) {
+            return this.leastUsedNodes().filter((node) => node.nodeType === (node as unknown as NodeType))[0];
+        }
+        if (!!node && node instanceof NodeLinkNode) {
+            return this.leastUsedNodes().filter((node) => node instanceof NodeLinkNode)[0];
+        }
+        if (!!node && node instanceof LavalinkNode) {
+            return this.leastUsedNodes().filter((node) => node instanceof LavalinkNode)[0];
+        }
+
         const decodeNode = typeof node === "string" ? this.nodes.get(node) : node;
         if (!decodeNode) return undefined;
         if (decodeNode.nodeType === NodeType.NodeLink) return decodeNode as NodeLinkNode;

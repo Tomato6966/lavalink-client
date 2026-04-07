@@ -37,14 +37,14 @@ export function parseLavalinkConnUrl(connectionUrl: string): {
     host: string;
     port: number;
 } {
-    if(!connectionUrl) throw new Error("ConnectionUrl is required");
+    if (!connectionUrl) throw new Error("ConnectionUrl is required");
     const lowered = connectionUrl.toLowerCase();
     if (!lowered.startsWith("lavalink://") && !lowered.startsWith("nodelink://"))
         throw new Error(`ConnectionUrl (${connectionUrl}) must start with 'lavalink://' or 'nodelink://'`);
     const parsed = new URL(connectionUrl);
     return {
         authorization: parsed.password,
-        nodeType: (lowered.startsWith("lavalink://") ? NodeType.Lavalink : NodeType.NodeLink),
+        nodeType: lowered.startsWith("lavalink://") ? NodeType.Lavalink : NodeType.NodeLink,
         id: parsed.username,
         host: parsed.hostname,
         port: Number(parsed.port),

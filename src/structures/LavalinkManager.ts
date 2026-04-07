@@ -1,6 +1,8 @@
 import { EventEmitter } from "node:events";
 
 import { DebugEvents, DestroyReasons } from "./Constants";
+import { LavalinkNode } from "./Node";
+import { NodeLinkNode } from "./NodeLink";
 import { NodeManager } from "./NodeManager";
 import { Player } from "./Player";
 import { DefaultQueueStore } from "./Queue";
@@ -15,6 +17,7 @@ import type { LavalinkNodeOptions } from "./Types/Node";
 import type { PlayerOptions } from "./Types/Player";
 import type { ChannelDeletePacket, VoicePacket, VoiceServer, VoiceState } from "./Types/Utils";
 import { ManagerUtils, MiniMap, safeStringify } from "./Utils";
+
 export class LavalinkManager<CustomPlayerT extends Player = Player> extends EventEmitter {
     /**
      * Emit an event
@@ -107,7 +110,7 @@ export class LavalinkManager<CustomPlayerT extends Player = Player> extends Even
             },
             sendToShard: options?.sendToShard,
             autoMove: options?.autoMove ?? false,
-            nodes: options?.nodes as DeepRequired<LavalinkNodeOptions>[],
+            nodes: options?.nodes as DeepRequired<LavalinkNodeOptions | NodeLinkNode | LavalinkNode>[],
             playerClass: (options?.playerClass ?? Player) as unknown as DeepRequired<CustomPlayerT>,
             playerOptions: {
                 applyVolumeAsFilter: options?.playerOptions?.applyVolumeAsFilter ?? false,
@@ -187,10 +190,13 @@ export class LavalinkManager<CustomPlayerT extends Player = Player> extends Even
         if (
             !options?.nodes ||
             !Array.isArray(options?.nodes) ||
-            !options?.nodes.every((node) => this.utils.isNodeOptions(node))
+            !options?.nodes.every(
+                (node) =>
+                    node instanceof NodeLinkNode || node instanceof LavalinkNode || this.utils.isNodeOptions(node),
+            )
         )
             throw new SyntaxError(
-                "ManagerOption.nodes must be an Array of NodeOptions and is required of at least 1 Node",
+                "ManagerOption.nodes must be an Array of NodeOptions or the Node-Classes 'NodeLinkNode' or 'LavalinkNode' and is required of at least 1 Node",
             );
 
         /* QUEUE STORE */

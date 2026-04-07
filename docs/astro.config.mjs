@@ -105,6 +105,10 @@ export default defineConfig({
                             link: "/extra/resuming",
                         },
                         {
+                            label: "Custom Node Extensions",
+                            link: "/extra/custom-node-extension",
+                        },
+                        {
                             label: "Version-Update-Log",
                             link: "/extra/version-log",
                         },

@@ -33,7 +33,10 @@ export class NodeLinkNode extends LavalinkNode {
         super(options, manager);
 
         // if wrongly typed, return the proper thing..
-        if (this.options.nodeType === NodeType.Lavalink && (this.constructor.name === "NodeLinkNode" || this.constructor.name === "NodeLink")) {
+        if (
+            this.options.nodeType === NodeType.Lavalink &&
+            (this.constructor.name === "NodeLinkNode" || this.constructor.name === "NodeLink")
+        ) {
             return new (LavalinkNode as any)(options, manager);
         }
         this.nodeType = NodeType.NodeLink;

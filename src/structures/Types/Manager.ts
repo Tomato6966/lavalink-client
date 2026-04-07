@@ -1,5 +1,7 @@
 import type { DebugEvents } from "../Constants";
 import type { LavalinkManager } from "../LavalinkManager";
+import { LavalinkNode } from "../Node";
+import { NodeLinkNode } from "../NodeLink";
 import type { Player } from "../Player";
 
 import type { LavalinkNodeOptions } from "./Node";
@@ -339,7 +341,7 @@ type PlayerConstructor<T extends Player = Player> = new (
 /** Manager Options used to create the manager */
 export interface ManagerOptions<CustomPlayerT extends Player = Player> {
     /** The Node Options, for all Nodes! (on init) */
-    nodes: LavalinkNodeOptions[];
+    nodes: (LavalinkNodeOptions | NodeLinkNode | LavalinkNode)[];
     /** @async The Function to send the voice connection changes from Lavalink to Discord */
     sendToShard: (guildId: string, payload: GuildShardPayload) => void;
     /** The Bot Client's Data for Authorization */

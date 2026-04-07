@@ -1,0 +1,198 @@
+---
+title: "Custom Node Extensions"
+description: Extend LavalinkNode or NodeLinkNode with your own logic
+---
+
+## Why use a custom node class?
+
+`lavalink-client` allows you to pass full node class instances to `nodeManager.createNode(...)`, not only plain options.
+This is useful when you want to attach custom helper methods for plugin endpoints or project-specific behavior.
+
+You can:
+
+- Use plain options (`LavalinkNodeOptions`)
+- Pass a `LavalinkNode` instance
+- Pass a `NodeLinkNode` instance
+- Pass your own class extending one of those
+
+---
+
+## 1) Extend `LavalinkNode`
+
+```ts
+import { LavalinkNode, NodeType, safeString, type LavalinkNodeOptions, type NodeManager } from "lavalink-client";
+
+export class MyCustomLavalinkNode extends LavalinkNode {
+    public constructor(options: LavalinkNodeOptions, manager: NodeManager) {
+        super(options, manager);
+
+        // Optional: choose how this node identifies itself internally
+        this.nodeType = NodeType.Lavalink;
+    }
+
+    public async getCustomData(bodyData: Record<string, unknown>) {
+        const { response } = await this.rawRequest("/customEndpoint", (req) => {
+            // rawRequest prefixes "/v4/" automatically based on node version
+            req.method = "POST";
+            req.body = safeString(bodyData);
+        });
+
+        if (!response.ok) {
+            throw new Error(`Failed to get custom data: ${response.status} ${response.statusText}`);
+        }
+
+        return response.json();
+    }
+}
+```
+
+---
+
+## 2) Register the custom node instance
+
+```ts
+const customNode = new MyCustomLavalinkNode(
+    {
+        host: "localhost",
+        port: 2333,
+        authorization: "youshallnotpass",
+        id: "custom-lavalink-node",
+    },
+    client.lavalink.nodeManager,
+);
+
+client.lavalink.nodeManager.createNode(customNode);
+```
+
+---
+
+## 3) Or provide it in `LavalinkManager` options
+
+```ts
+import { LavalinkManager, LavalinkNode, NodeLinkNode } from "lavalink-client";
+
+client.lavalink = new LavalinkManager({
+    nodes: [
+        // plain options (auto-creates LavalinkNode / NodeLinkNode by nodeType)
+        {
+            host: "localhost",
+            port: 2333,
+            authorization: "youshallnotpass",
+            id: "main-node",
+        },
+
+        // direct class instances
+        new LavalinkNode(
+            {
+                host: "localhost",
+                port: 2333,
+                authorization: "youshallnotpass",
+            },
+            client.lavalink.nodeManager,
+        ),
+
+        new NodeLinkNode(
+            {
+                host: "localhost",
+                port: 2333,
+                authorization: "youshallnotpass",
+            },
+            client.lavalink.nodeManager,
+        ),
+
+        // your custom extension
+        new MyCustomLavalinkNode(
+            {
+                host: "localhost",
+                port: 2333,
+                authorization: "youshallnotpass",
+                id: "custom-lavalink-node",
+            },
+            client.lavalink.nodeManager,
+        ),
+    ],
+});
+```
+
+---
+
+## 4) Retrieve nodes via `getNode(...)` (enum or class-based lookup)
+
+The `NodeManager#getNode(...)` overload also supports:
+
+- `NodeType` enum lookup
+- Passing a `NodeLinkNode` instance (class-based lookup)
+- Passing a `LavalinkNode` instance (class-based lookup)
+
+When you use those lookups, the returned node is picked from `leastUsedNodes()`.
+That means you always get the least-used **connected** node matching that type/class.
+
+```ts
+import { LavalinkNode, NodeLinkNode, NodeType } from "lavalink-client";
+
+// by enum -> least-used connected NodeLink node (useful if you have 1 node of NodeLink and 1 node of LavalinkNode)
+const leastUsedNodeLink = client.lavalink.nodeManager.getNode(NodeType.NodeLink);
+
+// by class-instance lookup -> least-used connected LavalinkNode (useful if you only have 1 instance of your customNodeLinkClass, or want to retrieve the leastused one of that)
+const leastUsedLavalink = client.lavalink.nodeManager.getNode(myCustomNodeLinkClass);
+```
+
+---
+
+## 5) Type after accessing `player.node`
+
+`player.node` is usually typed as `LavalinkNode | NodeLinkNode`.
+If you use custom methods, narrow/cast it to your custom class:
+
+```ts
+const node = player.node;
+
+if (node instanceof MyCustomLavalinkNode) {
+    await node.getCustomData({ guildId: player.guildId });
+}
+```
+
+Or cast when you are certain the player is on your custom node:
+
+```ts
+const customNode = player.node as MyCustomLavalinkNode;
+await customNode.getCustomData({ guildId: player.guildId });
+```
+
+---
+
+## 6) Use `player.node.isNodeLink()` for runtime checks
+
+You can use `player.node.isNodeLink()` to quickly check if the player's current node is a `NodeLinkNode`.
+This is useful before calling NodeLink-specific logic.
+
+```ts
+const node = player.node;
+
+if (node.isNodeLink()) {
+    // node is NodeLinkNode here
+    console.log("Player is on a NodeLink node:", node.id);
+} else {
+    // node is LavalinkNode here
+    console.log("Player is on a Lavalink node:", node.id);
+}
+```
+
+Combine it with custom class checks when needed:
+
+```ts
+if (!player.node.isNodeLink() && player.node instanceof MyCustomLavalinkNode) {
+    await player.node.getCustomData({ guildId: player.guildId });
+}
+```
+
+---
+
+## Notes
+
+- `createNode(...)` returns an existing node if one with the same id already exists.
+- `getNode(...)` with enum/class-based lookup returns from `leastUsedNodes()` (least-used connected node).
+- `player.node.isNodeLink()` is the easiest runtime guard to branch between NodeLink and Lavalink behavior.
+- `rawRequest(...)` uses the internal fetch stack and includes auth headers automatically.
+- Use `safeString(...)` when sending JSON bodies to ensure consistent payload handling.
+- You can also extend `NodeLinkNode` the same way if your server is NodeLink-specific.

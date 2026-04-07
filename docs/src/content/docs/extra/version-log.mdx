@@ -9,6 +9,116 @@ Logs about the changed features.
 
 ---
 
+## **Version 2.10.0**
+
+- Now you can directly provide the nodes as classes based on LavalinkNode Class instead of providing options only. This way it will be possible to make custom nodeclasses for yourself.
+- This is totaly optional, as it's an extension built on current functionality. you can use the provided NodeLinkNode or LavalinkNode, or just provide the NodeOptions options.
+- Added `nodeManager.getNode(...)` support for enum/class-based retrieval (`NodeType`, `LavalinkNode`, `NodeLinkNode`), which now resolves to the least-used connected matching node.
+- Added `nodeManager.leastUsedNodes(sortType, filterForNodeTypes)` filtering support to limit results to specific node types/classes before sorting.
+
+e.g. for createNode function
+
+```ts
+import { NodeLinkNode, LavalinkNode } from "lavalink-client";
+
+// provide NodeLinkNode class:
+const nodeLinkClass = new NodeLinkNode({
+  host: "localhost",
+  port: 2333,
+  authorization: "youshallnotpass"
+}, client.lavalink.nodeManager);
+client.lavalink.nodeManager.createNode(nodeLinkClass); // create+add and bind node to NodeManager
+
+// provide LavalinkNode
+const LavalinkNodeClass = new LavalinkNode({
+  host: "localhost",
+  port: 2333,
+  authorization: "youshallnotpass"
+}, client.lavalink.nodeManager);
+client.lavalink.nodeManager.createNode(LavalinkNodeClass) // create+add and bind node to NodeManager
+
+// example of custom LavalinkNode Class
+export class MyCustomLavalinkNode extends LavalinkNode {
+    constructor(options: LavalinkNodeOptions, manager: NodeManager) {
+        super(options, manager);
+
+        // for custom nodes it doesnt matter which type you use, i suggest to use type Lavalink
+        this.nodeType = NodeType.Lavalink;
+    }
+
+    public async yourCustomFunction() {
+        const { response, options } = await this.rawRequest("/customEndpoint", (m) => {
+            // the path "/customEndpoint" get's automatically changed to "/v4/customEndpoint"
+            // the default method is "GET"
+            // the default headers are { Authorization: this.options.authorization }
+            m.path = ""; // if you want to overwride the pathing like adding the "/v4/" prefix automatically
+            m.method = "POST";
+            m.body = safeString({ ...bodyData })
+        })
+        if(response.ok)  return response.json();
+        throw new Error(`Failed to yourCustomFunction: ${response.statusText}`);
+    }
+}
+const customLavalinkNodeClass = new MyCustomLavalinkNode({
+  host: "localhost",
+  id: "customLavalinkClass"
+  port: 2333,
+  authorization: "youshallnotpass"
+}, client.lavalink.nodeManager);
+client.lavalink.nodeManager.createNode(customLavalinkNodeClass) // create+add and bind node to NodeManager
+```
+
+You can also just straight up provide it as a custom Node in the manager's options in the nodes array:
+
+```ts
+client.lavalink = new LavalinkManager({
+    nodes: [
+        // example of providing just the options, which will create based on nodeType either a LavalinkNode (default) or NodeLinkNode
+        {
+            authorization: "youshallnotpass",
+            host: "localhost",
+            port: 2333,
+            id: "Main Node",
+        },
+        // example of providing the LavalinkNode
+        new LavalinkNode({
+            host: "localhost",
+            port: 2333,
+            authorization: "youshallnotpass"
+        }, client.lavalink.nodeManager),
+        // example of providing the nodeLink node:
+        new NodeLinkNode({
+            host: "localhost",
+            port: 2333,
+            authorization: "youshallnotpass"
+        }, client.lavalink.nodeManager),
+        // exampekl of provbiding a custom node extending either LavalinkNode or NodeLinkNode.
+        new MyCustomLavalinkNode({
+            host: "localhost",
+            id: "customLavalinkClass"
+            port: 2333,
+            authorization: "youshallnotpass"
+        }, client.lavalink.nodeManager),
+    ]
+})
+```
+
+## **Version 2.9.8-2.9.12**
+
+- `parseLavalinkConnUrl(...)` was improved:
+    - Supports both `lavalink://` and `nodelink://` connection urls.
+    - Returns `nodeType` from the url scheme and now uses the `NodeType` enum.
+    - Added stricter validation (e.g. required value checks) and more usage examples in docs/README.
+- Added exported `NodeType` enum and switched node option typing to use it (`LavalinkNodeOptions.nodeType?: NodeType`).
+- NodeLink additions:
+    - Added `node.getMeaning(...)` support with `MeaningResponse` typings.
+    - Added gapless next-track helpers via `setNextTrackGapLess(...)` and `removeNextTrackGapLess(...)`.
+    - Fixed NodeLink mixer/stream volume handling (`volume / 100` precision handling).
+- Player/Node internal cleanup and behavior fixes:
+    - Migrated deprecated internal custom-data access from `get/set` to `getData/setData`.
+    - `player.stopPlaying(...)` now clears `nextTrack` for NodeLink as well to avoid stale gapless state.
+- Filter fix: compressor default ratio handling was corrected in filter-change detection logic.
+
 ## **Version 2.9.7**
 
 - Add `skipTrackSource` option to player.subscribeLyrics and node.lyrics.subscribe (Ty @EvilG-MC on Github)
