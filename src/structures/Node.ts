@@ -1002,7 +1002,10 @@ export class LavalinkNode {
                     `there is no lyrics source (via lavasrc-plugin / java-lyrics-plugin) available in the lavalink node (required for lyrics): ${this.id}`,
                 );
 
-            const url = `/lyrics?track=${track.encoded}&skipTrackSource=${skipTrackSource}`;
+            let url = `/lyrics?track=${track.encoded}&skipTrackSource=${skipTrackSource}`;
+            if(this.nodeType === NodeType.NodeLink) {
+                url = `/loadlyrics?encodedTrack=${track.encoded}`;
+            }
             return (await this.request(url)) as LyricsResult | null;
         },
 
@@ -1037,7 +1040,10 @@ export class LavalinkNode {
                     `there is no lyrics source (via lavasrc-plugin / java-lyrics-plugin) available in the lavalink node (required for lyrics): ${this.id}`,
                 );
 
-            const url = `/sessions/${this.sessionId}/players/${guildId}/track/lyrics?skipTrackSource=${skipTrackSource}`;
+            let url = `/sessions/${this.sessionId}/players/${guildId}/track/lyrics?skipTrackSource=${skipTrackSource}`;
+            if(this.nodeType === NodeType.NodeLink) {
+                url = `/loadlyrics?encodedTrack=${this._LManager.getPlayer(guildId)?.queue.current?.encoded}`;
+            }
             return (await this.request(url)) as LyricsResult | null;
         },
 
