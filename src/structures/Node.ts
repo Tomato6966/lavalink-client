@@ -42,6 +42,7 @@ import type {
     LavalinkPlayer,
     LavaSearchQuery,
     LavaSearchResponse,
+    LavaSrcSearchPlatformBase,
     LoadTypes,
     LyricsFoundEvent,
     LyricsLineEvent,
@@ -499,10 +500,8 @@ export class LavalinkNode {
         if (/^https?:\/\//.test(Query.query))
             return this.search({ query: Query.query, source: Query.source }, requestUser);
 
-        if (!["spsearch", "sprec", "amsearch", "dzsearch", "dzisrc", "ytmsearch", "ytsearch"].includes(Query.source))
-            throw new SyntaxError(
-                `Query.source must be a source from LavaSrc: "spsearch" | "sprec" | "amsearch" | "dzsearch" | "dzisrc" | "ytmsearch" | "ytsearch"`,
-            );
+        if (!this.isLavaSrcSource(Query.source))
+            throw new SyntaxError(`Query.source must be an available source from LavaSrc`);
 
         if (this._checkForPlugins && !this.info?.plugins?.find?.((v) => v.name === "lavasearch-plugin"))
             throw new RangeError(`there is no lavasearch-plugin available in the lavalink node: ${this.id}`);
@@ -2449,5 +2448,40 @@ export class LavalinkNode {
 
         this._LManager.emit("LyricsNotFound", player, track, payload);
         return;
+    }
+
+    /**
+     * @private
+     * util function to check if a provided source is valid with current node.
+     * @param {LavaSrcSearchPlatformBase} src
+     * @returns {boolean} True if provided source is valid.
+     */
+    private isLavaSrcSource(src: unknown): src is LavaSrcSearchPlatformBase {
+        const source = new Set<LavaSrcSearchPlatformBase>([]);
+        if (this.info?.sourceManagers.includes("spotify"))
+            for (const srrc of ["spsearch", "sprec"] as unknown as LavaSrcSearchPlatformBase)
+                source.add(srrc as LavaSrcSearchPlatformBase);
+        if (this.info?.sourceManagers.includes("applemusic"))
+            for (const srrc of ["amsearch"] as unknown as LavaSrcSearchPlatformBase)
+                source.add(srrc as LavaSrcSearchPlatformBase);
+        if (this.info?.sourceManagers.includes("deezer"))
+            for (const srrc of ["dzsearch", "dzisrc", "dzrec"] as unknown as LavaSrcSearchPlatformBase)
+                source.add(srrc as LavaSrcSearchPlatformBase);
+        if (this.info?.sourceManagers.includes("yandexmusic"))
+            for (const srrc of ["ymsearch", "ymrec"] as unknown as LavaSrcSearchPlatformBase)
+                source.add(srrc as LavaSrcSearchPlatformBase);
+        if (this.info?.sourceManagers.includes("vkmusic"))
+            for (const srrc of ["vksearch", "vkrec"] as unknown as LavaSrcSearchPlatformBase)
+                source.add(srrc as LavaSrcSearchPlatformBase);
+        if (this.info?.sourceManagers.includes("tidal"))
+            for (const srrc of ["tdsearch", "tdrec"] as unknown as LavaSrcSearchPlatformBase)
+                source.add(srrc as LavaSrcSearchPlatformBase);
+        if (this.info?.sourceManagers.includes("qobuz"))
+            for (const srrc of ["qbsearch", "qbisrc", "qbrec"] as unknown as LavaSrcSearchPlatformBase)
+                source.add(srrc as LavaSrcSearchPlatformBase);
+        if (this.info?.sourceManagers.includes("pandora"))
+            for (const srrc of ["pdsearch", "pdisrc", "pdrec"] as unknown as LavaSrcSearchPlatformBase)
+                source.add(srrc as LavaSrcSearchPlatformBase);
+        return typeof src === "string" && source.has(src as LavaSrcSearchPlatformBase);
     }
 }
