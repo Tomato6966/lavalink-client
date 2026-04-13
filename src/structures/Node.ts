@@ -40,9 +40,9 @@ import type {
     Base64,
     InvalidLavalinkRestRequest,
     LavalinkPlayer,
+    LavalinkSearchPlatform,
     LavaSearchQuery,
     LavaSearchResponse,
-    LavaSrcSearchPlatformBase,
     LoadTypes,
     LyricsFoundEvent,
     LyricsLineEvent,
@@ -2453,35 +2453,21 @@ export class LavalinkNode {
     /**
      * @private
      * util function to check if a provided source is valid with current node.
-     * @param {LavaSrcSearchPlatformBase} src
+     * @param {LavalinkSearchPlatform} src
      * @returns {boolean} True if provided source is valid.
      */
-    private isLavaSrcSource(src: unknown): src is LavaSrcSearchPlatformBase {
-        const source = new Set<LavaSrcSearchPlatformBase>([]);
-        if (this.info?.sourceManagers.includes("spotify"))
-            for (const srrc of ["spsearch", "sprec"] as unknown as LavaSrcSearchPlatformBase)
-                source.add(srrc as LavaSrcSearchPlatformBase);
-        if (this.info?.sourceManagers.includes("applemusic"))
-            for (const srrc of ["amsearch"] as unknown as LavaSrcSearchPlatformBase)
-                source.add(srrc as LavaSrcSearchPlatformBase);
-        if (this.info?.sourceManagers.includes("deezer"))
-            for (const srrc of ["dzsearch", "dzisrc", "dzrec"] as unknown as LavaSrcSearchPlatformBase)
-                source.add(srrc as LavaSrcSearchPlatformBase);
-        if (this.info?.sourceManagers.includes("yandexmusic"))
-            for (const srrc of ["ymsearch", "ymrec"] as unknown as LavaSrcSearchPlatformBase)
-                source.add(srrc as LavaSrcSearchPlatformBase);
-        if (this.info?.sourceManagers.includes("vkmusic"))
-            for (const srrc of ["vksearch", "vkrec"] as unknown as LavaSrcSearchPlatformBase)
-                source.add(srrc as LavaSrcSearchPlatformBase);
-        if (this.info?.sourceManagers.includes("tidal"))
-            for (const srrc of ["tdsearch", "tdrec"] as unknown as LavaSrcSearchPlatformBase)
-                source.add(srrc as LavaSrcSearchPlatformBase);
-        if (this.info?.sourceManagers.includes("qobuz"))
-            for (const srrc of ["qbsearch", "qbisrc", "qbrec"] as unknown as LavaSrcSearchPlatformBase)
-                source.add(srrc as LavaSrcSearchPlatformBase);
-        if (this.info?.sourceManagers.includes("pandora"))
-            for (const srrc of ["pdsearch", "pdisrc", "pdrec"] as unknown as LavaSrcSearchPlatformBase)
-                source.add(srrc as LavaSrcSearchPlatformBase);
-        return typeof src === "string" && source.has(src as LavaSrcSearchPlatformBase);
+    private isLavaSrcSource(src: unknown): src is LavalinkSearchPlatform {
+        const source = new Set<LavalinkSearchPlatform>([]);
+        if (this.info?.sourceManagers.includes("spotify")) source.add("spsearch").add("sprec");
+        if (this.info?.sourceManagers.includes("applemusic")) source.add("amsearch");
+        if (this.info?.sourceManagers.includes("deezer")) source.add("dzsearch").add("dzrec").add("dzisrc");
+        if (this.info?.sourceManagers.includes("yandexmusic")) source.add("ymsearch").add("ymrec");
+        if (this.info?.sourceManagers.includes("vkmusic")) source.add("vksearch").add("vkrec");
+        if (this.info?.sourceManagers.includes("tidal")) source.add("tdsearch").add("tdrec");
+        if (this.info?.sourceManagers.includes("qobuz")) source.add("qbsearch").add("qbisrc").add("qbrec");
+        if (this.info?.sourceManagers.includes("pandora")) source.add("pdsearch").add("pdisrc").add("pdrec");
+        if (this.info?.sourceManagers.includes("youtube")) source.add("ytsearch").add("ytmsearch");
+
+        return typeof src === "string" && source.has(src as LavalinkSearchPlatform);
     }
 }
