@@ -40,6 +40,7 @@ import type {
     Base64,
     InvalidLavalinkRestRequest,
     LavalinkPlayer,
+    LavalinkSearchPlatform,
     LavaSearchQuery,
     LavaSearchResponse,
     LoadTypes,
@@ -499,10 +500,8 @@ export class LavalinkNode {
         if (/^https?:\/\//.test(Query.query))
             return this.search({ query: Query.query, source: Query.source }, requestUser);
 
-        if (!["spsearch", "sprec", "amsearch", "dzsearch", "dzisrc", "ytmsearch", "ytsearch"].includes(Query.source))
-            throw new SyntaxError(
-                `Query.source must be a source from LavaSrc: "spsearch" | "sprec" | "amsearch" | "dzsearch" | "dzisrc" | "ytmsearch" | "ytsearch"`,
-            );
+        if (!this.isLavaSrcSource(Query.source))
+            throw new SyntaxError(`Query.source must be an available source from LavaSrc`);
 
         if (this._checkForPlugins && !this.info?.plugins?.find?.((v) => v.name === "lavasearch-plugin"))
             throw new RangeError(`there is no lavasearch-plugin available in the lavalink node: ${this.id}`);
@@ -2449,5 +2448,26 @@ export class LavalinkNode {
 
         this._LManager.emit("LyricsNotFound", player, track, payload);
         return;
+    }
+
+    /**
+     * @private
+     * util function to check if a provided source is valid with current node.
+     * @param {LavalinkSearchPlatform} src
+     * @returns {boolean} True if provided source is valid.
+     */
+    private isLavaSrcSource(src: unknown): src is LavalinkSearchPlatform {
+        const source = new Set<LavalinkSearchPlatform>([]);
+        if (this.info?.sourceManagers.includes("spotify")) source.add("spsearch").add("sprec");
+        if (this.info?.sourceManagers.includes("applemusic")) source.add("amsearch");
+        if (this.info?.sourceManagers.includes("deezer")) source.add("dzsearch").add("dzrec").add("dzisrc");
+        if (this.info?.sourceManagers.includes("yandexmusic")) source.add("ymsearch").add("ymrec");
+        if (this.info?.sourceManagers.includes("vkmusic")) source.add("vksearch").add("vkrec");
+        if (this.info?.sourceManagers.includes("tidal")) source.add("tdsearch").add("tdrec");
+        if (this.info?.sourceManagers.includes("qobuz")) source.add("qbsearch").add("qbisrc").add("qbrec");
+        if (this.info?.sourceManagers.includes("pandora")) source.add("pdsearch").add("pdisrc").add("pdrec");
+        if (this.info?.sourceManagers.includes("youtube")) source.add("ytsearch").add("ytmsearch");
+
+        return typeof src === "string" && source.has(src as LavalinkSearchPlatform);
     }
 }
