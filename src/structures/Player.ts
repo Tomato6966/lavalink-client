@@ -969,7 +969,7 @@ export class Player {
             if (this.queue.current || this.queue.tracks.length) {
                 // Check if all queued track sources are supported by the new node
                 const trackSources = new Set(
-                    [this.queue.current, ...this.queue.tracks].map((track) => track.info.sourceName),
+                    [this.queue.current, ...this.queue.tracks].map((track) => track?.info?.sourceName).filter(Boolean),
                 );
                 const missingSources = [...trackSources].filter(
                     (source) => !updateNode.info?.sourceManagers.includes(source),
