@@ -9,6 +9,14 @@ Logs about the changed features.
 
 ---
 
+## **Version 2.10.1**
+
+- Added source validation helper logic in `Node` to verify supported/provided sources more safely before usage.
+- Improved source normalization/mapping internals by replacing the older loop-based handling and adding explicit handling for YouTube / YouTube Music source aliases.
+- Added support for NodeLink lyrics in node structures.
+- Fixed `player.changeNode()` source-check handling to properly ignore/filter null tracks during source validation.
+- Includes the merged upstream changes from PRs #182 and #184.
+
 ## **Version 2.10.0**
 
 - Now you can directly provide the nodes as classes based on LavalinkNode Class instead of providing options only. This way it will be possible to make custom nodeclasses for yourself.
