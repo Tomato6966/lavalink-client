@@ -113,6 +113,7 @@ export const LavalinkPlugins = {
     Jiosaavn_Plugin: "jiosaavn-plugin",
     LavalinkFilterPlugin: "lavalink-filter-plugin",
     JavaTimedLyricsPlugin: "java-lyrics-plugin",
+    PulseLink: "pulselink-plugin",
 };
 
 /** Lavalink Sources regexes for url validations */
