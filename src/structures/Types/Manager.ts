@@ -367,7 +367,7 @@ export interface ManagerOptions<CustomPlayerT extends Player = Player> {
     /** If links should be allowed or not. If set to false, it will throw an error if a link was provided. */
     linksAllowed?: boolean;
     /** Custom http headers to be sent with every request to lavalink */
-    httpHeaders?: { [header: string]: string };
+    httpHeaders?: Record<string, string>;
     /** Advanced Options for the Library, which may or may not be "library breaking" */
     advancedOptions?: {
         /** Max duration for that the filter fix duration works (in ms) - default is 8mins */
