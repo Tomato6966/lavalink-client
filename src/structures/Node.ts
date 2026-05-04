@@ -279,7 +279,7 @@ export class LavalinkNode {
         options: RequestInit & { path: string; extraQueryUrlParams?: URLSearchParams };
     }> {
         let headers = {
-            "Authorization": this.options.authorization,
+            Authorization: this.options.authorization,
         };
 
         if (this.NodeManager?.LavalinkManager.options.httpHeaders) {
