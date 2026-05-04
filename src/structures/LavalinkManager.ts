@@ -149,6 +149,7 @@ export class LavalinkManager<CustomPlayerT extends Player = Player> extends Even
                 queueChangesWatcher: options?.queueOptions?.queueChangesWatcher ?? null,
                 queueStore: options?.queueOptions?.queueStore ?? new DefaultQueueStore(),
             },
+            httpHeaders: options?.httpHeaders ?? {},
             advancedOptions: {
                 enableDebugEvents: options?.advancedOptions?.enableDebugEvents ?? false,
                 maxFilterFixDuration: options?.advancedOptions?.maxFilterFixDuration ?? 600_000,
@@ -230,6 +231,21 @@ export class LavalinkManager<CustomPlayerT extends Player = Player> extends Even
             options?.queueOptions?.maxPreviousTracks < 0
         )
             options.queueOptions.maxPreviousTracks = 25;
+
+        if (options?.httpHeaders) {
+            if (typeof options.httpHeaders !== "object" || Array.isArray(options.httpHeaders))
+                throw new SyntaxError("ManagerOption.httpHeaders must be an object with string keys and string values");
+
+            const forbiddenHeaders = ["authorization", "user-id", "client-name", "session-id"];
+            for (const header in options.httpHeaders) {
+                if (forbiddenHeaders.includes(header.toLowerCase()))
+                    throw new SyntaxError(
+                        `ManagerOption.httpHeaders cannot have the following headers: ${forbiddenHeaders.join(", ")}`,
+                    );
+                if (typeof options.httpHeaders[header] !== "string")
+                    throw new SyntaxError(`ManagerOption.httpHeaders values must be of type string :: ${header}`);
+            }
+        }
     }
 
     /**
