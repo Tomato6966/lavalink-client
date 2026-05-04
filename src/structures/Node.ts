@@ -278,8 +278,10 @@ export class LavalinkNode {
         response: Response;
         options: RequestInit & { path: string; extraQueryUrlParams?: URLSearchParams };
     }> {
-        let headers = {};
-        headers["Authorization"] = this.options.authorization;
+        let headers = {
+            "Authorization": this.options.authorization,
+        };
+
         if (this.NodeManager?.LavalinkManager.options.httpHeaders) {
             headers = { ...headers, ...this.NodeManager.LavalinkManager.options.httpHeaders };
         }
