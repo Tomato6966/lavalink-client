@@ -278,12 +278,18 @@ export class LavalinkNode {
         response: Response;
         options: RequestInit & { path: string; extraQueryUrlParams?: URLSearchParams };
     }> {
+        let headers = {
+            Authorization: this.options.authorization,
+        };
+
+        if (this.NodeManager?.LavalinkManager.options.httpHeaders) {
+            headers = { ...headers, ...this.NodeManager.LavalinkManager.options.httpHeaders };
+        }
+
         const options: RequestInit & { path: string; extraQueryUrlParams?: URLSearchParams } = {
             path: `/${this.version}/${endpoint.startsWith("/") ? endpoint.slice(1) : endpoint}`,
             method: "GET",
-            headers: {
-                Authorization: this.options.authorization,
-            },
+            headers,
             signal:
                 this.options.requestSignalTimeoutMS && this.options.requestSignalTimeoutMS > 0
                     ? AbortSignal.timeout(this.options.requestSignalTimeoutMS)
@@ -638,7 +644,7 @@ export class LavalinkNode {
             return;
         }
 
-        const headers = {
+        let headers = {
             Authorization: this.options.authorization,
             "User-Id": this._LManager.options.client.id,
             "Client-Name": String(this._LManager.options.client.username || "Lavalink-Client").replace(
@@ -650,6 +656,10 @@ export class LavalinkNode {
         if (typeof this.options.sessionId === "string" || typeof sessionId === "string") {
             headers["Session-Id"] = this.options.sessionId || sessionId;
             this.sessionId = this.options.sessionId || sessionId;
+        }
+
+        if (this.NodeManager?.LavalinkManager.options.httpHeaders) {
+            headers = { ...headers, ...this.NodeManager.LavalinkManager.options.httpHeaders };
         }
 
         this.socket = new WebSocket(
