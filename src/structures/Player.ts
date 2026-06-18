@@ -762,8 +762,10 @@ export class Player {
      * @returns
      */
     public async connect() {
-        if (!this.options.voiceChannelId)
-            throw new RangeError("No Voice Channel id has been set. (player.options.voiceChannelId)");
+        if (!this.options.voiceChannelId) {
+            if (this.voiceChannelId) this.options.voiceChannelId = this.voiceChannelId;
+            else throw new RangeError("No Voice Channel id has been set. (player.options.voiceChannelId)");
+        }
 
         await this.LavalinkManager.options.sendToShard(this.guildId, {
             op: 4,
@@ -810,8 +812,10 @@ export class Player {
      * @returns
      */
     public async disconnect(force: boolean = false) {
-        if (!force && !this.options.voiceChannelId)
-            throw new RangeError("No Voice Channel id has been set. (player.options.voiceChannelId)");
+        if (!force && !this.options.voiceChannelId) {
+            if (this.voiceChannelId) this.options.voiceChannelId = this.voiceChannelId;
+            else throw new RangeError("No Voice Channel id has been set. (player.options.voiceChannelId)");
+        }
 
         await this.LavalinkManager.options.sendToShard(this.guildId, {
             op: 4,
