@@ -991,7 +991,10 @@ export class Player {
 
         const data = this.toJSON();
         const currentTrack = this.queue.current;
-        if (!this.voice.endpoint || !this.voice.sessionId || !this.voice.token)
+        const storedVoice = this.getData<LavalinkPlayerVoiceOptions | undefined>("internal_nodeMoveVoiceData");
+        const voiceData =
+            this.voice?.endpoint && this.voice?.sessionId && this.voice?.token ? this.voice : storedVoice;
+        if (!voiceData?.endpoint || !voiceData?.sessionId || !voiceData?.token)
             throw new Error("Voice Data is missing, can't change the node");
         this.setData("internal_nodeChanging", true); // This will stop execution of trackEnd or queueEnd event while changing the node
         if (this.node.connected) await this.node.destroyPlayer(this.guildId); // destroy the player on the currentNode if it's connected
@@ -1038,10 +1041,10 @@ export class Player {
                         paused: this.paused,
                     }),
                     voice: {
-                        token: this.voice.token,
-                        endpoint: this.voice.endpoint,
-                        sessionId: this.voice.sessionId,
-                        channelId: this.voice.channelId,
+                        token: voiceData.token,
+                        endpoint: voiceData.endpoint,
+                        sessionId: voiceData.sessionId,
+                        channelId: voiceData.channelId || this.voice.channelId || this.options.voiceChannelId,
                     },
                 },
             });
@@ -1058,6 +1061,7 @@ export class Player {
             throw new Error(`Failed to change the node: ${error}`);
         } finally {
             this.setData("internal_nodeChanging", undefined);
+            this.setData("internal_nodeMoveVoiceData", undefined);
         }
     }
 
@@ -1076,8 +1080,8 @@ export class Player {
         try {
             if (!node)
                 node = Array.from(this.LavalinkManager.nodeManager.leastUsedNodes("playingPlayers")).find(
-                    (n) => n.connected && n.options.id !== this.node.options.id,
-                ).id;
+                    (n) => n.connected && !!n.sessionId && n.options.id !== this.node.options.id,
+                )?.id;
             if (!node || !this.LavalinkManager.nodeManager.nodes.get(node))
                 throw new RangeError("No nodes are available.");
             if (this.node.options.id === node) return this;

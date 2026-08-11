@@ -658,7 +658,11 @@ export class LavalinkNode {
             { headers },
         );
         this.socket.on("open", this.open.bind(this));
-        this.socket.on("close", (code, reason) => this.close(code, reason?.toString()));
+        this.socket.on("close", (code, reason) =>
+            void this.close(code, reason?.toString()).catch((error) => {
+                this.NodeManager.emit("error", this, error as Error);
+            }),
+        );
         this.socket.on("message", this.message.bind(this));
         this.socket.on("error", this.error.bind(this));
         // this.socket.on("ping", () => this.heartBeat("ping")); // lavalink doesn'T send ping periodically, therefore we use the stats message
@@ -764,46 +768,7 @@ export class LavalinkNode {
                     ),
                 );
             }
-            const nodeToMove = Array.from(this.NodeManager.leastUsedNodes("playingPlayers")).find(
-                (n) => n.connected && n.options.id !== this.id,
-            );
-
-            if (!nodeToMove) {
-                return Promise.allSettled(
-                    Array.from(players.values()).map((player) =>
-                        player.destroy(DestroyReasons.PlayerChangeNodeFailNoEligibleNode).catch((error) => {
-                            this._emitDebugEvent(DebugEvents.PlayerChangeNodeFailNoEligibleNode, {
-                                state: "error",
-                                message: `Failed to destroy player ${player.guildId}: ${error.message}`,
-                                error,
-                                functionLayer: "Node > destroy() > movePlayers",
-                            });
-                        }),
-                    ),
-                );
-            }
-            return Promise.allSettled(
-                Array.from(players.values()).map((player) =>
-                    player.changeNode(nodeToMove.options.id).catch((error) => {
-                        this._emitDebugEvent(DebugEvents.PlayerChangeNodeFail, {
-                            state: "error",
-                            message: `Failed to move player ${player.guildId}: ${error.message}`,
-                            error,
-                            functionLayer: "Node > destroy() > movePlayers",
-                        });
-                        return player
-                            .destroy(error.message ?? DestroyReasons.PlayerChangeNodeFail)
-                            .catch((destroyError) => {
-                                this._emitDebugEvent(DebugEvents.PlayerDestroyFail, {
-                                    state: "error",
-                                    message: `Failed to destroy player ${player.guildId} after move failure: ${destroyError.message}`,
-                                    error: destroyError,
-                                    functionLayer: "Node > destroy() > movePlayers",
-                                });
-                            });
-                    }),
-                ),
-            );
+            return this.movePlayersToReplacementNode(Array.from(players.values()), "destroy");
         };
 
         // Handle all player operations first, then clean up the socket
@@ -848,6 +813,75 @@ export class LavalinkNode {
         this.resetReconnectionAttempts();
 
         this.NodeManager.emit("disconnect", this, { code: 1000, reason: disconnectReason });
+    }
+
+    /**
+     * Pick the best ready node to move players to.
+     * A node must be connected and have a sessionId before a player can be migrated to it.
+     */
+    private getReadyMigrationNode(excludeNodeId: string): LavalinkNode | NodeLinkNode | null {
+        return (
+            Array.from(this.NodeManager.leastUsedNodes("playingPlayers")).find(
+                (node) => node.connected && !!node.sessionId && node.options.id !== excludeNodeId,
+            ) || null
+        );
+    }
+
+    /**
+     * Move a batch of players to a ready node sequentially.
+     * Sequential migration avoids bursty REST timeouts and keeps voice snapshots alive per player.
+     */
+    private async movePlayersToReplacementNode(
+        players: Player[],
+        onNoEligibleNode: "destroy" | "freeze",
+    ): Promise<void> {
+        for (const player of players) {
+            const targetNode = this.getReadyMigrationNode(player.node?.options?.id || this.id);
+
+            if (!targetNode) {
+                if (onNoEligibleNode === "destroy") {
+                    await player.destroy(DestroyReasons.PlayerChangeNodeFailNoEligibleNode).catch((error) => {
+                        this._emitDebugEvent(DebugEvents.PlayerChangeNodeFailNoEligibleNode, {
+                            state: "error",
+                            message: `Failed to destroy player ${player.guildId}: ${error.message}`,
+                            error,
+                            functionLayer: "Node > movePlayersToReplacementNode()",
+                        });
+                    });
+                } else {
+                    player.playing = false;
+                }
+                continue;
+            }
+
+            player.setData("internal_nodeMoveVoiceData", { ...player.voice });
+
+            try {
+                await player.changeNode(targetNode.id);
+            } catch (error) {
+                this._emitDebugEvent(DebugEvents.PlayerChangeNodeFail, {
+                    state: "error",
+                    message: `Failed to move player ${player.guildId}: ${error.message}`,
+                    error,
+                    functionLayer: "Node > movePlayersToReplacementNode()",
+                });
+
+                if (onNoEligibleNode === "destroy") {
+                    await player.destroy(error.message ?? DestroyReasons.PlayerChangeNodeFail).catch((destroyError) => {
+                        this._emitDebugEvent(DebugEvents.PlayerDestroyFail, {
+                            state: "error",
+                            message: `Failed to destroy player ${player.guildId} after move failure: ${destroyError.message}`,
+                            error: destroyError,
+                            functionLayer: "Node > movePlayersToReplacementNode()",
+                        });
+                    });
+                } else {
+                    player.playing = false;
+                }
+            } finally {
+                player.setData("internal_nodeMoveVoiceData", undefined);
+            }
+        }
     }
 
     /**
@@ -1738,7 +1772,7 @@ export class LavalinkNode {
     }
 
     /** @private util function for handling closing events from websocket */
-    private close(code: number, reason: string): void {
+    private async close(code: number, reason: string): Promise<void> {
         this.resetAckTimeouts(true, true);
 
         try {
@@ -1761,6 +1795,16 @@ export class LavalinkNode {
         if (code === 1006 && !reason) reason = "Socket got terminated due to no ping connection";
         if (code === 1000 && reason === "Node-Disconnect") return; // manually disconnected and already emitted the event.
 
+        const players = Array.from(this._LManager.players.filter((p) => p?.node?.options?.id === this?.options?.id).values());
+
+        if (this._LManager.options.autoMove && players.length) {
+            await this.movePlayersToReplacementNode(players, "freeze");
+        } else if (!this._LManager.options.autoMove) {
+            players.forEach((p) => (p.playing = false));
+        } else if (this.NodeManager.nodes.filter((n) => n.connected && !!n.sessionId).size === 0) {
+            players.forEach((p) => (p.playing = false));
+        }
+
         this.NodeManager.emit("disconnect", this, { code, reason });
 
         if (code !== 1000 || reason !== "Node-Destroy") {
@@ -1769,16 +1813,6 @@ export class LavalinkNode {
                 this.reconnect();
             }
         }
-
-        this._LManager.players
-            .filter((p) => p?.node?.options?.id === this?.options?.id)
-            .forEach((p) => {
-                if (!this._LManager.options.autoMove) return (p.playing = false);
-                if (this._LManager.options.autoMove) {
-                    if (this.NodeManager.nodes.filter((n) => n.connected).size === 0) return (p.playing = false);
-                    p.moveNode();
-                }
-            });
     }
 
     /** @private util function for handling error events from websocket */
