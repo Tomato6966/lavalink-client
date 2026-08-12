@@ -153,6 +153,11 @@ export class LavalinkManager<CustomPlayerT extends Player = Player> extends Even
             advancedOptions: {
                 enableDebugEvents: options?.advancedOptions?.enableDebugEvents ?? false,
                 maxFilterFixDuration: options?.advancedOptions?.maxFilterFixDuration ?? 600_000,
+                playerMigration: {
+                    concurrency: options?.advancedOptions?.playerMigration?.concurrency ?? 5,
+                    perTargetConcurrency: options?.advancedOptions?.playerMigration?.perTargetConcurrency ?? 2,
+                    backpressureDelayMs: options?.advancedOptions?.playerMigration?.backpressureDelayMs ?? 50,
+                },
                 debugOptions: {
                     logCustomSearches: options?.advancedOptions?.debugOptions?.logCustomSearches ?? false,
                     noAudio: options?.advancedOptions?.debugOptions?.noAudio ?? false,

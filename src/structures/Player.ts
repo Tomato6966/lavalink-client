@@ -992,8 +992,7 @@ export class Player {
         const data = this.toJSON();
         const currentTrack = this.queue.current;
         const storedVoice = this.getData<LavalinkPlayerVoiceOptions | undefined>("internal_nodeMoveVoiceData");
-        const voiceData =
-            this.voice?.endpoint && this.voice?.sessionId && this.voice?.token ? this.voice : storedVoice;
+        const voiceData = this.voice?.endpoint && this.voice?.sessionId && this.voice?.token ? this.voice : storedVoice;
         if (!voiceData?.endpoint || !voiceData?.sessionId || !voiceData?.token)
             throw new Error("Voice Data is missing, can't change the node");
         this.setData("internal_nodeChanging", true); // This will stop execution of trackEnd or queueEnd event while changing the node
