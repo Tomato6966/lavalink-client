@@ -66,6 +66,17 @@ export class NodeManager extends EventEmitter {
      * A map of all nodes in the nodeManager
      */
     public nodes = new MiniMap<string, LavalinkNode | NodeLinkNode>();
+    /** @internal Coordinates player migrations between nodes owned by this manager. */
+    public readonly playerMigration = {
+        reservations: new Map<string, number>(),
+        capacityWaiters: new Set<() => void>(),
+    };
+
+    /** @internal Wakes migrations waiting for capacity on one of this manager's nodes. */
+    public signalPlayerMigrationCapacityChange(): void {
+        for (const resolve of this.playerMigration.capacityWaiters) resolve();
+        this.playerMigration.capacityWaiters.clear();
+    }
 
     /**
      * @param LavalinkManager The LavalinkManager that created this NodeManager

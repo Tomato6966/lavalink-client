@@ -66,13 +66,6 @@ import type {
 } from "./Types/Utils";
 import { NodeSymbol, queueTrackEnd, safeStringify } from "./Utils";
 
-const migrationReservations = new Map<string, number>();
-const migrationCapacityWaiters = new Set<() => void>();
-
-const signalMigrationCapacityChange = () => {
-    for (const resolve of migrationCapacityWaiters) resolve();
-    migrationCapacityWaiters.clear();
-};
 const normalizeInt = (value: unknown, fallback: number, min: number, max: number) => {
     const parsed = typeof value === "number" ? value : Number(value);
     if (!Number.isFinite(parsed)) return fallback;
@@ -858,18 +851,18 @@ export class LavalinkNode {
     }
 
     private getMigrationReservationCount(nodeId: string): number {
-        return migrationReservations.get(nodeId) || 0;
+        return this.NodeManager.playerMigration.reservations.get(nodeId) || 0;
     }
 
     private reserveMigrationTarget(nodeId: string): void {
-        migrationReservations.set(nodeId, this.getMigrationReservationCount(nodeId) + 1);
+        this.NodeManager.playerMigration.reservations.set(nodeId, this.getMigrationReservationCount(nodeId) + 1);
     }
 
     private releaseMigrationTarget(nodeId: string): void {
         const current = this.getMigrationReservationCount(nodeId);
-        if (current <= 1) migrationReservations.delete(nodeId);
-        else migrationReservations.set(nodeId, current - 1);
-        signalMigrationCapacityChange();
+        if (current <= 1) this.NodeManager.playerMigration.reservations.delete(nodeId);
+        else this.NodeManager.playerMigration.reservations.set(nodeId, current - 1);
+        this.NodeManager.signalPlayerMigrationCapacityChange();
     }
 
     private getEffectiveMigrationLoad(node: LavalinkNode | NodeLinkNode): number {
@@ -943,18 +936,18 @@ export class LavalinkNode {
                 if (settled) return;
                 settled = true;
                 if (timer) clearTimeout(timer);
-                migrationCapacityWaiters.delete(onSignal);
+                this.NodeManager.playerMigration.capacityWaiters.delete(onSignal);
                 resolve();
             };
 
             timer = setTimeout(() => {
                 if (settled) return;
                 settled = true;
-                migrationCapacityWaiters.delete(onSignal);
+                this.NodeManager.playerMigration.capacityWaiters.delete(onSignal);
                 resolve();
             }, timeoutMs);
 
-            migrationCapacityWaiters.add(onSignal);
+            this.NodeManager.playerMigration.capacityWaiters.add(onSignal);
         });
     }
 
@@ -1042,6 +1035,7 @@ export class LavalinkNode {
                                 error,
                                 functionLayer: "Node > movePlayersToReplacementNode()",
                             });
+                            if (player.node?.options?.id === targetNodeId) player.node = this;
                             continue;
                         }
 
@@ -1052,6 +1046,7 @@ export class LavalinkNode {
                                 error,
                                 functionLayer: "Node > movePlayersToReplacementNode()",
                             });
+                            if (player.node?.options?.id === targetNodeId) player.node = this;
                             continue;
                         }
 
@@ -2013,7 +2008,7 @@ export class LavalinkNode {
         this.info.isNodelink = !!this.info.isNodelink;
 
         this.NodeManager.emit("connect", this);
-        signalMigrationCapacityChange();
+        this.NodeManager.signalPlayerMigrationCapacityChange();
     }
 
     /** @private util function for handling closing events from websocket */
@@ -2044,14 +2039,6 @@ export class LavalinkNode {
             this._LManager.players.filter((p) => p?.node?.options?.id === this?.options?.id).values(),
         );
 
-        if (this._LManager.options.autoMove && players.length) {
-            await this.movePlayersToReplacementNode(players, "freeze");
-        } else if (!this._LManager.options.autoMove) {
-            players.forEach((p) => (p.playing = false));
-        } else if (this.NodeManager.nodes.filter((n) => n.connected && !!n.sessionId).size === 0) {
-            players.forEach((p) => (p.playing = false));
-        }
-
         this.NodeManager.emit("disconnect", this, { code, reason });
 
         if (code !== 1000 || reason !== "Node-Destroy") {
@@ -2059,6 +2046,14 @@ export class LavalinkNode {
                 // try to reconnect only when the node is still in the nodeManager.nodes list
                 this.reconnect();
             }
+        }
+
+        if (this._LManager.options.autoMove && players.length) {
+            await this.movePlayersToReplacementNode(players, "freeze");
+        } else if (!this._LManager.options.autoMove) {
+            players.forEach((p) => (p.playing = false));
+        } else if (this.NodeManager.nodes.filter((n) => n.connected && !!n.sessionId).size === 0) {
+            players.forEach((p) => (p.playing = false));
         }
     }
 
