@@ -1011,7 +1011,6 @@ export class LavalinkNode {
                     if (player.getData("internal_destroystatus") === true) return;
                     if (player.node?.options?.id !== this.id) return;
                     this.reserveMigrationTarget(targetNodeId);
-                    player.setData("internal_nodeMoveVoiceData", { ...player.voice });
 
                     try {
                         await player.changeNode(targetNodeId);
@@ -1064,7 +1063,6 @@ export class LavalinkNode {
                         }
                         return;
                     } finally {
-                        player.setData("internal_nodeMoveVoiceData", undefined);
                         this.releaseMigrationTarget(targetNodeId);
                     }
                 }
@@ -1115,7 +1113,6 @@ export class LavalinkNode {
                     });
                 } finally {
                     player.setData("internal_nodeMigrating", undefined);
-                    player.setData("internal_nodeMoveVoiceData", undefined);
                 }
             }
         });
