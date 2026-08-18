@@ -1076,8 +1076,8 @@ export class Player {
         try {
             if (!node)
                 node = Array.from(this.LavalinkManager.nodeManager.leastUsedNodes("playingPlayers")).find(
-                    (n) => n.connected && n.options.id !== this.node.options.id,
-                ).id;
+                    (n) => n.connected && !!n.sessionId && n.options.id !== this.node.options.id,
+                )?.id;
             if (!node || !this.LavalinkManager.nodeManager.nodes.get(node))
                 throw new RangeError("No nodes are available.");
             if (this.node.options.id === node) return this;

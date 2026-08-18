@@ -65,6 +65,12 @@ import type {
     WebSocketClosedEvent,
 } from "./Types/Utils";
 import { NodeSymbol, queueTrackEnd, safeStringify } from "./Utils";
+
+const normalizeInt = (value: unknown, fallback: number, min: number, max: number) => {
+    const parsed = typeof value === "number" ? value : Number(value);
+    if (!Number.isFinite(parsed)) return fallback;
+    return Math.min(max, Math.max(min, Math.floor(parsed)));
+};
 /**
  * Lavalink Node creator class
  */
@@ -658,7 +664,13 @@ export class LavalinkNode {
             { headers },
         );
         this.socket.on("open", this.open.bind(this));
-        this.socket.on("close", (code, reason) => this.close(code, reason?.toString()));
+        this.socket.on(
+            "close",
+            (code, reason) =>
+                void this.close(code, reason?.toString()).catch((error) => {
+                    this.NodeManager.emit("error", this, error as Error);
+                }),
+        );
         this.socket.on("message", this.message.bind(this));
         this.socket.on("error", this.error.bind(this));
         // this.socket.on("ping", () => this.heartBeat("ping")); // lavalink doesn'T send ping periodically, therefore we use the stats message
@@ -764,46 +776,7 @@ export class LavalinkNode {
                     ),
                 );
             }
-            const nodeToMove = Array.from(this.NodeManager.leastUsedNodes("playingPlayers")).find(
-                (n) => n.connected && n.options.id !== this.id,
-            );
-
-            if (!nodeToMove) {
-                return Promise.allSettled(
-                    Array.from(players.values()).map((player) =>
-                        player.destroy(DestroyReasons.PlayerChangeNodeFailNoEligibleNode).catch((error) => {
-                            this._emitDebugEvent(DebugEvents.PlayerChangeNodeFailNoEligibleNode, {
-                                state: "error",
-                                message: `Failed to destroy player ${player.guildId}: ${error.message}`,
-                                error,
-                                functionLayer: "Node > destroy() > movePlayers",
-                            });
-                        }),
-                    ),
-                );
-            }
-            return Promise.allSettled(
-                Array.from(players.values()).map((player) =>
-                    player.changeNode(nodeToMove.options.id).catch((error) => {
-                        this._emitDebugEvent(DebugEvents.PlayerChangeNodeFail, {
-                            state: "error",
-                            message: `Failed to move player ${player.guildId}: ${error.message}`,
-                            error,
-                            functionLayer: "Node > destroy() > movePlayers",
-                        });
-                        return player
-                            .destroy(error.message ?? DestroyReasons.PlayerChangeNodeFail)
-                            .catch((destroyError) => {
-                                this._emitDebugEvent(DebugEvents.PlayerDestroyFail, {
-                                    state: "error",
-                                    message: `Failed to destroy player ${player.guildId} after move failure: ${destroyError.message}`,
-                                    error: destroyError,
-                                    functionLayer: "Node > destroy() > movePlayers",
-                                });
-                            });
-                    }),
-                ),
-            );
+            return this.movePlayersToReplacementNode(Array.from(players.values()), "destroy");
         };
 
         // Handle all player operations first, then clean up the socket
@@ -848,6 +821,303 @@ export class LavalinkNode {
         this.resetReconnectionAttempts();
 
         this.NodeManager.emit("disconnect", this, { code: 1000, reason: disconnectReason });
+    }
+
+    /**
+     * Pick the best ready node to move players to.
+     * A node must be connected and have a sessionId before a player can be migrated to it.
+     */
+    private getReadyMigrationNode(excludeNodeId: string): LavalinkNode | NodeLinkNode | null {
+        return this.selectMigrationTarget(new Set([excludeNodeId]), Number.MAX_SAFE_INTEGER);
+    }
+
+    private getMigrationErrorMessage(error: unknown): string {
+        if (error instanceof Error) return error.message;
+        if (typeof error === "string") return error;
+        try {
+            return safeStringify(error);
+        } catch {
+            return String(error);
+        }
+    }
+
+    private getMigrationConfig() {
+        const migration = this._LManager.options?.advancedOptions?.playerMigration;
+        return {
+            concurrency: normalizeInt(migration?.concurrency, 5, 1, 32),
+            perTargetConcurrency: normalizeInt(migration?.perTargetConcurrency, 2, 1, 8),
+            backpressureDelayMs: normalizeInt(migration?.backpressureDelayMs, 50, 0, 1000),
+        };
+    }
+
+    private getMigrationReservationCount(nodeId: string): number {
+        return this.NodeManager.playerMigration.reservations.get(nodeId) || 0;
+    }
+
+    private reserveMigrationTarget(nodeId: string): void {
+        this.NodeManager.playerMigration.reservations.set(nodeId, this.getMigrationReservationCount(nodeId) + 1);
+    }
+
+    private releaseMigrationTarget(nodeId: string): void {
+        const current = this.getMigrationReservationCount(nodeId);
+        if (current <= 1) this.NodeManager.playerMigration.reservations.delete(nodeId);
+        else this.NodeManager.playerMigration.reservations.set(nodeId, current - 1);
+        this.NodeManager.signalPlayerMigrationCapacityChange();
+    }
+
+    private getEffectiveMigrationLoad(node: LavalinkNode | NodeLinkNode): number {
+        return (node.stats?.players || 0) + this.getMigrationReservationCount(node.id);
+    }
+
+    private selectMigrationTarget(
+        excludeNodeIds: Set<string>,
+        perTargetConcurrency: number,
+    ): LavalinkNode | NodeLinkNode | null {
+        let selectedNode: LavalinkNode | NodeLinkNode | null = null;
+        let selectedEffectiveLoad = Number.POSITIVE_INFINITY;
+        let selectedLiveLoad = Number.POSITIVE_INFINITY;
+
+        for (const node of this.NodeManager.nodes.values()) {
+            if (!node.connected || !node.sessionId) continue;
+            if (excludeNodeIds.has(node.id)) continue;
+
+            const reservationCount = this.getMigrationReservationCount(node.id);
+            if (reservationCount >= perTargetConcurrency) continue;
+
+            const liveLoad = node.stats?.players || 0;
+            const effectiveLoad = this.getEffectiveMigrationLoad(node);
+
+            if (
+                !selectedNode ||
+                effectiveLoad < selectedEffectiveLoad ||
+                (effectiveLoad === selectedEffectiveLoad &&
+                    (liveLoad < selectedLiveLoad ||
+                        (liveLoad === selectedLiveLoad && node.id.localeCompare(selectedNode.id) < 0)))
+            ) {
+                selectedNode = node;
+                selectedEffectiveLoad = effectiveLoad;
+                selectedLiveLoad = liveLoad;
+            }
+        }
+
+        return selectedNode;
+    }
+
+    private hasAnyHealthyMigrationNode(excludeNodeIds: Set<string>): boolean {
+        for (const node of this.NodeManager.nodes.values()) {
+            if (!node.connected || !node.sessionId) continue;
+            if (excludeNodeIds.has(node.id)) continue;
+            return true;
+        }
+        return false;
+    }
+
+    private isMigrationNodeHealthy(nodeId: string): boolean {
+        const node = this.NodeManager.nodes.get(nodeId);
+        return !!node?.connected && !!node.sessionId;
+    }
+
+    private async waitForMigrationCapacity(
+        excludeNodeIds: Set<string>,
+        perTargetConcurrency: number,
+        timeoutMs: number,
+    ): Promise<void> {
+        if (this.selectMigrationTarget(excludeNodeIds, perTargetConcurrency)) return;
+
+        if (timeoutMs <= 0) {
+            await new Promise<void>((resolve) => setImmediate(resolve));
+            return;
+        }
+
+        await new Promise<void>((resolve) => {
+            let settled = false;
+            let timer: NodeJS.Timeout | undefined;
+            const onSignal = () => {
+                if (settled) return;
+                settled = true;
+                if (timer) clearTimeout(timer);
+                this.NodeManager.playerMigration.capacityWaiters.delete(onSignal);
+                resolve();
+            };
+
+            timer = setTimeout(() => {
+                if (settled) return;
+                settled = true;
+                this.NodeManager.playerMigration.capacityWaiters.delete(onSignal);
+                resolve();
+            }, timeoutMs);
+
+            this.NodeManager.playerMigration.capacityWaiters.add(onSignal);
+        });
+    }
+
+    /**
+     * Move a batch of players to a ready node with bounded concurrency.
+     * This keeps migration responsive without flooding the replacement node with requests.
+     */
+    private async movePlayersToReplacementNode(
+        players: Player[],
+        onNoEligibleNode: "destroy" | "freeze",
+    ): Promise<void> {
+        const migrationQueue = players.filter((player) => {
+            if (player.getData("internal_nodeMigrating") === true) return false;
+            if (player.getData("internal_destroystatus") === true) return false;
+            player.setData("internal_nodeMigrating", true);
+            return true;
+        });
+        const { concurrency, perTargetConcurrency, backpressureDelayMs } = this.getMigrationConfig();
+        let nextQueueIndex = 0;
+        const workerCount = Math.min(concurrency, migrationQueue.length);
+
+        const migratePlayer = async (player: Player): Promise<void> => {
+            const excludedNodes = new Set<string>();
+
+            try {
+                for (let attempt = 0; attempt < 2; attempt++) {
+                    if (player.getData("internal_destroystatus") === true) return;
+                    if (player.node?.options?.id !== this.id) return;
+
+                    let targetNode: LavalinkNode | NodeLinkNode | null = null;
+
+                    while (!(targetNode = this.selectMigrationTarget(excludedNodes, perTargetConcurrency))) {
+                        if (!this.hasAnyHealthyMigrationNode(excludedNodes)) {
+                            this._emitDebugEvent(DebugEvents.PlayerChangeNodeFailNoEligibleNode, {
+                                state: "warn",
+                                message: `No eligible ready node was available for player ${player.guildId}`,
+                                functionLayer: "Node > movePlayersToReplacementNode()",
+                            });
+
+                            if (onNoEligibleNode === "destroy") {
+                                await player
+                                    .destroy(DestroyReasons.PlayerChangeNodeFailNoEligibleNode)
+                                    .catch((destroyError) => {
+                                        this._emitDebugEvent(DebugEvents.PlayerDestroyFail, {
+                                            state: "error",
+                                            message: `Failed to destroy player ${player.guildId}: ${this.getMigrationErrorMessage(destroyError)}`,
+                                            error: destroyError,
+                                            functionLayer: "Node > movePlayersToReplacementNode()",
+                                        });
+                                    });
+                            } else {
+                                player.playing = false;
+                            }
+                            return;
+                        }
+
+                        await this.waitForMigrationCapacity(excludedNodes, perTargetConcurrency, backpressureDelayMs);
+                    }
+
+                    const targetNodeId = targetNode.id;
+                    if (player.getData("internal_destroystatus") === true) return;
+                    if (player.node?.options?.id !== this.id) return;
+                    this.reserveMigrationTarget(targetNodeId);
+
+                    try {
+                        await player.changeNode(targetNodeId);
+                        return;
+                    } catch (error) {
+                        const errorMessage = this.getMigrationErrorMessage(error);
+                        this._emitDebugEvent(DebugEvents.PlayerChangeNodeFail, {
+                            state: "error",
+                            message: `Failed to move player ${player.guildId}: ${errorMessage}`,
+                            error,
+                            functionLayer: "Node > movePlayersToReplacementNode()",
+                        });
+
+                        const targetStillHealthy = this.isMigrationNodeHealthy(targetNodeId);
+                        excludedNodes.add(targetNodeId);
+
+                        if (attempt === 0 && !targetStillHealthy) {
+                            this._emitDebugEvent(DebugEvents.PlayerChangeNodeFail, {
+                                state: "warn",
+                                message: `Migration target ${targetNodeId} became unavailable while moving player ${player.guildId}; retrying on another ready node`,
+                                error,
+                                functionLayer: "Node > movePlayersToReplacementNode()",
+                            });
+                            if (player.node?.options?.id === targetNodeId) player.node = this;
+                            continue;
+                        }
+
+                        if (attempt === 0 && this.hasAnyHealthyMigrationNode(excludedNodes)) {
+                            this._emitDebugEvent(DebugEvents.PlayerChangeNodeFail, {
+                                state: "warn",
+                                message: `Retrying migration for player ${player.guildId} on a different ready node`,
+                                error,
+                                functionLayer: "Node > movePlayersToReplacementNode()",
+                            });
+                            if (player.node?.options?.id === targetNodeId) player.node = this;
+                            continue;
+                        }
+
+                        if (onNoEligibleNode === "destroy") {
+                            await player.destroy(DestroyReasons.PlayerChangeNodeFail).catch((destroyError) => {
+                                this._emitDebugEvent(DebugEvents.PlayerDestroyFail, {
+                                    state: "error",
+                                    message: `Failed to destroy player ${player.guildId} after unexpected migration failure: ${this.getMigrationErrorMessage(destroyError)}`,
+                                    error: destroyError,
+                                    functionLayer: "Node > movePlayersToReplacementNode()",
+                                });
+                            });
+                        } else {
+                            player.playing = false;
+                        }
+                        return;
+                    } finally {
+                        this.releaseMigrationTarget(targetNodeId);
+                    }
+                }
+            } catch (error) {
+                this._emitDebugEvent(DebugEvents.PlayerChangeNodeFail, {
+                    state: "error",
+                    message: `Unexpected error while migrating player ${player.guildId}: ${this.getMigrationErrorMessage(error)}`,
+                    error,
+                    functionLayer: "Node > movePlayersToReplacementNode()",
+                });
+
+                if (onNoEligibleNode === "destroy") {
+                    await player.destroy(DestroyReasons.PlayerChangeNodeFail).catch((destroyError) => {
+                        this._emitDebugEvent(DebugEvents.PlayerDestroyFail, {
+                            state: "error",
+                            message: `Failed to destroy player ${player.guildId} after unexpected migration failure: ${this.getMigrationErrorMessage(destroyError)}`,
+                            error: destroyError,
+                            functionLayer: "Node > movePlayersToReplacementNode()",
+                        });
+                    });
+                } else {
+                    player.playing = false;
+                }
+            }
+        };
+
+        const workers = Array.from({ length: workerCount }, async () => {
+            while (true) {
+                const queueIndex = nextQueueIndex++;
+                if (queueIndex >= migrationQueue.length) return;
+
+                const player = migrationQueue[queueIndex];
+                if (!player) continue;
+
+                try {
+                    if (player.getData("internal_nodeMigrating") !== true) {
+                        player.setData("internal_nodeMigrating", true);
+                    }
+                    if (player.getData("internal_destroystatus") === true) continue;
+                    if (player.node?.options?.id !== this.id) continue;
+                    await migratePlayer(player);
+                } catch (error) {
+                    this._emitDebugEvent(DebugEvents.PlayerChangeNodeFail, {
+                        state: "error",
+                        message: `Unexpected worker error while migrating player ${player.guildId}: ${this.getMigrationErrorMessage(error)}`,
+                        error,
+                        functionLayer: "Node > movePlayersToReplacementNode()",
+                    });
+                } finally {
+                    player.setData("internal_nodeMigrating", undefined);
+                }
+            }
+        });
+
+        await Promise.all(workers);
     }
 
     /**
@@ -1735,10 +2005,11 @@ export class LavalinkNode {
         this.info.isNodelink = !!this.info.isNodelink;
 
         this.NodeManager.emit("connect", this);
+        this.NodeManager.signalPlayerMigrationCapacityChange();
     }
 
     /** @private util function for handling closing events from websocket */
-    private close(code: number, reason: string): void {
+    private async close(code: number, reason: string): Promise<void> {
         this.resetAckTimeouts(true, true);
 
         try {
@@ -1761,6 +2032,10 @@ export class LavalinkNode {
         if (code === 1006 && !reason) reason = "Socket got terminated due to no ping connection";
         if (code === 1000 && reason === "Node-Disconnect") return; // manually disconnected and already emitted the event.
 
+        const players = Array.from(
+            this._LManager.players.filter((p) => p?.node?.options?.id === this?.options?.id).values(),
+        );
+
         this.NodeManager.emit("disconnect", this, { code, reason });
 
         if (code !== 1000 || reason !== "Node-Destroy") {
@@ -1770,15 +2045,13 @@ export class LavalinkNode {
             }
         }
 
-        this._LManager.players
-            .filter((p) => p?.node?.options?.id === this?.options?.id)
-            .forEach((p) => {
-                if (!this._LManager.options.autoMove) return (p.playing = false);
-                if (this._LManager.options.autoMove) {
-                    if (this.NodeManager.nodes.filter((n) => n.connected).size === 0) return (p.playing = false);
-                    p.moveNode();
-                }
-            });
+        if (this._LManager.options.autoMove && players.length) {
+            await this.movePlayersToReplacementNode(players, "freeze");
+        } else if (!this._LManager.options.autoMove) {
+            players.forEach((p) => (p.playing = false));
+        } else if (this.NodeManager.nodes.filter((n) => n.connected && !!n.sessionId).size === 0) {
+            players.forEach((p) => (p.playing = false));
+        }
     }
 
     /** @private util function for handling error events from websocket */

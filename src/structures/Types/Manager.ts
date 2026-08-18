@@ -370,23 +370,34 @@ export interface ManagerOptions<CustomPlayerT extends Player = Player> {
     httpHeaders?: Record<string, string>;
     /** Advanced Options for the Library, which may or may not be "library breaking" */
     advancedOptions?: {
-        /** Max duration for that the filter fix duration works (in ms) - default is 8mins */
-        maxFilterFixDuration?: number;
-        /** Enable Debug event */
-        enableDebugEvents?: boolean;
-        /** optional */
-        debugOptions?: {
-            /** For logging custom searches */
-            logCustomSearches?: boolean;
-            /** logs for debugging the "no-Audio" playing error */
-            noAudio?: boolean;
-            /** For Logging the Destroy function */
-            playerDestroy?: {
-                /** To show the debug reason at all times. */
-                debugLog?: boolean;
-                /** If you get 'Error: Use Player#destroy("reason") not LavalinkManager#deletePlayer() to stop the Player' put it on true */
-                dontThrowError?: boolean;
-            };
+    /** Max duration for that the filter fix duration works (in ms) - default is 8mins */
+    maxFilterFixDuration?: number;
+    /** Enable Debug event */
+    enableDebugEvents?: boolean;
+    /** optional */
+    debugOptions?: {
+        /** For logging custom searches */
+        logCustomSearches?: boolean;
+        /** logs for debugging the "no-Audio" playing error */
+        noAudio?: boolean;
+        /** For Logging the Destroy function */
+        playerDestroy?: {
+            /** To show the debug reason at all times. */
+            debugLog?: boolean;
+            /** If you get 'Error: Use Player#destroy("reason") not LavalinkManager#deletePlayer() to stop the Player' put it on true */
+            dontThrowError?: boolean;
         };
     };
+    /** Player migration configuration */
+    playerMigration?: {
+        /** Maximum number of players migrated concurrently. Default: 5 */
+        concurrency?: number;
+
+        /** Maximum number of concurrent migrations to a single target node. Default: 2 */
+        perTargetConcurrency?: number;
+
+        /** Maximum time to wait for migration capacity before retrying. Default: 50ms */
+        backpressureDelayMs?: number;
+    };
+};
 }
