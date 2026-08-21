@@ -9,6 +9,37 @@ Logs about the changed features.
 
 ---
 
+## **Version 2.11.0**
+
+- **Build System & Tooling Migration**:
+    - Switched build toolchain from `tsup` to `tsdown` (powered by `rolldown`) for faster and cleaner builds.
+    - Generates synchronized CommonJS (`.cjs`, `.d.cts`) and ESM (`.mjs`, `.d.mts`, `.d.ts`) distribution outputs.
+    - Updated TypeScript compiler configuration (`tsconfig.json`) to use `module: "ESNext"` and `moduleResolution: "bundler"`.
+- **Dependencies & Formatting Updates**:
+    - Upgraded dependencies across the client, documentation site, and test bot.
+    - Updated to TypeScript 7 in development tools and updated `ws`, `oxfmt`, and `oxlint`.
+    - Normalized code formatting and import structures across the codebase.
+
+## **Version 2.10.4**
+
+- **Resilient Player Migration & Auto-Move**:
+    - Overhauled automatic node migration (`autoMove`) when a node disconnects to prevent stuck or stale player states.
+    - Implemented worker-based concurrent player migration queue with target reservation coordination across nodes in `NodeManager`.
+    - Added new configuration options in `ManagerOptions.advancedOptions.playerMigration`:
+        - `concurrency` (number, default: `5`): Maximum number of players migrated concurrently.
+        - `perTargetConcurrency` (number, default: `2`): Maximum concurrent migrations per target node.
+        - `backpressureDelayMs` (number, default: `50`): Time to wait for capacity before retrying migration.
+    - Added debug event logging for migration failures (`DebugEvents.PlayerChangeNodeFail` and `DebugEvents.PlayerDestroyFail`).
+    - Added scoped migration tracking per player via internal metadata (`internal_nodeMigrating`).
+- **Player & Node Stability**:
+    - `player.moveNode()` now ensures the target node is connected with a valid `sessionId` before initiating migration.
+    - Proper voice state verification and fallback handling (`freeze` / `destroy`) when no eligible node is available during migration.
+
+## **Version 2.10.3**
+
+- **Voice Channel ID Fallback**:
+    - Improved `player.connect()` and `player.disconnect()` methods to automatically fall back to `player.voiceChannelId` if `player.options.voiceChannelId` was not explicitly passed.
+
 ## **Version 2.10.2**
 
 - Added source validation helper logic in `Node` to verify supported/provided sources more safely before usage.
