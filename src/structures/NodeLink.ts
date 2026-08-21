@@ -1,7 +1,6 @@
 import { ReadableStream } from "node:stream/web";
 
 import { LavalinkNode } from "./Node";
-import type { NodeManager } from "./NodeManager";
 import { Player } from "./Player";
 import {
     NodeLink_ChorusFilter,
@@ -24,8 +23,10 @@ import {
     YoutubeOAuthResponse,
 } from "./Types/NodeLink";
 import { Track, UnresolvedTrack } from "./Types/Track";
-import type { ClientCustomSearchPlatformUtils, NodeLinkSearchPlatform, SearchPlatform } from "./Types/Utils";
 import { safeStringify } from "./Utils";
+
+import type { NodeManager } from "./NodeManager";
+import type { ClientCustomSearchPlatformUtils, NodeLinkSearchPlatform, SearchPlatform } from "./Types/Utils";
 
 /** Default Sources Record for NodeLink, to allow source parsing with multiple inputs. */
 export const NodeLinkDefaultSources: Record<SearchPlatform, NodeLinkSearchPlatform | ClientCustomSearchPlatformUtils> =

@@ -1,7 +1,7 @@
 import { MessageFlags, SlashCommandBuilder } from "discord.js";
-import type { StoredQueue } from "lavalink-client";
 
 import type { SubCommand } from "../types/Client";
+import type { StoredQueue } from "lavalink-client";
 
 export default {
     data: new SlashCommandBuilder()

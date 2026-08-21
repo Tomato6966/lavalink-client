@@ -1,4 +1,6 @@
 import { audioOutputsData, EQList } from "./Constants";
+import { safeStringify } from "./Utils";
+
 import type { Player } from "./Player";
 import type {
     AudioOutputs,
@@ -8,7 +10,6 @@ import type {
     PlayerFilters,
     TimescaleFilter,
 } from "./Types/Filters";
-import { safeStringify } from "./Utils";
 /**
  * The FilterManager for each player
  */

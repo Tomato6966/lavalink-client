@@ -1,6 +1,5 @@
 import type { LavalinkNode } from "../Node";
 import type { Player } from "../Player";
-
 import type { NodeLinkEventPayload, NodeLinkEventTypes } from "./NodeLink";
 import type { DestroyReasonsType } from "./Player";
 import type { PluginInfo, Track } from "./Track";

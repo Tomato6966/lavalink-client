@@ -1,5 +1,4 @@
 import type { MiniMap } from "../Utils";
-
 import type { LavalinkFilterData } from "./Filters";
 import type { LyricsLine, LyricsResult, NodeStats } from "./Node";
 import type { LavalinkPlayOptions } from "./Player";

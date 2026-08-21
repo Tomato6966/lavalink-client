@@ -1,7 +1,6 @@
 import { TextChannel } from "discord.js";
 
 import type { BotClient } from "../types/Client";
-
 import type { PlayerSaver } from "./CustomClasses";
 
 export async function handleResuming(client: BotClient, playerSaver: PlayerSaver) {

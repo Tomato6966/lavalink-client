@@ -1,9 +1,9 @@
-import type { DebugEvents } from "../Constants";
-import type { LavalinkManager } from "../LavalinkManager";
 import { LavalinkNode } from "../Node";
 import { NodeLinkNode } from "../NodeLink";
-import type { Player } from "../Player";
 
+import type { DebugEvents } from "../Constants";
+import type { LavalinkManager } from "../LavalinkManager";
+import type { Player } from "../Player";
 import type { LavalinkNodeOptions } from "./Node";
 import type { DestroyReasonsType, PlayerJson, PlayerOptions } from "./Player";
 import type { ManagerQueueOptions } from "./Queue";

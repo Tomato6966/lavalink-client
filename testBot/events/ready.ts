@@ -1,8 +1,9 @@
 import { Events } from "discord.js";
-import type { ApplicationCommandDataResolvable } from "discord.js";
 
 import { envConfig } from "../config";
+
 import type { Event } from "../types/Client";
+import type { ApplicationCommandDataResolvable } from "discord.js";
 
 export default {
     name: Events.ClientReady,

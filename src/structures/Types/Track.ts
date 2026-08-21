@@ -1,5 +1,4 @@
 import type { Player } from "../Player";
-
 import type { anyObject } from "./Player";
 import type { Base64 } from "./Utils";
 

@@ -1,4 +1,6 @@
 import { MessageFlags, SlashCommandBuilder } from "discord.js";
+
+import type { Command } from "../types/Client";
 import type { CommandInteractionOptionResolver, GuildMember, VoiceChannel } from "discord.js";
 import type {
     LavaSearchFilteredResponse,
@@ -6,8 +8,6 @@ import type {
     LavaSrcSearchPlatformBase,
     SearchResult,
 } from "lavalink-client";
-
-import type { Command } from "../types/Client";
 
 const autocompleteMap = new Map();
 

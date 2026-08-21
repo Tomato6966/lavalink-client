@@ -1,9 +1,10 @@
 import { MessageFlags, SlashCommandBuilder } from "discord.js";
-import type { CommandInteractionOptionResolver, GuildMember, VoiceChannel } from "discord.js";
-import type { SearchPlatform, SearchResult, Track } from "lavalink-client";
+
+import { formatMS_HHMMSS } from "../Utils/Time";
 
 import type { Command } from "../types/Client";
-import { formatMS_HHMMSS } from "../Utils/Time";
+import type { CommandInteractionOptionResolver, GuildMember, VoiceChannel } from "discord.js";
+import type { SearchPlatform, SearchResult, Track } from "lavalink-client";
 
 const autocompleteMap = new Map();
 

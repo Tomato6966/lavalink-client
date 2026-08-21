@@ -1,7 +1,7 @@
-import type { Message } from "discord.js";
 import { Player } from "lavalink-client";
 
 import type { BotClient } from "../../types/Client";
+import type { Message } from "discord.js";
 
 export class myCustomPlayer extends Player {
     npMessage: null | Message = null;

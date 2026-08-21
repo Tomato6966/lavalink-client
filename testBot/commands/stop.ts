@@ -1,7 +1,7 @@
 import { MessageFlags, SlashCommandBuilder } from "discord.js";
-import type { GuildMember } from "discord.js";
 
 import type { Command } from "../types/Client";
+import type { GuildMember } from "discord.js";
 
 export default {
     data: new SlashCommandBuilder().setName("stop").setDescription("Stops the player & leaves the voice"),

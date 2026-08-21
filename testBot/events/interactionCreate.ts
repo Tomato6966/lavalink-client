@@ -1,7 +1,7 @@
 import { Events, MessageFlags } from "discord.js";
-import type { ChatInputCommandInteraction, CommandInteractionOptionResolver, Interaction } from "discord.js";
 
 import type { Command, Event, SubCommand } from "../types/Client";
+import type { ChatInputCommandInteraction, CommandInteractionOptionResolver, Interaction } from "discord.js";
 
 export default {
     name: Events.InteractionCreate,

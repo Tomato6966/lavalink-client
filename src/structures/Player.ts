@@ -1,11 +1,13 @@
 import { DebugEvents } from "./Constants";
-import type { DestroyReasons } from "./Constants";
 import { bandCampSearch } from "./CustomSearches/BandCampSearch";
 import { FilterManager } from "./Filters";
+import { Queue, QueueSaver } from "./Queue";
+import { queueTrackEnd } from "./Utils";
+
+import type { DestroyReasons } from "./Constants";
 import type { LavalinkManager } from "./LavalinkManager";
 import type { LavalinkNode } from "./Node";
 import type { NodeLinkNode } from "./NodeLink";
-import { Queue, QueueSaver } from "./Queue";
 import type { SponsorBlockSegment } from "./Types/Node";
 import type {
     anyObject,
@@ -17,7 +19,6 @@ import type {
 } from "./Types/Player";
 import type { Track, UnresolvedTrack } from "./Types/Track";
 import type { LavalinkPlayerVoiceOptions, LavaSearchQuery, SearchQuery } from "./Types/Utils";
-import { queueTrackEnd } from "./Utils";
 export class Player {
     /** Filter Manager per player */
     public filterManager: FilterManager;

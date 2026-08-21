@@ -7,11 +7,12 @@ import {
     SlashCommandSubcommandGroupBuilder,
     SlashCommandSubcommandsOnlyBuilder,
 } from "discord.js";
-import type { LavalinkManager, MiniMap } from "lavalink-client";
 import { RedisClientType } from "redis";
 
-import type { JSONStore } from "../Utils/CustomClasses";
 import { myCustomPlayer } from "../Utils/CustomClasses/customPlayerClass";
+
+import type { JSONStore } from "../Utils/CustomClasses";
+import type { LavalinkManager, MiniMap } from "lavalink-client";
 declare type InteractionExecuteFN = (client: BotClient, interaction: ChatInputCommandInteraction<"cached">) => any;
 declare type AutoCompleteExecuteFN = (client: BotClient, interaction: AutocompleteInteraction) => any;
 

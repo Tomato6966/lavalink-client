@@ -1,8 +1,8 @@
 import { MessageFlags, SlashCommandBuilder } from "discord.js";
-import type { CommandInteractionOptionResolver, GuildMember, VoiceChannel } from "discord.js";
-import type { SearchPlatform, UnresolvedQuery } from "lavalink-client";
 
 import type { Command } from "../types/Client";
+import type { CommandInteractionOptionResolver, GuildMember, VoiceChannel } from "discord.js";
+import type { SearchPlatform, UnresolvedQuery } from "lavalink-client";
 
 export default {
     data: new SlashCommandBuilder()

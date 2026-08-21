@@ -3,11 +3,12 @@ import { URL } from "node:url";
 import { isRegExp } from "node:util/types";
 
 import { DebugEvents } from "./Constants";
-import type { LavalinkManager } from "./LavalinkManager";
 import { DefaultSources, LavalinkPlugins, SourceLinksRegexes } from "./LavalinkManagerStatics";
+import { NodeType, type LavalinkNodeOptions } from "./Types/Node";
+
+import type { LavalinkManager } from "./LavalinkManager";
 import type { LavalinkNode } from "./Node";
 import type { Player } from "./Player";
-import { NodeType, type LavalinkNodeOptions } from "./Types/Node";
 import type { LavalinkTrack, Track, UnresolvedQuery, UnresolvedTrack } from "./Types/Track";
 import type {
     LavalinkSearchPlatform,

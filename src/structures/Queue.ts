@@ -1,6 +1,7 @@
+import { ManagerUtils, MiniMap, QueueSymbol } from "./Utils";
+
 import type { ManagerQueueOptions, QueueChangesWatcher, QueueStoreManager, StoredQueue } from "./Types/Queue";
 import type { Track, UnresolvedTrack } from "./Types/Track";
-import { ManagerUtils, MiniMap, QueueSymbol } from "./Utils";
 
 export class QueueSaver {
     /**

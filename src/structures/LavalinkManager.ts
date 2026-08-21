@@ -6,6 +6,8 @@ import { NodeLinkNode } from "./NodeLink";
 import { NodeManager } from "./NodeManager";
 import { Player } from "./Player";
 import { DefaultQueueStore } from "./Queue";
+import { ManagerUtils, MiniMap, safeStringify } from "./Utils";
+
 import type {
     BotClientOptions,
     DeepRequired,
@@ -16,7 +18,6 @@ import type {
 import type { LavalinkNodeOptions } from "./Types/Node";
 import type { PlayerOptions } from "./Types/Player";
 import type { ChannelDeletePacket, VoicePacket, VoiceServer, VoiceState } from "./Types/Utils";
-import { ManagerUtils, MiniMap, safeStringify } from "./Utils";
 
 export class LavalinkManager<CustomPlayerT extends Player = Player> extends EventEmitter {
     /**

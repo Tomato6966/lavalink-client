@@ -10,8 +10,6 @@ import {
     NodeLinkExclusiveEvents,
 } from "./Constants";
 import { NodeLinkNode } from "./NodeLink";
-import type { NodeManager } from "./NodeManager";
-import type { Player } from "./Player";
 import { ReconnectionState } from "./Types/Node";
 import {
     BaseNodeStats,
@@ -24,6 +22,10 @@ import {
     NodeType,
     SponsorBlockSegment,
 } from "./Types/Node";
+import { NodeSymbol, queueTrackEnd, safeStringify } from "./Utils";
+
+import type { NodeManager } from "./NodeManager";
+import type { Player } from "./Player";
 import type {
     NodeLinkEventPayload,
     NodeLinkEventTypes,
@@ -64,7 +66,6 @@ import type {
     TrackStuckEvent,
     WebSocketClosedEvent,
 } from "./Types/Utils";
-import { NodeSymbol, queueTrackEnd, safeStringify } from "./Utils";
 
 const normalizeInt = (value: unknown, fallback: number, min: number, max: number) => {
     const parsed = typeof value === "number" ? value : Number(value);

@@ -2,10 +2,10 @@
 import { inspect } from "util";
 
 import { EmbedBuilder, MessageFlags, SlashCommandBuilder } from "discord.js";
-import type { CommandInteractionOptionResolver, GuildMember } from "discord.js";
 import { SourceLinksRegexes } from "lavalink-client";
 
 import type { Command } from "../types/Client";
+import type { CommandInteractionOptionResolver, GuildMember } from "discord.js";
 
 export default {
     data: new SlashCommandBuilder()

@@ -4,11 +4,12 @@ import { createClient } from "redis";
 
 import { envConfig } from "./config";
 import { loadCommands, loadEvents, loadLavalinkEvents } from "./handler";
-import type { BotClient, CustomRequester } from "./types/Client";
 import { JSONStore, myCustomStore, myCustomWatcher, PlayerSaver } from "./Utils/CustomClasses";
 import { myCustomPlayer } from "./Utils/CustomClasses/customPlayerClass";
 import { handleResuming } from "./Utils/handleResuming";
 import { autoPlayFunction, requesterTransformer } from "./Utils/OptionalFunctions";
+
+import type { BotClient, CustomRequester } from "./types/Client";
 
 // you can declare a global type for the requester used via the requesterTransformer
 declare module "lavalink-client" {

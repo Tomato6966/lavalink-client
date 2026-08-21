@@ -1,5 +1,6 @@
-import type { AudioOutputs, ChannelMixFilter, EQBand } from "./Types/Filters";
 import { NodeLinkEventTypes } from "./Types/NodeLink";
+
+import type { AudioOutputs, ChannelMixFilter, EQBand } from "./Types/Filters";
 
 /**
  * Debug events for more detailed logging

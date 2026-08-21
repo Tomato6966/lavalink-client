@@ -1,11 +1,12 @@
 import { EventEmitter } from "node:events";
 
 import { DestroyReasons, DisconnectReasons } from "./Constants";
-import type { LavalinkManager } from "./LavalinkManager";
 import { LavalinkNode } from "./Node";
 import { NodeLinkNode } from "./NodeLink";
 import { NodeType, type LavalinkNodeIdentifier, type LavalinkNodeOptions, type NodeManagerEvents } from "./Types/Node";
 import { MiniMap } from "./Utils";
+
+import type { LavalinkManager } from "./LavalinkManager";
 
 export class NodeManager extends EventEmitter {
     /**

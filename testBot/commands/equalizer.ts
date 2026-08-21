@@ -1,8 +1,9 @@
 import { MessageFlags, SlashCommandBuilder } from "discord.js";
-import type { CommandInteractionOptionResolver, GuildMember } from "discord.js";
+
+import { EQList } from "../Utils/EQList";
 
 import type { Command } from "../types/Client";
-import { EQList } from "../Utils/EQList";
+import type { CommandInteractionOptionResolver, GuildMember } from "discord.js";
 
 export default {
     data: new SlashCommandBuilder()

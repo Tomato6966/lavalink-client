@@ -1,13 +1,12 @@
 {
     "compilerOptions": {
-        "baseUrl": ".",
         "paths": {
             "lavalink-client": ["../src/index.ts"]
         },
         "lib": ["ESNext", "DOM"],
         "target": "ESNext",
         "module": "commonjs",
-        "moduleResolution": "node",
+        "moduleResolution": "bundler",
         "outDir": "dist",
         "resolveJsonModule": true,
         "emitDecoratorMetadata": true,

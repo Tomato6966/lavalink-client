@@ -1,7 +1,7 @@
 import { MessageFlags, SlashCommandBuilder } from "discord.js";
-import type { GuildMember, VoiceChannel } from "discord.js";
 
 import type { Command } from "../types/Client";
+import type { GuildMember, VoiceChannel } from "discord.js";
 
 export default {
     data: new SlashCommandBuilder().setName("join").setDescription("Joins a Voice Channel"),
