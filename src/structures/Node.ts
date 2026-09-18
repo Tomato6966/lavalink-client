@@ -2257,10 +2257,15 @@ export class LavalinkNode {
             player.playing = true;
             player.paused = false;
         }
-        // don't emit the event if previous track == new track aka track loop
+        // Don't emit when the same track starts twice in a row, aka a track loop.
+        // queue.previous is history, not "the track that played just before this one": it keeps the
+        // track after a loadFailed / cleanup end and after the queue ended, so replaying the last
+        // track looked like a loop and its trackStart got swallowed. Compare against the last track
+        // we announced instead, and reset that marker wherever playback is torn down or replaced on
+        // purpose (queueEnd, a "replaced" end, changeNode).
         if (
             this._LManager.options?.emitNewSongsOnly === true &&
-            player.queue.previous[0]?.info?.identifier === track?.info?.identifier
+            player.getData<string | undefined>("internal_lastEmittedTrackId") === track?.info?.identifier
         ) {
             return this._emitDebugEvent(DebugEvents.TrackStartNewSongsOnly, {
                 state: "log",
@@ -2268,6 +2273,7 @@ export class LavalinkNode {
                 functionLayer: "LavalinkNode > trackStart()",
             });
         }
+        player.setData("internal_lastEmittedTrackId", track?.info?.identifier);
         if (!player.queue.current) {
             player.queue.current = this.getTrackOfPayload(payload);
             if (player.queue.current) {
@@ -2295,6 +2301,9 @@ export class LavalinkNode {
                 message: `TrackEnd Event does not handle any playback, because the track was replaced.`,
                 functionLayer: "LavalinkNode > trackEnd()",
             });
+            // The old track was swapped out on purpose, so whatever starts next is a new song even
+            // if it happens to be the same track.
+            player.setData("internal_lastEmittedTrackId", undefined);
             this._LManager.emit("trackEnd", player, trackToUse, payload);
             return;
         }
@@ -2550,6 +2559,7 @@ export class LavalinkNode {
         player.queue.current = null;
         player.playing = false;
         player.setData("internal_stopPlaying", undefined);
+        player.setData("internal_lastEmittedTrackId", undefined);
 
         this._emitDebugEvent(DebugEvents.QueueEnded, {
             state: "log",
