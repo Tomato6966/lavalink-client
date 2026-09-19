@@ -98,6 +98,15 @@ export class NodeManager extends EventEmitter {
     }
 
     /**
+     * Explicitly sanitize serialization: drop the back-reference to the
+     * manager so stringifying a NodeManager can't recurse into it.
+     */
+    public toJSON() {
+        const { LavalinkManager: _manager, ...rest } = this;
+        return rest;
+    }
+
+    /**
      * Disconnects all Nodes from lavalink ws sockets
      * @param deleteAllNodes if the nodes should also be deleted from nodeManager.nodes
      * @param destroyPlayers if the players should be destroyed

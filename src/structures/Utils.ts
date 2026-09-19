@@ -69,6 +69,15 @@ export class ManagerUtils {
     }
 
     /**
+     * Explicitly sanitize serialization: drop the back-reference to the
+     * manager so stringifying the utils can't recurse into it.
+     */
+    public toJSON() {
+        const { LavalinkManager: _manager, ...rest } = this;
+        return rest;
+    }
+
+    /**
      * Builds a pluginInfo object based on the provided data, extracting relevant information from the data and clientData parameters. This function is used to construct the pluginInfo property for tracks, allowing for consistent handling of plugin-related information across different track sources and formats.
      * @param data
      * @param clientData
