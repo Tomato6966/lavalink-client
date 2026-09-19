@@ -53,12 +53,19 @@ export function parseLavalinkConnUrl(connectionUrl: string): {
 }
 
 export class ManagerUtils {
-    public LavalinkManager: LavalinkManager | undefined = undefined;
+    public LavalinkManager: LavalinkManager | undefined;
     /** Override this with your custom sources record if you want to use custom sources for your node */
     public SourcesRecord = DefaultSources;
 
     constructor(LavalinkManager?: LavalinkManager) {
-        this.LavalinkManager = LavalinkManager;
+        // Same as NodeManager: keep the back-reference readable without
+        // making the whole manager unserializable.
+        Object.defineProperty(this, "LavalinkManager", {
+            value: LavalinkManager,
+            enumerable: false,
+            writable: true,
+            configurable: true,
+        });
     }
 
     /**

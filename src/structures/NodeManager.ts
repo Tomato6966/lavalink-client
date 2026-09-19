@@ -84,7 +84,14 @@ export class NodeManager extends EventEmitter {
      */
     constructor(LavalinkManager: LavalinkManager) {
         super();
-        this.LavalinkManager = LavalinkManager;
+        // Stored non-enumerable so the manager -> nodeManager -> manager
+        // chain stays readable but no longer breaks JSON.stringify.
+        Object.defineProperty(this, "LavalinkManager", {
+            value: LavalinkManager,
+            enumerable: false,
+            writable: true,
+            configurable: true,
+        });
 
         if (this.LavalinkManager.options.nodes)
             this.LavalinkManager.options.nodes.forEach((node) => this.createNode(node));
