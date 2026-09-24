@@ -579,7 +579,7 @@ export class ManagerUtils {
     validateSourceString(node: LavalinkNode, sourceString: SearchPlatform) {
         if (!sourceString) throw new Error(`No SourceString was provided`);
         const source = this.SourcesRecord[sourceString.toLowerCase().trim()] as LavalinkSearchPlatform;
-        if (!source && !!this.LavalinkManager.options.playerOptions.allowCustomSources)
+        if (!source && !this.LavalinkManager.options.playerOptions.allowCustomSources)
             throw new Error(
                 `Lavalink-Client does not support SearchQuerySource: '${sourceString}'. You can disable this check by setting 'ManagerOptions.PlayerOptions.allowCustomSources' to true`,
             );
