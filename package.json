@@ -53,7 +53,7 @@
         "lint": "oxlint .",
         "lint:fix": "npm run lint -- --fix",
         "fmt": "oxfmt .",
-        "test": "node -v",
+        "test": "npm run build && node --test test/validate-source.test.mjs",
         "prepublishOnly": "npm run fmt && npm run build",
         "prepare": "npm run fmt && npm run build"
     },
