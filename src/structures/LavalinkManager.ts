@@ -144,6 +144,7 @@ export class LavalinkManager<CustomPlayerT extends Player = Player> extends Even
             linksAllowed: options?.linksAllowed ?? true,
             autoSkip: options?.autoSkip ?? true,
             autoSkipOnResolveError: options?.autoSkipOnResolveError ?? true,
+            catchLifeCycleRejections: options?.catchLifeCycleRejections ?? false,
             emitNewSongsOnly: options?.emitNewSongsOnly ?? false,
             queueOptions: {
                 maxPreviousTracks: options?.queueOptions?.maxPreviousTracks ?? 25,
@@ -190,6 +191,9 @@ export class LavalinkManager<CustomPlayerT extends Player = Player> extends Even
 
         if (options?.autoSkipOnResolveError && typeof options?.autoSkipOnResolveError !== "boolean")
             throw new SyntaxError("ManagerOption.autoSkipOnResolveError must be either false | true aka boolean");
+
+        if (options?.catchLifeCycleRejections && typeof options?.catchLifeCycleRejections !== "boolean")
+            throw new SyntaxError("ManagerOption.catchLifeCycleRejections must be either false | true aka boolean");
 
         if (options?.emitNewSongsOnly && typeof options?.emitNewSongsOnly !== "boolean")
             throw new SyntaxError("ManagerOption.emitNewSongsOnly must be either false | true aka boolean");
@@ -570,7 +574,9 @@ export class LavalinkManager<CustomPlayerT extends Player = Player> extends Even
             if (!update.guild_id) return;
             const player = this.getPlayer(update.guild_id);
             if (player && player.voiceChannelId === update.id)
-                return void player.destroy(DestroyReasons.ChannelDeleted);
+                return void player.destroy(DestroyReasons.ChannelDeleted).catch((error: unknown) => {
+                    if (!this.options.catchLifeCycleRejections) throw error;
+                });
         }
 
         // for voice updates

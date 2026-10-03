@@ -1852,7 +1852,9 @@ export class LavalinkNode {
             if (!player) return;
 
             if (typeof res?.voice?.connected === "boolean" && res.voice.connected === false) {
-                player.destroy(DestroyReasons.LavalinkNoVoice);
+                player.destroy(DestroyReasons.LavalinkNoVoice).catch((error: unknown) => {
+                    if (!this._LManager.options.catchLifeCycleRejections) throw error;
+                });
                 return;
             }
             player.ping.ws = res?.voice?.ping || player?.ping.ws;
@@ -2330,7 +2332,9 @@ export class LavalinkNode {
             this._LManager.emit("trackEnd", player, trackToUse, payload);
             // play track if autoSkip is true
             if (this._LManager.options.autoSkip && player.queue.current) {
-                player.play({ noReplace: true });
+                player.play({ noReplace: true }).catch((error: unknown) => {
+                    if (!this._LManager.options.catchLifeCycleRejections) throw error;
+                });
             }
             return;
         }
@@ -2350,7 +2354,9 @@ export class LavalinkNode {
         this._LManager.emit("trackEnd", player, trackToUse, payload);
         // play track if autoSkip is true
         if (this._LManager.options.autoSkip && player.queue.current) {
-            player.play({ noReplace: true });
+            player.play({ noReplace: true }).catch((error: unknown) => {
+                if (!this._LManager.options.catchLifeCycleRejections) throw error;
+            });
         }
         return;
     }
@@ -2371,7 +2377,9 @@ export class LavalinkNode {
                     message: `trackStuck Event was triggered too often within a given threshold (LavalinkManager.options.playerOptions.maxErrorsPerTime). Threshold: "${this._LManager.options.playerOptions.maxErrorsPerTime?.threshold}ms", maxAmount: "${this._LManager.options.playerOptions.maxErrorsPerTime?.maxAmount}"`,
                     functionLayer: "LavalinkNode > trackStuck()",
                 });
-                player.destroy(DestroyReasons.TrackStuckMaxTracksErroredPerTime);
+                player.destroy(DestroyReasons.TrackStuckMaxTracksErroredPerTime).catch((error: unknown) => {
+                    if (!this._LManager.options.catchLifeCycleRejections) throw error;
+                });
                 return;
             }
         }
@@ -2397,7 +2405,9 @@ export class LavalinkNode {
         }
         // play track if autoSkip is true
         if (this._LManager.options.autoSkip && player.queue.current) {
-            player.play({ track: player.queue.current, noReplace: false }); // Replace the stuck track with the new track.
+            player.play({ track: player.queue.current, noReplace: false }).catch((error: unknown) => {
+                if (!this._LManager.options.catchLifeCycleRejections) throw error;
+            }); // Replace the stuck track with the new track.
         }
         return;
     }
@@ -2418,7 +2428,9 @@ export class LavalinkNode {
                     message: `TrackError Event was triggered too often within a given threshold (LavalinkManager.options.playerOptions.maxErrorsPerTime). Threshold: "${this._LManager.options.playerOptions.maxErrorsPerTime?.threshold}ms", maxAmount: "${this._LManager.options.playerOptions.maxErrorsPerTime?.maxAmount}"`,
                     functionLayer: "LavalinkNode > trackError()",
                 });
-                player.destroy(DestroyReasons.TrackErrorMaxTracksErroredPerTime);
+                player.destroy(DestroyReasons.TrackErrorMaxTracksErroredPerTime).catch((error: unknown) => {
+                    if (!this._LManager.options.catchLifeCycleRejections) throw error;
+                });
                 return;
             }
         }
@@ -2605,7 +2617,10 @@ export class LavalinkNode {
             }
             if (player.queue.current) {
                 if (payload.type === "TrackEndEvent") this._LManager.emit("trackEnd", player, track, payload);
-                if (this._LManager.options.autoSkip) return player.play({ noReplace: true, paused: false });
+                if (this._LManager.options.autoSkip)
+                    return player.play({ noReplace: true, paused: false }).catch((error: unknown) => {
+                        if (!this._LManager.options.catchLifeCycleRejections) throw error;
+                    });
             } else {
                 this._emitDebugEvent(DebugEvents.AutoplayThresholdSpamLimiter, {
                     state: "warn",
@@ -2636,7 +2651,9 @@ export class LavalinkNode {
             this._LManager.options.playerOptions.onEmptyQueue?.destroyAfterMs >= 0
         ) {
             if (this._LManager.options.playerOptions.onEmptyQueue?.destroyAfterMs === 0) {
-                player.destroy(DestroyReasons.QueueEmpty);
+                player.destroy(DestroyReasons.QueueEmpty).catch((error: unknown) => {
+                    if (!this._LManager.options.catchLifeCycleRejections) throw error;
+                });
                 return;
             } else {
                 this._emitDebugEvent(DebugEvents.TriggerQueueEmptyInterval, {
@@ -2660,7 +2677,9 @@ export class LavalinkNode {
                             return this._LManager.emit("playerQueueEmptyCancel", player);
                         }
                         this._LManager.emit("playerQueueEmptyEnd", player);
-                        player.destroy(DestroyReasons.QueueEmpty);
+                        player.destroy(DestroyReasons.QueueEmpty).catch((error: unknown) => {
+                            if (!this._LManager.options.catchLifeCycleRejections) throw error;
+                        });
                     }, this._LManager.options.playerOptions.onEmptyQueue?.destroyAfterMs),
                 );
             }
