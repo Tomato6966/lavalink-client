@@ -664,7 +664,16 @@ export class LavalinkNode {
             `ws${this.options.secure ? "s" : ""}://${this.options.host}:${this.options.port}/v4/websocket`,
             { headers },
         );
-        this.socket.on("open", this.open.bind(this));
+        this.socket.on("open", () =>
+            void this.open().catch((error) => {
+                // open() can reject even after a successful websocket handshake,
+                // e.g. when the node's /v4/info request fails or is blocked by a
+                // WAF. Without this catch the rejection would be unhandled and
+                // crash the host application; route it through the regular
+                // error path so the node cleans up and reconnects.
+                this.error(error);
+            }),
+        );
         this.socket.on(
             "close",
             (code, reason) =>
