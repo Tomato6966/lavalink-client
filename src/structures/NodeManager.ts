@@ -84,10 +84,26 @@ export class NodeManager extends EventEmitter {
      */
     constructor(LavalinkManager: LavalinkManager) {
         super();
-        this.LavalinkManager = LavalinkManager;
+        // Stored non-enumerable so the manager -> nodeManager -> manager
+        // chain stays readable but no longer breaks JSON.stringify.
+        Object.defineProperty(this, "LavalinkManager", {
+            value: LavalinkManager,
+            enumerable: false,
+            writable: true,
+            configurable: true,
+        });
 
         if (this.LavalinkManager.options.nodes)
             this.LavalinkManager.options.nodes.forEach((node) => this.createNode(node));
+    }
+
+    /**
+     * Explicitly sanitize serialization: drop the back-reference to the
+     * manager so stringifying a NodeManager can't recurse into it.
+     */
+    public toJSON() {
+        const { LavalinkManager: _manager, ...rest } = this;
+        return rest;
     }
 
     /**
