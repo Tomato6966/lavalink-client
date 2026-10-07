@@ -48,6 +48,7 @@ client.lavalink = new LavalinkManager({
         username: "TESTBOT",
     },
     autoSkipOnResolveError: true, // skip song, if resolving an unresolved song fails
+    catchLifeCycleRejections: false, // default; set to true to catch the library's internal fire-and-forget lifecycle rejections (autoSkip play(), player destroy(), the fire-and-forget queue save() in Player#play()) instead of letting them become unhandled rejections
     emitNewSongsOnly: true, // don't emit "looping songs"
     playerOptions: {
         // These are the default prevention methods

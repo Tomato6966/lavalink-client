@@ -358,6 +358,15 @@ export interface ManagerOptions<CustomPlayerT extends Player = Player> {
     autoMove?: boolean;
     /** If it should skip to the next Track if track.resolve errors while trying to play a track. */
     autoSkipOnResolveError?: boolean;
+    /**
+     * If the library's internal fire-and-forget lifecycle calls (e.g. autoSkip `player.play()`,
+     * `player.destroy()`, and the fire-and-forget queue `save()` inside `Player#play()`) should
+     * catch their own rejections instead of letting them surface as unhandled rejections which
+     * may crash the host application.
+     * Default: false - rejections surface as unhandled rejections, exactly as if this option
+     * did not exist.
+     */
+    catchLifeCycleRejections?: boolean;
     /** If it should emit only new (unique) songs and not when a looping track (or similar) is plaid, default false */
     emitNewSongsOnly?: boolean;
     /** Only allow link requests with links either matching some of that regExp or including some of that string */
