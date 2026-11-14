@@ -9,6 +9,18 @@ Logs about the changed features.
 
 ---
 
+## **Version 2.11.1**
+
+- **Lifecycle Rejection Handling**:
+    - Added the `catchLifeCycleRejections` manager option (default: `false`) to control whether internal fire-and-forget lifecycle calls catch their rejections. When enabled, this applies to calls such as auto-skip playback, player destruction, and queue saves.
+- **Playback and Node Reliability**:
+    - WebSocket `open()` failures are now routed through the node's normal error handling instead of becoming unhandled promise rejections.
+    - Fixed `emitNewSongsOnly` to compare against the last announced track rather than queue history, so replayed tracks are announced correctly after playback ends or is replaced.
+    - Fixed custom search source validation so custom sources are accepted when `playerOptions.allowCustomSources` is enabled.
+- **Queue and Type Fixes**:
+    - Fixed `Queue.remove` matching so shared titles or artwork do not cause unrelated tracks to be removed; matching now prioritizes track identifiers and only falls back to title or artwork when those identifiers are unavailable.
+    - Corrected queue-related typings, including optional queue saver operations and `Queue.splice` results.
+
 ## **Version 2.11.0**
 
 - **Build System & Tooling Migration**:
