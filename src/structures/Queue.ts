@@ -3,6 +3,19 @@ import { ManagerUtils, MiniMap, QueueSymbol } from "./Utils";
 import type { ManagerQueueOptions, QueueChangesWatcher, QueueStoreManager, StoredQueue } from "./Types/Queue";
 import type { Track, UnresolvedTrack } from "./Types/Track";
 
+function tracksMatch(a: Track | UnresolvedTrack, b: Track | UnresolvedTrack): boolean {
+    if (a === b) return true;
+    if (a.encoded) return a.encoded === b.encoded;
+    if (a.info?.identifier) return a.info.identifier === b.info?.identifier;
+    if (a.info?.uri) return a.info.uri === b.info?.uri;
+    if (a.info?.isrc) return a.info.isrc === b.info?.isrc;
+    return (
+        (a.info?.title && a.info.title === b.info?.title) ||
+        (a.info?.artworkUrl && a.info.artworkUrl === b.info?.artworkUrl) ||
+        false
+    );
+}
+
 export class QueueSaver {
     /**
      * The queue store manager
@@ -27,7 +40,7 @@ export class QueueSaver {
      * @returns The queue for the guild
      */
     async get(guildId: string) {
-        return this._.parse(await this._.get(guildId));
+        return this._.parse((await this._.get(guildId))!);
     }
 
     /**
@@ -188,7 +201,7 @@ export class Queue {
         save: async () => {
             if (this.previous.length > this.options.maxPreviousTracks)
                 this.previous.splice(this.options.maxPreviousTracks, this.previous.length);
-            return await this.QueueSaver.set(this.guildId, this.utils.toJSON());
+            return await this.QueueSaver?.set(this.guildId, this.utils.toJSON());
         },
 
         /**
@@ -196,7 +209,7 @@ export class Queue {
          * @returns {void}
          */
         sync: async (override = true, dontSyncCurrent = true) => {
-            const data = await this.QueueSaver.get(this.guildId);
+            const data = await this.QueueSaver?.get(this.guildId);
             if (!data) throw new Error(`No data found to sync for guildId: ${this.guildId}`);
             if (!dontSyncCurrent && !this.current && this.managerUtils.isTrack(data.current))
                 this.current = data.current;
@@ -235,7 +248,7 @@ export class Queue {
         },
 
         destroy: async () => {
-            return await this.QueueSaver.delete(this.guildId);
+            return await this.QueueSaver?.delete(this.guildId);
         },
 
         /**
@@ -412,7 +425,7 @@ export class Queue {
 
         // LOG
         if (typeof this.queueChanges?.shuffled === "function")
-            this.queueChanges.shuffled(this.guildId, oldStored, this.utils.toJSON());
+            this.queueChanges.shuffled(this.guildId, oldStored!, this.utils.toJSON());
 
         await this.utils.save();
         return this.tracks.length;
@@ -451,7 +464,7 @@ export class Queue {
                         .flat(2)
                         .filter((v) => this.managerUtils.isTrack(v) || this.managerUtils.isUnresolvedTrack(v)),
                     this.tracks.length,
-                    oldStored,
+                    oldStored!,
                     this.utils.toJSON(),
                 );
             } catch {
@@ -469,20 +482,20 @@ export class Queue {
      * @param {number} index Where to remove the Track
      * @param {number} amount How many Tracks to remove?
      * @param {Track | Track[]} TrackOrTracks Want to Add more Tracks?
-     * @returns {Track} Spliced Track
+     * @returns {Track} Spliced (aka Removed) Track
      */
     public async splice(
         index: number,
         amount: number,
         TrackOrTracks?: Track | UnresolvedTrack | (Track | UnresolvedTrack)[],
-    ) {
+    ): Promise<Track | UnresolvedTrack | (Track | UnresolvedTrack)[] | null> {
         const oldStored =
             typeof this.queueChanges?.tracksAdd === "function" || typeof this.queueChanges?.tracksRemoved === "function"
                 ? this.utils.toJSON()
                 : null;
         // if no tracks to splice, add the tracks
         if (!this.tracks.length) {
-            if (TrackOrTracks) return await this.add(TrackOrTracks);
+            if (TrackOrTracks) await this.add(TrackOrTracks);
             return null;
         }
         // Log if available
@@ -494,7 +507,7 @@ export class Queue {
                         .flat(2)
                         .filter((v) => this.managerUtils.isTrack(v) || this.managerUtils.isUnresolvedTrack(v)),
                     index,
-                    oldStored,
+                    oldStored!,
                     this.utils.toJSON(),
                 );
             } catch {
@@ -513,7 +526,7 @@ export class Queue {
         // Log if available
         if (typeof this.queueChanges?.tracksRemoved === "function")
             try {
-                this.queueChanges.tracksRemoved(this.guildId, spliced, index, oldStored, this.utils.toJSON());
+                this.queueChanges.tracksRemoved(this.guildId, spliced, index, oldStored!, this.utils.toJSON());
             } catch {
                 /* */
             }
@@ -586,7 +599,7 @@ export class Queue {
                         this.guildId,
                         removed,
                         removeQueryTrack,
-                        oldStored,
+                        oldStored!,
                         this.utils.toJSON(),
                     );
                 } catch {
@@ -616,7 +629,7 @@ export class Queue {
                             this.guildId,
                             removed,
                             removeQueryTrack as number[],
-                            oldStored,
+                            oldStored!,
                             this.utils.toJSON(),
                         );
                     } catch {
@@ -634,13 +647,7 @@ export class Queue {
                     removeQueryTrack.find(
                         (t) =>
                             (typeof t === "number" && t === i) ||
-                            (typeof t === "object" &&
-                                ((t.encoded && t.encoded === v.encoded) ||
-                                    (t.info?.identifier && t.info.identifier === v.info?.identifier) ||
-                                    (t.info?.uri && t.info.uri === v.info?.uri) ||
-                                    (t.info?.title && t.info.title === v.info?.title) ||
-                                    (t.info?.isrc && t.info.isrc === v.info?.isrc) ||
-                                    (t.info?.artworkUrl && t.info.artworkUrl === v.info?.artworkUrl))),
+                            (typeof t === "object" && t !== null && tracksMatch(t, v)),
                     ),
                 );
 
@@ -661,7 +668,7 @@ export class Queue {
                         this.guildId,
                         removed,
                         tracksToRemove.map((v) => v.i),
-                        oldStored,
+                        oldStored!,
                         this.utils.toJSON(),
                     );
                 } catch {
@@ -673,13 +680,7 @@ export class Queue {
             return { removed };
         }
         const toRemove = this.tracks.findIndex(
-            (v) =>
-                (removeQueryTrack.encoded && removeQueryTrack.encoded === v.encoded) ||
-                (removeQueryTrack.info?.identifier && removeQueryTrack.info.identifier === v.info?.identifier) ||
-                (removeQueryTrack.info?.uri && removeQueryTrack.info.uri === v.info?.uri) ||
-                (removeQueryTrack.info?.title && removeQueryTrack.info.title === v.info?.title) ||
-                (removeQueryTrack.info?.isrc && removeQueryTrack.info.isrc === v.info?.isrc) ||
-                (removeQueryTrack.info?.artworkUrl && removeQueryTrack.info.artworkUrl === v.info?.artworkUrl),
+            (v) => tracksMatch(removeQueryTrack, v),
         );
 
         if (toRemove < 0) return null;
@@ -688,7 +689,7 @@ export class Queue {
         // Log if available
         if (typeof this.queueChanges?.tracksRemoved === "function")
             try {
-                this.queueChanges.tracksRemoved(this.guildId, removed, toRemove, oldStored, this.utils.toJSON());
+                this.queueChanges.tracksRemoved(this.guildId, removed, toRemove, oldStored!, this.utils.toJSON());
             } catch {
                 /* */
             }

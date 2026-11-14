@@ -299,9 +299,9 @@ export class ManagerUtils {
      * @param data the Track to validate
      * @returns
      */
-    isTrack(data: Track | UnresolvedTrack): data is Track {
-        if (!data) return false;
-        if (data[TrackSymbol] === true) return true;
+    isTrack(data?: Track | UnresolvedTrack | null): data is Track {
+        if (!data || typeof data !== "object") return false;
+        if (Reflect.get(data, TrackSymbol) === true) return true;
         return typeof data?.encoded === "string" && typeof data?.info === "object" && !("resolve" in data);
     }
 
@@ -311,7 +311,7 @@ export class ManagerUtils {
      */
     isUnresolvedTrack(data: UnresolvedTrack | Track): data is UnresolvedTrack {
         if (!data) return false;
-        if (data[UnresolvedTrackSymbol] === true) return true;
+        if (Reflect.get(data, UnresolvedTrackSymbol) === true) return true;
         return (
             typeof data === "object" &&
             (("info" in data && typeof data.info.title === "string") || typeof data.encoded === "string") &&
@@ -340,7 +340,7 @@ export class ManagerUtils {
         } catch (e) {
             if (this.LavalinkManager?.options?.advancedOptions?.enableDebugEvents) {
                 this.LavalinkManager?.emit("debug", DebugEvents.GetClosestTrackFailed, {
-                    error: e,
+                    error: e as Error,
                     functionLayer: "ManagerUtils > getClosestTrack()",
                     message: "Failed to resolve track because the getClosestTrack function failed.",
                     state: "error",
@@ -368,7 +368,7 @@ export class ManagerUtils {
             throw new Error(`Query is speak, which is limited to 100 characters.`);
 
         // checks for blacklisted links / domains / queries
-        if (this.LavalinkManager.options?.linksBlacklist?.length > 0) {
+        if (this.LavalinkManager?.options?.linksBlacklist && this.LavalinkManager.options?.linksBlacklist.length > 0) {
             if (this.LavalinkManager.options?.advancedOptions?.enableDebugEvents) {
                 this.LavalinkManager.emit("debug", DebugEvents.ValidatingBlacklistLinks, {
                     state: "log",
@@ -388,12 +388,12 @@ export class ManagerUtils {
         }
 
         if (!/^https?:\/\//.test(queryString)) return;
-        else if (this.LavalinkManager.options?.linksAllowed === false)
+        else if (this.LavalinkManager?.options?.linksAllowed === false)
             throw new Error("Using links to make a request is not allowed.");
 
         // checks for if the query is whitelisted (should only work for links, so it skips the check for no link queries)
-        if (this.LavalinkManager.options?.linksWhitelist?.length > 0) {
-            if (this.LavalinkManager.options?.advancedOptions?.enableDebugEvents) {
+        if (this.LavalinkManager?.options?.linksWhitelist && this.LavalinkManager.options?.linksWhitelist.length > 0) {
+            if (this.LavalinkManager?.options?.advancedOptions?.enableDebugEvents) {
                 this.LavalinkManager.emit("debug", DebugEvents.ValidatingWhitelistLinks, {
                     state: "log",
                     message: `Link was provided to the Query, validating against LavalinkManager.options.linksWhitelist, query: "${queryString}"`,
