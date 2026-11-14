@@ -326,7 +326,9 @@ export class Player {
         // if either encoded or identifier is provided generate the data to play them
         if (options?.track?.encoded || options?.track?.identifier) {
             this.queue.current = (options.clientTrack as Track) || null;
-            this.queue.utils.save();
+            this.queue.utils.save().catch((error: unknown) => {
+                if (!this.LavalinkManager.options.catchLifeCycleRejections) throw error;
+            });
 
             if (typeof options?.volume === "number" && !isNaN(options?.volume)) {
                 this.volume = Math.max(Math.min(options?.volume, 1000), 0);
@@ -706,7 +708,12 @@ export class Player {
             await this.queue.splice(0, skipTo - 1);
         }
 
-        if (!this.playing && !this.queue.current) return (this.play(), this);
+        if (!this.playing && !this.queue.current) {
+            this.play().catch((error: unknown) => {
+                if (!this.LavalinkManager.options.catchLifeCycleRejections) throw error;
+            });
+            return this;
+        }
 
         const now = performance.now();
         this.setData("internal_skipped", true);
