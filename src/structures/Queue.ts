@@ -679,9 +679,7 @@ export class Queue {
 
             return { removed };
         }
-        const toRemove = this.tracks.findIndex(
-            (v) => tracksMatch(removeQueryTrack, v),
-        );
+        const toRemove = this.tracks.findIndex((v) => tracksMatch(removeQueryTrack, v));
 
         if (toRemove < 0) return null;
 

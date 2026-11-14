@@ -426,8 +426,8 @@ This client powers various Discord bots:
 A minimal example to get you started quickly.
 
 ```typescript
-import { LavalinkManager } from "lavalink-client";
 import { Client, GatewayIntentBits } from "discord.js"; // example for a discord bot
+import { LavalinkManager } from "lavalink-client";
 
 // Extend the Client type to include the lavalink manager
 declare module "discord.js" {
@@ -479,9 +479,9 @@ client.login(process.env.DISCORD_TOKEN);
 <summary><strong>🔩 Complete Configuration Example (almost all Options)</strong></summary>
 
 ```typescript
+import { Client, GatewayIntentBits, User } from "discord.js";
 import { LavalinkManager, QueueChangesWatcher, QueueStoreManager, StoredQueue } from "lavalink-client";
 import { RedisClientType, createClient } from "redis";
-import { Client, GatewayIntentBits, User } from "discord.js";
 
 // It's recommended to extend the Client type
 declare module "discord.js" {
